@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { GeometricPattern, Ornament, Star8Point } from '@/components/decorative/GeometricPattern';
 import { SessionCard } from '@/components/onboarding/SessionCard';
@@ -8,77 +9,163 @@ import { QuranMap } from '@/components/dashboard/QuranMap';
 import { RecitationInterface } from '@/components/recitation/RecitationInterface';
 import { CorrectionReport } from '@/components/dashboard/CorrectionReport';
 import { Card, CardContent } from '@/components/ui/card';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserProgress } from '@/hooks/useUserProgress';
+import { supabase } from '@/integrations/supabase/client';
+import { Loader2, LogOut } from 'lucide-react';
 
 type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections';
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user, loading: authLoading, signOut } = useAuth();
+  const { profile, progress, corrections, surahProgress, updateProfile, addCorrection, loading: dataLoading } = useUserProgress();
+  
   const [currentView, setCurrentView] = useState<AppView>('landing');
   const [selectedSession, setSelectedSession] = useState<'homme' | 'femme' | null>(null);
   const [selectedQiraat, setSelectedQiraat] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [aiFeedback, setAiFeedback] = useState<{
+    status: 'correct' | 'review';
+    message: string;
+    details: string;
+  } | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
 
-  // Mock data
+  // Redirect to appropriate view based on auth and profile
+  useEffect(() => {
+    if (!authLoading && user && !dataLoading) {
+      if (profile?.sessionType && profile?.selectedQiraat) {
+        setCurrentView('dashboard');
+        setSelectedSession(profile.sessionType === 'male' ? 'homme' : 'femme');
+        setSelectedQiraat(profile.selectedQiraat);
+      } else if (profile?.sessionType) {
+        setCurrentView('qiraat-select');
+        setSelectedSession(profile.sessionType === 'male' ? 'homme' : 'femme');
+      }
+    }
+  }, [user, authLoading, profile, dataLoading]);
+
   const progressData = {
     totalSurahs: 114,
-    completedSurahs: 12,
+    completedSurahs: surahProgress.filter(s => s.status === 'mastered').length || 0,
     totalVerses: 6236,
-    masteredVerses: 487,
-    reviewNeeded: 23,
-    totalHours: 42,
-    currentStreak: 7,
+    masteredVerses: surahProgress.reduce((acc, s) => acc + s.masteredVerses, 0) || 0,
+    reviewNeeded: corrections.length || 0,
+    totalHours: progress?.totalHours || 0,
+    currentStreak: progress?.currentStreak || 0,
   };
 
-  const mockCorrections = [
-    {
-      id: '1',
-      surah: 'Al-Fatiha',
-      verse: 6,
-      word: 'sirāṭ',
-      wordArabic: 'صِرَاطَ',
-      rule: 'madd' as const,
-      description: 'La durée du madd sur le alif n\'atteint pas 2 temps selon Ḥafṣ',
-      timestamp: new Date(),
-    },
-    {
-      id: '2',
-      surah: 'Al-Fatiha',
-      verse: 7,
-      word: 'ḍāllīn',
-      wordArabic: 'الضَّالِّينَ',
-      rule: 'madd' as const,
-      description: 'Le madd lāzim doit être prolongé de 6 temps minimum',
-      timestamp: new Date(),
-    },
-    {
-      id: '3',
-      surah: 'Al-Baqarah',
-      verse: 3,
-      word: 'yunfiqūn',
-      wordArabic: 'يُنفِقُونَ',
-      rule: 'ikhfa' as const,
-      description: 'L\'ikhfā\' du nūn sākin avant le fā\' n\'est pas correctement appliqué',
-      timestamp: new Date(),
-    },
-  ];
+  const mockCorrections = corrections.map(c => ({
+    id: c.id,
+    surah: `Sourate ${c.surahNumber}`,
+    verse: c.verseNumber,
+    word: c.word,
+    wordArabic: c.word,
+    rule: c.ruleType as 'madd' | 'ghunna' | 'qalqala' | 'idgham' | 'ikhfa',
+    description: c.ruleDescription,
+    timestamp: new Date(c.createdAt),
+  }));
 
-  const surahStatuses = [
-    { id: 1, status: 'completed' as const, progress: 100 },
-    { id: 2, status: 'in_progress' as const, progress: 45 },
-    { id: 3, status: 'needs_review' as const, progress: 80 },
-    { id: 4, status: 'not_started' as const, progress: 0 },
-  ];
+  const surahStatuses = surahProgress.map(s => ({
+    id: s.surahNumber,
+    status: s.status === 'mastered' ? 'completed' as const : 
+            s.status === 'in_progress' ? 'in_progress' as const : 
+            'not_started' as const,
+    progress: s.totalVerses > 0 ? (s.masteredVerses / s.totalVerses) * 100 : 0,
+  }));
 
   const handleStartRecording = () => {
     setIsRecording(true);
     setShowFeedback(false);
+    setAiFeedback(null);
   };
 
-  const handleStopRecording = () => {
+  const handleStopRecording = async () => {
     setIsRecording(false);
-    // Simulate AI feedback after recording
-    setTimeout(() => setShowFeedback(true), 500);
+    setAnalyzing(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-recitation', {
+        body: {
+          surahNumber: 1,
+          verseNumber: 6,
+          expectedText: 'اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ',
+          qiraat: selectedQiraat || 'hafs_asim',
+        },
+      });
+
+      if (error) throw error;
+
+      const isCorrect = data.isCorrect && data.overallScore >= 80;
+      
+      setAiFeedback({
+        status: isCorrect ? 'correct' : 'review',
+        message: isCorrect ? 'Récitation correcte !' : 'À revoir',
+        details: data.feedback || data.encouragement,
+      });
+
+      // Add corrections if any errors found
+      if (data.errors && data.errors.length > 0) {
+        for (const err of data.errors) {
+          await addCorrection({
+            surahNumber: 1,
+            verseNumber: 6,
+            word: err.word,
+            ruleType: err.ruleType,
+            ruleDescription: err.ruleDescription,
+          });
+        }
+      }
+
+      setShowFeedback(true);
+    } catch (error) {
+      console.error('Error analyzing recitation:', error);
+      setAiFeedback({
+        status: 'review',
+        message: 'Erreur d\'analyse',
+        details: 'Une erreur s\'est produite. Réessaye.',
+      });
+      setShowFeedback(true);
+    } finally {
+      setAnalyzing(false);
+    }
   };
+
+  const handleSessionSelect = async (session: 'homme' | 'femme') => {
+    setSelectedSession(session);
+    if (user) {
+      await updateProfile({ 
+        sessionType: session === 'homme' ? 'male' : 'female' 
+      });
+    }
+  };
+
+  const handleQiraatSelect = async (qiraat: string) => {
+    setSelectedQiraat(qiraat);
+    if (user) {
+      await updateProfile({ selectedQiraat: qiraat });
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    setCurrentView('landing');
+    setSelectedSession(null);
+    setSelectedQiraat(null);
+  };
+
+  if (authLoading || (user && dataLoading)) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Landing Page
   if (currentView === 'landing') {
@@ -87,6 +174,27 @@ const Index = () => {
         <GeometricPattern className="text-primary" opacity={0.04} />
         
         <div className="relative z-10 container mx-auto px-4 py-12 md:py-20">
+          {/* Auth buttons */}
+          <div className="absolute top-4 right-4 flex gap-2">
+            {user ? (
+              <>
+                <Button variant="ghost" size="sm" onClick={() => setCurrentView('dashboard')}>
+                  Mon tableau de bord
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Déconnexion
+                </Button>
+              </>
+            ) : (
+              <Link to="/auth">
+                <Button variant="outline" size="sm">
+                  Connexion
+                </Button>
+              </Link>
+            )}
+          </div>
+
           {/* Hero Section */}
           <div className="text-center max-w-4xl mx-auto mb-16 animate-fade-in">
             <div className="flex justify-center mb-8">
@@ -111,11 +219,21 @@ const Index = () => {
             <Button 
               variant="hero" 
               size="xl"
-              onClick={() => setCurrentView('session-select')}
+              onClick={() => {
+                if (user) {
+                  if (profile?.sessionType && profile?.selectedQiraat) {
+                    setCurrentView('dashboard');
+                  } else {
+                    setCurrentView('session-select');
+                  }
+                } else {
+                  navigate('/auth');
+                }
+              }}
               className="animate-scale-in"
               style={{ animationDelay: '0.3s' }}
             >
-              Commencer mon apprentissage
+              {user ? 'Continuer mon apprentissage' : 'Commencer mon apprentissage'}
               <svg className="w-5 h-5 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
@@ -216,12 +334,12 @@ const Index = () => {
             <SessionCard
               type="homme"
               isSelected={selectedSession === 'homme'}
-              onClick={() => setSelectedSession('homme')}
+              onClick={() => handleSessionSelect('homme')}
             />
             <SessionCard
               type="femme"
               isSelected={selectedSession === 'femme'}
-              onClick={() => setSelectedSession('femme')}
+              onClick={() => handleSessionSelect('femme')}
             />
           </div>
 
@@ -266,7 +384,7 @@ const Index = () => {
           <div className="max-w-4xl mx-auto mb-12">
             <QiraatSelector
               selectedQiraat={selectedQiraat}
-              onSelect={setSelectedQiraat}
+              onSelect={handleQiraatSelect}
             />
           </div>
 
@@ -301,6 +419,11 @@ const Index = () => {
               <div className="flex items-center gap-3">
                 <Star8Point size={24} className="text-primary" />
                 <span className="font-semibold text-lg text-foreground">Quran Learn</span>
+                {profile?.fullName && (
+                  <span className="text-sm text-muted-foreground">
+                    — {profile.fullName}
+                  </span>
+                )}
               </div>
               <nav className="flex items-center gap-2">
                 <Button 
@@ -308,7 +431,7 @@ const Index = () => {
                   size="sm"
                   onClick={() => setCurrentView('corrections')}
                 >
-                  Corrections
+                  Corrections ({corrections.length})
                 </Button>
                 <Button 
                   variant="default" 
@@ -316,6 +439,13 @@ const Index = () => {
                   onClick={() => setCurrentView('recitation')}
                 >
                   Réciter
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleSignOut}
+                >
+                  <LogOut className="h-4 w-4" />
                 </Button>
               </nav>
             </div>
@@ -332,7 +462,12 @@ const Index = () => {
             {/* Quran map */}
             <div className="lg:col-span-2">
               <QuranMap 
-                surahStatuses={surahStatuses}
+                surahStatuses={surahStatuses.length > 0 ? surahStatuses : [
+                  { id: 1, status: 'not_started', progress: 0 },
+                  { id: 2, status: 'not_started', progress: 0 },
+                  { id: 3, status: 'not_started', progress: 0 },
+                  { id: 4, status: 'not_started', progress: 0 },
+                ]}
                 onSurahSelect={() => setCurrentView('recitation')}
               />
             </div>
@@ -373,12 +508,14 @@ const Index = () => {
             isRecording={isRecording}
             onStartRecording={handleStartRecording}
             onStopRecording={handleStopRecording}
-            feedback={showFeedback ? {
-              status: 'review',
-              message: 'Le verset nécessite une révision.',
-              details: 'Le madd sur "الصِّرَاطَ" n\'a pas atteint la durée requise selon la lecture de Ḥafṣ. Reprends calmement, tu progresses.',
-            } : undefined}
+            feedback={showFeedback && aiFeedback ? aiFeedback : undefined}
           />
+          {analyzing && (
+            <div className="mt-6 text-center">
+              <Loader2 className="h-6 w-6 animate-spin text-primary mx-auto mb-2" />
+              <p className="text-muted-foreground">Analyse en cours...</p>
+            </div>
+          )}
         </main>
       </div>
     );
@@ -405,7 +542,7 @@ const Index = () => {
 
         <main className="container mx-auto px-4 py-8 max-w-4xl">
           <CorrectionReport
-            corrections={mockCorrections}
+            corrections={mockCorrections.length > 0 ? mockCorrections : []}
             onPrint={() => window.print()}
           />
         </main>

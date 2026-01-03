@@ -48,4 +48,6 @@ export const TAJWEED_RULES = {
   iqlab: { name: "الإقلاب", transliteration: "Iqlāb", description: "Conversion" },
   izhar: { name: "الإظهار", transliteration: "Iẓhār", description: "Manifestation" },
   waqf: { name: "الوقف", transliteration: "Waqf", description: "Arrêts" },
+  ghunna: { name: "الغنة", transliteration: "Ghunna", description: "Nasalisation" },
+  qalqala: { name: "القلقلة", transliteration: "Qalqala", description: "Vibration" },
 };
