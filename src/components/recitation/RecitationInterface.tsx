@@ -13,7 +13,7 @@ interface RecitationInterfaceProps {
   onStartRecording: () => void;
   onStopRecording: () => void;
   feedback?: {
-    status: 'success' | 'review';
+    status: 'correct' | 'success' | 'review';
     message: string;
     details?: string;
   };
@@ -97,16 +97,16 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
           variant="progress" 
           className={`
             border-l-4 animate-slide-up
-            ${feedback.status === 'success' ? 'border-l-primary' : 'border-l-gold-warm'}
+            ${feedback.status === 'success' || feedback.status === 'correct' ? 'border-l-primary' : 'border-l-gold-warm'}
           `}
         >
           <CardContent className="py-5">
             <div className="flex items-start gap-4">
               <div className={`
                 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0
-                ${feedback.status === 'success' ? 'bg-primary/10' : 'bg-gold-warm/10'}
+                ${feedback.status === 'success' || feedback.status === 'correct' ? 'bg-primary/10' : 'bg-gold-warm/10'}
               `}>
-                {feedback.status === 'success' ? (
+                {feedback.status === 'success' || feedback.status === 'correct' ? (
                   <svg className="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
@@ -118,8 +118,8 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
                 )}
               </div>
               <div>
-                <h4 className={`font-semibold text-lg ${feedback.status === 'success' ? 'text-primary' : 'text-gold-warm'}`}>
-                  {feedback.status === 'success' ? 'Excellent !' : 'À revoir'}
+                <h4 className={`font-semibold text-lg ${feedback.status === 'success' || feedback.status === 'correct' ? 'text-primary' : 'text-gold-warm'}`}>
+                  {feedback.status === 'success' || feedback.status === 'correct' ? 'Excellent !' : 'À revoir'}
                 </h4>
                 <p className="text-foreground mt-1">{feedback.message}</p>
                 {feedback.details && (
