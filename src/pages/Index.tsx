@@ -9,11 +9,14 @@ import { QuranMap } from '@/components/dashboard/QuranMap';
 import { RecitationInterface } from '@/components/recitation/RecitationInterface';
 import { CorrectionReport } from '@/components/dashboard/CorrectionReport';
 import { PricingSection } from '@/components/payment/PricingSection';
+import { MultilingualChat } from '@/components/chat/MultilingualChat';
+import { FeedbackForm } from '@/components/feedback/FeedbackForm';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProgress } from '@/hooks/useUserProgress';
+import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, LogOut } from 'lucide-react';
+import { Loader2, LogOut, MessageSquareHeart } from 'lucide-react';
 import { toast } from 'sonner';
 
 type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections' | 'pricing';
@@ -27,14 +30,22 @@ const Index = () => {
   const [currentView, setCurrentView] = useState<AppView>('landing');
   const [selectedSession, setSelectedSession] = useState<'homme' | 'femme' | null>(null);
   const [selectedQiraat, setSelectedQiraat] = useState<string | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [aiFeedback, setAiFeedback] = useState<{
     status: 'correct' | 'review';
     message: string;
     details: string;
   } | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  
+  const { 
+    isRecording, 
+    audioBase64, 
+    startRecording, 
+    stopRecording, 
+    error: recordingError 
+  } = useAudioRecorder();
 
   // Handle payment redirect
   useEffect(() => {
@@ -89,19 +100,23 @@ const Index = () => {
     progress: s.totalVerses > 0 ? (s.masteredVerses / s.totalVerses) * 100 : 0,
   }));
 
-  const handleStartRecording = () => {
-    setIsRecording(true);
+  const handleStartRecording = async () => {
     setShowFeedback(false);
     setAiFeedback(null);
+    await startRecording();
   };
 
   const handleStopRecording = async () => {
-    setIsRecording(false);
+    await stopRecording();
     setAnalyzing(true);
+
+    // Wait a bit for audioBase64 to be set
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     try {
       const { data, error } = await supabase.functions.invoke('analyze-recitation', {
         body: {
+          audioBase64,
           surahNumber: 1,
           verseNumber: 6,
           expectedText: 'اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ',
@@ -446,6 +461,13 @@ const Index = () => {
                 <Button 
                   variant="ghost" 
                   size="sm"
+                  onClick={() => setShowFeedbackForm(true)}
+                >
+                  <MessageSquareHeart className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
                   onClick={() => setCurrentView('corrections')}
                 >
                   Corrections ({corrections.length})
@@ -490,6 +512,10 @@ const Index = () => {
             </div>
           </div>
         </main>
+        
+        {/* Chat and Feedback */}
+        <MultilingualChat />
+        <FeedbackForm isOpen={showFeedbackForm} onClose={() => setShowFeedbackForm(false)} />
       </div>
     );
   }
@@ -519,20 +545,17 @@ const Index = () => {
           <RecitationInterface
             surahName="Al-Fatiha"
             surahArabic="الفاتحة"
+            surahNumber={1}
             currentVerse={6}
             totalVerses={7}
             verseText="اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ"
             isRecording={isRecording}
+            isAnalyzing={analyzing}
             onStartRecording={handleStartRecording}
             onStopRecording={handleStopRecording}
+            recordingError={recordingError}
             feedback={showFeedback && aiFeedback ? aiFeedback : undefined}
           />
-          {analyzing && (
-            <div className="mt-6 text-center">
-              <Loader2 className="h-6 w-6 animate-spin text-primary mx-auto mb-2" />
-              <p className="text-muted-foreground">Analyse en cours...</p>
-            </div>
-          )}
         </main>
       </div>
     );
