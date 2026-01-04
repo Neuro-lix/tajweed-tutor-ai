@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { GeometricPattern, Ornament, Star8Point } from '@/components/decorative/GeometricPattern';
 import { SessionCard } from '@/components/onboarding/SessionCard';
@@ -8,16 +8,19 @@ import { ProgressDashboard } from '@/components/dashboard/ProgressDashboard';
 import { QuranMap } from '@/components/dashboard/QuranMap';
 import { RecitationInterface } from '@/components/recitation/RecitationInterface';
 import { CorrectionReport } from '@/components/dashboard/CorrectionReport';
+import { PricingSection } from '@/components/payment/PricingSection';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, LogOut } from 'lucide-react';
+import { toast } from 'sonner';
 
-type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections';
+type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections' | 'pricing';
 
 const Index = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, loading: authLoading, signOut } = useAuth();
   const { profile, progress, corrections, surahProgress, updateProfile, addCorrection, loading: dataLoading } = useUserProgress();
   
@@ -32,6 +35,16 @@ const Index = () => {
     details: string;
   } | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+
+  // Handle payment redirect
+  useEffect(() => {
+    const paymentStatus = searchParams.get('payment');
+    if (paymentStatus === 'success') {
+      toast.success('Paiement réussi ! Merci pour votre confiance.');
+    } else if (paymentStatus === 'canceled') {
+      toast.info('Paiement annulé.');
+    }
+  }, [searchParams]);
 
   // Redirect to appropriate view based on auth and profile
   useEffect(() => {
@@ -293,12 +306,16 @@ const Index = () => {
 
           {/* Pricing note */}
           <div className="text-center mt-16 animate-fade-in" style={{ animationDelay: '0.7s' }}>
-            <Card variant="outline" className="inline-block px-8 py-4">
+            <Card 
+              variant="outline" 
+              className="inline-block px-8 py-4 cursor-pointer hover:border-primary/50 transition-colors"
+              onClick={() => user ? setCurrentView('pricing') : navigate('/auth')}
+            >
               <p className="text-foreground">
                 <span className="text-2xl font-bold text-primary">3€</span>
                 <span className="text-muted-foreground"> / heure</span>
                 <span className="mx-4 text-border">|</span>
-                <span className="text-muted-foreground">Abonnement illimité disponible</span>
+                <span className="text-muted-foreground">Abonnement illimité à 29€/mois</span>
               </p>
             </Card>
           </div>
@@ -548,6 +565,11 @@ const Index = () => {
         </main>
       </div>
     );
+  }
+
+  // Pricing
+  if (currentView === 'pricing') {
+    return <PricingSection onBack={() => setCurrentView('dashboard')} />;
   }
 
   return null;
