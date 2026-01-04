@@ -1,17 +1,22 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ReferenceRecitations } from './ReferenceRecitations';
+import { Loader2 } from 'lucide-react';
 
 interface RecitationInterfaceProps {
   surahName: string;
   surahArabic: string;
+  surahNumber: number;
   currentVerse: number;
   totalVerses: number;
   verseText: string;
   isRecording: boolean;
+  isAnalyzing?: boolean;
   onStartRecording: () => void;
   onStopRecording: () => void;
+  recordingError?: string | null;
   feedback?: {
     status: 'correct' | 'success' | 'review';
     message: string;
@@ -22,12 +27,15 @@ interface RecitationInterfaceProps {
 export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
   surahName,
   surahArabic,
+  surahNumber,
   currentVerse,
   totalVerses,
   verseText,
   isRecording,
+  isAnalyzing,
   onStartRecording,
   onStopRecording,
+  recordingError,
   feedback,
 }) => {
   return (
@@ -61,20 +69,35 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
         </CardContent>
       </Card>
 
+      {/* Reference recitations */}
+      <ReferenceRecitations surahNumber={surahNumber} verseNumber={currentVerse} />
+
+      {/* Recording error */}
+      {recordingError && (
+        <div className="text-center text-destructive text-sm">
+          {recordingError}
+        </div>
+      )}
+
       {/* Recording controls */}
       <div className="flex flex-col items-center gap-6">
         <button
           onClick={isRecording ? onStopRecording : onStartRecording}
+          disabled={isAnalyzing}
           className={`
             w-24 h-24 rounded-full flex items-center justify-center
             transition-all duration-300 shadow-card
-            ${isRecording 
-              ? 'bg-destructive text-destructive-foreground animate-pulse scale-110' 
-              : 'bg-primary text-primary-foreground hover:scale-105 hover:shadow-glow'
+            ${isAnalyzing 
+              ? 'bg-muted text-muted-foreground cursor-not-allowed'
+              : isRecording 
+                ? 'bg-destructive text-destructive-foreground animate-pulse scale-110' 
+                : 'bg-primary text-primary-foreground hover:scale-105 hover:shadow-glow'
             }
           `}
         >
-          {isRecording ? (
+          {isAnalyzing ? (
+            <Loader2 className="w-10 h-10 animate-spin" />
+          ) : isRecording ? (
             <svg className="w-10 h-10" viewBox="0 0 24 24" fill="currentColor">
               <rect x="6" y="6" width="12" height="12" rx="2" />
             </svg>
@@ -87,8 +110,23 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
           )}
         </button>
         <p className="text-muted-foreground">
-          {isRecording ? 'Appuie pour arrêter' : 'Appuie pour réciter'}
+          {isAnalyzing 
+            ? 'Analyse en cours...' 
+            : isRecording 
+              ? 'Appuie pour arrêter' 
+              : 'Appuie pour réciter'
+          }
         </p>
+        
+        {isRecording && (
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-destructive"></span>
+            </span>
+            <span className="text-sm text-destructive">Enregistrement...</span>
+          </div>
+        )}
       </div>
 
       {/* Feedback */}
