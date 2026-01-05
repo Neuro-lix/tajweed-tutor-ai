@@ -13,11 +13,15 @@ import { MultilingualChat } from '@/components/chat/MultilingualChat';
 import { FeedbackForm } from '@/components/feedback/FeedbackForm';
 import { SpacedRepetitionPanel } from '@/components/review/SpacedRepetitionPanel';
 import { VerseNavigator } from '@/components/navigation/VerseNavigator';
+import { GamificationPanel } from '@/components/gamification/GamificationPanel';
+import { NotificationSettings } from '@/components/notifications/NotificationSettings';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
+import { useGamification } from '@/hooks/useGamification';
+import { useReviewNotifications } from '@/hooks/useReviewNotifications';
 import { supabase } from '@/integrations/supabase/client';
 import { SURAHS } from '@/data/quranData';
 import { Loader2, LogOut, MessageSquareHeart } from 'lucide-react';
@@ -59,6 +63,8 @@ const Index = () => {
     addToReviewQueue, 
     processReview 
   } = useSpacedRepetition();
+
+  const { recordSession } = useGamification();
 
   // Handle payment redirect
   useEffect(() => {
@@ -150,6 +156,9 @@ const Index = () => {
         details: data.feedback || data.encouragement,
       });
 
+      // Record session for gamification
+      await recordSession(isCorrect);
+
       // Add to spaced repetition if errors found
       if (data.errors && data.errors.length > 0) {
         await addToReviewQueue(currentSurah, currentVerse);
@@ -205,6 +214,11 @@ const Index = () => {
     setCurrentVerse(verseNumber);
     setCurrentView('recitation');
   };
+
+  const { requestPermission } = useReviewNotifications(
+    dueReviews,
+    handleStartReview
+  );
 
   const handleSessionSelect = async (session: 'homme' | 'femme') => {
     setSelectedSession(session);
@@ -541,11 +555,13 @@ const Index = () => {
             {/* Progress sidebar */}
             <div className="lg:col-span-1 space-y-6">
               <ProgressDashboard data={progressData} />
+              <GamificationPanel />
               <SpacedRepetitionPanel
                 dueReviews={dueReviews}
                 totalInQueue={reviewQueue.length}
                 onStartReview={handleStartReview}
               />
+              <NotificationSettings onRequestPermission={requestPermission} />
             </div>
 
             {/* Quran map */}
