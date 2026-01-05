@@ -1,5 +1,8 @@
 project_id = "zymyzuydidefjmiympsl"
 
+[functions.text-to-speech]
+verify_jwt = false
+
 [functions.analyze-recitation]
 verify_jwt = false
 
