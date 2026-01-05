@@ -194,6 +194,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_achievements: {
+        Row: {
+          achievement_description: string | null
+          achievement_name: string
+          achievement_type: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_description?: string | null
+          achievement_name: string
+          achievement_type: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_description?: string | null
+          achievement_name?: string
+          achievement_type?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_feedback: {
         Row: {
           category: string | null
@@ -218,6 +245,42 @@ export type Database = {
           id?: string
           rating?: number | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_levels: {
+        Row: {
+          created_at: string
+          current_level: number
+          experience_points: number
+          id: string
+          perfect_recitations: number
+          total_sessions: number
+          total_verses_mastered: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_level?: number
+          experience_points?: number
+          id?: string
+          perfect_recitations?: number
+          total_sessions?: number
+          total_verses_mastered?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_level?: number
+          experience_points?: number
+          id?: string
+          perfect_recitations?: number
+          total_sessions?: number
+          total_verses_mastered?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
