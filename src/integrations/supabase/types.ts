@@ -119,6 +119,45 @@ export type Database = {
         }
         Relationships: []
       }
+      review_queue: {
+        Row: {
+          created_at: string
+          ease_factor: number
+          id: string
+          interval_days: number
+          next_review_date: string
+          repetitions: number
+          surah_number: number
+          updated_at: string
+          user_id: string
+          verse_number: number
+        }
+        Insert: {
+          created_at?: string
+          ease_factor?: number
+          id?: string
+          interval_days?: number
+          next_review_date?: string
+          repetitions?: number
+          surah_number: number
+          updated_at?: string
+          user_id: string
+          verse_number: number
+        }
+        Update: {
+          created_at?: string
+          ease_factor?: number
+          id?: string
+          interval_days?: number
+          next_review_date?: string
+          repetitions?: number
+          surah_number?: number
+          updated_at?: string
+          user_id?: string
+          verse_number?: number
+        }
+        Relationships: []
+      }
       surah_progress: {
         Row: {
           created_at: string

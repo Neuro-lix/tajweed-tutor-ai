@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
-import { MessageCircle, Send, X, Globe, Loader2 } from 'lucide-react';
+import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+import { MessageCircle, Send, X, Globe, Loader2, Volume2, VolumeX } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -33,7 +34,9 @@ export const MultilingualChat: React.FC = () => {
   const [input, setInput] = useState('');
   const [language, setLanguage] = useState('fr');
   const [isLoading, setIsLoading] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { speak, stop, isSpeaking, isLoading: ttsLoading } = useTextToSpeech();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -62,13 +65,19 @@ export const MultilingualChat: React.FC = () => {
 
       if (error) throw error;
 
+      const responseText = data.response || 'Je suis désolé, une erreur est survenue.';
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: data.response || 'Je suis désolé, une erreur est survenue.',
+        content: responseText,
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+      
+      // Auto-speak the response if enabled
+      if (autoSpeak && responseText) {
+        speak(responseText, language);
+      }
     } catch (error) {
       console.error('Chat error:', error);
       setMessages(prev => [...prev, {
@@ -149,7 +158,24 @@ export const MultilingualChat: React.FC = () => {
                   : 'bg-muted text-foreground'
               }`}
             >
-              {msg.content}
+              <div className="flex items-start gap-2">
+                <span className="flex-1">{msg.content}</span>
+                {msg.role === 'assistant' && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 shrink-0"
+                    onClick={() => isSpeaking ? stop() : speak(msg.content, language)}
+                    disabled={ttsLoading}
+                  >
+                    {isSpeaking ? (
+                      <VolumeX className="h-3 w-3" />
+                    ) : (
+                      <Volume2 className="h-3 w-3" />
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         ))}

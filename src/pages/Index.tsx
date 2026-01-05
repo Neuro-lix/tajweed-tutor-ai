@@ -11,11 +11,15 @@ import { CorrectionReport } from '@/components/dashboard/CorrectionReport';
 import { PricingSection } from '@/components/payment/PricingSection';
 import { MultilingualChat } from '@/components/chat/MultilingualChat';
 import { FeedbackForm } from '@/components/feedback/FeedbackForm';
+import { SpacedRepetitionPanel } from '@/components/review/SpacedRepetitionPanel';
+import { VerseNavigator } from '@/components/navigation/VerseNavigator';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
+import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { supabase } from '@/integrations/supabase/client';
+import { SURAHS } from '@/data/quranData';
 import { Loader2, LogOut, MessageSquareHeart } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -32,6 +36,8 @@ const Index = () => {
   const [selectedQiraat, setSelectedQiraat] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [currentSurah, setCurrentSurah] = useState(1);
+  const [currentVerse, setCurrentVerse] = useState(1);
   const [aiFeedback, setAiFeedback] = useState<{
     status: 'correct' | 'review';
     message: string;
@@ -46,6 +52,13 @@ const Index = () => {
     stopRecording, 
     error: recordingError 
   } = useAudioRecorder();
+
+  const { 
+    dueReviews, 
+    reviewQueue, 
+    addToReviewQueue, 
+    processReview 
+  } = useSpacedRepetition();
 
   // Handle payment redirect
   useEffect(() => {
@@ -113,13 +126,16 @@ const Index = () => {
     // Wait a bit for audioBase64 to be set
     await new Promise(resolve => setTimeout(resolve, 200));
 
+    const surahData = SURAHS.find(s => s.id === currentSurah);
+    const expectedText = getExpectedVerseText(currentSurah, currentVerse);
+
     try {
       const { data, error } = await supabase.functions.invoke('analyze-recitation', {
         body: {
           audioBase64,
-          surahNumber: 1,
-          verseNumber: 6,
-          expectedText: 'اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ',
+          surahNumber: currentSurah,
+          verseNumber: currentVerse,
+          expectedText,
           qiraat: selectedQiraat || 'hafs_asim',
         },
       });
@@ -134,12 +150,14 @@ const Index = () => {
         details: data.feedback || data.encouragement,
       });
 
-      // Add corrections if any errors found
+      // Add to spaced repetition if errors found
       if (data.errors && data.errors.length > 0) {
+        await addToReviewQueue(currentSurah, currentVerse);
+        
         for (const err of data.errors) {
           await addCorrection({
-            surahNumber: 1,
-            verseNumber: 6,
+            surahNumber: currentSurah,
+            verseNumber: currentVerse,
             word: err.word,
             ruleType: err.ruleType,
             ruleDescription: err.ruleDescription,
@@ -159,6 +177,33 @@ const Index = () => {
     } finally {
       setAnalyzing(false);
     }
+  };
+
+  // Mock verse text - in real app, fetch from Quran API
+  const getExpectedVerseText = (surah: number, verse: number) => {
+    const verses: Record<string, string> = {
+      '1:1': 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
+      '1:2': 'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ',
+      '1:3': 'الرَّحْمَٰنِ الرَّحِيمِ',
+      '1:4': 'مَالِكِ يَوْمِ الدِّينِ',
+      '1:5': 'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ',
+      '1:6': 'اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ',
+      '1:7': 'صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ',
+    };
+    return verses[`${surah}:${verse}`] || `Verset ${verse} de la sourate ${surah}`;
+  };
+
+  const handleNavigate = (surah: number, verse: number) => {
+    setCurrentSurah(surah);
+    setCurrentVerse(verse);
+    setShowFeedback(false);
+    setAiFeedback(null);
+  };
+
+  const handleStartReview = (surahNumber: number, verseNumber: number) => {
+    setCurrentSurah(surahNumber);
+    setCurrentVerse(verseNumber);
+    setCurrentView('recitation');
   };
 
   const handleSessionSelect = async (session: 'homme' | 'femme') => {
@@ -494,8 +539,13 @@ const Index = () => {
         <main className="container mx-auto px-4 py-8">
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Progress sidebar */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 space-y-6">
               <ProgressDashboard data={progressData} />
+              <SpacedRepetitionPanel
+                dueReviews={dueReviews}
+                totalInQueue={reviewQueue.length}
+                onStartReview={handleStartReview}
+              />
             </div>
 
             {/* Quran map */}
@@ -507,7 +557,11 @@ const Index = () => {
                   { id: 3, status: 'not_started', progress: 0 },
                   { id: 4, status: 'not_started', progress: 0 },
                 ]}
-                onSurahSelect={() => setCurrentView('recitation')}
+                onSurahSelect={(surahId) => {
+                  setCurrentSurah(surahId);
+                  setCurrentVerse(1);
+                  setCurrentView('recitation');
+                }}
               />
             </div>
           </div>
@@ -541,14 +595,21 @@ const Index = () => {
           </div>
         </header>
 
-        <main className="container mx-auto px-4 py-8 max-w-3xl">
+        <main className="container mx-auto px-4 py-8 max-w-3xl space-y-6">
+          {/* Verse Navigator */}
+          <VerseNavigator
+            currentSurah={currentSurah}
+            currentVerse={currentVerse}
+            onNavigate={handleNavigate}
+          />
+
           <RecitationInterface
-            surahName="Al-Fatiha"
-            surahArabic="الفاتحة"
-            surahNumber={1}
-            currentVerse={6}
-            totalVerses={7}
-            verseText="اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ"
+            surahName={SURAHS.find(s => s.id === currentSurah)?.transliteration || 'Al-Fatiha'}
+            surahArabic={SURAHS.find(s => s.id === currentSurah)?.name || 'الفاتحة'}
+            surahNumber={currentSurah}
+            currentVerse={currentVerse}
+            totalVerses={SURAHS.find(s => s.id === currentSurah)?.verses || 7}
+            verseText={getExpectedVerseText(currentSurah, currentVerse)}
             isRecording={isRecording}
             isAnalyzing={analyzing}
             onStartRecording={handleStartRecording}
