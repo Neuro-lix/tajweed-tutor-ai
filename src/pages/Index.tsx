@@ -26,6 +26,7 @@ import { useGamification } from '@/hooks/useGamification';
 import { useStreaks } from '@/hooks/useStreaks';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useReviewNotifications } from '@/hooks/useReviewNotifications';
+import { useStreakNotifications } from '@/hooks/useStreakNotifications';
 import { supabase } from '@/integrations/supabase/client';
 import { SURAHS } from '@/data/quranData';
 import { Loader2, LogOut, MessageSquareHeart } from 'lucide-react';
@@ -235,6 +236,23 @@ const Index = () => {
   const { requestPermission } = useReviewNotifications(
     dueReviews,
     handleStartReview
+  );
+
+  // Streak notifications for daily practice reminders
+  const handleStartPractice = () => {
+    setCurrentView('recitation');
+  };
+
+  const { 
+    requestPermission: requestStreakPermission,
+    hasPracticedToday 
+  } = useStreakNotifications(
+    {
+      currentStreak: streakData.currentStreak,
+      longestStreak: streakData.longestStreak,
+      lastPracticeDate: streakData.lastPracticeDate ? new Date(streakData.lastPracticeDate) : null,
+    },
+    handleStartPractice
   );
 
   const handleSessionSelect = async (session: 'homme' | 'femme') => {

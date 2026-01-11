@@ -53,6 +53,48 @@ export type Database = {
         }
         Relationships: []
       }
+      leaderboard: {
+        Row: {
+          current_level: number
+          current_streak: number
+          display_name: string
+          id: string
+          longest_streak: number
+          perfect_recitations: number
+          rank_position: number | null
+          total_verses_mastered: number
+          total_xp: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_level?: number
+          current_streak?: number
+          display_name?: string
+          id?: string
+          longest_streak?: number
+          perfect_recitations?: number
+          rank_position?: number | null
+          total_verses_mastered?: number
+          total_xp?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_level?: number
+          current_streak?: number
+          display_name?: string
+          id?: string
+          longest_streak?: number
+          perfect_recitations?: number
+          rank_position?: number | null
+          total_verses_mastered?: number
+          total_xp?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -309,6 +351,39 @@ export type Database = {
           id?: string
           last_session_date?: string | null
           total_hours?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_streaks: {
+        Row: {
+          created_at: string
+          current_streak: number
+          id: string
+          last_practice_date: string | null
+          longest_streak: number
+          streak_start_date: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_practice_date?: string | null
+          longest_streak?: number
+          streak_start_date?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_practice_date?: string | null
+          longest_streak?: number
+          streak_start_date?: string | null
           updated_at?: string
           user_id?: string
         }
