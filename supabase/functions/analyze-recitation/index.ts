@@ -20,8 +20,50 @@ serve(async (req) => {
 
     console.log('Analyzing recitation for Surah', surahNumber, 'Verse', verseNumber);
     console.log('Qiraat:', qiraat);
+    console.log('Audio provided:', !!audioBase64);
 
-    // System prompt inspiré de Mishary Rashid Al-Afasy et Mohamed Siddiq El-Minshawi
+    let transcribedText = "";
+    
+    // Step 1: Transcribe audio using Whisper if audio is provided
+    if (audioBase64) {
+      console.log('Transcribing audio with Whisper...');
+      
+      try {
+        // Decode base64 audio to binary
+        const audioBytes = Uint8Array.from(atob(audioBase64), c => c.charCodeAt(0));
+        
+        // Create FormData for Whisper API
+        const formData = new FormData();
+        const audioBlob = new Blob([audioBytes], { type: 'audio/webm' });
+        formData.append('file', audioBlob, 'audio.webm');
+        formData.append('model', 'whisper-1');
+        formData.append('language', 'ar'); // Arabic language for Quran
+        formData.append('prompt', `Ceci est une récitation coranique en arabe. Texte attendu: ${expectedText}`);
+
+        const whisperResponse = await fetch("https://ai.gateway.lovable.dev/v1/audio/transcriptions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          },
+          body: formData,
+        });
+
+        if (whisperResponse.ok) {
+          const whisperResult = await whisperResponse.json();
+          transcribedText = whisperResult.text || "";
+          console.log('Transcription result:', transcribedText);
+        } else {
+          const errorText = await whisperResponse.text();
+          console.error('Whisper transcription failed:', whisperResponse.status, errorText);
+          // Continue with text-based analysis if transcription fails
+        }
+      } catch (whisperError) {
+        console.error('Whisper error:', whisperError);
+        // Continue with text-based analysis
+      }
+    }
+
+    // System prompt for rigorous tajweed analysis
     const systemPrompt = `Tu es un MAÎTRE ABSOLU du tajwīd, formé selon les méthodes des plus grands récitateurs : Mishary Rashid Al-Afasy pour sa précision cristalline des makhārij et Mohamed Siddiq El-Minshawi pour sa rigueur académique impitoyable.
 
 Tu analyses les récitations selon la lecture ${qiraat} avec une EXIGENCE MAXIMALE.
@@ -87,11 +129,14 @@ Tu ne dois JAMAIS, sous AUCUN PRÉTEXTE :
 - 50-59 : Insuffisant, révision importante requise
 - <50 : À reprendre entièrement
 
-⚠️ FORMAT DE RÉPONSE JSON :
+⚠️ FORMAT DE RÉPONSE JSON STRICT :
 {
   "isCorrect": boolean (true SEULEMENT si score >= 90),
   "overallScore": number (0-100, sois SÉVÈRE),
   "feedback": "Analyse détaillée avec références aux grands récitateurs",
+  "transcribedText": "Le texte transcrit de l'audio (si disponible)",
+  "expectedText": "Le texte attendu",
+  "textComparison": "Comparaison mot à mot entre transcription et texte attendu",
   "errors": [
     {
       "word": "الكلمة",
@@ -109,15 +154,29 @@ Tu ne dois JAMAIS, sous AUCUN PRÉTEXTE :
   "encouragement": "Message de motivation sincère mais exigeant, sans flatterie"
 }`;
 
+    // User prompt with transcribed text if available
     const userPrompt = `Analyse cette récitation du Coran :
 - Sourate : ${surahNumber}
 - Verset : ${verseNumber}
 - Texte attendu : ${expectedText}
 - Lecture : ${qiraat}
+${transcribedText ? `
+📝 TRANSCRIPTION AUDIO (Whisper) :
+"${transcribedText}"
 
-${audioBase64 ? "L'audio a été fourni pour analyse." : "Analyse basée sur le texte fourni."}
+IMPORTANT : Compare attentivement la transcription ci-dessus avec le texte attendu. Identifie :
+1. Les mots manquants ou ajoutés
+2. Les mots mal prononcés ou déformés
+3. L'ordre des mots
+4. Les erreurs de prononciation détectables dans la transcription
+
+Si la transcription est vide ou très différente du texte attendu, c'est probablement une erreur grave de récitation.` : `
+⚠️ Pas de transcription audio disponible. Analyse basée sur le texte attendu uniquement.
+Fournis des conseils généraux sur les règles de tajwīd pour ce verset.`}
 
 Fournis une analyse détaillée selon les règles de tajwīd.`;
+
+    console.log('Sending to AI for analysis...');
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -163,18 +222,23 @@ Fournis une analyse détaillée selon les règles de tajwīd.`;
     let analysis;
     try {
       analysis = JSON.parse(content);
+      // Add transcription info to the response
+      analysis.transcribedText = transcribedText || null;
+      analysis.audioAnalyzed = !!audioBase64;
     } catch {
       console.error("Failed to parse AI response:", content);
       analysis = {
         isCorrect: false,
         overallScore: 0,
         feedback: "Erreur d'analyse. Veuillez réessayer.",
+        transcribedText: transcribedText || null,
+        audioAnalyzed: !!audioBase64,
         errors: [],
         encouragement: "Continue tes efforts, chaque récitation compte."
       };
     }
 
-    console.log('Analysis result:', analysis);
+    console.log('Analysis result:', JSON.stringify(analysis, null, 2));
 
     return new Response(JSON.stringify(analysis), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
