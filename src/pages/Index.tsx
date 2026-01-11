@@ -15,12 +15,16 @@ import { SpacedRepetitionPanel } from '@/components/review/SpacedRepetitionPanel
 import { VerseNavigator } from '@/components/navigation/VerseNavigator';
 import { GamificationPanel } from '@/components/gamification/GamificationPanel';
 import { NotificationSettings } from '@/components/notifications/NotificationSettings';
+import { LeaderboardPanel } from '@/components/leaderboard/LeaderboardPanel';
+import { StreakPanel } from '@/components/streaks/StreakPanel';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useGamification } from '@/hooks/useGamification';
+import { useStreaks } from '@/hooks/useStreaks';
+import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useReviewNotifications } from '@/hooks/useReviewNotifications';
 import { supabase } from '@/integrations/supabase/client';
 import { SURAHS } from '@/data/quranData';
@@ -64,7 +68,9 @@ const Index = () => {
     processReview 
   } = useSpacedRepetition();
 
-  const { recordSession } = useGamification();
+  const { recordSession, userLevel } = useGamification();
+  const { recordPractice, streakData } = useStreaks();
+  const { updateLeaderboardEntry } = useLeaderboard();
 
   // Handle payment redirect
   useEffect(() => {
@@ -156,8 +162,19 @@ const Index = () => {
         details: data.feedback || data.encouragement,
       });
 
-      // Record session for gamification
+      // Record session for gamification and streaks
       await recordSession(isCorrect);
+      await recordPractice();
+      
+      // Update leaderboard
+      await updateLeaderboardEntry({
+        totalXp: userLevel.experiencePoints,
+        currentLevel: userLevel.currentLevel,
+        totalVersesMastered: userLevel.totalVersesMastered,
+        perfectRecitations: userLevel.perfectRecitations,
+        currentStreak: streakData.currentStreak,
+        longestStreak: streakData.longestStreak,
+      });
 
       // Add to spaced repetition if errors found
       if (data.errors && data.errors.length > 0) {
@@ -555,12 +572,14 @@ const Index = () => {
             {/* Progress sidebar */}
             <div className="lg:col-span-1 space-y-6">
               <ProgressDashboard data={progressData} />
+              <StreakPanel />
               <GamificationPanel />
               <SpacedRepetitionPanel
                 dueReviews={dueReviews}
                 totalInQueue={reviewQueue.length}
                 onStartReview={handleStartReview}
               />
+              <LeaderboardPanel />
               <NotificationSettings onRequestPermission={requestPermission} />
             </div>
 
