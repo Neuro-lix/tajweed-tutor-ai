@@ -7,16 +7,33 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Star8Point } from '@/components/decorative/GeometricPattern';
-import { Loader2, Mail, Lock, User } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Password validation
+  const passwordChecks = {
+    minLength: password.length >= 8,
+    hasUppercase: /[A-Z]/.test(password),
+    hasLowercase: /[a-z]/.test(password),
+    hasNumber: /[0-9]/.test(password),
+    passwordsMatch: password === confirmPassword && password.length > 0,
+  };
+
+  const isPasswordValid = passwordChecks.minLength && passwordChecks.hasUppercase && 
+    passwordChecks.hasLowercase && passwordChecks.hasNumber;
+  
+  const canSubmitSignup = isPasswordValid && passwordChecks.passwordsMatch && email && fullName;
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -67,6 +84,25 @@ const Auth = () => {
           description: "Connexion réussie.",
         });
       } else {
+        // Validate password before signup
+        if (!isPasswordValid) {
+          toast({
+            title: "Mot de passe invalide",
+            description: "Le mot de passe ne respecte pas les critères requis.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          toast({
+            title: "Erreur",
+            description: "Les mots de passe ne correspondent pas.",
+            variant: "destructive",
+          });
+          return;
+        }
+
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -83,6 +119,12 @@ const Auth = () => {
             toast({
               title: "Compte existant",
               description: "Cet email est déjà utilisé. Essayez de vous connecter.",
+              variant: "destructive",
+            });
+          } else if (error.message.includes('Password')) {
+            toast({
+              title: "Mot de passe trop faible",
+              description: "Utilisez au moins 8 caractères avec majuscules, minuscules et chiffres.",
               variant: "destructive",
             });
           } else {
@@ -110,6 +152,13 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
+  const PasswordCheck = ({ valid, label }: { valid: boolean; label: string }) => (
+    <div className={`flex items-center gap-2 text-xs ${valid ? 'text-green-600' : 'text-muted-foreground'}`}>
+      {valid ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+      {label}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -180,22 +229,75 @@ const Auth = () => {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 pr-10"
                   required
-                  minLength={6}
+                  minLength={8}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
+              
+              {/* Password requirements for signup */}
+              {!isLogin && password.length > 0 && (
+                <div className="grid grid-cols-2 gap-1 pt-2">
+                  <PasswordCheck valid={passwordChecks.minLength} label="8 caractères min" />
+                  <PasswordCheck valid={passwordChecks.hasUppercase} label="1 majuscule" />
+                  <PasswordCheck valid={passwordChecks.hasLowercase} label="1 minuscule" />
+                  <PasswordCheck valid={passwordChecks.hasNumber} label="1 chiffre" />
+                </div>
+              )}
             </div>
+
+            {/* Confirm password for signup */}
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className={`pl-10 pr-10 ${
+                      confirmPassword.length > 0 
+                        ? passwordChecks.passwordsMatch 
+                          ? 'border-green-500 focus-visible:ring-green-500' 
+                          : 'border-red-500 focus-visible:ring-red-500'
+                        : ''
+                    }`}
+                    required
+                    minLength={8}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {confirmPassword.length > 0 && !passwordChecks.passwordsMatch && (
+                  <p className="text-xs text-red-500">Les mots de passe ne correspondent pas</p>
+                )}
+              </div>
+            )}
 
             <Button 
               type="submit" 
               className="w-full" 
               size="lg"
-              disabled={loading}
+              disabled={loading || (!isLogin && !canSubmitSignup)}
             >
               {loading ? (
                 <>
@@ -211,7 +313,11 @@ const Auth = () => {
           <div className="mt-6 text-center">
             <button
               type="button"
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setPassword('');
+                setConfirmPassword('');
+              }}
               className="text-sm text-primary hover:underline"
             >
               {isLogin 
