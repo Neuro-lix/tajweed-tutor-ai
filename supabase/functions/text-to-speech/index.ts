@@ -24,7 +24,7 @@ serve(async (req) => {
     }
 
     // Use OpenAI TTS via Lovable AI Gateway
-    const response = await fetch('https://ai-gateway.lovable.dev/v1/audio/speech', {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/audio/speech', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${LOVABLE_API_KEY}`,

@@ -17,6 +17,8 @@ import { GamificationPanel } from '@/components/gamification/GamificationPanel';
 import { NotificationSettings } from '@/components/notifications/NotificationSettings';
 import { LeaderboardPanel } from '@/components/leaderboard/LeaderboardPanel';
 import { StreakPanel } from '@/components/streaks/StreakPanel';
+import { OfflineCacheManager } from '@/components/offline/OfflineCacheManager';
+import { OfflineIndicator } from '@/components/offline/OfflineIndicator';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProgress } from '@/hooks/useUserProgress';
@@ -27,6 +29,7 @@ import { useStreaks } from '@/hooks/useStreaks';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useReviewNotifications } from '@/hooks/useReviewNotifications';
 import { useStreakNotifications } from '@/hooks/useStreakNotifications';
+import { useOfflineMode } from '@/hooks/useOfflineMode';
 import { supabase } from '@/integrations/supabase/client';
 import { SURAHS } from '@/data/quranData';
 import { Loader2, LogOut, MessageSquareHeart } from 'lucide-react';
@@ -72,6 +75,19 @@ const Index = () => {
   const { recordSession, userLevel } = useGamification();
   const { recordPractice, streakData } = useStreaks();
   const { updateLeaderboardEntry } = useLeaderboard();
+  
+  // Offline mode
+  const {
+    isOnline,
+    isOfflineReady,
+    cacheStats,
+    formatCacheSize,
+    cacheSurah,
+    isSurahCached,
+    clearCache,
+    getCachedVerse,
+    cacheVerse,
+  } = useOfflineMode();
 
   // Handle payment redirect
   useEffect(() => {
@@ -133,19 +149,31 @@ const Index = () => {
   };
 
   const handleStopRecording = async () => {
-    await stopRecording();
     setAnalyzing(true);
+    
+    // stopRecording now returns the base64 audio directly
+    const recordedAudioBase64 = await stopRecording();
+    
+    if (!recordedAudioBase64) {
+      console.error('No audio recorded');
+      setAiFeedback({
+        status: 'review',
+        message: 'Erreur d\'enregistrement',
+        details: 'Aucun audio n\'a été capturé. Vérifie les permissions du microphone.',
+      });
+      setShowFeedback(true);
+      setAnalyzing(false);
+      return;
+    }
 
-    // Wait a bit for audioBase64 to be set
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    const surahData = SURAHS.find(s => s.id === currentSurah);
+    console.log('Audio recorded successfully, length:', recordedAudioBase64.length);
+    
     const expectedText = getExpectedVerseText(currentSurah, currentVerse);
 
     try {
       const { data, error } = await supabase.functions.invoke('analyze-recitation', {
         body: {
-          audioBase64,
+          audioBase64: recordedAudioBase64,
           surahNumber: currentSurah,
           verseNumber: currentVerse,
           expectedText,
@@ -550,6 +578,12 @@ const Index = () => {
                     — {profile.fullName}
                   </span>
                 )}
+                <OfflineIndicator
+                  isOnline={isOnline}
+                  isOfflineReady={isOfflineReady}
+                  cacheStats={cacheStats}
+                  formatCacheSize={formatCacheSize}
+                />
               </div>
               <nav className="flex items-center gap-2">
                 <Button 
@@ -598,6 +632,15 @@ const Index = () => {
                 onStartReview={handleStartReview}
               />
               <LeaderboardPanel />
+              <OfflineCacheManager
+                isOnline={isOnline}
+                isOfflineReady={isOfflineReady}
+                cacheStats={cacheStats}
+                formatCacheSize={formatCacheSize}
+                cacheSurah={cacheSurah}
+                isSurahCached={isSurahCached}
+                clearCache={clearCache}
+              />
               <NotificationSettings onRequestPermission={requestPermission} />
             </div>
 
