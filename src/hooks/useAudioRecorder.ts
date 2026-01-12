@@ -5,7 +5,7 @@ interface UseAudioRecorderReturn {
   audioBlob: Blob | null;
   audioBase64: string | null;
   startRecording: () => Promise<void>;
-  stopRecording: () => Promise<void>;
+  stopRecording: () => Promise<string | null>;
   error: string | null;
 }
 
@@ -38,9 +38,12 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
 
       streamRef.current = stream;
 
+      // Prefer audio/webm for better compatibility with Whisper
       const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
         ? 'audio/webm;codecs=opus' 
-        : 'audio/webm';
+        : MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : 'audio/mp4';
 
       const mediaRecorder = new MediaRecorder(stream, { mimeType });
       mediaRecorderRef.current = mediaRecorder;
@@ -51,21 +54,6 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
         }
       };
 
-      mediaRecorder.onstop = async () => {
-        const blob = new Blob(chunksRef.current, { type: mimeType });
-        setAudioBlob(blob);
-
-        // Convert to base64
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64 = reader.result as string;
-          // Remove data URL prefix
-          const base64Data = base64.split(',')[1];
-          setAudioBase64(base64Data);
-        };
-        reader.readAsDataURL(blob);
-      };
-
       mediaRecorder.start(100); // Collect data every 100ms
       setIsRecording(true);
     } catch (err) {
@@ -74,21 +62,25 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
     }
   }, []);
 
-  const stopRecording = useCallback(async () => {
-    return new Promise<void>((resolve) => {
+  const stopRecording = useCallback(async (): Promise<string | null> => {
+    return new Promise<string | null>((resolve) => {
       if (mediaRecorderRef.current && isRecording) {
         mediaRecorderRef.current.onstop = async () => {
           const mimeType = mediaRecorderRef.current?.mimeType || 'audio/webm';
           const blob = new Blob(chunksRef.current, { type: mimeType });
           setAudioBlob(blob);
 
-          // Convert to base64
+          // Convert to base64 and RETURN it directly
           const reader = new FileReader();
           reader.onloadend = () => {
             const base64 = reader.result as string;
             const base64Data = base64.split(',')[1];
             setAudioBase64(base64Data);
-            resolve();
+            resolve(base64Data); // Return the base64 data directly
+          };
+          reader.onerror = () => {
+            console.error('Error reading audio blob');
+            resolve(null);
           };
           reader.readAsDataURL(blob);
         };
@@ -103,7 +95,7 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
         
         setIsRecording(false);
       } else {
-        resolve();
+        resolve(null);
       }
     });
   }, [isRecording]);
