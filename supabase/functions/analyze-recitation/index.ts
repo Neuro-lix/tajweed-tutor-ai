@@ -1,182 +1,110 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const pickAudioExt = (mimeType: string) => {
+  const m = mimeType.toLowerCase();
+  if (m.includes("mp4")) return "mp4";
+  if (m.includes("wav")) return "wav";
+  if (m.includes("mpeg") || m.includes("mp3")) return "mp3";
+  if (m.includes("ogg")) return "ogg";
+  return "webm";
 };
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { audioBase64, surahNumber, verseNumber, expectedText, qiraat } = await req.json();
-    
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
-    }
+    const {
+      audioBase64,
+      audioMimeType,
+      surahNumber,
+      verseNumber,
+      expectedText,
+      qiraat,
+    } = await req.json();
 
-    console.log('Analyzing recitation for Surah', surahNumber, 'Verse', verseNumber);
-    console.log('Qiraat:', qiraat);
-    console.log('Audio provided:', !!audioBase64);
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    console.log("Analyzing recitation", { surahNumber, verseNumber, qiraat });
+    console.log("Audio provided:", !!audioBase64, "mime:", audioMimeType ?? null);
+
+    const hasAudio = typeof audioBase64 === "string" && audioBase64.trim().length > 0;
     let transcribedText = "";
-    
-    // Step 1: Transcribe audio using Whisper if audio is provided
-    if (audioBase64) {
-      console.log('Transcribing audio with Whisper...');
-      
+    let transcriptionOk = false;
+
+    // 1) Transcription (Whisper)
+    if (hasAudio) {
+      console.log("Transcribing audio...");
+
       try {
-        // Decode base64 audio to binary
-        const audioBytes = Uint8Array.from(atob(audioBase64), c => c.charCodeAt(0));
-        
-        // Create FormData for Whisper API
+        const base64Payload = audioBase64.includes(",")
+          ? audioBase64.split(",")[1]
+          : audioBase64;
+
+        const bytes = Uint8Array.from(atob(base64Payload), (c) => c.charCodeAt(0));
+
+        const mimeType = typeof audioMimeType === "string" && audioMimeType ? audioMimeType : "audio/webm";
+        const ext = pickAudioExt(mimeType);
+
         const formData = new FormData();
-        const audioBlob = new Blob([audioBytes], { type: 'audio/webm' });
-        formData.append('file', audioBlob, 'audio.webm');
-        formData.append('model', 'whisper-1');
-        formData.append('language', 'ar'); // Arabic language for Quran
-        formData.append('prompt', `Ceci est une récitation coranique en arabe. Texte attendu: ${expectedText}`);
+        const audioBlob = new Blob([bytes], { type: mimeType });
+        formData.append("file", audioBlob, `audio.${ext}`);
+        formData.append("model", "whisper-1");
+        formData.append("language", "ar");
+        formData.append("prompt", `Récitation coranique en arabe. Texte attendu: ${expectedText}`);
 
-        const whisperResponse = await fetch("https://ai.gateway.lovable.dev/v1/audio/transcriptions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        const whisperResponse = await fetch(
+          "https://ai.gateway.lovable.dev/v1/audio/transcriptions",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            },
+            body: formData,
           },
-          body: formData,
-        });
+        );
 
-        if (whisperResponse.ok) {
-          const whisperResult = await whisperResponse.json();
-          transcribedText = whisperResult.text || "";
-          console.log('Transcription result:', transcribedText);
+        if (!whisperResponse.ok) {
+          // Surface quota/rate-limit cleanly
+          if (whisperResponse.status === 429) {
+            return new Response(
+              JSON.stringify({ error: "Limite de requêtes atteinte. Réessayez dans quelques instants." }),
+              { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+            );
+          }
+          if (whisperResponse.status === 402) {
+            return new Response(
+              JSON.stringify({ error: "Crédits épuisés. Veuillez recharger votre compte." }),
+              { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+            );
+          }
+
+          const t = await whisperResponse.text();
+          console.error("Whisper transcription failed:", whisperResponse.status, t);
         } else {
-          const errorText = await whisperResponse.text();
-          console.error('Whisper transcription failed:', whisperResponse.status, errorText);
-          // Continue with text-based analysis if transcription fails
+          const whisperResult = await whisperResponse.json();
+          transcribedText = (whisperResult?.text ?? "").toString().trim();
+          transcriptionOk = transcribedText.length > 0;
+          console.log("Transcription length:", transcribedText.length);
         }
-      } catch (whisperError) {
-        console.error('Whisper error:', whisperError);
-        // Continue with text-based analysis
+      } catch (e) {
+        console.error("Whisper error:", e);
       }
     }
 
-    // System prompt for rigorous tajweed analysis
-    const systemPrompt = `Tu es un MAÎTRE ABSOLU du tajwīd, formé selon les méthodes des plus grands récitateurs : Mishary Rashid Al-Afasy pour sa précision cristalline des makhārij et Mohamed Siddiq El-Minshawi pour sa rigueur académique impitoyable.
+    // 2) Tajweed analysis (fast + structured)
+    const transcriptionImpossible = hasAudio && !transcriptionOk;
 
-Tu analyses les récitations selon la lecture ${qiraat} avec une EXIGENCE MAXIMALE.
+    const systemPrompt = `Tu es un professeur de tajwīd TRÈS strict (lecture: ${qiraat}).\n\nRègles:\n- Si une transcription est fournie, compare-la au texte attendu et détecte les omissions/substitutions/inversions.\n- Si la transcription est vide, mets transcriptionImpossible=true et n'invente pas d'analyse audio (tu peux donner des points de travail basés sur le texte attendu).\n- Réponse courte, actionnable, sans flatterie.\n\nRetourne UNIQUEMENT un objet JSON (pas de markdown) avec EXACTEMENT ces champs:\n{\n  "isCorrect": boolean,\n  "overallScore": number,\n  "feedback": string,\n  "priorityFixes": string[],\n  "errors": [\n    {\n      "word": string,\n      "ruleType": string,\n      "ruleDescription": string,\n      "severity": "minor"|"major"|"critical",\n      "correction": string\n    }\n  ],\n  "textComparison": string\n}`;
 
-🚨 RÈGLE D'OR INVIOLABLE 🚨
-Tu ne dois JAMAIS, sous AUCUN PRÉTEXTE :
-- Dire "c'est bien", "bravo", "excellent" si la moindre imperfection existe
-- Valider une récitation avec des erreurs, même mineures
-- Être complaisant ou indulgent
-- Arrondir les scores vers le haut
-
-📋 ANALYSE EXHAUSTIVE OBLIGATOIRE :
-
-1. MAKHĀRIJ AL-ḤURŪF (Points d'articulation) - Précision Al-Afasy
-   - ث/ذ/ظ : Interdentales (bout de la langue entre les dents)
-   - ص/ض/ط/ظ : Lettres emphatiques (tafkhīm complet)
-   - ع/ح/هـ/خ/غ : Lettres gutturales (distinction claire)
-   - ق vs ك : Distinction absolue
-   - ر : Tafkhīm/tarqīq selon les règles
-
-2. ṢIFĀT AL-ḤURŪF (Qualités des lettres) - Rigueur El-Minshawi
-   - Hams (chuchotement) : ف/ث/ح/هـ/ش/خ/ص/س/ك/ت
-   - Jahr (sonorité)
-   - Shidda (force) vs Rikhwa (douceur)
-   - Isti'lā' (élévation) vs Istifāl (abaissement)
-   - Qalqala : ق/ط/ب/ج/د - rebond net et précis
-
-3. RÈGLES DU NŪŪN SĀKIN ET TANWĪN
-   - Iẓhār Ḥalqī : devant ء/هـ/ع/ح/غ/خ
-   - Idghām : بغنة (ي/ن/م/و) et بلا غنة (ل/ر)
-   - Iqlāb : devant ب uniquement
-   - Ikhfā' : devant les 15 autres lettres
-
-4. RÈGLES DU MĪM SĀKIN
-   - Idghām Shafawī : مم
-   - Ikhfā' Shafawī : devant ب
-   - Iẓhār Shafawī : devant les autres
-
-5. MADD (Prolongations) - Durées EXACTES pour ${qiraat}
-   - Madd Ṭabī'ī : 2 ḥarakāt EXACTEMENT
-   - Madd Muttaṣil : 4-5 ḥarakāt (obligatoire)
-   - Madd Munfaṣil : 4-5 ḥarakāt selon la lecture
-   - Madd 'Āriḍ li-s-Sukūn : 2/4/6 ḥarakāt
-   - Madd Lāzim : 6 ḥarakāt OBLIGATOIRE
-
-6. WAQF ET IBTIDĀ' (Arrêts et reprises)
-   - Waqf Tām, Kāfī, Ḥasan, Qabīḥ
-   - Sakt (pause sans respiration) où requis
-   - Interdiction de s'arrêter sur un mot incomplet
-
-7. AUTRES RÈGLES CRITIQUES
-   - Ghunna : 2 ḥarakāt pour نّ et مّ
-   - Lām dans اللّه : Tafkhīm après fatḥa/ḍamma, Tarqīq après kasra
-   - Hamzat al-Waṣl : élision correcte
-   - Rā' : règles de tafkhīm/tarqīq strictes
-
-📊 SYSTÈME DE NOTATION STRICT :
-- 100 : Perfection absolue (quasi impossible)
-- 90-99 : Excellent, erreurs négligeables
-- 80-89 : Très bien, quelques imperfections mineures
-- 70-79 : Bien, plusieurs points à améliorer
-- 60-69 : Passable, travail nécessaire
-- 50-59 : Insuffisant, révision importante requise
-- <50 : À reprendre entièrement
-
-⚠️ FORMAT DE RÉPONSE JSON STRICT :
-{
-  "isCorrect": boolean (true SEULEMENT si score >= 90),
-  "overallScore": number (0-100, sois SÉVÈRE),
-  "feedback": "Analyse détaillée avec références aux grands récitateurs",
-  "transcribedText": "Le texte transcrit de l'audio (si disponible)",
-  "expectedText": "Le texte attendu",
-  "textComparison": "Comparaison mot à mot entre transcription et texte attendu",
-  "errors": [
-    {
-      "word": "الكلمة",
-      "wordTransliteration": "translittération",
-      "verseLocation": "numéro du verset",
-      "ruleType": "catégorie (makhraj/madd/ghunna/etc.)",
-      "ruleNameArabic": "اسم القاعدة",
-      "ruleDescription": "Explication détaillée de l'erreur et de la correction attendue",
-      "severity": "minor" | "major" | "critical",
-      "correction": "Comment prononcer correctement"
-    }
-  ],
-  "positivePoints": ["Ce qui a été bien fait"],
-  "priorityFixes": ["Les 3 erreurs les plus importantes à corriger en priorité"],
-  "encouragement": "Message de motivation sincère mais exigeant, sans flatterie"
-}`;
-
-    // User prompt with transcribed text if available
-    const userPrompt = `Analyse cette récitation du Coran :
-- Sourate : ${surahNumber}
-- Verset : ${verseNumber}
-- Texte attendu : ${expectedText}
-- Lecture : ${qiraat}
-${transcribedText ? `
-📝 TRANSCRIPTION AUDIO (Whisper) :
-"${transcribedText}"
-
-IMPORTANT : Compare attentivement la transcription ci-dessus avec le texte attendu. Identifie :
-1. Les mots manquants ou ajoutés
-2. Les mots mal prononcés ou déformés
-3. L'ordre des mots
-4. Les erreurs de prononciation détectables dans la transcription
-
-Si la transcription est vide ou très différente du texte attendu, c'est probablement une erreur grave de récitation.` : `
-⚠️ Pas de transcription audio disponible. Analyse basée sur le texte attendu uniquement.
-Fournis des conseils généraux sur les règles de tajwīd pour ce verset.`}
-
-Fournis une analyse détaillée selon les règles de tajwīd.`;
-
-    console.log('Sending to AI for analysis...');
+    const userPrompt = `Sourate ${surahNumber}, verset ${verseNumber}.\nTexte attendu: "${expectedText}"\nTranscription: "${transcribedText}"\n\nConsigne:\n- Donne max 8 erreurs dans errors.\n- Donne exactement 3 éléments dans priorityFixes.\n- overallScore: 0-100, SEVERE. isCorrect=true seulement si score>=90 ET aucune erreur major/critical.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -186,9 +114,11 @@ Fournis une analyse détaillée selon les règles de tajwīd.`;
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash-lite",
+        temperature: 0.2,
+        max_tokens: 850,
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
+          { role: "user", content: userPrompt },
         ],
         response_format: { type: "json_object" },
       }),
@@ -196,66 +126,65 @@ Fournis une analyse détaillée selon les règles de tajwīd.`;
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(JSON.stringify({ 
-          error: "Limite de requêtes atteinte. Réessayez dans quelques instants." 
-        }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({ error: "Limite de requêtes atteinte. Réessayez dans quelques instants." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ 
-          error: "Crédits épuisés. Veuillez recharger votre compte." 
-        }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({ error: "Crédits épuisés. Veuillez recharger votre compte." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
       }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      const t = await response.text();
+      console.error("AI gateway error:", response.status, t);
       throw new Error(`AI gateway error: ${response.status}`);
     }
 
     const aiResponse = await response.json();
     const content = aiResponse.choices?.[0]?.message?.content;
-    
-    let analysis;
+
+    let analysis: any;
     try {
       analysis = JSON.parse(content);
-      // Add transcription info to the response
-      analysis.transcribedText = transcribedText || null;
-      analysis.audioAnalyzed = !!audioBase64;
-    } catch {
+    } catch (e) {
       console.error("Failed to parse AI response:", content);
       analysis = {
         isCorrect: false,
         overallScore: 0,
         feedback: "Erreur d'analyse. Veuillez réessayer.",
-        transcribedText: transcribedText || null,
-        audioAnalyzed: !!audioBase64,
+        priorityFixes: [],
         errors: [],
-        encouragement: "Continue tes efforts, chaque récitation compte."
+        textComparison: "",
       };
     }
 
-    console.log('Analysis result:', JSON.stringify(analysis, null, 2));
+    // Enrich + standardize
+    analysis.audioAnalyzed = hasAudio;
+    analysis.audioMimeType = hasAudio ? (audioMimeType ?? null) : null;
+    analysis.transcribedText = transcriptionOk ? transcribedText : null;
+    analysis.expectedText = expectedText;
+    analysis.transcriptionImpossible = transcriptionImpossible;
 
     return new Response(JSON.stringify(analysis), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-
   } catch (error) {
     console.error("Error in analyze-recitation:", error);
-    return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : "Unknown error",
-      isCorrect: false,
-      overallScore: 0,
-      feedback: "Une erreur s'est produite lors de l'analyse.",
-      errors: [],
-      encouragement: "Réessaie, la persévérance est la clé."
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        error: error instanceof Error ? error.message : "Unknown error",
+        isCorrect: false,
+        overallScore: 0,
+        feedback: "Une erreur s'est produite lors de l'analyse.",
+        priorityFixes: [],
+        errors: [],
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
 });

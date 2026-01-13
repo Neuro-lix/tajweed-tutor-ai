@@ -60,6 +60,7 @@ const Index = () => {
   const { 
     isRecording, 
     audioBase64, 
+    audioMimeType,
     startRecording, 
     stopRecording, 
     error: recordingError 
@@ -174,6 +175,7 @@ const Index = () => {
       const { data, error } = await supabase.functions.invoke('analyze-recitation', {
         body: {
           audioBase64: recordedAudioBase64,
+          audioMimeType,
           surahNumber: currentSurah,
           verseNumber: currentVerse,
           expectedText,
