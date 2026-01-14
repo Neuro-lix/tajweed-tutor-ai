@@ -19,6 +19,10 @@ import { LeaderboardPanel } from '@/components/leaderboard/LeaderboardPanel';
 import { StreakPanel } from '@/components/streaks/StreakPanel';
 import { OfflineCacheManager } from '@/components/offline/OfflineCacheManager';
 import { OfflineIndicator } from '@/components/offline/OfflineIndicator';
+import { LanguageSelector } from '@/components/settings/LanguageSelector';
+import { AnalysisProgress } from '@/components/recitation/AnalysisProgress';
+import { AudioComparison } from '@/components/recitation/AudioComparison';
+import { RecitationReport } from '@/components/reports/RecitationReport';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProgress } from '@/hooks/useUserProgress';
@@ -30,18 +34,39 @@ import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useReviewNotifications } from '@/hooks/useReviewNotifications';
 import { useStreakNotifications } from '@/hooks/useStreakNotifications';
 import { useOfflineMode } from '@/hooks/useOfflineMode';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { SURAHS } from '@/data/quranData';
-import { Loader2, LogOut, MessageSquareHeart } from 'lucide-react';
+import { Loader2, LogOut, MessageSquareHeart, Award, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 
 type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections' | 'pricing';
+
+interface AnalysisResult {
+  isCorrect: boolean;
+  overallScore: number;
+  feedback: string;
+  encouragement?: string;
+  priorityFixes?: string[];
+  errors?: Array<{
+    word: string;
+    ruleType: string;
+    ruleDescription: string;
+    severity: 'minor' | 'major' | 'critical';
+    correction: string;
+  }>;
+  textComparison?: string;
+  transcribedText?: string | null;
+  expectedText?: string;
+  whisperError?: string | null;
+}
 
 const Index = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, loading: authLoading, signOut } = useAuth();
   const { profile, progress, corrections, surahProgress, updateProfile, addCorrection, loading: dataLoading } = useUserProgress();
+  const { t } = useLanguage();
   
   const [currentView, setCurrentView] = useState<AppView>('landing');
   const [selectedSession, setSelectedSession] = useState<'homme' | 'femme' | null>(null);
@@ -56,9 +81,14 @@ const Index = () => {
     details: string;
   } | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [analysisStep, setAnalysisStep] = useState<'upload' | 'transcription' | 'analysis' | 'complete'>('upload');
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [showReport, setShowReport] = useState(false);
+  const [userAudioBlob, setUserAudioBlob] = useState<Blob | null>(null);
   
   const { 
     isRecording, 
+    audioBlob,
     audioBase64, 
     audioMimeType,
     startRecording, 
@@ -146,11 +176,14 @@ const Index = () => {
   const handleStartRecording = async () => {
     setShowFeedback(false);
     setAiFeedback(null);
+    setAnalysisResult(null);
+    setShowReport(false);
     await startRecording();
   };
 
   const handleStopRecording = async () => {
     setAnalyzing(true);
+    setAnalysisStep('upload');
     
     // stopRecording now returns the base64 audio directly
     const recordedAudioBase64 = await stopRecording();
@@ -167,11 +200,19 @@ const Index = () => {
       return;
     }
 
+    // Store audio blob for comparison
+    if (audioBlob) {
+      setUserAudioBlob(audioBlob);
+    }
+
     console.log('Audio recorded successfully, length:', recordedAudioBase64.length);
+    setAnalysisStep('transcription');
     
     const expectedText = getExpectedVerseText(currentSurah, currentVerse);
 
     try {
+      setAnalysisStep('analysis');
+      
       const { data, error } = await supabase.functions.invoke('analyze-recitation', {
         body: {
           audioBase64: recordedAudioBase64,
@@ -185,11 +226,16 @@ const Index = () => {
 
       if (error) throw error;
 
+      setAnalysisStep('complete');
+      
       const isCorrect = data.isCorrect && data.overallScore >= 80;
+      
+      // Store full analysis result
+      setAnalysisResult(data);
       
       setAiFeedback({
         status: isCorrect ? 'correct' : 'review',
-        message: isCorrect ? 'Récitation correcte !' : 'À revoir',
+        message: isCorrect ? t.excellent : t.needsReview,
         details: data.feedback || data.encouragement,
       });
 
@@ -588,6 +634,7 @@ const Index = () => {
                 />
               </div>
               <nav className="flex items-center gap-2">
+                <LanguageSelector />
                 <Button 
                   variant="ghost" 
                   size="sm"
@@ -595,19 +642,25 @@ const Index = () => {
                 >
                   <MessageSquareHeart className="h-4 w-4" />
                 </Button>
+                <Link to="/ijaza">
+                  <Button variant="ghost" size="sm">
+                    <Award className="h-4 w-4 mr-1" />
+                    Ijaza
+                  </Button>
+                </Link>
                 <Button 
                   variant="ghost" 
                   size="sm"
                   onClick={() => setCurrentView('corrections')}
                 >
-                  Corrections ({corrections.length})
+                  {t.corrections} ({corrections.length})
                 </Button>
                 <Button 
                   variant="default" 
                   size="sm"
                   onClick={() => setCurrentView('recitation')}
                 >
-                  Réciter
+                  {t.recitation}
                 </Button>
                 <Button 
                   variant="outline" 
