@@ -3,7 +3,22 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ReferenceRecitations } from './ReferenceRecitations';
+import { AnalysisProgress, AnalysisStep } from './AnalysisProgress';
+import { AudioComparison } from './AudioComparison';
 import { Loader2 } from 'lucide-react';
+
+// Cumulative verse counts for reference audio URL
+const CUMULATIVE_VERSES = [
+  0, 7, 293, 493, 669, 789, 954, 1160, 1235, 1364, 1473, 1596, 1707, 1750, 1802, 
+  1901, 2029, 2140, 2250, 2348, 2483, 2593, 2673, 2791, 2855, 2932, 3159, 3252, 
+  3340, 3409, 3469, 3503, 3533, 3606, 3660, 3705, 3788, 3970, 4058, 4133, 4218, 
+  4272, 4325, 4414, 4473, 4510, 4545, 4583, 4612, 4630, 4675, 4735, 4784, 4846, 
+  4901, 4979, 5075, 5104, 5126, 5150, 5163, 5177, 5188, 5199, 5217, 5229, 5241, 
+  5271, 5323, 5375, 5419, 5447, 5496, 5551, 5591, 5622, 5672, 5712, 5758, 5800, 
+  5829, 5848, 5884, 5909, 5931, 5948, 5967, 5993, 6023, 6043, 6058, 6079, 6090, 
+  6098, 6106, 6125, 6130, 6138, 6146, 6157, 6168, 6176, 6179, 6188, 6193, 6197, 
+  6204, 6207, 6213, 6216, 6221, 6225, 6230, 6236
+];
 
 interface RecitationInterfaceProps {
   surahName: string;
@@ -14,8 +29,13 @@ interface RecitationInterfaceProps {
   verseText: string;
   isRecording: boolean;
   isAnalyzing?: boolean;
+  analysisStep?: AnalysisStep;
+  transcriptionFailed?: boolean;
+  userAudioBlob?: Blob | null;
   onStartRecording: () => void;
   onStopRecording: () => void;
+  onPreviousVerse?: () => void;
+  onNextVerse?: () => void;
   recordingError?: string | null;
   feedback?: {
     status: 'correct' | 'success' | 'review';
@@ -33,11 +53,25 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
   verseText,
   isRecording,
   isAnalyzing,
+  analysisStep = 'idle',
+  transcriptionFailed,
+  userAudioBlob,
   onStartRecording,
   onStopRecording,
+  onPreviousVerse,
+  onNextVerse,
   recordingError,
   feedback,
 }) => {
+  // Build reference audio URL for comparison
+  const getAyahNumber = (surah: number, verse: number): number => {
+    if (surah <= 1) return verse;
+    if (surah > CUMULATIVE_VERSES.length) return verse;
+    return CUMULATIVE_VERSES[surah - 1] + verse;
+  };
+  
+  const referenceAudioUrl = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${getAyahNumber(surahNumber, currentVerse)}.mp3`;
+
   return (
     <div className="space-y-6">
       {/* Surah header */}
@@ -129,6 +163,24 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
         )}
       </div>
 
+      {/* Analysis Progress */}
+      {isAnalyzing && (
+        <AnalysisProgress 
+          currentStep={analysisStep} 
+          transcriptionFailed={transcriptionFailed}
+        />
+      )}
+
+      {/* Audio Comparison - only show after recording */}
+      {userAudioBlob && !isRecording && !isAnalyzing && (
+        <AudioComparison
+          userAudioBlob={userAudioBlob}
+          referenceAudioUrl={referenceAudioUrl}
+          surahNumber={surahNumber}
+          verseNumber={currentVerse}
+        />
+      )}
+
       {/* Feedback */}
       {feedback && (
         <Card 
@@ -171,13 +223,21 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
 
       {/* Navigation */}
       <div className="flex justify-center gap-4">
-        <Button variant="outline" disabled={currentVerse === 1}>
+        <Button 
+          variant="outline" 
+          disabled={currentVerse === 1}
+          onClick={onPreviousVerse}
+        >
           <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M15 18l-6-6 6-6" />
           </svg>
           Précédent
         </Button>
-        <Button variant="default" disabled={currentVerse === totalVerses}>
+        <Button 
+          variant="default" 
+          disabled={currentVerse === totalVerses}
+          onClick={onNextVerse}
+        >
           Suivant
           <svg className="w-4 h-4 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M9 18l6-6-6-6" />

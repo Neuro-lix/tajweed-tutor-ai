@@ -763,11 +763,41 @@ const Index = () => {
             verseText={getExpectedVerseText(currentSurah, currentVerse)}
             isRecording={isRecording}
             isAnalyzing={analyzing}
+            analysisStep={analysisStep === 'upload' ? 'uploading' : 
+                         analysisStep === 'transcription' ? 'transcribing' : 
+                         analysisStep === 'analysis' ? 'analyzing' : 
+                         analysisStep === 'complete' ? 'done' : 'idle'}
+            transcriptionFailed={analysisResult?.whisperError !== null && analysisResult?.whisperError !== undefined}
+            userAudioBlob={userAudioBlob}
             onStartRecording={handleStartRecording}
             onStopRecording={handleStopRecording}
+            onPreviousVerse={() => currentVerse > 1 && handleNavigate(currentSurah, currentVerse - 1)}
+            onNextVerse={() => {
+              const surah = SURAHS.find(s => s.id === currentSurah);
+              if (surah && currentVerse < surah.verses) {
+                handleNavigate(currentSurah, currentVerse + 1);
+              }
+            }}
             recordingError={recordingError}
             feedback={showFeedback && aiFeedback ? aiFeedback : undefined}
           />
+
+          {/* Recitation Report */}
+          {showFeedback && analysisResult && (
+            <RecitationReport
+              surahNumber={currentSurah}
+              verseNumber={currentVerse}
+              score={analysisResult.overallScore || 0}
+              isCorrect={analysisResult.isCorrect || false}
+              feedback={analysisResult.feedback || ''}
+              priorityFixes={analysisResult.priorityFixes || []}
+              errors={analysisResult.errors || []}
+              transcribedText={analysisResult.transcribedText}
+              expectedText={analysisResult.expectedText || getExpectedVerseText(currentSurah, currentVerse)}
+              textComparison={analysisResult.textComparison}
+              onClose={() => setShowReport(false)}
+            />
+          )}
         </main>
       </div>
     );
