@@ -208,8 +208,8 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
                 )}
               </div>
               <div>
-                <h4 className={`font-semibold text-lg ${feedback.status === 'success' || feedback.status === 'correct' ? 'text-primary' : 'text-gold-warm'}`}>
-                  {feedback.status === 'success' || feedback.status === 'correct' ? 'Excellent !' : 'À revoir'}
+                <h4 className={`font-semibold text-lg ${feedback.status === 'success' || feedback.status === 'correct' ? 'text-primary' : 'text-gold-warm'}`}> 
+                  {transcriptionFailed ? 'Transcription échouée' : (feedback.status === 'success' || feedback.status === 'correct' ? 'Excellent !' : 'À revoir')}
                 </h4>
                 <p className="text-foreground mt-1">{feedback.message}</p>
                 {feedback.details && (

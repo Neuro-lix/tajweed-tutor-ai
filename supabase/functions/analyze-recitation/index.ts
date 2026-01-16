@@ -61,37 +61,53 @@ serve(async (req) => {
         const bytes = Uint8Array.from(atob(base64Payload), (c) => c.charCodeAt(0));
         console.log("[analyze-recitation] Audio bytes length:", bytes.length);
 
-        const mimeType = typeof audioMimeType === "string" && audioMimeType ? audioMimeType : "audio/webm";
+        const rawMimeType = typeof audioMimeType === "string" && audioMimeType
+          ? audioMimeType
+          : "audio/webm";
+
+        // IMPORTANT: Whisper is sometimes picky with codec suffixes (e.g. audio/webm;codecs=opus)
+        // so we normalize to the base mime type.
+        const mimeType = rawMimeType.split(";")[0].trim() || "audio/webm";
         const ext = pickAudioExt(mimeType);
 
         console.log("[analyze-recitation] Creating blob with mime:", mimeType, "ext:", ext);
 
-        const formData = new FormData();
         const audioBlob = new Blob([bytes], { type: mimeType });
-        formData.append("file", audioBlob, `recording.${ext}`);
-        formData.append("model", "whisper-1");
-        formData.append("language", "ar");
-        formData.append("prompt", `Récitation coranique du Coran en arabe classique. Sourate ${surahNumber}, verset ${verseNumber}. Texte attendu: ${expectedText}`);
 
-        console.log("[analyze-recitation] Sending to Whisper API...");
+        const makeFormData = (opts: { includeLanguage: boolean; includePrompt: boolean }) => {
+          const fd = new FormData();
+          fd.append("file", audioBlob, `recording.${ext}`);
+          fd.append("model", "whisper-1");
+          if (opts.includeLanguage) fd.append("language", "ar");
+          if (opts.includePrompt) {
+            fd.append(
+              "prompt",
+              `Récitation coranique du Coran en arabe classique. Sourate ${surahNumber}, verset ${verseNumber}. Texte attendu: ${expectedText}`,
+            );
+          }
+          return fd;
+        };
 
-        const whisperResponse = await fetch(
-          "https://ai.gateway.lovable.dev/v1/audio/transcriptions",
-          {
+        const callWhisper = async (fd: FormData) => {
+          console.log("[analyze-recitation] Sending to Whisper API...");
+          const res = await fetch("https://ai.gateway.lovable.dev/v1/audio/transcriptions", {
             method: "POST",
             headers: {
               Authorization: `Bearer ${LOVABLE_API_KEY}`,
             },
-            body: formData,
-          },
-        );
+            body: fd,
+          });
+          console.log("[analyze-recitation] Whisper response status:", res.status);
+          return res;
+        };
 
-        console.log("[analyze-recitation] Whisper response status:", whisperResponse.status);
+        // Attempt 1: force Arabic + strong prompt
+        let whisperResponse = await callWhisper(makeFormData({ includeLanguage: true, includePrompt: true }));
 
         if (!whisperResponse.ok) {
           const errorText = await whisperResponse.text();
           console.error("[analyze-recitation] Whisper error:", whisperResponse.status, errorText);
-          
+
           if (whisperResponse.status === 429) {
             whisperError = "Limite de requêtes atteinte";
           } else if (whisperResponse.status === 402) {
@@ -100,10 +116,36 @@ serve(async (req) => {
             whisperError = `Erreur Whisper: ${whisperResponse.status}`;
           }
         } else {
-          const whisperResult = await whisperResponse.json();
+          const whisperResult = await whisperResponse.json().catch(() => null);
           transcribedText = (whisperResult?.text ?? "").toString().trim();
           transcriptionOk = transcribedText.length > 0;
           console.log("[analyze-recitation] Transcription result:", transcribedText.substring(0, 100), "...");
+        }
+
+        // Attempt 2 (fallback): let Whisper auto-detect language, no prompt.
+        // This helps when the browser MIME/codecs mismatch confuses decoding.
+        if (!transcriptionOk) {
+          console.log("[analyze-recitation] Whisper retry (auto language, no prompt)...");
+          whisperResponse = await callWhisper(makeFormData({ includeLanguage: false, includePrompt: false }));
+
+          if (whisperResponse.ok) {
+            const whisperResult = await whisperResponse.json().catch(() => null);
+            const retryText = (whisperResult?.text ?? "").toString().trim();
+            if (retryText.length > 0) {
+              transcribedText = retryText;
+              transcriptionOk = true;
+              whisperError = null;
+              console.log("[analyze-recitation] Retry transcription OK:", transcribedText.substring(0, 100), "...");
+            }
+          } else if (!whisperError) {
+            const errorText = await whisperResponse.text();
+            console.error("[analyze-recitation] Whisper retry error:", whisperResponse.status, errorText);
+            whisperError = `Erreur Whisper (retry): ${whisperResponse.status}`;
+          }
+
+          if (!transcriptionOk && !whisperError) {
+            whisperError = "Transcription vide";
+          }
         }
       } catch (e) {
         console.error("[analyze-recitation] Whisper exception:", e);
@@ -114,12 +156,43 @@ serve(async (req) => {
     // 2) Tajweed analysis
     const transcriptionImpossible = hasAudio && !transcriptionOk;
 
+    // If we couldn't transcribe, stop here (no AI tajwīd analysis without text).
+    if (transcriptionImpossible) {
+      const failure = {
+        isCorrect: false,
+        overallScore: 0,
+        feedback: "La transcription est vide. Veuillez réenregistrer.",
+        encouragement: "Réessaie en te rapprochant du micro et en parlant clairement.",
+        priorityFixes: [
+          "Réenregistre dans un endroit calme (sans bruit de fond)",
+          "Rapproche le micro et augmente légèrement le volume de ta voix",
+          "Réessaie avec un verset court (ex: Al-Ikhlâs 112:1)",
+        ],
+        errors: [],
+        textComparison: "",
+        audioAnalyzed: true,
+        audioMimeType: audioMimeType ?? null,
+        transcribedText: null,
+        expectedText,
+        transcriptionImpossible: true,
+        whisperError,
+      };
+
+      console.log("[analyze-recitation] Early return (transcriptionImpossible)", {
+        whisperError,
+      });
+
+      return new Response(JSON.stringify(failure), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     console.log("[analyze-recitation] Analysis params:", {
       hasAudio,
       transcriptionOk,
       transcriptionImpossible,
       transcribedTextLength: transcribedText.length,
-      whisperError
+      whisperError,
     });
 
     const systemPrompt = `Tu es un professeur de tajwīd TRÈS strict (lecture: ${qiraat}).
