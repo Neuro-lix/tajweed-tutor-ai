@@ -59,6 +59,7 @@ interface AnalysisResult {
   transcribedText?: string | null;
   expectedText?: string;
   whisperError?: string | null;
+  transcriptionImpossible?: boolean;
 }
 
 const Index = () => {
@@ -767,7 +768,7 @@ const Index = () => {
                          analysisStep === 'transcription' ? 'transcribing' : 
                          analysisStep === 'analysis' ? 'analyzing' : 
                          analysisStep === 'complete' ? 'done' : 'idle'}
-            transcriptionFailed={analysisResult?.whisperError !== null && analysisResult?.whisperError !== undefined}
+            transcriptionFailed={analysisResult?.transcriptionImpossible === true}
             userAudioBlob={userAudioBlob}
             onStartRecording={handleStartRecording}
             onStopRecording={handleStopRecording}
