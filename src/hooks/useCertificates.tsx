@@ -48,7 +48,7 @@ export const useCertificates = () => {
           certificateType: c.certificate_type,
           userName: c.user_name,
           qiraat: c.qiraat,
-          averageScore: parseFloat(c.average_score),
+          averageScore: Number(c.average_score),
           completedAt: c.completed_at,
         }))
       );
@@ -116,7 +116,7 @@ export const useCertificates = () => {
           certificateType: data.certificate_type,
           userName: data.user_name,
           qiraat: data.qiraat,
-          averageScore: parseFloat(data.average_score),
+          averageScore: Number(data.average_score),
           completedAt: data.completed_at,
         };
 
