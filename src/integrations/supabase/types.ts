@@ -53,6 +53,63 @@ export type Database = {
         }
         Relationships: []
       }
+      ijaza_requests: {
+        Row: {
+          created_at: string
+          email: string
+          experience: string | null
+          full_name: string
+          id: string
+          motivation: string | null
+          notes: string | null
+          phone: string | null
+          preferred_language: string | null
+          preferred_time: string | null
+          rejection_reason: string | null
+          scheduled_date: string | null
+          sheikh_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          experience?: string | null
+          full_name: string
+          id?: string
+          motivation?: string | null
+          notes?: string | null
+          phone?: string | null
+          preferred_language?: string | null
+          preferred_time?: string | null
+          rejection_reason?: string | null
+          scheduled_date?: string | null
+          sheikh_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          experience?: string | null
+          full_name?: string
+          id?: string
+          motivation?: string | null
+          notes?: string | null
+          phone?: string | null
+          preferred_language?: string | null
+          preferred_time?: string | null
+          rejection_reason?: string | null
+          scheduled_date?: string | null
+          sheikh_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       leaderboard: {
         Row: {
           current_level: number
@@ -200,6 +257,80 @@ export type Database = {
         }
         Relationships: []
       }
+      sheikh_availability: {
+        Row: {
+          booked_by: string | null
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_booked: boolean | null
+          sheikh_id: string
+          start_time: string
+        }
+        Insert: {
+          booked_by?: string | null
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_booked?: boolean | null
+          sheikh_id: string
+          start_time: string
+        }
+        Update: {
+          booked_by?: string | null
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_booked?: boolean | null
+          sheikh_id?: string
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sheikh_availability_sheikh_id_fkey"
+            columns: ["sheikh_id"]
+            isOneToOne: false
+            referencedRelation: "sheikhs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sheikhs: {
+        Row: {
+          bio: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          is_available: boolean | null
+          languages: string[] | null
+          name: string
+          specialty: string | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_available?: boolean | null
+          languages?: string[] | null
+          name: string
+          specialty?: string | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_available?: boolean | null
+          languages?: string[] | null
+          name?: string
+          specialty?: string | null
+        }
+        Relationships: []
+      }
       surah_progress: {
         Row: {
           created_at: string
@@ -260,6 +391,42 @@ export type Database = {
           earned_at?: string
           id?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_certificates: {
+        Row: {
+          average_score: number
+          certificate_type: string
+          completed_at: string
+          created_at: string
+          id: string
+          qiraat: string | null
+          surah_number: number
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          average_score: number
+          certificate_type?: string
+          completed_at?: string
+          created_at?: string
+          id?: string
+          qiraat?: string | null
+          surah_number: number
+          user_id: string
+          user_name: string
+        }
+        Update: {
+          average_score?: number
+          certificate_type?: string
+          completed_at?: string
+          created_at?: string
+          id?: string
+          qiraat?: string | null
+          surah_number?: number
+          user_id?: string
+          user_name?: string
         }
         Relationships: []
       }
