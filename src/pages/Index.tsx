@@ -23,6 +23,8 @@ import { LanguageSelector } from '@/components/settings/LanguageSelector';
 import { AnalysisProgress } from '@/components/recitation/AnalysisProgress';
 import { AudioComparison } from '@/components/recitation/AudioComparison';
 import { RecitationReport } from '@/components/reports/RecitationReport';
+import { RewardsPanel } from '@/components/rewards/RewardsPanel';
+import { CertificateModal } from '@/components/certificates/CertificateModal';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProgress } from '@/hooks/useUserProgress';
@@ -34,10 +36,11 @@ import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { useReviewNotifications } from '@/hooks/useReviewNotifications';
 import { useStreakNotifications } from '@/hooks/useStreakNotifications';
 import { useOfflineMode } from '@/hooks/useOfflineMode';
+import { useCertificates } from '@/hooks/useCertificates';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { SURAHS } from '@/data/quranData';
-import { Loader2, LogOut, MessageSquareHeart, Award, Globe } from 'lucide-react';
+import { Loader2, LogOut, MessageSquareHeart, Award, Globe, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 
 type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections' | 'pricing';
@@ -107,6 +110,9 @@ const Index = () => {
   const { recordSession, userLevel } = useGamification();
   const { recordPractice, streakData } = useStreaks();
   const { updateLeaderboardEntry } = useLeaderboard();
+  
+  // Certificates
+  const { certificates, loading: certificatesLoading, newCertificate, dismissNewCertificate } = useCertificates();
   
   // Offline mode
   const {
@@ -681,6 +687,18 @@ const Index = () => {
             <div className="lg:col-span-1 space-y-6">
               <ProgressDashboard data={progressData} />
               <StreakPanel />
+              <RewardsPanel 
+                certificates={certificates.map(c => ({
+                  id: c.id,
+                  surahNumber: c.surahNumber,
+                  certificateType: c.certificateType,
+                  userName: c.userName,
+                  qiraat: c.qiraat,
+                  averageScore: c.averageScore,
+                  completedAt: c.completedAt,
+                }))}
+                loading={certificatesLoading}
+              />
               <GamificationPanel />
               <SpacedRepetitionPanel
                 dueReviews={dueReviews}
@@ -722,6 +740,21 @@ const Index = () => {
         {/* Chat and Feedback */}
         <MultilingualChat />
         <FeedbackForm isOpen={showFeedbackForm} onClose={() => setShowFeedbackForm(false)} />
+        
+        {/* Certificate Modal */}
+        <CertificateModal
+          certificate={newCertificate ? {
+            id: newCertificate.id,
+            surahNumber: newCertificate.surahNumber,
+            certificateType: newCertificate.certificateType,
+            userName: newCertificate.userName,
+            qiraat: newCertificate.qiraat,
+            averageScore: newCertificate.averageScore,
+            completedAt: newCertificate.completedAt,
+          } : null}
+          isOpen={!!newCertificate}
+          onClose={dismissNewCertificate}
+        />
       </div>
     );
   }
