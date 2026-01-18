@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { SURAHS } from '@/data/quranData';
+import { generateReportPDF } from '@/utils/pdfGenerator';
 
 interface RecitationError {
   word: string;
@@ -36,6 +37,7 @@ interface RecitationReportProps {
   expectedText: string;
   textComparison?: string;
   date?: Date;
+  userName?: string;
   onClose?: () => void;
 }
 
@@ -51,6 +53,7 @@ export const RecitationReport: React.FC<RecitationReportProps> = ({
   expectedText,
   textComparison,
   date = new Date(),
+  userName,
   onClose,
 }) => {
   const { t } = useLanguage();
@@ -80,47 +83,26 @@ export const RecitationReport: React.FC<RecitationReportProps> = ({
   };
 
   const handleDownload = () => {
-    if (!reportRef.current) return;
-
-    const content = reportRef.current.innerHTML;
-    const styles = `
-      <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; }
-        .card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .score { font-size: 48px; font-weight: bold; }
-        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
-        .error-item { padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px; }
-        .arabic { font-family: 'Amiri', serif; direction: rtl; font-size: 20px; }
-        @media print { .no-print { display: none; } }
-      </style>
-    `;
-
-    const html = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <title>Rapport de Récitation - ${surah?.transliteration} : ${verseNumber}</title>
-          ${styles}
-        </head>
-        <body>
-          <h1>Rapport de Récitation</h1>
-          <p>Date: ${date.toLocaleDateString('fr-FR')}</p>
-          ${content}
-        </body>
-      </html>
-    `;
-
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `rapport-recitation-${surahNumber}-${verseNumber}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // Generate real PDF using jsPDF
+    generateReportPDF({
+      userName: userName || 'Utilisateur',
+      surahNumber,
+      verseNumber,
+      score,
+      isCorrect,
+      feedback,
+      priorityFixes,
+      errors: errors.map(e => ({
+        word: e.word,
+        ruleType: e.ruleType,
+        ruleDescription: e.ruleDescription,
+        severity: e.severity,
+        correction: e.correction,
+      })),
+      transcribedText,
+      expectedText,
+      date,
+    });
   };
 
   return (
