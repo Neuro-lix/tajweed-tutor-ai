@@ -19,6 +19,7 @@ import { LeaderboardPanel } from '@/components/leaderboard/LeaderboardPanel';
 import { StreakPanel } from '@/components/streaks/StreakPanel';
 import { OfflineCacheManager } from '@/components/offline/OfflineCacheManager';
 import { OfflineIndicator } from '@/components/offline/OfflineIndicator';
+import { OfflinePracticeMode } from '@/components/offline/OfflinePracticeMode';
 import { LanguageSelector } from '@/components/settings/LanguageSelector';
 import { AnalysisProgress } from '@/components/recitation/AnalysisProgress';
 import { AudioComparison } from '@/components/recitation/AudioComparison';
@@ -89,6 +90,7 @@ const Index = () => {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [showReport, setShowReport] = useState(false);
   const [userAudioBlob, setUserAudioBlob] = useState<Blob | null>(null);
+  const [isCurrentVerseCached, setIsCurrentVerseCached] = useState(false);
   
   const { 
     isRecording, 
@@ -150,6 +152,15 @@ const Index = () => {
       }
     }
   }, [user, authLoading, profile, dataLoading]);
+
+  // Check if current verse is cached when verse changes
+  useEffect(() => {
+    const checkCache = async () => {
+      const cached = await getCachedVerse(currentSurah, currentVerse);
+      setIsCurrentVerseCached(!!cached);
+    };
+    checkCache();
+  }, [currentSurah, currentVerse, getCachedVerse]);
 
   const progressData = {
     totalSurahs: 114,
@@ -303,11 +314,19 @@ const Index = () => {
     return verses[`${surah}:${verse}`] || `Verset ${verse} de la sourate ${surah}`;
   };
 
-  const handleNavigate = (surah: number, verse: number) => {
+  const handleNavigate = async (surah: number, verse: number) => {
     setCurrentSurah(surah);
     setCurrentVerse(verse);
     setShowFeedback(false);
     setAiFeedback(null);
+    
+    // Auto-cache verse when navigating (if online)
+    if (isOnline) {
+      const verseText = getExpectedVerseText(surah, verse);
+      if (verseText && !verseText.startsWith('Verset')) {
+        await cacheVerse(surah, verse, verseText);
+      }
+    }
   };
 
   const handleStartReview = (surahNumber: number, verseNumber: number) => {
@@ -814,6 +833,24 @@ const Index = () => {
             }}
             recordingError={recordingError}
             feedback={showFeedback && aiFeedback ? aiFeedback : undefined}
+          />
+
+          {/* Offline Practice Mode */}
+          <OfflinePracticeMode
+            isOnline={isOnline}
+            cachedVerseCount={cacheStats.verses}
+            currentSurah={currentSurah}
+            currentVerse={currentVerse}
+            isVerseCached={isCurrentVerseCached}
+            onStartPractice={() => {
+              // Practice without analysis in offline mode
+              toast.info('Mode pratique sans analyse IA');
+            }}
+            onListenReference={() => {
+              // Scroll to reference recitations
+              const element = document.querySelector('[data-reference-recitations]');
+              if (element) element.scrollIntoView({ behavior: 'smooth' });
+            }}
           />
 
           {/* Recitation Report */}

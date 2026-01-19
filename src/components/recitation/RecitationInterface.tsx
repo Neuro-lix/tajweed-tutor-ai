@@ -104,7 +104,9 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
       </Card>
 
       {/* Reference recitations */}
-      <ReferenceRecitations surahNumber={surahNumber} verseNumber={currentVerse} />
+      <div data-reference-recitations>
+        <ReferenceRecitations surahNumber={surahNumber} verseNumber={currentVerse} />
+      </div>
 
       {/* Recording error */}
       {recordingError && (
