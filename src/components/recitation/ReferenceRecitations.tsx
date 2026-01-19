@@ -33,6 +33,22 @@ const RECITERS: ReciterInfo[] = [
     color: 'bg-emerald-500',
   },
   {
+    id: 'sudais',
+    name: 'Abdurrahman As-Sudais',
+    nameArabic: 'عبدالرحمن السديس',
+    style: 'Imam de La Mecque',
+    audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.abdurrahmaansudais',
+    color: 'bg-purple-500',
+  },
+  {
+    id: 'shuraim',
+    name: 'Saud Al-Shuraim',
+    nameArabic: 'سعود الشريم',
+    style: 'Imam de La Mecque',
+    audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.saaboralshatreem',
+    color: 'bg-red-500',
+  },
+  {
     id: 'minshawi',
     name: 'Mohamed Siddiq El-Minshawi',
     nameArabic: 'محمد صديق المنشاوي',
@@ -49,12 +65,28 @@ const RECITERS: ReciterInfo[] = [
     color: 'bg-blue-500',
   },
   {
-    id: 'sudais',
-    name: 'Abdurrahman As-Sudais',
-    nameArabic: 'عبدالرحمن السديس',
-    style: 'Imam de La Mecque',
-    audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.abdurrahmaansudais',
-    color: 'bg-purple-500',
+    id: 'husary_mujawwad',
+    name: 'Al-Husary (Mujawwad)',
+    nameArabic: 'الحصري مجود',
+    style: 'Style mujawwad mélodique',
+    audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.husarymujawwad',
+    color: 'bg-cyan-500',
+  },
+  {
+    id: 'abdulbasit',
+    name: 'Abdul Basit Abdul Samad',
+    nameArabic: 'عبدالباسط عبدالصمد',
+    style: 'Légende mondiale du tajwīd',
+    audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.abdulsamad',
+    color: 'bg-orange-500',
+  },
+  {
+    id: 'ghamdi',
+    name: 'Saad Al-Ghamdi',
+    nameArabic: 'سعد الغامدي',
+    style: 'Voix douce et apaisante',
+    audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.saadalghamdi',
+    color: 'bg-teal-500',
   },
 ];
 
@@ -277,31 +309,33 @@ export const ReferenceRecitations: React.FC<ReferenceRecitationsProps> = ({
           </Badge>
         </div>
 
-        {/* Reciter selection */}
-        <div className="grid grid-cols-2 gap-2">
-          {RECITERS.map((reciter) => (
-            <button
-              key={reciter.id}
-              onClick={() => handleReciterChange(reciter)}
-              className={`
-                p-3 rounded-lg text-left transition-all
-                ${selectedReciter.id === reciter.id 
-                  ? 'bg-primary/10 border-2 border-primary' 
-                  : 'bg-muted/50 border-2 border-transparent hover:bg-muted'
-                }
-              `}
-            >
-              <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${reciter.color}`} />
-                <span className="text-sm font-medium text-foreground truncate">
-                  {reciter.name.split(' ').slice(-1)[0]}
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1 truncate">
-                {reciter.style}
-              </p>
-            </button>
-          ))}
+        {/* Reciter selection - scrollable grid */}
+        <div className="max-h-48 overflow-y-auto">
+          <div className="grid grid-cols-2 gap-2 pr-1">
+            {RECITERS.map((reciter) => (
+              <button
+                key={reciter.id}
+                onClick={() => handleReciterChange(reciter)}
+                className={`
+                  p-2 rounded-lg text-left transition-all
+                  ${selectedReciter.id === reciter.id 
+                    ? 'bg-primary/10 border-2 border-primary' 
+                    : 'bg-muted/50 border-2 border-transparent hover:bg-muted'
+                  }
+                `}
+              >
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${reciter.color}`} />
+                  <span className="text-xs font-medium text-foreground truncate">
+                    {reciter.name.split(' ').slice(-1)[0]}
+                  </span>
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
+                  {reciter.style}
+                </p>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Selected reciter info */}
