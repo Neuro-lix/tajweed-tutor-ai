@@ -1,11 +1,23 @@
 import { useState, useRef, useCallback } from 'react';
 
+export type AudioRecordingStats = {
+  mimeType: string | null;
+  chunks: number;
+  totalBytes: number;
+  blobSize: number | null;
+  durationMs: number | null;
+  base64Length: number | null;
+  trackLabel: string | null;
+  trackSettings: Record<string, unknown> | null;
+};
+
 interface UseAudioRecorderReturn {
   isRecording: boolean;
   audioBlob: Blob | null;
   audioBase64: string | null;
   audioMimeType: string | null;
   mediaStream: MediaStream | null;
+  recordingStats: AudioRecordingStats;
   startRecording: () => Promise<void>;
   stopRecording: () => Promise<string | null>;
   error: string | null;
@@ -18,11 +30,22 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
   const [audioMimeType, setAudioMimeType] = useState<string | null>(null);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [recordingStats, setRecordingStats] = useState<AudioRecordingStats>({
+    mimeType: null,
+    chunks: 0,
+    totalBytes: 0,
+    blobSize: null,
+    durationMs: null,
+    base64Length: null,
+    trackLabel: null,
+    trackSettings: null,
+  });
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const mimeTypeRef = useRef<string>('audio/webm');
+  const startAtRef = useRef<number | null>(null);
 
   const startRecording = useCallback(async () => {
     try {
@@ -31,6 +54,18 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
       setAudioBase64(null);
       setAudioMimeType(null);
       chunksRef.current = [];
+      startAtRef.current = Date.now();
+
+      setRecordingStats((prev) => ({
+        ...prev,
+        chunks: 0,
+        totalBytes: 0,
+        blobSize: null,
+        durationMs: null,
+        base64Length: null,
+        trackLabel: null,
+        trackSettings: null,
+      }));
 
       if (typeof MediaRecorder === 'undefined') {
         setError("L'enregistrement audio n'est pas supporté sur ce navigateur.");
@@ -57,6 +92,19 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
       streamRef.current = stream;
       setMediaStream(stream);
 
+      const track = stream.getAudioTracks?.()[0] ?? null;
+      const trackSettings = (track?.getSettings?.() ?? {}) as Record<string, unknown>;
+      const trackLabel = track?.label ?? null;
+
+      console.log('[AudioRecorder] Track label:', trackLabel);
+      console.log('[AudioRecorder] Track settings:', trackSettings);
+
+      setRecordingStats((prev) => ({
+        ...prev,
+        trackLabel,
+        trackSettings,
+      }));
+
       // Determine best MIME type for browser compatibility
       let mimeType = 'audio/webm';
       if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
@@ -70,17 +118,27 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
       }
 
       mimeTypeRef.current = mimeType;
+      setAudioMimeType(mimeType);
+      setRecordingStats((prev) => ({ ...prev, mimeType }));
       console.log('[AudioRecorder] Using MIME type:', mimeType);
 
       const mediaRecorder = new MediaRecorder(stream, { mimeType });
       mediaRecorderRef.current = mediaRecorder;
-      setAudioMimeType(mimeType);
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           chunksRef.current.push(event.data);
+          setRecordingStats((prev) => ({
+            ...prev,
+            chunks: prev.chunks + 1,
+            totalBytes: prev.totalBytes + event.data.size,
+          }));
           console.log('[AudioRecorder] Chunk received, size:', event.data.size);
         }
+      };
+
+      mediaRecorder.onerror = (e) => {
+        console.error('[AudioRecorder] MediaRecorder error:', e);
       };
 
       mediaRecorder.start(250);
@@ -110,12 +168,24 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
             mediaRecorderRef.current = null;
           };
 
+          const durationMs = startAtRef.current ? Date.now() - startAtRef.current : null;
+          const totalBytes = chunksRef.current.reduce((acc, c) => acc + c.size, 0);
+
           console.log('[AudioRecorder] Recording stopped, chunks:', chunksRef.current.length);
-          console.log('[AudioRecorder] Total size:', chunksRef.current.reduce((acc, c) => acc + c.size, 0));
+          console.log('[AudioRecorder] Total size:', totalBytes);
+          console.log('[AudioRecorder] Duration ms:', durationMs);
 
           if (chunksRef.current.length === 0) {
             console.error('[AudioRecorder] No audio chunks recorded');
-            setError("Aucun audio capturé. Réessayez.");
+            setError('Aucun audio capturé. Réessayez.');
+            setRecordingStats((prev) => ({
+              ...prev,
+              durationMs,
+              chunks: 0,
+              totalBytes: 0,
+              blobSize: 0,
+              base64Length: 0,
+            }));
             cleanup();
             resolve(null);
             return;
@@ -125,6 +195,15 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
           setAudioBlob(blob);
           setAudioMimeType(mimeType);
 
+          setRecordingStats((prev) => ({
+            ...prev,
+            durationMs,
+            chunks: chunksRef.current.length,
+            totalBytes,
+            blobSize: blob.size,
+            mimeType,
+          }));
+
           console.log('[AudioRecorder] Final blob size:', blob.size, 'type:', blob.type);
 
           // Convert to base64
@@ -133,13 +212,14 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
             const base64 = reader.result as string;
             const base64Data = base64.includes(',') ? base64.split(',')[1] : base64;
             setAudioBase64(base64Data);
+            setRecordingStats((prev) => ({ ...prev, base64Length: base64Data.length }));
             console.log('[AudioRecorder] Base64 length:', base64Data.length);
             cleanup();
             resolve(base64Data);
           };
           reader.onerror = () => {
             console.error('[AudioRecorder] FileReader error');
-            setError("Erreur de lecture audio.");
+            setError('Erreur de lecture audio.');
             cleanup();
             resolve(null);
           };
@@ -161,6 +241,7 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
     audioBase64,
     audioMimeType,
     mediaStream,
+    recordingStats,
     startRecording,
     stopRecording,
     error,

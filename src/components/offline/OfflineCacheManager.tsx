@@ -3,16 +3,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Download, 
-  Trash2, 
-  HardDrive, 
-  Wifi, 
+import {
+  Download,
+  Trash2,
+  HardDrive,
+  Wifi,
   WifiOff,
   CheckCircle2,
-  Loader2
+  Loader2,
 } from 'lucide-react';
 import { SURAHS } from '@/data/quranData';
+import { fetchSurah } from '@/lib/quranApi';
 
 interface OfflineCacheManagerProps {
   isOnline: boolean;
@@ -23,44 +24,13 @@ interface OfflineCacheManagerProps {
     size: number;
   };
   formatCacheSize: (bytes: number) => string;
-  cacheSurah: (surahNumber: number, verses: Array<{ verseNumber: number; text: string }>) => Promise<void>;
+  cacheSurah: (
+    surahNumber: number,
+    verses: Array<{ verseNumber: number; text: string; translation?: string }>,
+  ) => Promise<void>;
   isSurahCached: (surahNumber: number, totalVerses: number) => Promise<boolean>;
   clearCache: () => Promise<void>;
 }
-
-// Sample verses for demo - in production, fetch from Quran API
-const SAMPLE_VERSES: Record<number, Array<{ verseNumber: number; text: string }>> = {
-  1: [
-    { verseNumber: 1, text: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ' },
-    { verseNumber: 2, text: 'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ' },
-    { verseNumber: 3, text: 'الرَّحْمَٰنِ الرَّحِيمِ' },
-    { verseNumber: 4, text: 'مَالِكِ يَوْمِ الدِّينِ' },
-    { verseNumber: 5, text: 'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ' },
-    { verseNumber: 6, text: 'اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ' },
-    { verseNumber: 7, text: 'صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ' },
-  ],
-  112: [
-    { verseNumber: 1, text: 'قُلْ هُوَ اللَّهُ أَحَدٌ' },
-    { verseNumber: 2, text: 'اللَّهُ الصَّمَدُ' },
-    { verseNumber: 3, text: 'لَمْ يَلِدْ وَلَمْ يُولَدْ' },
-    { verseNumber: 4, text: 'وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ' },
-  ],
-  113: [
-    { verseNumber: 1, text: 'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ' },
-    { verseNumber: 2, text: 'مِن شَرِّ مَا خَلَقَ' },
-    { verseNumber: 3, text: 'وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ' },
-    { verseNumber: 4, text: 'وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ' },
-    { verseNumber: 5, text: 'وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ' },
-  ],
-  114: [
-    { verseNumber: 1, text: 'قُلْ أَعُوذُ بِرَبِّ النَّاسِ' },
-    { verseNumber: 2, text: 'مَلِكِ النَّاسِ' },
-    { verseNumber: 3, text: 'إِلَٰهِ النَّاسِ' },
-    { verseNumber: 4, text: 'مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ' },
-    { verseNumber: 5, text: 'الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ' },
-    { verseNumber: 6, text: 'مِنَ الْجِنَّةِ وَالنَّاسِ' },
-  ],
-};
 
 export const OfflineCacheManager: React.FC<OfflineCacheManagerProps> = ({
   isOnline,
@@ -81,22 +51,21 @@ export const OfflineCacheManager: React.FC<OfflineCacheManagerProps> = ({
 
   const handleDownloadSurah = async (surahNumber: number) => {
     if (!isOnline) return;
-    
+
     setDownloading(surahNumber);
     setProgress(0);
 
     try {
-      const verses = SAMPLE_VERSES[surahNumber];
-      if (verses) {
-        // Simulate progressive download
-        for (let i = 0; i < verses.length; i++) {
-          await new Promise(resolve => setTimeout(resolve, 100));
-          setProgress(((i + 1) / verses.length) * 100);
-        }
-        
-        await cacheSurah(surahNumber, verses);
-        setCachedSurahs(prev => new Set([...prev, surahNumber]));
+      const verses = await fetchSurah(surahNumber, { translationId: 'fr.hamidullah' });
+
+      // Simulate progressive download (only used for small "popular" surahs)
+      for (let i = 0; i < verses.length; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 80));
+        setProgress(((i + 1) / verses.length) * 100);
       }
+
+      await cacheSurah(surahNumber, verses);
+      setCachedSurahs((prev) => new Set([...prev, surahNumber]));
     } catch (error) {
       console.error('Failed to download surah:', error);
     } finally {
