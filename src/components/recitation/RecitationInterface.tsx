@@ -6,18 +6,21 @@ import { ReferenceRecitations } from './ReferenceRecitations';
 import { AnalysisProgress, AnalysisStep } from './AnalysisProgress';
 import { AudioComparison } from './AudioComparison';
 import { Loader2 } from 'lucide-react';
+import { useAudioWaveform } from '@/hooks/useAudioWaveform';
+import { AudioWaveform } from './AudioWaveform';
+import { AudioDebugPanel, type AudioDebugStats } from './AudioDebugPanel';
 
 // Cumulative verse counts for reference audio URL
 const CUMULATIVE_VERSES = [
-  0, 7, 293, 493, 669, 789, 954, 1160, 1235, 1364, 1473, 1596, 1707, 1750, 1802, 
-  1901, 2029, 2140, 2250, 2348, 2483, 2593, 2673, 2791, 2855, 2932, 3159, 3252, 
-  3340, 3409, 3469, 3503, 3533, 3606, 3660, 3705, 3788, 3970, 4058, 4133, 4218, 
-  4272, 4325, 4414, 4473, 4510, 4545, 4583, 4612, 4630, 4675, 4735, 4784, 4846, 
-  4901, 4979, 5075, 5104, 5126, 5150, 5163, 5177, 5188, 5199, 5217, 5229, 5241, 
-  5271, 5323, 5375, 5419, 5447, 5496, 5551, 5591, 5622, 5672, 5712, 5758, 5800, 
-  5829, 5848, 5884, 5909, 5931, 5948, 5967, 5993, 6023, 6043, 6058, 6079, 6090, 
-  6098, 6106, 6125, 6130, 6138, 6146, 6157, 6168, 6176, 6179, 6188, 6193, 6197, 
-  6204, 6207, 6213, 6216, 6221, 6225, 6230, 6236
+  0, 7, 293, 493, 669, 789, 954, 1160, 1235, 1364, 1473, 1596, 1707, 1750, 1802,
+  1901, 2029, 2140, 2250, 2348, 2483, 2593, 2673, 2791, 2855, 2932, 3159, 3252,
+  3340, 3409, 3469, 3503, 3533, 3606, 3660, 3705, 3788, 3970, 4058, 4133, 4218,
+  4272, 4325, 4414, 4473, 4510, 4545, 4583, 4612, 4630, 4675, 4735, 4784, 4846,
+  4901, 4979, 5075, 5104, 5126, 5150, 5163, 5177, 5188, 5199, 5217, 5229, 5241,
+  5271, 5323, 5375, 5419, 5447, 5496, 5551, 5591, 5622, 5672, 5712, 5758, 5800,
+  5829, 5848, 5884, 5909, 5931, 5948, 5967, 5993, 6023, 6043, 6058, 6079, 6090,
+  6098, 6106, 6125, 6130, 6138, 6146, 6157, 6168, 6176, 6179, 6188, 6193, 6197,
+  6204, 6207, 6213, 6216, 6221, 6225, 6230, 6236,
 ];
 
 interface RecitationInterfaceProps {
@@ -32,6 +35,8 @@ interface RecitationInterfaceProps {
   analysisStep?: AnalysisStep;
   transcriptionFailed?: boolean;
   userAudioBlob?: Blob | null;
+  mediaStream?: MediaStream | null;
+  audioDebugStats?: AudioDebugStats;
   onStartRecording: () => void;
   onStopRecording: () => void;
   onPreviousVerse?: () => void;
@@ -56,6 +61,8 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
   analysisStep = 'idle',
   transcriptionFailed,
   userAudioBlob,
+  mediaStream,
+  audioDebugStats,
   onStartRecording,
   onStopRecording,
   onPreviousVerse,
@@ -69,8 +76,12 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
     if (surah > CUMULATIVE_VERSES.length) return verse;
     return CUMULATIVE_VERSES[surah - 1] + verse;
   };
-  
+
   const referenceAudioUrl = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${getAyahNumber(surahNumber, currentVerse)}.mp3`;
+
+  const { level, peak, waveform } = useAudioWaveform(isRecording ? (mediaStream ?? null) : null, {
+    fftSize: 1024,
+  });
 
   return (
     <div className="space-y-6">
@@ -89,7 +100,7 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
       <Card variant="elevated" className="relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
         <CardContent className="py-12 px-6 md:px-12">
-          <p 
+          <p
             className="font-arabic text-2xl md:text-3xl lg:text-4xl text-center leading-loose text-foreground"
             dir="rtl"
           >
@@ -109,51 +120,50 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
       </div>
 
       {/* Recording error */}
-      {recordingError && (
-        <div className="text-center text-destructive text-sm">
-          {recordingError}
-        </div>
-      )}
+      {recordingError && <div className="text-center text-destructive text-sm">{recordingError}</div>}
 
       {/* Recording controls */}
       <div className="flex flex-col items-center gap-6">
-        <button
-          onClick={isRecording ? onStopRecording : onStartRecording}
-          disabled={isAnalyzing}
-          className={`
-            w-24 h-24 rounded-full flex items-center justify-center
-            transition-all duration-300 shadow-card
-            ${isAnalyzing 
-              ? 'bg-muted text-muted-foreground cursor-not-allowed'
-              : isRecording 
-                ? 'bg-destructive text-destructive-foreground animate-pulse scale-110' 
-                : 'bg-primary text-primary-foreground hover:scale-105 hover:shadow-glow'
-            }
-          `}
-        >
-          {isAnalyzing ? (
-            <Loader2 className="w-10 h-10 animate-spin" />
-          ) : isRecording ? (
-            <svg className="w-10 h-10" viewBox="0 0 24 24" fill="currentColor">
-              <rect x="6" y="6" width="12" height="12" rx="2" />
-            </svg>
-          ) : (
-            <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" fill="currentColor" />
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-              <line x1="12" y1="19" x2="12" y2="22" />
-            </svg>
-          )}
-        </button>
+        <div className="relative">
+          <AudioWaveform isRecording={isRecording} level={level} peak={peak} waveform={waveform} />
+
+          <button
+            onClick={isRecording ? onStopRecording : onStartRecording}
+            disabled={isAnalyzing}
+            className={`
+              relative z-10 w-24 h-24 rounded-full flex items-center justify-center
+              transition-all duration-300 shadow-card
+              ${isAnalyzing
+                ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                : isRecording
+                  ? 'bg-destructive text-destructive-foreground animate-pulse scale-110'
+                  : 'bg-primary text-primary-foreground hover:scale-105 hover:shadow-glow'
+              }
+            `}
+          >
+            {isAnalyzing ? (
+              <Loader2 className="w-10 h-10 animate-spin" />
+            ) : isRecording ? (
+              <svg className="w-10 h-10" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="6" y="6" width="12" height="12" rx="2" />
+              </svg>
+            ) : (
+              <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path
+                  d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"
+                  fill="currentColor"
+                />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <line x1="12" y1="19" x2="12" y2="22" />
+              </svg>
+            )}
+          </button>
+        </div>
+
         <p className="text-muted-foreground">
-          {isAnalyzing 
-            ? 'Analyse en cours...' 
-            : isRecording 
-              ? 'Appuie pour arrêter' 
-              : 'Appuie pour réciter'
-          }
+          {isAnalyzing ? 'Analyse en cours...' : isRecording ? 'Appuie pour arrêter' : 'Appuie pour réciter'}
         </p>
-        
+
         {isRecording && (
           <div className="flex items-center gap-2">
             <span className="relative flex h-3 w-3">
@@ -166,12 +176,7 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
       </div>
 
       {/* Analysis Progress */}
-      {isAnalyzing && (
-        <AnalysisProgress 
-          currentStep={analysisStep} 
-          transcriptionFailed={transcriptionFailed}
-        />
-      )}
+      {isAnalyzing && <AnalysisProgress currentStep={analysisStep} transcriptionFailed={transcriptionFailed} />}
 
       {/* Audio Comparison - only show after recording */}
       {userAudioBlob && !isRecording && !isAnalyzing && (
@@ -185,8 +190,8 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
 
       {/* Feedback */}
       {feedback && (
-        <Card 
-          variant="progress" 
+        <Card
+          variant="progress"
           className={`
             border-l-4 animate-slide-up
             ${feedback.status === 'success' || feedback.status === 'correct' ? 'border-l-primary' : 'border-l-gold-warm'}
@@ -194,10 +199,12 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
         >
           <CardContent className="py-5">
             <div className="flex items-start gap-4">
-              <div className={`
-                w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0
-                ${feedback.status === 'success' || feedback.status === 'correct' ? 'bg-primary/10' : 'bg-gold-warm/10'}
-              `}>
+              <div
+                className={`
+                  w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0
+                  ${feedback.status === 'success' || feedback.status === 'correct' ? 'bg-primary/10' : 'bg-gold-warm/10'}
+                `}
+              >
                 {feedback.status === 'success' || feedback.status === 'correct' ? (
                   <svg className="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="20 6 9 17 4 12" />
@@ -210,13 +217,19 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
                 )}
               </div>
               <div>
-                <h4 className={`font-semibold text-lg ${feedback.status === 'success' || feedback.status === 'correct' ? 'text-primary' : 'text-gold-warm'}`}> 
-                  {transcriptionFailed ? 'Transcription échouée' : (feedback.status === 'success' || feedback.status === 'correct' ? 'Excellent !' : 'À revoir')}
+                <h4
+                  className={`font-semibold text-lg ${
+                    feedback.status === 'success' || feedback.status === 'correct' ? 'text-primary' : 'text-gold-warm'
+                  }`}
+                >
+                  {transcriptionFailed
+                    ? 'Transcription échouée'
+                    : feedback.status === 'success' || feedback.status === 'correct'
+                      ? 'Excellent !'
+                      : 'À revoir'}
                 </h4>
                 <p className="text-foreground mt-1">{feedback.message}</p>
-                {feedback.details && (
-                  <p className="text-sm text-muted-foreground mt-2">{feedback.details}</p>
-                )}
+                {feedback.details && <p className="text-sm text-muted-foreground mt-2">{feedback.details}</p>}
               </div>
             </div>
           </CardContent>
@@ -225,27 +238,22 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
 
       {/* Navigation */}
       <div className="flex justify-center gap-4">
-        <Button 
-          variant="outline" 
-          disabled={currentVerse === 1}
-          onClick={onPreviousVerse}
-        >
+        <Button variant="outline" disabled={currentVerse === 1} onClick={onPreviousVerse}>
           <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M15 18l-6-6 6-6" />
           </svg>
           Précédent
         </Button>
-        <Button 
-          variant="default" 
-          disabled={currentVerse === totalVerses}
-          onClick={onNextVerse}
-        >
+        <Button variant="default" disabled={currentVerse === totalVerses} onClick={onNextVerse}>
           Suivant
           <svg className="w-4 h-4 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M9 18l6-6-6-6" />
           </svg>
         </Button>
       </div>
+
+      {/* Dev-only debug */}
+      {import.meta.env.DEV && audioDebugStats && <AudioDebugPanel stats={audioDebugStats} />}
     </div>
   );
 };

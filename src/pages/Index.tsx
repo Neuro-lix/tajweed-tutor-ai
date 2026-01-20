@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { GeometricPattern, Ornament, Star8Point } from '@/components/decorative/GeometricPattern';
@@ -43,6 +43,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { SURAHS } from '@/data/quranData';
 import { Loader2, LogOut, MessageSquareHeart, Award, Globe, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
+import { fetchAyah } from '@/lib/quranApi';
 
 type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections' | 'pricing';
 
@@ -92,15 +93,21 @@ const Index = () => {
   const [userAudioBlob, setUserAudioBlob] = useState<Blob | null>(null);
   const [isCurrentVerseCached, setIsCurrentVerseCached] = useState(false);
   
-  const { 
-    isRecording, 
+  const {
+    isRecording,
     audioBlob,
-    audioBase64, 
+    audioBase64,
     audioMimeType,
-    startRecording, 
-    stopRecording, 
-    error: recordingError 
+    mediaStream,
+    recordingStats,
+    startRecording,
+    stopRecording,
+    error: recordingError,
   } = useAudioRecorder();
+
+  const [currentVerseText, setCurrentVerseText] = useState<string>('');
+  const [currentVerseTranslation, setCurrentVerseTranslation] = useState<string | null>(null);
+  const [isVerseTextLoading, setIsVerseTextLoading] = useState(false);
 
   const { 
     dueReviews, 
@@ -153,14 +160,47 @@ const Index = () => {
     }
   }, [user, authLoading, profile, dataLoading]);
 
-  // Check if current verse is cached when verse changes
+  const loadVerse = useCallback(async (surah: number, verse: number) => {
+    setIsVerseTextLoading(true);
+
+    try {
+      // 1) If offline, prefer cached immediately
+      const cached = await getCachedVerse(surah, verse);
+      if (cached) {
+        setCurrentVerseText(cached.text);
+        setCurrentVerseTranslation(cached.translation ?? null);
+        setIsCurrentVerseCached(true);
+      } else {
+        setIsCurrentVerseCached(false);
+        if (!isOnline) {
+          setCurrentVerseText(`Sourate ${surah}, verset ${verse} (non disponible hors-ligne)`);
+          setCurrentVerseTranslation(null);
+          return;
+        }
+      }
+
+      // 2) If online, fetch fresh (and cache)
+      if (isOnline) {
+        const { text, translation } = await fetchAyah(surah, verse, { translationId: 'fr.hamidullah' });
+        if (text) {
+          setCurrentVerseText(text);
+          setCurrentVerseTranslation(translation ?? null);
+          await cacheVerse(surah, verse, text, translation);
+          setIsCurrentVerseCached(true);
+        }
+      }
+    } catch (e) {
+      console.error('[Verse] Failed to load verse', { surah, verse, e });
+      // keep whatever we have
+    } finally {
+      setIsVerseTextLoading(false);
+    }
+  }, [getCachedVerse, cacheVerse, isOnline]);
+
+  // Load verse text when verse changes (online fetch + offline cache fallback)
   useEffect(() => {
-    const checkCache = async () => {
-      const cached = await getCachedVerse(currentSurah, currentVerse);
-      setIsCurrentVerseCached(!!cached);
-    };
-    checkCache();
-  }, [currentSurah, currentVerse, getCachedVerse]);
+    loadVerse(currentSurah, currentVerse);
+  }, [currentSurah, currentVerse, loadVerse]);
 
   const progressData = {
     totalSurahs: 114,
@@ -191,6 +231,13 @@ const Index = () => {
     progress: s.totalVerses > 0 ? (s.masteredVerses / s.totalVerses) * 100 : 0,
   }));
 
+  // Keep userAudioBlob in sync reliably (state updates in hook are async)
+  useEffect(() => {
+    if (audioBlob && !isRecording) {
+      setUserAudioBlob(audioBlob);
+    }
+  }, [audioBlob, isRecording]);
+
   const handleStartRecording = async () => {
     setShowFeedback(false);
     setAiFeedback(null);
@@ -202,35 +249,54 @@ const Index = () => {
   const handleStopRecording = async () => {
     setAnalyzing(true);
     setAnalysisStep('upload');
-    
-    // stopRecording now returns the base64 audio directly
+
     const recordedAudioBase64 = await stopRecording();
-    
+
     if (!recordedAudioBase64) {
       console.error('No audio recorded');
       setAiFeedback({
         status: 'review',
-        message: 'Erreur d\'enregistrement',
-        details: 'Aucun audio n\'a été capturé. Vérifie les permissions du microphone.',
+        message: "Erreur d'enregistrement",
+        details: "Aucun audio n'a été capturé. Vérifie les permissions du microphone.",
       });
       setShowFeedback(true);
       setAnalyzing(false);
       return;
     }
 
-    // Store audio blob for comparison
-    if (audioBlob) {
-      setUserAudioBlob(audioBlob);
-    }
-
-    console.log('Audio recorded successfully, length:', recordedAudioBase64.length);
+    console.log('[Recitation] Audio base64 length:', recordedAudioBase64.length, 'mime:', audioMimeType);
     setAnalysisStep('transcription');
-    
-    const expectedText = getExpectedVerseText(currentSurah, currentVerse);
+
+    // Ensure we have a real expectedText (not placeholder)
+    let expectedText = currentVerseText;
+    if (!expectedText || expectedText.startsWith('Sourate') || expectedText.startsWith('Verset')) {
+      if (!isOnline) {
+        setAiFeedback({
+          status: 'review',
+          message: "Texte du verset indisponible",
+          details: "Ce verset n'est pas en cache hors-ligne. Reconnecte-toi pour lancer l'analyse.",
+        });
+        setShowFeedback(true);
+        setAnalyzing(false);
+        return;
+      }
+
+      try {
+        const fetched = await fetchAyah(currentSurah, currentVerse, { translationId: 'fr.hamidullah' });
+        expectedText = fetched.text;
+        if (expectedText) {
+          setCurrentVerseText(expectedText);
+          setCurrentVerseTranslation(fetched.translation ?? null);
+          await cacheVerse(currentSurah, currentVerse, expectedText, fetched.translation);
+        }
+      } catch (e) {
+        console.error('[Recitation] Failed to fetch expectedText before analysis', e);
+      }
+    }
 
     try {
       setAnalysisStep('analysis');
-      
+
       const { data, error } = await supabase.functions.invoke('analyze-recitation', {
         body: {
           audioBase64: recordedAudioBase64,
@@ -245,12 +311,12 @@ const Index = () => {
       if (error) throw error;
 
       setAnalysisStep('complete');
-      
+
       const isCorrect = data.isCorrect && data.overallScore >= 80;
-      
+
       // Store full analysis result
       setAnalysisResult(data);
-      
+
       setAiFeedback({
         status: isCorrect ? 'correct' : 'review',
         message: isCorrect ? t.excellent : t.needsReview,
@@ -260,7 +326,7 @@ const Index = () => {
       // Record session for gamification and streaks
       await recordSession(isCorrect);
       await recordPractice();
-      
+
       // Update leaderboard
       await updateLeaderboardEntry({
         totalXp: userLevel.experiencePoints,
@@ -274,7 +340,7 @@ const Index = () => {
       // Add to spaced repetition if errors found
       if (data.errors && data.errors.length > 0) {
         await addToReviewQueue(currentSurah, currentVerse);
-        
+
         for (const err of data.errors) {
           await addCorrection({
             surahNumber: currentSurah,
@@ -291,8 +357,8 @@ const Index = () => {
       console.error('Error analyzing recitation:', error);
       setAiFeedback({
         status: 'review',
-        message: 'Erreur d\'analyse',
-        details: 'Une erreur s\'est produite. Réessaye.',
+        message: "Erreur d'analyse",
+        details: "Une erreur s'est produite. Réessaye.",
       });
       setShowFeedback(true);
     } finally {
@@ -300,34 +366,15 @@ const Index = () => {
     }
   };
 
-  // Mock verse text - in real app, fetch from Quran API
-  const getExpectedVerseText = (surah: number, verse: number) => {
-    const verses: Record<string, string> = {
-      '1:1': 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
-      '1:2': 'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ',
-      '1:3': 'الرَّحْمَٰنِ الرَّحِيمِ',
-      '1:4': 'مَالِكِ يَوْمِ الدِّينِ',
-      '1:5': 'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ',
-      '1:6': 'اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ',
-      '1:7': 'صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ',
-    };
-    return verses[`${surah}:${verse}`] || `Verset ${verse} de la sourate ${surah}`;
-  };
-
   const handleNavigate = async (surah: number, verse: number) => {
     setCurrentSurah(surah);
     setCurrentVerse(verse);
     setShowFeedback(false);
     setAiFeedback(null);
-    
-    // Auto-cache verse when navigating (if online)
-    if (isOnline) {
-      const verseText = getExpectedVerseText(surah, verse);
-      if (verseText && !verseText.startsWith('Verset')) {
-        await cacheVerse(surah, verse, verseText);
-      }
-    }
+
+    await loadVerse(surah, verse);
   };
+
 
   const handleStartReview = (surahNumber: number, verseNumber: number) => {
     setCurrentSurah(surahNumber);
@@ -813,7 +860,7 @@ const Index = () => {
             surahNumber={currentSurah}
             currentVerse={currentVerse}
             totalVerses={SURAHS.find(s => s.id === currentSurah)?.verses || 7}
-            verseText={getExpectedVerseText(currentSurah, currentVerse)}
+            verseText={currentVerseText || `Sourate ${currentSurah}, verset ${currentVerse}`}
             isRecording={isRecording}
             isAnalyzing={analyzing}
             analysisStep={analysisStep === 'upload' ? 'uploading' : 
@@ -822,6 +869,18 @@ const Index = () => {
                          analysisStep === 'complete' ? 'done' : 'idle'}
             transcriptionFailed={analysisResult?.transcriptionImpossible === true}
             userAudioBlob={userAudioBlob}
+            mediaStream={mediaStream}
+            audioDebugStats={{
+              mimeType: audioMimeType,
+              chunks: recordingStats.chunks,
+              totalBytes: recordingStats.totalBytes,
+              blobSize: recordingStats.blobSize,
+              durationMs: recordingStats.durationMs,
+              base64Length: recordingStats.base64Length,
+              trackLabel: recordingStats.trackLabel,
+              trackSettings: recordingStats.trackSettings,
+              error: recordingError,
+            }}
             onStartRecording={handleStartRecording}
             onStopRecording={handleStopRecording}
             onPreviousVerse={() => currentVerse > 1 && handleNavigate(currentSurah, currentVerse - 1)}
@@ -864,7 +923,7 @@ const Index = () => {
               priorityFixes={analysisResult.priorityFixes || []}
               errors={analysisResult.errors || []}
               transcribedText={analysisResult.transcribedText}
-              expectedText={analysisResult.expectedText || getExpectedVerseText(currentSurah, currentVerse)}
+              expectedText={analysisResult.expectedText || currentVerseText || `Sourate ${currentSurah}, verset ${currentVerse}`}
               textComparison={analysisResult.textComparison}
               onClose={() => setShowReport(false)}
             />
