@@ -9,6 +9,7 @@ import { Loader2 } from 'lucide-react';
 import { useAudioWaveform } from '@/hooks/useAudioWaveform';
 import { AudioWaveform } from './AudioWaveform';
 import { AudioDebugPanel, type AudioDebugStats } from './AudioDebugPanel';
+import { MicQualityIndicator } from './MicQualityIndicator';
 
 // Cumulative verse counts for reference audio URL
 const CUMULATIVE_VERSES = [
@@ -30,6 +31,7 @@ interface RecitationInterfaceProps {
   currentVerse: number;
   totalVerses: number;
   verseText: string;
+  verseTranslation?: string | null;
   isRecording: boolean;
   isAnalyzing?: boolean;
   analysisStep?: AnalysisStep;
@@ -37,6 +39,7 @@ interface RecitationInterfaceProps {
   userAudioBlob?: Blob | null;
   mediaStream?: MediaStream | null;
   audioDebugStats?: AudioDebugStats;
+  showTranslation?: boolean;
   onStartRecording: () => void;
   onStopRecording: () => void;
   onPreviousVerse?: () => void;
@@ -56,6 +59,7 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
   currentVerse,
   totalVerses,
   verseText,
+  verseTranslation,
   isRecording,
   isAnalyzing,
   analysisStep = 'idle',
@@ -63,6 +67,7 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
   userAudioBlob,
   mediaStream,
   audioDebugStats,
+  showTranslation,
   onStartRecording,
   onStopRecording,
   onPreviousVerse,
@@ -106,6 +111,11 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
           >
             {verseText}
           </p>
+          {showTranslation && verseTranslation && (
+            <p className="text-base text-muted-foreground text-center mt-6 italic">
+              {verseTranslation}
+            </p>
+          )}
           <div className="flex justify-center mt-6">
             <Badge variant="outline" className="text-base px-4 py-1">
               ﴿{currentVerse}﴾
@@ -165,12 +175,15 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
         </p>
 
         {isRecording && (
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-destructive"></span>
-            </span>
-            <span className="text-sm text-destructive">Enregistrement...</span>
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-destructive"></span>
+              </span>
+              <span className="text-sm text-destructive">Enregistrement...</span>
+            </div>
+            <MicQualityIndicator level={level} peak={peak} isRecording={isRecording} />
           </div>
         )}
       </div>

@@ -39,11 +39,13 @@ import { useStreakNotifications } from '@/hooks/useStreakNotifications';
 import { useOfflineMode } from '@/hooks/useOfflineMode';
 import { useCertificates } from '@/hooks/useCertificates';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslationSettings } from '@/contexts/TranslationContext';
 import { supabase } from '@/integrations/supabase/client';
 import { SURAHS } from '@/data/quranData';
 import { Loader2, LogOut, MessageSquareHeart, Award, Globe, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { fetchAyah } from '@/lib/quranApi';
+import { TranslationToggle } from '@/components/recitation/TranslationToggle';
 
 type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections' | 'pricing';
 
@@ -73,6 +75,7 @@ const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const { profile, progress, corrections, surahProgress, updateProfile, addCorrection, loading: dataLoading } = useUserProgress();
   const { t } = useLanguage();
+  const { showTranslation, currentTranslationId } = useTranslationSettings();
   
   const [currentView, setCurrentView] = useState<AppView>('landing');
   const [selectedSession, setSelectedSession] = useState<'homme' | 'femme' | null>(null);
@@ -160,12 +163,12 @@ const Index = () => {
     }
   }, [user, authLoading, profile, dataLoading]);
 
-  const loadVerse = useCallback(async (surah: number, verse: number) => {
+  const loadVerse = useCallback(async (surah: number, verse: number, translationId: string) => {
     setIsVerseTextLoading(true);
 
     try {
       // 1) If offline, prefer cached immediately
-      const cached = await getCachedVerse(surah, verse);
+      const cached = await getCachedVerse(surah, verse, translationId);
       if (cached) {
         setCurrentVerseText(cached.text);
         setCurrentVerseTranslation(cached.translation ?? null);
@@ -181,11 +184,11 @@ const Index = () => {
 
       // 2) If online, fetch fresh (and cache)
       if (isOnline) {
-        const { text, translation } = await fetchAyah(surah, verse, { translationId: 'fr.hamidullah' });
+        const { text, translation } = await fetchAyah(surah, verse, { translationId });
         if (text) {
           setCurrentVerseText(text);
           setCurrentVerseTranslation(translation ?? null);
-          await cacheVerse(surah, verse, text, translation);
+          await cacheVerse(surah, verse, text, translation, translationId);
           setIsCurrentVerseCached(true);
         }
       }
@@ -197,10 +200,10 @@ const Index = () => {
     }
   }, [getCachedVerse, cacheVerse, isOnline]);
 
-  // Load verse text when verse changes (online fetch + offline cache fallback)
+  // Load verse text when verse/translation changes
   useEffect(() => {
-    loadVerse(currentSurah, currentVerse);
-  }, [currentSurah, currentVerse, loadVerse]);
+    loadVerse(currentSurah, currentVerse, currentTranslationId);
+  }, [currentSurah, currentVerse, currentTranslationId, loadVerse]);
 
   const progressData = {
     totalSurahs: 114,
@@ -282,12 +285,12 @@ const Index = () => {
       }
 
       try {
-        const fetched = await fetchAyah(currentSurah, currentVerse, { translationId: 'fr.hamidullah' });
+        const fetched = await fetchAyah(currentSurah, currentVerse, { translationId: currentTranslationId });
         expectedText = fetched.text;
         if (expectedText) {
           setCurrentVerseText(expectedText);
           setCurrentVerseTranslation(fetched.translation ?? null);
-          await cacheVerse(currentSurah, currentVerse, expectedText, fetched.translation);
+          await cacheVerse(currentSurah, currentVerse, expectedText, fetched.translation, currentTranslationId);
         }
       } catch (e) {
         console.error('[Recitation] Failed to fetch expectedText before analysis', e);
@@ -372,7 +375,7 @@ const Index = () => {
     setShowFeedback(false);
     setAiFeedback(null);
 
-    await loadVerse(surah, verse);
+    await loadVerse(surah, verse, currentTranslationId);
   };
 
 
@@ -854,6 +857,9 @@ const Index = () => {
             onNavigate={handleNavigate}
           />
 
+          {/* Translation toggle */}
+          <TranslationToggle />
+
           <RecitationInterface
             surahName={SURAHS.find(s => s.id === currentSurah)?.transliteration || 'Al-Fatiha'}
             surahArabic={SURAHS.find(s => s.id === currentSurah)?.name || 'الفاتحة'}
@@ -861,6 +867,8 @@ const Index = () => {
             currentVerse={currentVerse}
             totalVerses={SURAHS.find(s => s.id === currentSurah)?.verses || 7}
             verseText={currentVerseText || `Sourate ${currentSurah}, verset ${currentVerse}`}
+            verseTranslation={currentVerseTranslation}
+            showTranslation={showTranslation}
             isRecording={isRecording}
             isAnalyzing={analyzing}
             analysisStep={analysisStep === 'upload' ? 'uploading' : 

@@ -11,6 +11,7 @@ interface CachedVerse {
   verseNumber: number;
   text: string;
   translation?: string;
+  translationId?: string;
   cachedAt: number;
 }
 
@@ -82,7 +83,8 @@ export const useOfflineMode = () => {
     });
   };
 
-  const getVerseKey = (surah: number, verse: number) => `${surah}:${verse}`;
+  const getVerseKey = (surah: number, verse: number, translationId?: string) =>
+    `${surah}:${verse}:${translationId ?? ''}`;
   const getAudioKey = (surah: number, verse: number, reciter: string) => `${surah}:${verse}:${reciter}`;
 
   // Cache a verse
@@ -90,7 +92,8 @@ export const useOfflineMode = () => {
     surahNumber: number,
     verseNumber: number,
     text: string,
-    translation?: string
+    translation?: string,
+    translationId?: string
   ) => {
     if (!isDbReady) return;
 
@@ -100,11 +103,12 @@ export const useOfflineMode = () => {
       const store = transaction.objectStore(VERSE_STORE);
 
       const verse: CachedVerse = {
-        key: getVerseKey(surahNumber, verseNumber),
+        key: getVerseKey(surahNumber, verseNumber, translationId),
         surahNumber,
         verseNumber,
         text,
         translation,
+        translationId,
         cachedAt: Date.now(),
       };
 
@@ -157,7 +161,8 @@ export const useOfflineMode = () => {
   // Get cached verse
   const getCachedVerse = useCallback(async (
     surahNumber: number,
-    verseNumber: number
+    verseNumber: number,
+    translationId?: string
   ): Promise<CachedVerse | null> => {
     if (!isDbReady) return null;
 
@@ -165,7 +170,7 @@ export const useOfflineMode = () => {
       const db = await openDatabase();
       const transaction = db.transaction(VERSE_STORE, 'readonly');
       const store = transaction.objectStore(VERSE_STORE);
-      const key = getVerseKey(surahNumber, verseNumber);
+      const key = getVerseKey(surahNumber, verseNumber, translationId);
 
       return new Promise((resolve) => {
         const request = store.get(key);
@@ -219,10 +224,11 @@ export const useOfflineMode = () => {
   // Cache entire surah
   const cacheSurah = useCallback(async (
     surahNumber: number,
-    verses: Array<{ verseNumber: number; text: string; translation?: string }>
+    verses: Array<{ verseNumber: number; text: string; translation?: string }>,
+    translationId?: string
   ) => {
     for (const verse of verses) {
-      await cacheVerse(surahNumber, verse.verseNumber, verse.text, verse.translation);
+      await cacheVerse(surahNumber, verse.verseNumber, verse.text, verse.translation, translationId);
     }
   }, [cacheVerse]);
 

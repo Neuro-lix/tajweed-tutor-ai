@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { convertToWav } from '@/lib/audioConverter';
 
 export type AudioRecordingStats = {
   mimeType: string | null;
@@ -156,7 +157,7 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
 
       if (recorder && isRecording) {
         recorder.onstop = async () => {
-          const mimeType = mimeTypeRef.current;
+          const rawMimeType = mimeTypeRef.current;
 
           const cleanup = () => {
             // Stop all tracks (AFTER recorder stops, to avoid missing final chunk on some browsers)
@@ -191,7 +192,12 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
             return;
           }
 
-          const blob = new Blob(chunksRef.current, { type: mimeType });
+          const rawBlob = new Blob(chunksRef.current, { type: rawMimeType });
+          console.log('[AudioRecorder] Raw blob size:', rawBlob.size, 'type:', rawBlob.type);
+
+          // Convert to WAV for better Whisper compatibility (with fallback)
+          const { blob, mimeType } = await convertToWav(rawBlob);
+
           setAudioBlob(blob);
           setAudioMimeType(mimeType);
 
@@ -204,7 +210,7 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
             mimeType,
           }));
 
-          console.log('[AudioRecorder] Final blob size:', blob.size, 'type:', blob.type);
+          console.log('[AudioRecorder] Final blob size:', blob.size, 'type:', mimeType);
 
           // Convert to base64
           const reader = new FileReader();

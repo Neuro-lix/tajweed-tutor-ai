@@ -6,13 +6,14 @@ export type QuranVerse = {
 
 const API_BASE = 'https://api.alquran.cloud/v1';
 
+// In-memory caches keyed by surah:verse:translationId
 const ayahCache = new Map<string, QuranVerse>();
 const surahCache = new Map<string, QuranVerse[]>();
 
-const keyAyah = (surah: number, verse: number, translationId?: string) =>
+const keyAyah = (surah: number, verse: number, translationId: string | null) =>
   `${surah}:${verse}:${translationId ?? ''}`;
 
-const keySurah = (surah: number, translationId?: string) => `${surah}:${translationId ?? ''}`;
+const keySurah = (surah: number, translationId: string | null) => `${surah}:${translationId ?? ''}`;
 
 const safeFetchJson = async (url: string) => {
   const res = await fetch(url);

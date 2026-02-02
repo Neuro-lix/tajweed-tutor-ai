@@ -27,6 +27,7 @@ interface OfflineCacheManagerProps {
   cacheSurah: (
     surahNumber: number,
     verses: Array<{ verseNumber: number; text: string; translation?: string }>,
+    translationId?: string,
   ) => Promise<void>;
   isSurahCached: (surahNumber: number, totalVerses: number) => Promise<boolean>;
   clearCache: () => Promise<void>;
@@ -64,7 +65,7 @@ export const OfflineCacheManager: React.FC<OfflineCacheManagerProps> = ({
         setProgress(((i + 1) / verses.length) * 100);
       }
 
-      await cacheSurah(surahNumber, verses);
+      await cacheSurah(surahNumber, verses, 'fr.hamidullah');
       setCachedSurahs((prev) => new Set([...prev, surahNumber]));
     } catch (error) {
       console.error('Failed to download surah:', error);
