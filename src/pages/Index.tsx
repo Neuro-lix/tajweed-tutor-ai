@@ -253,9 +253,9 @@ const Index = () => {
     setAnalyzing(true);
     setAnalysisStep('upload');
 
-    const recordedAudioBase64 = await stopRecording();
+    const recording = await stopRecording();
 
-    if (!recordedAudioBase64) {
+    if (!recording) {
       console.error('No audio recorded');
       setAiFeedback({
         status: 'review',
@@ -267,7 +267,10 @@ const Index = () => {
       return;
     }
 
-    console.log('[Recitation] Audio base64 length:', recordedAudioBase64.length, 'mime:', audioMimeType);
+    const recordedAudioBase64 = recording.base64;
+    const recordedAudioMimeType = recording.mimeType;
+
+    console.log('[Recitation] Audio base64 length:', recordedAudioBase64.length, 'mime:', recordedAudioMimeType);
     setAnalysisStep('transcription');
 
     // Ensure we have a real expectedText (not placeholder)
@@ -303,7 +306,7 @@ const Index = () => {
       const { data, error } = await supabase.functions.invoke('analyze-recitation', {
         body: {
           audioBase64: recordedAudioBase64,
-          audioMimeType,
+          audioMimeType: recordedAudioMimeType,
           surahNumber: currentSurah,
           verseNumber: currentVerse,
           expectedText,

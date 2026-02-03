@@ -20,7 +20,7 @@ interface UseAudioRecorderReturn {
   mediaStream: MediaStream | null;
   recordingStats: AudioRecordingStats;
   startRecording: () => Promise<void>;
-  stopRecording: () => Promise<string | null>;
+  stopRecording: () => Promise<{ base64: string; mimeType: string } | null>;
   error: string | null;
 }
 
@@ -151,8 +151,8 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
     }
   }, []);
 
-  const stopRecording = useCallback(async (): Promise<string | null> => {
-    return new Promise<string | null>((resolve) => {
+  const stopRecording = useCallback(async (): Promise<{ base64: string; mimeType: string } | null> => {
+    return new Promise<{ base64: string; mimeType: string } | null>((resolve) => {
       const recorder = mediaRecorderRef.current;
 
       if (recorder && isRecording) {
@@ -221,7 +221,7 @@ export const useAudioRecorder = (): UseAudioRecorderReturn => {
             setRecordingStats((prev) => ({ ...prev, base64Length: base64Data.length }));
             console.log('[AudioRecorder] Base64 length:', base64Data.length);
             cleanup();
-            resolve(base64Data);
+            resolve({ base64: base64Data, mimeType });
           };
           reader.onerror = () => {
             console.error('[AudioRecorder] FileReader error');
