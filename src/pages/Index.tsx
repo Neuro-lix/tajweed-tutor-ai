@@ -26,6 +26,8 @@ import { AudioComparison } from '@/components/recitation/AudioComparison';
 import { RecitationReport } from '@/components/reports/RecitationReport';
 import { RewardsPanel } from '@/components/rewards/RewardsPanel';
 import { CertificateModal } from '@/components/certificates/CertificateModal';
+import { SaveRecordingDialog } from '@/components/recitation/SaveRecordingDialog';
+import { RecordingsLibrary } from '@/components/recitation/RecordingsLibrary';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProgress } from '@/hooks/useUserProgress';
@@ -38,16 +40,17 @@ import { useReviewNotifications } from '@/hooks/useReviewNotifications';
 import { useStreakNotifications } from '@/hooks/useStreakNotifications';
 import { useOfflineMode } from '@/hooks/useOfflineMode';
 import { useCertificates } from '@/hooks/useCertificates';
+import { useRecitationStorage } from '@/hooks/useRecitationStorage';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslationSettings } from '@/contexts/TranslationContext';
 import { supabase } from '@/integrations/supabase/client';
 import { SURAHS } from '@/data/quranData';
-import { Loader2, LogOut, MessageSquareHeart, Award, Globe, Trophy } from 'lucide-react';
+import { Loader2, LogOut, MessageSquareHeart, Award, Globe, Trophy, Music } from 'lucide-react';
 import { toast } from 'sonner';
 import { fetchAyah } from '@/lib/quranApi';
 import { TranslationToggle } from '@/components/recitation/TranslationToggle';
 
-type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections' | 'pricing';
+type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections' | 'pricing' | 'recordings';
 
 interface AnalysisResult {
   isCorrect: boolean;
@@ -95,6 +98,9 @@ const Index = () => {
   const [showReport, setShowReport] = useState(false);
   const [userAudioBlob, setUserAudioBlob] = useState<Blob | null>(null);
   const [isCurrentVerseCached, setIsCurrentVerseCached] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [pendingSaveBlob, setPendingSaveBlob] = useState<Blob | null>(null);
+  const [pendingSaveScore, setPendingSaveScore] = useState<number | null>(null);
   
   const {
     isRecording,
@@ -107,6 +113,8 @@ const Index = () => {
     stopRecording,
     error: recordingError,
   } = useAudioRecorder();
+
+  const { saveRecording } = useRecitationStorage();
 
   const [currentVerseText, setCurrentVerseText] = useState<string>('');
   const [currentVerseTranslation, setCurrentVerseTranslation] = useState<string | null>(null);
@@ -359,6 +367,13 @@ const Index = () => {
       }
 
       setShowFeedback(true);
+
+      // Prompt user to save recording (if logged in)
+      if (user && audioBlob) {
+        setPendingSaveBlob(audioBlob);
+        setPendingSaveScore(data.overallScore ?? null);
+        setShowSaveDialog(true);
+      }
     } catch (error) {
       console.error('Error analyzing recitation:', error);
       setAiFeedback({
@@ -431,6 +446,27 @@ const Index = () => {
     setCurrentView('landing');
     setSelectedSession(null);
     setSelectedQiraat(null);
+  };
+
+  const handleSaveRecording = async () => {
+    if (!pendingSaveBlob) return;
+    await saveRecording({
+      audioBlob: pendingSaveBlob,
+      surahNumber: currentSurah,
+      verseNumber: currentVerse,
+      durationSeconds: recordingStats.durationMs ? recordingStats.durationMs / 1000 : undefined,
+      analysisScore: pendingSaveScore ?? undefined,
+      qiraat: selectedQiraat ?? 'hafs_asim',
+    });
+    setPendingSaveBlob(null);
+    setPendingSaveScore(null);
+    setShowSaveDialog(false);
+  };
+
+  const handleDiscardRecording = () => {
+    setPendingSaveBlob(null);
+    setPendingSaveScore(null);
+    setShowSaveDialog(false);
   };
 
   if (authLoading || (user && dataLoading)) {
@@ -730,6 +766,14 @@ const Index = () => {
                 <Button 
                   variant="ghost" 
                   size="sm"
+                  onClick={() => setCurrentView('recordings')}
+                >
+                  <Music className="h-4 w-4 mr-1" />
+                  Mes récitations
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
                   onClick={() => setCurrentView('corrections')}
                 >
                   {t.corrections} ({corrections.length})
@@ -939,6 +983,16 @@ const Index = () => {
               onClose={() => setShowReport(false)}
             />
           )}
+
+          {/* Save Recording Dialog */}
+          <SaveRecordingDialog
+            open={showSaveDialog}
+            onOpenChange={setShowSaveDialog}
+            onSave={handleSaveRecording}
+            onDiscard={handleDiscardRecording}
+            surahName={SURAHS.find((s) => s.id === currentSurah)?.name}
+            verseNumber={currentVerse}
+          />
         </main>
       </div>
     );
@@ -976,6 +1030,41 @@ const Index = () => {
   // Pricing
   if (currentView === 'pricing') {
     return <PricingSection onBack={() => setCurrentView('dashboard')} />;
+  }
+
+  // Recordings Library
+  if (currentView === 'recordings') {
+    return (
+      <div className="min-h-screen bg-background">
+        <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <Button variant="ghost" onClick={() => setCurrentView('dashboard')}>
+                <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+                Retour au tableau de bord
+              </Button>
+              <Star8Point size={24} className="text-primary" />
+            </div>
+          </div>
+        </header>
+
+        <main className="container mx-auto px-4 py-8">
+          <RecordingsLibrary />
+        </main>
+
+        {/* Save Recording Dialog */}
+        <SaveRecordingDialog
+          open={showSaveDialog}
+          onOpenChange={setShowSaveDialog}
+          onSave={handleSaveRecording}
+          onDiscard={handleDiscardRecording}
+          surahName={SURAHS.find((s) => s.id === currentSurah)?.name}
+          verseNumber={currentVerse}
+        />
+      </div>
+    );
   }
 
   return null;

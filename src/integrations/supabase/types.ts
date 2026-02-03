@@ -523,6 +523,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_recitations: {
+        Row: {
+          analysis_score: number | null
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          keep_recording: boolean | null
+          qiraat: string | null
+          storage_path: string
+          surah_number: number
+          user_id: string
+          verse_number: number
+        }
+        Insert: {
+          analysis_score?: number | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          keep_recording?: boolean | null
+          qiraat?: string | null
+          storage_path: string
+          surah_number: number
+          user_id: string
+          verse_number: number
+        }
+        Update: {
+          analysis_score?: number | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          keep_recording?: boolean | null
+          qiraat?: string | null
+          storage_path?: string
+          surah_number?: number
+          user_id?: string
+          verse_number?: number
+        }
+        Relationships: []
+      }
       user_streaks: {
         Row: {
           created_at: string
