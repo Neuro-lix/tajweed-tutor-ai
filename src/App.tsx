@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { TranslationProvider } from "@/contexts/TranslationContext";
+import { PwaInstallDialog } from "@/components/pwa/PwaInstallDialog";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Ijaza from "./pages/IjazaWrapper";
@@ -21,6 +22,7 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <PwaInstallDialog />
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
