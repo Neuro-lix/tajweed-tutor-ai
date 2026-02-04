@@ -29,6 +29,8 @@ import { CertificateModal } from '@/components/certificates/CertificateModal';
 import { SaveRecordingDialog } from '@/components/recitation/SaveRecordingDialog';
 import { RecordingsLibrary } from '@/components/recitation/RecordingsLibrary';
 import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
@@ -45,7 +47,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslationSettings } from '@/contexts/TranslationContext';
 import { supabase } from '@/integrations/supabase/client';
 import { SURAHS } from '@/data/quranData';
-import { Loader2, LogOut, MessageSquareHeart, Award, Globe, Trophy, Music } from 'lucide-react';
+import { Loader2, LogOut, MessageSquareHeart, Award, Globe, Trophy, Music, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { fetchAyah } from '@/lib/quranApi';
 import { TranslationToggle } from '@/components/recitation/TranslationToggle';
@@ -96,6 +98,7 @@ const Index = () => {
   const [analysisStep, setAnalysisStep] = useState<'upload' | 'transcription' | 'analysis' | 'complete'>('upload');
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [showReport, setShowReport] = useState(false);
+  const [transcriptionFailed, setTranscriptionFailed] = useState(false);
   const [userAudioBlob, setUserAudioBlob] = useState<Blob | null>(null);
   const [isCurrentVerseCached, setIsCurrentVerseCached] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -254,6 +257,7 @@ const Index = () => {
     setAiFeedback(null);
     setAnalysisResult(null);
     setShowReport(false);
+    setTranscriptionFailed(false);
     await startRecording();
   };
 
@@ -323,18 +327,26 @@ const Index = () => {
       });
 
       if (error) throw error;
+      if (data?.error) throw new Error(String(data.error));
 
       setAnalysisStep('complete');
 
-      const isCorrect = data.isCorrect && data.overallScore >= 80;
+      const transcriptionImpossible = data?.transcriptionImpossible === true;
+      setTranscriptionFailed(transcriptionImpossible);
+      const isCorrect = !transcriptionImpossible && data?.isCorrect === true;
 
       // Store full analysis result
       setAnalysisResult(data);
 
+      // Open the detailed report automatically after each analysis
+      setShowReport(true);
+
       setAiFeedback({
         status: isCorrect ? 'correct' : 'review',
-        message: isCorrect ? t.excellent : t.needsReview,
-        details: data.feedback || data.encouragement,
+        message: transcriptionImpossible ? 'Transcription échouée' : isCorrect ? t.excellent : t.needsReview,
+        details: transcriptionImpossible
+          ? `${data.feedback || "La transcription est vide. Veuillez réenregistrer."}${data.whisperError ? ` (${data.whisperError})` : ''}`
+          : (data.feedback || data.encouragement || ''),
       });
 
       // Record session for gamification and streaks
@@ -467,6 +479,8 @@ const Index = () => {
     setPendingSaveBlob(null);
     setPendingSaveScore(null);
     setShowSaveDialog(false);
+    // If user chooses not to keep, clear local audio to avoid retaining data
+    setUserAudioBlob(null);
   };
 
   if (authLoading || (user && dataLoading)) {
@@ -922,7 +936,7 @@ const Index = () => {
                          analysisStep === 'transcription' ? 'transcribing' : 
                          analysisStep === 'analysis' ? 'analyzing' : 
                          analysisStep === 'complete' ? 'done' : 'idle'}
-            transcriptionFailed={analysisResult?.transcriptionImpossible === true}
+            transcriptionFailed={transcriptionFailed}
             userAudioBlob={userAudioBlob}
             mediaStream={mediaStream}
             audioDebugStats={{
@@ -969,20 +983,60 @@ const Index = () => {
 
           {/* Recitation Report */}
           {showFeedback && analysisResult && (
-            <RecitationReport
-              surahNumber={currentSurah}
-              verseNumber={currentVerse}
-              score={analysisResult.overallScore || 0}
-              isCorrect={analysisResult.isCorrect || false}
-              feedback={analysisResult.feedback || ''}
-              priorityFixes={analysisResult.priorityFixes || []}
-              errors={analysisResult.errors || []}
-              transcribedText={analysisResult.transcribedText}
-              expectedText={analysisResult.expectedText || currentVerseText || `Sourate ${currentSurah}, verset ${currentVerse}`}
-              textComparison={analysisResult.textComparison}
-              onClose={() => setShowReport(false)}
-            />
+            <Card>
+              <CardContent className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">Score :</span>
+                    <span className="font-semibold text-foreground">
+                      {typeof analysisResult.overallScore === 'number' ? analysisResult.overallScore : Number(analysisResult.overallScore ?? 0)}
+                      /100
+                    </span>
+                    {Array.isArray(analysisResult.errors) && analysisResult.errors.length > 0 && (
+                      <span className="text-sm text-muted-foreground">
+                        • {analysisResult.errors.length} erreur(s)
+                      </span>
+                    )}
+                  </div>
+                  {analysisResult.transcriptionImpossible && (
+                    <p className="text-sm text-destructive">
+                      Transcription impossible{analysisResult.whisperError ? ` : ${analysisResult.whisperError}` : ''}.
+                    </p>
+                  )}
+                  {!analysisResult.transcriptionImpossible && (!analysisResult.errors || analysisResult.errors.length === 0) && !analysisResult.isCorrect && (
+                    <p className="text-sm text-muted-foreground">
+                      Aucun détail d’erreur n’a été renvoyé — clique sur « Voir le rapport » puis réessaie.
+                    </p>
+                  )}
+                </div>
+                <Button variant="outline" onClick={() => setShowReport(true)} className="gap-2">
+                  <FileText className="h-4 w-4" />
+                  Voir le rapport
+                </Button>
+              </CardContent>
+            </Card>
           )}
+
+          <Dialog open={showReport} onOpenChange={setShowReport}>
+            <DialogContent className="w-[95vw] max-w-4xl">
+              <ScrollArea className="max-h-[75vh] pr-4">
+                {analysisResult && (
+                  <RecitationReport
+                    surahNumber={currentSurah}
+                    verseNumber={currentVerse}
+                    score={analysisResult.overallScore || 0}
+                    isCorrect={analysisResult.isCorrect || false}
+                    feedback={analysisResult.feedback || ''}
+                    priorityFixes={analysisResult.priorityFixes || []}
+                    errors={analysisResult.errors || []}
+                    transcribedText={analysisResult.transcribedText}
+                    expectedText={analysisResult.expectedText || currentVerseText || `Sourate ${currentSurah}, verset ${currentVerse}`}
+                    textComparison={analysisResult.textComparison}
+                  />
+                )}
+              </ScrollArea>
+            </DialogContent>
+          </Dialog>
 
           {/* Save Recording Dialog */}
           <SaveRecordingDialog
