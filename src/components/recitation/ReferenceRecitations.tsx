@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -11,8 +11,11 @@ import {
   RotateCcw, 
   Loader2,
   SkipBack,
-  Repeat
+  Repeat,
+  Download,
+  CheckCircle2,
 } from 'lucide-react';
+import { useOfflineMode } from '@/hooks/useOfflineMode';
 
 interface ReciterInfo {
   id: string;
@@ -122,8 +125,11 @@ export const ReferenceRecitations: React.FC<ReferenceRecitationsProps> = ({
   const [isLooping, setIsLooping] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  const [isCached, setIsCached] = useState(false);
+  const [isCaching, setIsCaching] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { cacheAudio, getCachedAudio, isOnline } = useOfflineMode();
 
   // Get ayah number (cumulative)
   const getAyahNumber = (surah: number, verse: number): number => {
@@ -158,9 +164,23 @@ export const ReferenceRecitations: React.FC<ReferenceRecitationsProps> = ({
     setCurrentTime(0);
     setDuration(0);
     setError(null);
-  }, [surahNumber, verseNumber]);
+    setIsCached(false);
+    // Check if audio is already cached
+    (async () => {
+      const cached = await getCachedAudio(surahNumber, verseNumber, selectedReciter.id);
+      setIsCached(Boolean(cached));
+    })();
+  }, [surahNumber, verseNumber, selectedReciter.id, getCachedAudio]);
 
-  // Handle play/pause
+  // Check cache when reciter changes
+  useEffect(() => {
+    (async () => {
+      const cached = await getCachedAudio(surahNumber, verseNumber, selectedReciter.id);
+      setIsCached(Boolean(cached));
+    })();
+  }, [selectedReciter.id, surahNumber, verseNumber, getCachedAudio]);
+
+  // Handle play/pause with on-demand caching
   const togglePlay = async () => {
     try {
       setError(null);
@@ -171,14 +191,25 @@ export const ReferenceRecitations: React.FC<ReferenceRecitationsProps> = ({
         return;
       }
 
+      const audioUrl = getAudioUrl(selectedReciter);
+
       // Create new audio if needed
-      if (!audioRef.current || audioRef.current.src !== getAudioUrl(selectedReciter)) {
+      if (!audioRef.current || audioRef.current.src !== audioUrl) {
         if (audioRef.current) {
           audioRef.current.pause();
         }
         
         setIsLoading(true);
-        const audio = new Audio(getAudioUrl(selectedReciter));
+
+        // Check cache first
+        let audioSrc = audioUrl;
+        const cachedBlob = await getCachedAudio(surahNumber, verseNumber, selectedReciter.id);
+        if (cachedBlob) {
+          audioSrc = URL.createObjectURL(cachedBlob);
+          setIsCached(true);
+        }
+
+        const audio = new Audio(audioSrc);
         audio.volume = isMuted ? 0 : volume / 100;
         audio.playbackRate = playbackSpeed;
         audio.loop = isLooping;
@@ -186,6 +217,22 @@ export const ReferenceRecitations: React.FC<ReferenceRecitationsProps> = ({
         audio.onloadedmetadata = () => {
           setDuration(audio.duration);
           setIsLoading(false);
+
+          // Cache audio if played from network
+          if (!cachedBlob && isOnline) {
+            (async () => {
+              try {
+                const res = await fetch(audioUrl);
+                if (res.ok) {
+                  const blob = await res.blob();
+                  await cacheAudio(surahNumber, verseNumber, selectedReciter.id, blob);
+                  setIsCached(true);
+                }
+              } catch (e) {
+                console.warn('[ReferenceRecitations] Failed to cache audio', e);
+              }
+            })();
+          }
         };
         
         audio.ontimeupdate = () => {
@@ -219,6 +266,24 @@ export const ReferenceRecitations: React.FC<ReferenceRecitationsProps> = ({
       setIsLoading(false);
     }
   };
+
+  // Manually cache audio for offline
+  const handleCacheAudio = useCallback(async () => {
+    if (!isOnline || isCaching || isCached) return;
+    setIsCaching(true);
+    try {
+      const res = await fetch(getAudioUrl(selectedReciter));
+      if (res.ok) {
+        const blob = await res.blob();
+        await cacheAudio(surahNumber, verseNumber, selectedReciter.id, blob);
+        setIsCached(true);
+      }
+    } catch (e) {
+      console.warn('[ReferenceRecitations] Manual cache failed', e);
+    } finally {
+      setIsCaching(false);
+    }
+  }, [isOnline, isCaching, isCached, selectedReciter, surahNumber, verseNumber, cacheAudio]);
 
   // Handle reciter change
   const handleReciterChange = (reciter: ReciterInfo) => {
@@ -437,17 +502,33 @@ export const ReferenceRecitations: React.FC<ReferenceRecitationsProps> = ({
               {playbackSpeed}x
             </Button>
 
-            {/* Restart */}
+            {/* Cache for offline */}
             <Button
               variant="ghost"
               size="icon"
-              onClick={restart}
-              className="h-7 w-7"
+              onClick={handleCacheAudio}
+              disabled={isCached || isCaching || !isOnline}
+              className={`h-7 w-7 ${isCached ? 'text-primary' : ''}`}
+              title={isCached ? 'En cache' : 'Télécharger pour hors-ligne'}
             >
-              <RotateCcw className="h-4 w-4" />
+              {isCaching ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : isCached ? (
+                <CheckCircle2 className="h-4 w-4" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
             </Button>
           </div>
         </div>
+
+        {/* Cached indicator */}
+        {isCached && (
+          <div className="flex items-center justify-center gap-1 text-xs text-primary">
+            <CheckCircle2 className="h-3 w-3" />
+            Audio en cache (disponible hors-ligne)
+          </div>
+        )}
 
         {/* Error message */}
         {error && (

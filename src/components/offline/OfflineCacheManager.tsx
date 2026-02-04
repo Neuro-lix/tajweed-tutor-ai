@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { SURAHS } from '@/data/quranData';
 import { fetchSurah } from '@/lib/quranApi';
+import { DownloadAllQuran } from './DownloadAllQuran';
 
 interface OfflineCacheManagerProps {
   isOnline: boolean;
@@ -185,17 +186,20 @@ export const OfflineCacheManager: React.FC<OfflineCacheManagerProps> = ({
           )}
         </div>
 
-        {/* Actions */}
+        {/* Download all 114 Surahs */}
+        <DownloadAllQuran cacheSurah={cacheSurah} isOnline={isOnline} />
+
+        {/* Quick download + clear */}
         <div className="flex gap-2">
           <Button
-            variant="default"
+            variant="outline"
             size="sm"
             className="flex-1"
             disabled={!isOnline || downloading !== null}
             onClick={handleDownloadAll}
           >
             <Download className="h-4 w-4 mr-2" />
-            Tout télécharger
+            Populaires (rapide)
           </Button>
           <Button
             variant="destructive"
