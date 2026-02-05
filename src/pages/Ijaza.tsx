@@ -1,27 +1,27 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Award, 
   BookOpen, 
   CheckCircle2, 
   Calendar, 
-  MessageSquare,
   Star,
   Users,
   GraduationCap,
   ArrowLeft,
-  Send,
-  Clock,
-  Globe
+  Plus,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { GeometricPattern, Star8Point } from '@/components/decorative/GeometricPattern';
-import { toast } from 'sonner';
+import { useIjaza } from '@/hooks/useIjaza';
+import { useAuth } from '@/hooks/useAuth';
+import { SheikhCard } from '@/components/ijaza/SheikhCard';
+import { IjazaRequestForm } from '@/components/ijaza/IjazaRequestForm';
+import { MyIjazaRequests } from '@/components/ijaza/MyIjazaRequests';
 
 interface IjazaPageProps {
   userName?: string;
@@ -29,6 +29,23 @@ interface IjazaPageProps {
   totalSurahs: number;
   averageScore: number;
   onBack: () => void;
+}
+
+interface SelectedSlotData {
+  sheikh: {
+    id: string;
+    name: string;
+    specialty: string | null;
+    languages: string[];
+  };
+  slot: {
+    id: string;
+    sheikhId: string;
+    dayOfWeek: number;
+    startTime: string;
+    endTime: string;
+    isBooked: boolean;
+  };
 }
 
 export const IjazaPage: React.FC<IjazaPageProps> = ({
@@ -39,17 +56,22 @@ export const IjazaPage: React.FC<IjazaPageProps> = ({
   onBack,
 }) => {
   const { t } = useLanguage();
-  const [formData, setFormData] = useState({
-    fullName: userName,
-    email: '',
-    phone: '',
-    preferredLanguage: 'ar',
-    preferredTime: '',
-    motivation: '',
-    experience: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { user } = useAuth();
+  const { 
+    sheikhs, 
+    availability, 
+    myRequests, 
+    loading, 
+    getSheikhAvailability, 
+    getDayName, 
+    formatTime,
+    submitRequest,
+    getStatusLabel,
+    getStatusColor,
+  } = useIjaza();
+
+  const [showForm, setShowForm] = useState(false);
+  const [selectedSlotData, setSelectedSlotData] = useState<SelectedSlotData | null>(null);
 
   const prerequisites = [
     { 
@@ -57,6 +79,7 @@ export const IjazaPage: React.FC<IjazaPageProps> = ({
       description: 'Avoir mémorisé le Coran en entier ou la partie concernée',
       icon: BookOpen,
       required: true,
+      met: undefined,
     },
     { 
       title: 'Maîtrise du Tajwīd',
@@ -77,40 +100,36 @@ export const IjazaPage: React.FC<IjazaPageProps> = ({
       description: 'Lettre de recommandation d\'un enseignant (optionnel)',
       icon: Users,
       required: false,
+      met: undefined,
     },
   ];
 
-  const sheikhs = [
-    {
-      name: 'Sheikh Ahmad Al-Tijani',
-      specialty: 'Lecture Ḥafṣ \'an \'Āṣim',
-      languages: ['Arabe', 'Français', 'Anglais'],
-      available: true,
-    },
-    {
-      name: 'Sheikh Muhammad Al-Azhari',
-      specialty: 'Lectures multiples (Qira\'at)',
-      languages: ['Arabe', 'Anglais', 'Ourdou'],
-      available: true,
-    },
-    {
-      name: 'Sheikh Yusuf Ibn Abdallah',
-      specialty: 'Lecture Warsh \'an Nāfi\'',
-      languages: ['Arabe', 'Français'],
-      available: false,
-    },
-  ];
+  const handleSelectSlot = (sheikh: { id: string; name: string; specialty: string | null; languages: string[] }, slot: { id: string; sheikhId: string; dayOfWeek: number; startTime: string; endTime: string; isBooked: boolean }) => {
+    setSelectedSlotData({ sheikh, slot });
+    setShowForm(true);
+  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const handleSubmitRequest = async (data: {
+    sheikhId?: string;
+    fullName: string;
+    email: string;
+    phone?: string;
+    preferredLanguage?: string;
+    preferredTime?: string;
+    experience?: string;
+    motivation?: string;
+    slotId?: string;
+  }) => {
+    const result = await submitRequest(data);
+    if (result) {
+      setShowForm(false);
+      setSelectedSlotData(null);
+    }
+  };
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    toast.success('Votre demande d\'Ijaza a été envoyée avec succès !');
+  const handleCancelForm = () => {
+    setShowForm(false);
+    setSelectedSlotData(null);
   };
 
   const progressPercent = (masteredSurahs / totalSurahs) * 100;
@@ -193,6 +212,14 @@ export const IjazaPage: React.FC<IjazaPageProps> = ({
           </CardContent>
         </Card>
 
+        {/* My Requests */}
+        <MyIjazaRequests 
+          requests={myRequests}
+          sheikhs={sheikhs}
+          getStatusLabel={getStatusLabel}
+          getStatusColor={getStatusColor}
+        />
+
         {/* Prerequisites */}
         <Card>
           <CardHeader>
@@ -205,17 +232,19 @@ export const IjazaPage: React.FC<IjazaPageProps> = ({
             <div className="space-y-4">
               {prerequisites.map((prereq, index) => {
                 const Icon = prereq.icon;
+                const isMet = prereq.met === true;
+                const isUnknown = prereq.met === undefined;
                 return (
                   <div 
                     key={index}
                     className={`flex items-start gap-4 p-4 rounded-lg border ${
-                      prereq.met ? 'bg-primary/5 border-primary/30' : 'bg-muted/50'
+                      isMet ? 'bg-primary/5 border-primary/30' : 'bg-muted/50'
                     }`}
                   >
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      prereq.met ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                      isMet ? 'bg-primary text-primary-foreground' : 'bg-muted'
                     }`}>
-                      {prereq.met ? (
+                      {isMet ? (
                         <CheckCircle2 className="w-5 h-5" />
                       ) : (
                         <Icon className="w-5 h-5" />
@@ -227,6 +256,9 @@ export const IjazaPage: React.FC<IjazaPageProps> = ({
                         {prereq.required && (
                           <Badge variant="outline" className="text-xs">Requis</Badge>
                         )}
+                        {isMet && (
+                          <Badge variant="default" className="text-xs">✓ Atteint</Badge>
+                        )}
                       </div>
                       <p className="text-sm text-muted-foreground">{prereq.description}</p>
                     </div>
@@ -237,170 +269,79 @@ export const IjazaPage: React.FC<IjazaPageProps> = ({
           </CardContent>
         </Card>
 
-        {/* Available Sheikhs */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-primary" />
-              Cheikhs disponibles
-            </CardTitle>
-            <CardDescription>
-              Nos cheikhs certifiés sont prêts à vous accompagner dans votre parcours
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4">
-              {sheikhs.map((sheikh, index) => (
-                <div 
-                  key={index}
-                  className={`p-4 rounded-lg border ${
-                    sheikh.available ? 'border-primary/30' : 'opacity-60'
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className="font-medium">{sheikh.name}</h4>
-                      <p className="text-sm text-muted-foreground">{sheikh.specialty}</p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Globe className="w-3 h-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">
-                          {sheikh.languages.join(', ')}
-                        </span>
-                      </div>
-                    </div>
-                    <Badge variant={sheikh.available ? 'default' : 'secondary'}>
-                      {sheikh.available ? 'Disponible' : 'Indisponible'}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Request form */}
-        {!isSubmitted ? (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-primary" />
-                {t.requestIjaza}
-              </CardTitle>
-              <CardDescription>
-                Remplis ce formulaire pour demander une session d'évaluation avec un cheikh
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Nom complet *</label>
-                    <Input
-                      value={formData.fullName}
-                      onChange={e => setFormData({ ...formData, fullName: e.target.value })}
-                      placeholder="Ton nom complet"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Email *</label>
-                    <Input
-                      type="email"
-                      value={formData.email}
-                      onChange={e => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="ton@email.com"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Téléphone</label>
-                    <Input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+33 6 12 34 56 78"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Créneaux préférés *</label>
-                    <Input
-                      value={formData.preferredTime}
-                      onChange={e => setFormData({ ...formData, preferredTime: e.target.value })}
-                      placeholder="Ex: Weekends après-midi"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Expérience en récitation *</label>
-                  <Textarea
-                    value={formData.experience}
-                    onChange={e => setFormData({ ...formData, experience: e.target.value })}
-                    placeholder="Décris ton parcours d'apprentissage du Coran..."
-                    rows={3}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Motivation</label>
-                  <Textarea
-                    value={formData.motivation}
-                    onChange={e => setFormData({ ...formData, motivation: e.target.value })}
-                    placeholder="Pourquoi souhaites-tu obtenir une Ijaza ?"
-                    rows={3}
-                  />
-                </div>
-
-                <Button 
-                  type="submit" 
-                  className="w-full"
-                  disabled={isSubmitting || !isEligible}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Clock className="w-4 h-4 mr-2 animate-spin" />
-                      Envoi en cours...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4 mr-2" />
-                      {t.requestIjaza}
-                    </>
-                  )}
-                </Button>
-
-                {!isEligible && (
-                  <p className="text-sm text-muted-foreground text-center">
-                    Tu dois remplir les prérequis avant de pouvoir demander une Ijaza
-                  </p>
-                )}
-              </form>
-            </CardContent>
-          </Card>
+        {showForm ? (
+          <IjazaRequestForm
+            userName={userName}
+            userEmail={user?.email || ''}
+            selectedSheikh={selectedSlotData?.sheikh || null}
+            selectedSlot={selectedSlotData?.slot || null}
+            sheikhs={sheikhs}
+            onSubmit={handleSubmitRequest}
+            onCancel={handleCancelForm}
+            getDayName={getDayName}
+            formatTime={formatTime}
+            isEligible={isEligible}
+          />
         ) : (
-          <Card className="border-primary/30">
-            <CardContent className="py-12 text-center space-y-4">
-              <div className="flex justify-center">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                  <CheckCircle2 className="w-8 h-8 text-primary" />
+          <>
+            {/* Available Sheikhs */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="w-5 h-5 text-primary" />
+                      Cheikhs disponibles
+                    </CardTitle>
+                    <CardDescription>
+                      Sélectionne un créneau pour demander une session d'évaluation
+                    </CardDescription>
+                  </div>
+                  <Button onClick={() => setShowForm(true)} disabled={!isEligible}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nouvelle demande
+                  </Button>
                 </div>
-              </div>
-              <h3 className="text-xl font-semibold">Demande envoyée !</h3>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Ta demande a été transmise à notre équipe. Un cheikh te contactera 
-                dans les 48 heures pour planifier ta session d'évaluation.
-              </p>
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <MessageSquare className="w-4 h-4" />
-                <span>Vérifie tes emails (et les spams)</span>
-              </div>
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <Skeleton key={i} className="h-32 w-full" />
+                    ))}
+                  </div>
+                ) : sheikhs.length > 0 ? (
+                  <div className="space-y-4">
+                    {sheikhs.map((sheikh) => (
+                      <SheikhCard
+                        key={sheikh.id}
+                        sheikh={sheikh}
+                        availability={getSheikhAvailability(sheikh.id)}
+                        onSelectSlot={handleSelectSlot}
+                        getDayName={getDayName}
+                        formatTime={formatTime}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>Aucun cheikh n'est disponible pour le moment.</p>
+                    <p className="text-sm">Reviens plus tard ou fais une demande générale.</p>
+                    <Button 
+                      className="mt-4" 
+                      onClick={() => setShowForm(true)}
+                      disabled={!isEligible}
+                    >
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Faire une demande
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </>
         )}
       </main>
     </div>
