@@ -326,6 +326,74 @@ export const useOfflineMode = () => {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  // Get cached surah info for offline screen
+  const getCachedSurahInfo = useCallback(async () => {
+    if (!isDbReady) return [];
+
+    try {
+      const db = await openDatabase();
+      const transaction = db.transaction([VERSE_STORE, AUDIO_STORE], 'readonly');
+      const verseStore = transaction.objectStore(VERSE_STORE);
+      const audioStore = transaction.objectStore(AUDIO_STORE);
+
+      const surahCounts = new Map<number, { verses: number; hasAudio: boolean }>();
+
+      // Count verses per surah
+      await new Promise<void>((resolve) => {
+        const request = verseStore.openCursor();
+        request.onsuccess = (event) => {
+          const cursor = (event.target as IDBRequest).result;
+          if (cursor) {
+            const verse = cursor.value as CachedVerse;
+            const current = surahCounts.get(verse.surahNumber) || { verses: 0, hasAudio: false };
+            current.verses++;
+            surahCounts.set(verse.surahNumber, current);
+            cursor.continue();
+          } else {
+            resolve();
+          }
+        };
+      });
+
+      // Check audio per surah
+      await new Promise<void>((resolve) => {
+        const request = audioStore.openCursor();
+        request.onsuccess = (event) => {
+          const cursor = (event.target as IDBRequest).result;
+          if (cursor) {
+            const audio = cursor.value as CachedAudio;
+            const current = surahCounts.get(audio.surahNumber) || { verses: 0, hasAudio: false };
+            current.hasAudio = true;
+            surahCounts.set(audio.surahNumber, current);
+            cursor.continue();
+          } else {
+            resolve();
+          }
+        };
+      });
+
+      db.close();
+
+      // Import SURAHS dynamically to avoid circular dependency
+      const { SURAHS } = await import('@/data/quranData');
+
+      return Array.from(surahCounts.entries()).map(([surahNumber, data]) => {
+        const surah = SURAHS.find(s => s.id === surahNumber);
+        return {
+          surahNumber,
+          name: surah?.name || '',
+          transliteration: surah?.transliteration || '',
+          verseCount: surah?.verses || 0,
+          cachedVerses: data.verses,
+          hasAudio: data.hasAudio,
+        };
+      }).sort((a, b) => a.surahNumber - b.surahNumber);
+    } catch (error) {
+      console.error('Failed to get cached surah info:', error);
+      return [];
+    }
+  }, [isDbReady]);
+
   return {
     isOnline,
     isOfflineReady: isDbReady && cacheStats.verses > 0,
@@ -338,5 +406,6 @@ export const useOfflineMode = () => {
     cacheSurah,
     isSurahCached,
     clearCache,
+    getCachedSurahInfo,
   };
 };
