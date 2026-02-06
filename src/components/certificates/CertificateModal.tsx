@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Download, Award, Star, Sparkles } from 'lucide-react';
 import { SURAHS } from '@/data/quranData';
 import { generateCertificatePDF } from '@/utils/pdfGenerator';
+import { ShareCertificate } from './ShareCertificate';
 
 interface Certificate {
   id: string;
@@ -50,6 +51,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
       qiraat: certificate.qiraat,
       averageScore: certificate.averageScore,
       completedAt: new Date(certificate.completedAt),
+      certificateId: certificate.id,
     });
   };
 
@@ -117,14 +119,20 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({
           </p>
 
           {/* Actions */}
-          <div className="flex gap-3">
-            <Button variant="outline" className="flex-1" onClick={onClose}>
+          <div className="flex gap-3 flex-wrap justify-center">
+            <Button variant="outline" onClick={onClose}>
               Continuer
             </Button>
-            <Button className="flex-1" onClick={handleDownload}>
+            <Button onClick={handleDownload}>
               <Download className="w-4 h-4 mr-2" />
-              Télécharger PDF
+              PDF
             </Button>
+            <ShareCertificate
+              certificateId={certificate.id}
+              surahNumber={certificate.surahNumber}
+              userName={certificate.userName}
+              averageScore={certificate.averageScore}
+            />
           </div>
         </div>
       </DialogContent>
