@@ -28,6 +28,7 @@ import { RewardsPanel } from '@/components/rewards/RewardsPanel';
 import { CertificateModal } from '@/components/certificates/CertificateModal';
 import { SaveRecordingDialog } from '@/components/recitation/SaveRecordingDialog';
 import { RecordingsLibrary } from '@/components/recitation/RecordingsLibrary';
+import { AppHeader } from '@/components/header/AppHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -51,6 +52,7 @@ import { Loader2, LogOut, MessageSquareHeart, Award, Globe, Trophy, Music, FileT
 import { toast } from 'sonner';
 import { fetchAyah } from '@/lib/quranApi';
 import { TranslationToggle } from '@/components/recitation/TranslationToggle';
+import logoImage from '@/assets/logo.png';
 
 type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections' | 'pricing' | 'recordings';
 
@@ -525,7 +527,11 @@ const Index = () => {
           {/* Hero Section */}
           <div className="text-center max-w-4xl mx-auto mb-16 animate-fade-in">
             <div className="flex justify-center mb-8">
-              <Star8Point size={48} className="text-primary" />
+              <img 
+                src={logoImage} 
+                alt="Tajweed Tutor AI" 
+                className="h-20 w-20 object-contain"
+              />
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
@@ -744,72 +750,19 @@ const Index = () => {
     return (
       <div className="min-h-screen bg-background">
         {/* Header */}
-        <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Star8Point size={24} className="text-primary" />
-                <span className="font-semibold text-lg text-foreground">Quran Learn</span>
-                {profile?.fullName && (
-                  <span className="text-sm text-muted-foreground">
-                    — {profile.fullName}
-                  </span>
-                )}
-                <OfflineIndicator
-                  isOnline={isOnline}
-                  isOfflineReady={isOfflineReady}
-                  cacheStats={cacheStats}
-                  formatCacheSize={formatCacheSize}
-                />
-              </div>
-              <nav className="flex items-center gap-2">
-                <LanguageSelector />
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setShowFeedbackForm(true)}
-                >
-                  <MessageSquareHeart className="h-4 w-4" />
-                </Button>
-                <Link to="/ijaza">
-                  <Button variant="ghost" size="sm">
-                    <Award className="h-4 w-4 mr-1" />
-                    Ijaza
-                  </Button>
-                </Link>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setCurrentView('recordings')}
-                >
-                  <Music className="h-4 w-4 mr-1" />
-                  Mes récitations
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => setCurrentView('corrections')}
-                >
-                  {t.corrections} ({corrections.length})
-                </Button>
-                <Button 
-                  variant="default" 
-                  size="sm"
-                  onClick={() => setCurrentView('recitation')}
-                >
-                  {t.recitation}
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={handleSignOut}
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </nav>
-            </div>
-          </div>
-        </header>
+        <AppHeader
+          fullName={profile?.fullName}
+          isOnline={isOnline}
+          isOfflineReady={isOfflineReady}
+          cacheStats={cacheStats}
+          formatCacheSize={formatCacheSize}
+          correctionsCount={corrections.length}
+          onFeedbackClick={() => setShowFeedbackForm(true)}
+          onRecordingsClick={() => setCurrentView('recordings')}
+          onCorrectionsClick={() => setCurrentView('corrections')}
+          onRecitationClick={() => setCurrentView('recitation')}
+          onSignOut={handleSignOut}
+        />
 
         <main className="container mx-auto px-4 py-8">
           <div className="grid lg:grid-cols-3 gap-8">
