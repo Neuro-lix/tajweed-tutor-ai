@@ -227,7 +227,8 @@ export const generateCertificatePDF = async (data: CertificateData): Promise<voi
 
   // Generate certificate ID for verification
   const certificateId = data.certificateId || `QTC-${Date.now().toString(36).toUpperCase()}`;
-  const verificationUrl = `https://quran-tajwid.app/verify/${certificateId}`;
+  // Use relative path that works with any domain
+  const verificationUrl = `${window.location.origin}/verify/${certificateId}`;
 
   // QR Code for verification
   const qrDataUrl = await generateQRCode(verificationUrl);
