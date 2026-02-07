@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -93,8 +94,39 @@ export default function VerifyCertificate() {
 
   const surah = certificate ? SURAHS.find(s => s.id === certificate.surahNumber) : null;
 
+  // Dynamic OG meta tags
+  const pageTitle = certificate 
+    ? `Certificat de ${certificate.userName} - Sourate ${surah?.transliteration || certificate.surahNumber}`
+    : 'Vérification de Certificat - Tajweed Tutor AI';
+  
+  const pageDescription = certificate
+    ? `${certificate.userName} a maîtrisé la récitation de la Sourate ${surah?.transliteration || certificate.surahNumber} avec un score de ${certificate.averageScore.toFixed(0)}% en lecture ${QIRAAT_NAMES[certificate.qiraat || ''] || certificate.qiraat || 'Ḥafṣ ʿan ʿĀṣim'}.`
+    : 'Vérifiez l\'authenticité d\'un certificat de maîtrise du Tajwīd délivré par Tajweed Tutor AI.';
+
+  const ogImage = 'https://storage.googleapis.com/gpt-engineer-file-uploads/K5B9XopSinZ3V0htRmjQEElgq9F2/social-images/social-1770296635561-Tajweed_tutor_ai.png';
+  const pageUrl = typeof window !== 'undefined' ? window.location.href : '';
+
   return (
     <div className="min-h-screen bg-background relative">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        
+        {/* Open Graph */}
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:site_name" content="Tajweed Tutor AI" />
+        
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={ogImage} />
+      </Helmet>
+
       <GeometricPattern className="text-primary" opacity={0.03} />
       
       <div className="relative z-10 container mx-auto px-4 py-12 max-w-2xl">

@@ -6,24 +6,58 @@
 const TARGET_SAMPLE_RATE = 16000;
 
 export const convertToWav = async (blob: Blob): Promise<{ blob: Blob; mimeType: string }> => {
+  console.log('[AudioConverter] Starting conversion, input blob size:', blob.size, 'type:', blob.type);
+  
+  // Skip conversion if blob is too small (likely no audio content)
+  if (blob.size < 1000) {
+    console.warn('[AudioConverter] Blob too small, likely no audio content:', blob.size, 'bytes');
+    return { blob, mimeType: blob.type || 'audio/webm' };
+  }
+  
   try {
     // Use OfflineAudioContext to decode and resample
     const arrayBuffer = await blob.arrayBuffer();
+    console.log('[AudioConverter] ArrayBuffer size:', arrayBuffer.byteLength);
 
     const AudioContextCtor = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextCtor) {
+      console.warn('[AudioConverter] AudioContext not available, returning original blob');
+      return { blob, mimeType: blob.type || 'audio/webm' };
+    }
+    
     const tempCtx = new AudioContextCtor();
 
     let audioBuffer: AudioBuffer;
     try {
-      audioBuffer = await tempCtx.decodeAudioData(arrayBuffer);
+      audioBuffer = await tempCtx.decodeAudioData(arrayBuffer.slice(0));
+      console.log('[AudioConverter] Decoded audio buffer:', {
+        duration: audioBuffer.duration,
+        sampleRate: audioBuffer.sampleRate,
+        channels: audioBuffer.numberOfChannels,
+        length: audioBuffer.length
+      });
+    } catch (decodeError) {
+      console.error('[AudioConverter] Failed to decode audio data:', decodeError);
+      await tempCtx.close().catch(() => null);
+      // Return original blob as fallback
+      return { blob, mimeType: blob.type || 'audio/webm' };
     } finally {
       await tempCtx.close().catch(() => null);
     }
+    
+    // Check if audio has any content
+    if (audioBuffer.duration < 0.1) {
+      console.warn('[AudioConverter] Audio duration too short:', audioBuffer.duration, 's');
+      return { blob, mimeType: blob.type || 'audio/webm' };
+    }
 
     // Resample to 16kHz mono
+    const outputLength = Math.ceil(audioBuffer.duration * TARGET_SAMPLE_RATE);
+    console.log('[AudioConverter] Creating OfflineAudioContext with length:', outputLength);
+    
     const offlineCtx = new OfflineAudioContext(
-      1,
-      Math.ceil(audioBuffer.duration * TARGET_SAMPLE_RATE),
+      1, // mono
+      outputLength,
       TARGET_SAMPLE_RATE,
     );
 
@@ -34,12 +68,25 @@ export const convertToWav = async (blob: Blob): Promise<{ blob: Blob; mimeType: 
 
     const rendered = await offlineCtx.startRendering();
     const samples = rendered.getChannelData(0);
+    
+    // Validate samples
+    const maxSample = samples.reduce((max, s) => Math.max(max, Math.abs(s)), 0);
+    console.log('[AudioConverter] Rendered samples:', {
+      length: samples.length,
+      maxAmplitude: maxSample.toFixed(4),
+      hasSilence: maxSample < 0.001
+    });
+    
+    if (maxSample < 0.001) {
+      console.warn('[AudioConverter] Audio appears to be silent, returning original blob');
+      return { blob, mimeType: blob.type || 'audio/webm' };
+    }
 
     const wavBlob = encodeWav(samples, TARGET_SAMPLE_RATE);
     console.log('[AudioConverter] Converted to WAV:', wavBlob.size, 'bytes');
     return { blob: wavBlob, mimeType: 'audio/wav' };
   } catch (err) {
-    console.warn('[AudioConverter] WAV conversion failed, falling back to original blob:', err);
+    console.error('[AudioConverter] WAV conversion failed, falling back to original blob:', err);
     // Return original
     return { blob, mimeType: blob.type || 'audio/webm' };
   }
