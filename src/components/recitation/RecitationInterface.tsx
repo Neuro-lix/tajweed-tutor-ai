@@ -251,13 +251,13 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
 
       {/* Navigation */}
       <div className="flex justify-center gap-4">
-        <Button variant="outline" disabled={currentVerse === 1} onClick={onPreviousVerse}>
+        <Button variant="outline" disabled={currentVerse === 1 || isAnalyzing} onClick={onPreviousVerse}>
           <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M15 18l-6-6 6-6" />
           </svg>
           Précédent
         </Button>
-        <Button variant="default" disabled={currentVerse === totalVerses} onClick={onNextVerse}>
+        <Button variant="default" disabled={currentVerse === totalVerses || isAnalyzing} onClick={onNextVerse}>
           Suivant
           <svg className="w-4 h-4 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M9 18l6-6-6-6" />
