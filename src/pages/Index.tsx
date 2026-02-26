@@ -228,13 +228,33 @@ const Index = () => {
     currentStreak: progress?.currentStreak || 0,
   };
 
+  // Normalize AI ruleType strings (e.g. "Makhārij", "Idghām") to TAJWEED_RULES keys (e.g. "makharij", "idgham")
+  const normalizeRuleType = (ruleType: string): 'madd' | 'ghunna' | 'qalqala' | 'idgham' | 'ikhfa' | 'makharij' | 'sifat' | 'iqlab' | 'izhar' | 'waqf' => {
+    const lower = ruleType
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // strip diacritics
+      .replace(/[^a-z]/g, '');        // keep only a-z
+    if (lower.includes('makh')) return 'makharij';
+    if (lower.includes('sif')) return 'sifat';
+    if (lower.includes('madd') || lower.includes('mad')) return 'madd';
+    if (lower.includes('idgh') || lower.includes('idgm')) return 'idgham';
+    if (lower.includes('ikh')) return 'ikhfa';
+    if (lower.includes('iql') || lower.includes('iqlab')) return 'iqlab';
+    if (lower.includes('izh') || lower.includes('izhar')) return 'izhar';
+    if (lower.includes('waq')) return 'waqf';
+    if (lower.includes('ghun') || lower.includes('ghn')) return 'ghunna';
+    if (lower.includes('qal')) return 'qalqala';
+    return 'madd'; // fallback
+  };
+
   const mockCorrections = corrections.map(c => ({
     id: c.id,
     surah: `Sourate ${c.surahNumber}`,
     verse: c.verseNumber,
     word: c.word,
     wordArabic: c.word,
-    rule: c.ruleType as 'madd' | 'ghunna' | 'qalqala' | 'idgham' | 'ikhfa',
+    rule: normalizeRuleType(c.ruleType),
     description: c.ruleDescription,
     timestamp: new Date(c.createdAt),
   }));
@@ -340,8 +360,8 @@ const Index = () => {
       // Store full analysis result
       setAnalysisResult(data);
 
-      // Open the detailed report automatically after each analysis
-      setShowReport(true);
+      // Don't open the report automatically — user clicks "Voir le rapport"
+      // setShowReport(true);  ← removed to not block UX
 
       setAiFeedback({
         status: isCorrect ? 'correct' : 'review',
@@ -374,7 +394,7 @@ const Index = () => {
             surahNumber: currentSurah,
             verseNumber: currentVerse,
             word: err.word,
-            ruleType: err.ruleType,
+            ruleType: normalizeRuleType(err.ruleType),
             ruleDescription: err.ruleDescription,
           });
         }
@@ -406,6 +426,10 @@ const Index = () => {
     setCurrentVerse(verse);
     setShowFeedback(false);
     setAiFeedback(null);
+    setAnalysisResult(null);
+    setShowReport(false);
+    setTranscriptionFailed(false);
+    setUserAudioBlob(null);
 
     await loadVerse(surah, verse, currentTranslationId);
   };
