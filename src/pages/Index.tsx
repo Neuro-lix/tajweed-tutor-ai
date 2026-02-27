@@ -9,6 +9,8 @@ import { QuranMap } from '@/components/dashboard/QuranMap';
 import { RecitationInterface } from '@/components/recitation/RecitationInterface';
 import { CorrectionReport } from '@/components/dashboard/CorrectionReport';
 import { PricingSection } from '@/components/payment/PricingSection';
+import { Boutique } from '@/pages/Boutique';
+import { IjazaPage } from '@/pages/Ijaza';
 import { MultilingualChat } from '@/components/chat/MultilingualChat';
 import { FeedbackForm } from '@/components/feedback/FeedbackForm';
 import { SpacedRepetitionPanel } from '@/components/review/SpacedRepetitionPanel';
@@ -54,7 +56,7 @@ import { fetchAyah } from '@/lib/quranApi';
 import { TranslationToggle } from '@/components/recitation/TranslationToggle';
 import logoImage from '@/assets/logo.png';
 
-type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections' | 'pricing' | 'recordings';
+type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections' | 'pricing' | 'recordings' | 'boutique' | 'ijaza';
 
 interface AnalysisResult {
   isCorrect: boolean;
@@ -100,6 +102,38 @@ const Index = () => {
   const [analysisStep, setAnalysisStep] = useState<'upload' | 'transcription' | 'analysis' | 'complete'>('upload');
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [showReport, setShowReport] = useState(false);
+  const [devMode, setDevMode] = useState(() => localStorage.getItem('devMode') === 'true');
+  const [logoClickCount, setLogoClickCount] = useState(0);
+
+  const handleLogoClick = () => {
+    setLogoClickCount(prev => {
+      const next = prev + 1;
+      if (next >= 5) {
+        const newMode = !devMode;
+        setDevMode(newMode);
+        localStorage.setItem('devMode', String(newMode));
+        alert(newMode ? '🛠️ Mode développeur activé — Tout est gratuit' : '🔒 Mode développeur désactivé');
+        return 0;
+      }
+      return next;
+    });
+  };
+  const [devMode, setDevMode] = useState(false);
+  const [logoClickCount, setLogoClickCount] = useState(0);
+
+  const handleLogoClick = () => {
+    setLogoClickCount(prev => {
+      const next = prev + 1;
+      if (next >= 5) {
+        setDevMode(true);
+        setTimeout(() => {
+          alert('🛠️ Mode développeur activé — Accès gratuit illimité');
+        }, 100);
+        return 0;
+      }
+      return next;
+    });
+  };
   const [transcriptionFailed, setTranscriptionFailed] = useState(false);
   const [userAudioBlob, setUserAudioBlob] = useState<Blob | null>(null);
   const [isCurrentVerseCached, setIsCurrentVerseCached] = useState(false);
@@ -554,10 +588,15 @@ const Index = () => {
               <img 
                 src={logoImage} 
                 alt="Tajweed Tutor AI" 
-                className="h-20 w-20 object-contain"
+                className="h-20 w-20 object-contain cursor-pointer"
+                onClick={handleLogoClick}
               />
             </div>
-            
+            {devMode && (
+              <div className="inline-flex items-center gap-1 px-3 py-1 bg-amber-500/20 border border-amber-500/40 rounded-full text-xs text-amber-600 font-medium mb-4">
+                🛠️ Mode développeur actif
+              </div>
+            )}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
               Apprends le Coran avec{' '}
               <span className="text-gradient-gold">rigueur</span>{' '}
@@ -785,6 +824,8 @@ const Index = () => {
           onRecordingsClick={() => setCurrentView('recordings')}
           onCorrectionsClick={() => setCurrentView('corrections')}
           onRecitationClick={() => setCurrentView('recitation')}
+          onBoutiqueClick={() => setCurrentView('boutique')}
+          onIjazaClick={() => setCurrentView('ijaza')}
           onSignOut={handleSignOut}
         />
 
@@ -1061,6 +1102,19 @@ const Index = () => {
   // Pricing
   if (currentView === 'pricing') {
     return <PricingSection onBack={() => setCurrentView('dashboard')} />;
+  }
+
+  if (currentView === 'boutique') {
+    return <Boutique onBack={() => setCurrentView('dashboard')} />;
+  }
+
+  if (currentView === 'ijaza') {
+    return <IjazaPage 
+      onBack={() => setCurrentView('dashboard')}
+      masteredSurahs={0}
+      totalSurahs={114}
+      averageScore={0}
+    />;
   }
 
   // Recordings Library
