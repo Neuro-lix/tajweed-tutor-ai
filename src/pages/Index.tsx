@@ -118,22 +118,6 @@ const Index = () => {
       return next;
     });
   };
-  const [devMode, setDevMode] = useState(false);
-  const [logoClickCount, setLogoClickCount] = useState(0);
-
-  const handleLogoClick = () => {
-    setLogoClickCount(prev => {
-      const next = prev + 1;
-      if (next >= 5) {
-        setDevMode(true);
-        setTimeout(() => {
-          alert('🛠️ Mode développeur activé — Accès gratuit illimité');
-        }, 100);
-        return 0;
-      }
-      return next;
-    });
-  };
   const [transcriptionFailed, setTranscriptionFailed] = useState(false);
   const [userAudioBlob, setUserAudioBlob] = useState<Blob | null>(null);
   const [isCurrentVerseCached, setIsCurrentVerseCached] = useState(false);
