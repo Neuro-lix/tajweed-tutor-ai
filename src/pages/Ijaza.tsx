@@ -254,10 +254,10 @@ export const IjazaPage: React.FC<IjazaPageProps> = ({
                     <h3 className="font-arabic text-2xl font-semibold" dir="rtl">أنس أحمد النشرتي</h3>
                     <p className="text-base font-medium text-foreground">Anas Ahmad Al-Nashrati</p>
                     <p className="text-sm text-muted-foreground font-arabic mt-1" dir="rtl">
-                      طبيب أزهري حافظ لكتاب الله عز وجل وحاصل على إجازة في قراءة الإمام عاصم برواية شعبة وحفص
+                      طبيب حاصل على شهادة الدكتوراه من جامعة الأزهر الشريف بمصر — حافظ لكتاب الله عز وجل — حاصل على إجازة في قراءة الإمام عاصم برواية شعبة وحفص
                     </p>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Médecin et diplômé d'Al-Azhar — Hafiz du Saint Coran — Titulaire de l'Ijaza en lecture de l'Imam Asim selon les deux rivayates Shu'ba et Hafs
+                      Docteur diplômé de l'Université Al-Azhar d'Égypte — Hafiz du Saint Coran — Titulaire de l'Ijaza en lecture de l'Imam Asim selon les deux rivayates Shu'ba et Hafs
                     </p>
                   </div>
                 </div>
