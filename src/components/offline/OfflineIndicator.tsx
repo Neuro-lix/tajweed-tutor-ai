@@ -19,7 +19,8 @@ export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
   cacheStats,
   formatCacheSize,
 }) => {
-  if (isOnline && !isOfflineReady) {
+  // Only show when offline - don't clutter header when online
+  if (isOnline) {
     return null;
   }
 
