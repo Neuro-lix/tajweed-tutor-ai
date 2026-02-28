@@ -32,7 +32,7 @@ const RECITERS: ReciterInfo[] = [
     name: 'Mishary Rashid Al-Afasy',
     nameArabic: 'مشاري راشد العفاسي',
     style: 'Précision cristalline des makhārij',
-    audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.alafasy',
+    audioBaseUrl: 'https://everyayah.com/data/Alafasy_128kbps',
     color: 'bg-emerald-500',
   },
 
@@ -42,7 +42,7 @@ const RECITERS: ReciterInfo[] = [
     name: 'Mohamed Siddiq El-Minshawi',
     nameArabic: 'محمد صديق المنشاوي',
     style: 'Rigueur académique impeccable',
-    audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.minshawi',
+    audioBaseUrl: 'https://everyayah.com/data/Minshawy_Murattal_128kbps',
     color: 'bg-amber-500',
   },
   {
@@ -50,7 +50,7 @@ const RECITERS: ReciterInfo[] = [
     name: 'Mahmoud Khalil Al-Husary',
     nameArabic: 'محمود خليل الحصري',
     style: 'Maître du tajwīd murattal',
-    audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.husary',
+    audioBaseUrl: 'https://everyayah.com/data/Husary_128kbps',
     color: 'bg-blue-500',
   },
   {
@@ -58,7 +58,7 @@ const RECITERS: ReciterInfo[] = [
     name: 'Al-Husary (Mujawwad)',
     nameArabic: 'الحصري مجود',
     style: 'Style mujawwad mélodique',
-    audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.husarymujawwad',
+    audioBaseUrl: 'https://everyayah.com/data/Husary_Mujawwad_128kbps',
     color: 'bg-cyan-500',
   },
   {
@@ -66,7 +66,7 @@ const RECITERS: ReciterInfo[] = [
     name: 'Abdul Basit Abdul Samad',
     nameArabic: 'عبدالباسط عبدالصمد',
     style: 'Légende mondiale du tajwīd',
-    audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.abdulsamad',
+    audioBaseUrl: 'https://everyayah.com/data/Abdul_Basit_Murattal_192kbps',
     color: 'bg-orange-500',
   },
   {
@@ -74,7 +74,7 @@ const RECITERS: ReciterInfo[] = [
     name: 'Saad Al-Ghamdi',
     nameArabic: 'سعد الغامدي',
     style: 'Voix douce et apaisante',
-    audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.saadalghamdi',
+    audioBaseUrl: 'https://everyayah.com/data/Saad_Al-Ghamdi_128kbps',
     color: 'bg-teal-500',
   },
 ];
@@ -131,14 +131,18 @@ export const ReferenceRecitations: React.FC<ReferenceRecitationsProps> = ({
   // Build audio URL
   const getAudioUrl = (reciter: ReciterInfo): string => {
     const ayahNumber = getAyahNumber(surahNumber, verseNumber);
-    return `${reciter.audioBaseUrl}/${ayahNumber}.mp3`;
+    // everyayah.com format: SSSAAA.mp3 (e.g. 001001.mp3)
+    const surahPad = String(surahNumber).padStart(3, '0');
+    const versePad = String(verseNumber).padStart(3, '0');
+    return `${reciter.audioBaseUrl}/${surahPad}${versePad}.mp3`;
   };
   
   const getFallbackUrl = (reciter: ReciterInfo): string | null => {
     const fallback = FALLBACK_URLS[reciter.id];
     if (!fallback) return null;
-    const ayahNumber = getAyahNumber(surahNumber, verseNumber);
-    return `${fallback}/${ayahNumber}.mp3`;
+    const surahPad2 = String(surahNumber).padStart(3, '0');
+    const versePad2 = String(verseNumber).padStart(3, '0');
+    return `${fallback}/${surahPad2}${versePad2}.mp3`;
   };
 
   // Cleanup audio on unmount or verse change
