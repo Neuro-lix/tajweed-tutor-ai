@@ -13,6 +13,7 @@ import { GeometricPattern, Star8Point } from '@/components/decorative/GeometricP
 import { useIjaza } from '@/hooks/useIjaza';
 import { useAuth } from '@/hooks/useAuth';
 import { SheikhCard } from '@/components/ijaza/SheikhCard';
+import { IjazaCalendar } from '@/components/ijaza/IjazaCalendar';
 import { IjazaRequestForm } from '@/components/ijaza/IjazaRequestForm';
 import { MyIjazaRequests } from '@/components/ijaza/MyIjazaRequests';
 
