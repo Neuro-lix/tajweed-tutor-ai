@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, ShoppingCart, Star, BookOpen, Headphones, FileText, Video, Moon, Heart, Calendar, Map, GripVertical, Settings, X, Check } from 'lucide-react';
+import { ArrowLeft, Download, ShoppingCart, Star, BookOpen, Headphones, FileText, Video, Moon, Heart, Calendar, Map, GripVertical, Settings, X, Check } from 'lucide-react';
 import { GeometricPattern } from '@/components/decorative/GeometricPattern';
 
 interface BoutiqueProps {
@@ -16,6 +16,7 @@ interface Product {
   titleAr: string;
   description: string;
   price: number;
+  downloadUrl?: string;
   originalPrice: number | null;
   iconName: string;
   color: string;
@@ -30,11 +31,15 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 const INITIAL_PRODUCTS: Product[] = [
-  { id: 1, category: "pdf", title: "Planner islamique 2026", titleAr: "المخطط الاسلامي 2026", description: "Organisateur annuel : prieres, objectifs, suivi memorisation Coran, rappels dhikr - PDF imprimable 120 pages", price: 7.90, originalPrice: 12.90, iconName: "Calendar", color: "text-emerald-600", bg: "bg-emerald-50", badge: "Bestseller", stars: 5, active: true },
-  { id: 2, category: "pdf", title: "Guide complet du Tajwid illustre", titleAr: "دليل التجويد الشامل", description: "Toutes les regles de tajwid avec exemples coraniques et schemas - 80 pages illustrees", price: 9.90, originalPrice: 14.90, iconName: "BookOpen", color: "text-blue-600", bg: "bg-blue-50", badge: null, stars: 5, active: true },
+  { id: 1,
+  downloadUrl: "https://etectgyjvkpqtpgypszv.supabase.co/storage/v1/object/public/boutique/planner_islamique.pdf",  category: "pdf", title: "Planner islamique 2026", titleAr: "المخطط الاسلامي 2026", description: "Organisateur annuel : prieres, objectifs, suivi memorisation Coran, rappels dhikr - PDF imprimable 120 pages", price: 7.90, originalPrice: 12.90, iconName: "Calendar", color: "text-emerald-600", bg: "bg-emerald-50", badge: "Bestseller", stars: 5, active: true },
+  { id: 2,
+  downloadUrl: "https://etectgyjvkpqtpgypszv.supabase.co/storage/v1/object/public/boutique/guide_tajwid.pdf",  category: "pdf", title: "Guide complet du Tajwid illustre", titleAr: "دليل التجويد الشامل", description: "Toutes les regles de tajwid avec exemples coraniques et schemas - 80 pages illustrees", price: 9.90, originalPrice: 14.90, iconName: "BookOpen", color: "text-blue-600", bg: "bg-blue-50", badge: null, stars: 5, active: true },
   { id: 3, category: "pdf", title: "Fiches memo 10 Qiraat", titleAr: "بطاقات القراءات العشر", description: "Resume visuel des 10 lectures canoniques avec regles specifiques - 40 fiches PDF", price: 7.90, originalPrice: null, iconName: "FileText", color: "text-purple-600", bg: "bg-purple-50", badge: "Nouveau", stars: 4, active: true },
-  { id: 4, category: "pdf", title: "Tracker de Dhikr quotidien", titleAr: "متتبع الذكر اليومي", description: "Fiche de suivi des adhkars du matin et du soir selon la Sunnah - PDF imprimable hebdomadaire", price: 4.90, originalPrice: null, iconName: "Heart", color: "text-rose-600", bg: "bg-rose-50", badge: null, stars: 5, active: true },
-  { id: 5, category: "pdf", title: "Journal Ramadan 30 jours", titleAr: "مجلة رمضان 30 يوما", description: "Journal interactif : objectifs spirituels, suivi tilawah, dou'as, reflexions quotidiennes - PDF 60 pages", price: 6.90, originalPrice: null, iconName: "Moon", color: "text-indigo-600", bg: "bg-indigo-50", badge: null, stars: 5, active: true },
+  { id: 4,
+  downloadUrl: "https://etectgyjvkpqtpgypszv.supabase.co/storage/v1/object/public/boutique/tracker_dhikr.pdf",  category: "pdf", title: "Tracker de Dhikr quotidien", titleAr: "متتبع الذكر اليومي", description: "Fiche de suivi des adhkars du matin et du soir selon la Sunnah - PDF imprimable hebdomadaire", price: 4.90, originalPrice: null, iconName: "Heart", color: "text-rose-600", bg: "bg-rose-50", badge: null, stars: 5, active: true },
+  { id: 5,
+  downloadUrl: "https://etectgyjvkpqtpgypszv.supabase.co/storage/v1/object/public/boutique/journal_ramadan.pdf",  category: "pdf", title: "Journal Ramadan 30 jours", titleAr: "مجلة رمضان 30 يوما", description: "Journal interactif : objectifs spirituels, suivi tilawah, dou'as, reflexions quotidiennes - PDF 60 pages", price: 6.90, originalPrice: null, iconName: "Moon", color: "text-indigo-600", bg: "bg-indigo-50", badge: null, stars: 5, active: true },
   { id: 6, category: "pdf", title: "Pack Douas essentielles illustrees", titleAr: "مجموعة الادعية المصورة", description: "60 douas authentiques du Quran et de la Sunnah avec translitteration et traduction - PDF 60 pages", price: 8.90, originalPrice: null, iconName: "BookOpen", color: "text-amber-600", bg: "bg-amber-50", badge: null, stars: 5, active: true },
   { id: 7, category: "pdf", title: "Roadmap memorisation Juz Amma", titleAr: "خطة حفظ جزء عم", description: "Programme structure 90 jours pour memoriser Juz Amma avec revisions espacees - PDF + tableaux de suivi", price: 9.90, originalPrice: null, iconName: "Map", color: "text-teal-600", bg: "bg-teal-50", badge: "Populaire", stars: 5, active: true },
   { id: 8, category: "audio", title: "Cours audio Tajwid debutant", titleAr: "دروس صوتية في التجويد للمبتدئين", description: "12 lecons progressives sur les regles fondamentales du tajwid - duree totale 4h - MP3", price: 14.90, originalPrice: 19.90, iconName: "Headphones", color: "text-cyan-600", bg: "bg-cyan-50", badge: null, stars: 4, active: true },
@@ -108,6 +113,22 @@ export const Boutique: React.FC<BoutiqueProps> = ({ onBack }) => {
   const cartTotal = cart.reduce((sum, id) => { const p = products.find(p => p.id === id); return sum + (p ? p.price : 0); }, 0);
 
   const toggleCart = (id: number) => { setCart(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]); };
+
+  const handleBuyNow = (product: Product) => {
+    if (product.downloadUrl) {
+      // Free preview / direct download for products with URL
+      const a = document.createElement('a');
+      a.href = product.downloadUrl;
+      a.download = product.title + '.pdf';
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } else {
+      // Redirect to contact/payment for audio/video
+      window.open('mailto:contact@tajweedtutorai.com?subject=Commande : ' + encodeURIComponent(product.title) + '&body=Bonjour, je souhaite commander : ' + encodeURIComponent(product.title) + ' (' + product.price + '€)', '_blank');
+    }
+  };
 
   const handleTitleClick = () => {
     const next = adminClicks + 1;
@@ -186,9 +207,14 @@ export const Boutique: React.FC<BoutiqueProps> = ({ onBack }) => {
                       </>
                     )}
                   </div>
-                  <Button className="w-full" variant={inCart ? "outline" : "default"} onClick={() => toggleCart(product.id)}>
-                    {inCart ? <><Check className="w-4 h-4 mr-2" />Dans le panier</> : <><ShoppingCart className="w-4 h-4 mr-2" />Ajouter au panier</>}
-                  </Button>
+                  <div className="space-y-2">
+                    <Button className="w-full" onClick={() => handleBuyNow(product)}>
+                      {product.downloadUrl ? <><Download className="w-4 h-4 mr-2" />Télécharger</> : <><ShoppingCart className="w-4 h-4 mr-2" />Commander</>}
+                    </Button>
+                    <Button className="w-full" variant={inCart ? "outline" : "secondary"} onClick={() => toggleCart(product.id)}>
+                      {inCart ? <><Check className="w-4 h-4 mr-2" />Dans le panier</> : <><ShoppingCart className="w-4 h-4 mr-2" />Ajouter au panier</>}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             );
