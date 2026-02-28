@@ -15,6 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { SheikhCard } from '@/components/ijaza/SheikhCard';
 import { IjazaRequestForm } from '@/components/ijaza/IjazaRequestForm';
 import { MyIjazaRequests } from '@/components/ijaza/MyIjazaRequests';
+import { IjazaCalendar } from '@/components/ijaza/IjazaCalendar';
 
 interface IjazaPageProps {
   userName?: string;
@@ -203,38 +204,33 @@ export const IjazaPage: React.FC<IjazaPageProps> = ({
               </CardContent>
             </Card>
 
-            {/* Sheikh + form */}
-            {showForm ? (
-              <IjazaRequestForm userName={userName} userEmail={user?.email || ''} selectedSheikh={selectedSlotData?.sheikh || null} selectedSlot={selectedSlotData?.slot || null} sheikhs={sheikhs} onSubmit={handleSubmitRequest} onCancel={handleCancelForm} getDayName={getDayName} formatTime={formatTime} isEligible={isEligible} />
-            ) : (
-              <Card>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5 text-primary" />Cheikh disponible</CardTitle>
-                      <CardDescription>Sélectionne un créneau pour ton évaluation Ijaza</CardDescription>
-                    </div>
-                    <Button onClick={() => setShowForm(true)} disabled={!isEligible}><Plus className="w-4 h-4 mr-2" />Nouvelle demande</Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <div className="space-y-4">{[1,2].map(i => <Skeleton key={i} className="h-32 w-full" />)}</div>
-                  ) : sheikhs.length > 0 ? (
-                    <div className="space-y-4">
-                      {sheikhs.map(sheikh => (
-                        <SheikhCard key={sheikh.id} sheikh={sheikh} availability={getSheikhAvailability(sheikh.id)} onSelectSlot={handleSelectSlot} getDayName={getDayName} formatTime={formatTime} />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p>Le cheikh n'a pas encore de créneaux configurés.</p>
-                      <Button className="mt-4" onClick={() => setShowForm(true)} disabled={!isEligible}><Calendar className="w-4 h-4 mr-2" />Faire une demande</Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+            {/* Calendrier de réservation */}
+            <IjazaCalendar
+              isAdmin={false}
+              onSlotSelect={(slotId, date, time) => {
+                setSelectedSlotData({ sheikh: sheikhs[0] || null, slot: { id: slotId, booking_date: date, start_time: time } });
+                setShowForm(true);
+              }}
+            />
+
+            {/* Formulaire de réservation - modal */}
+            {showForm && (
+              <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+                <div className="bg-background rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+                  <IjazaRequestForm
+                    userName={userName}
+                    userEmail={user?.email || ""}
+                    selectedSheikh={selectedSlotData?.sheikh || null}
+                    selectedSlot={selectedSlotData?.slot || null}
+                    sheikhs={sheikhs}
+                    onSubmit={handleSubmitRequest}
+                    onCancel={handleCancelForm}
+                    getDayName={getDayName}
+                    formatTime={formatTime}
+                    isEligible={isEligible}
+                  />
+                </div>
+              </div>
             )}
           </div>
         )}
