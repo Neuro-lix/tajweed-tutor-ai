@@ -45,7 +45,7 @@ export const IjazaPage: React.FC<IjazaPageProps> = ({
 
   const prerequisites = [
     { title: 'Mémorisation complète', description: 'Avoir mémorisé le Coran en entier ou la partie concernée', icon: BookOpen, required: true, met: undefined },
-    { title: 'Maîtrise du Tajwīd', description: 'Score moyen de 85% ou plus sur les récitations', icon: Star, met: averageScore >= 85, required: true },
+    { title: 'Maîtrise du Tajwid', description: 'Score moyen de 85% ou plus sur les récitations', icon: Star, met: averageScore >= 85, required: true },
     { title: 'Régularité', description: 'Au moins 30 sourates maîtrisées', icon: CheckCircle2, met: masteredSurahs >= 30, required: true },
     { title: 'Recommandation', description: "Lettre de recommandation d'un enseignant (optionnel)", icon: Users, required: false, met: undefined },
   ];
@@ -311,11 +311,11 @@ export const IjazaPage: React.FC<IjazaPageProps> = ({
                 <div className="grid md:grid-cols-2 gap-3">
                   {[
                     "Correction des makharij (points d'articulation)",
-                    "Règles du tajwīd selon la qirā'ah choisie",
+                    "Règles du tajwid selon la qira'ah choisie",
                     "Mémorisation et révision du Coran",
                     "Préparation à l'évaluation Ijaza",
                     "Règles du waqf et ibtida'",
-                    "Lecture selon les 10 qirā'āt canoniques",
+                    "Lecture selon les 10 qira'at canoniques",
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
                       <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
