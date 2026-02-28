@@ -11,6 +11,7 @@ import { CorrectionReport } from '@/components/dashboard/CorrectionReport';
 import { PricingSection } from '@/components/payment/PricingSection';
 import { Boutique } from '@/pages/Boutique';
 import { IjazaPage } from '@/pages/Ijaza';
+import { AdminDashboard } from '@/pages/AdminDashboard';
 import { MultilingualChat } from '@/components/chat/MultilingualChat';
 import { FeedbackForm } from '@/components/feedback/FeedbackForm';
 import { SpacedRepetitionPanel } from '@/components/review/SpacedRepetitionPanel';
@@ -56,7 +57,7 @@ import { fetchAyah } from '@/lib/quranApi';
 import { TranslationToggle } from '@/components/recitation/TranslationToggle';
 import logoImage from '@/assets/logo.png';
 
-type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections' | 'pricing' | 'recordings' | 'boutique' | 'ijaza';
+type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections' | 'pricing' | 'recordings' | 'boutique' | 'ijaza | 'admin';
 
 interface AnalysisResult {
   isCorrect: boolean;
@@ -577,8 +578,13 @@ const Index = () => {
               />
             </div>
             {devMode && (
-              <div className="inline-flex items-center gap-1 px-3 py-1 bg-amber-500/20 border border-amber-500/40 rounded-full text-xs text-amber-600 font-medium mb-4">
-                🛠️ Mode développeur actif
+              <div className="flex flex-col items-center gap-2 mb-4">
+                <div className="inline-flex items-center gap-1 px-3 py-1 bg-amber-500/20 border border-amber-500/40 rounded-full text-xs text-amber-600 font-medium">
+                  🛠️ Mode développeur actif
+                </div>
+                <button onClick={() => setCurrentView('admin')} className="text-xs text-muted-foreground underline hover:text-primary transition-colors">
+                  ⚙️ Ouvrir le dashboard admin
+                </button>
               </div>
             )}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
@@ -1097,6 +1103,10 @@ const Index = () => {
       totalSurahs={114}
       averageScore={0}
     />;
+  }
+
+  if (currentView === 'admin') {
+    return <AdminDashboard onBack={() => setCurrentView('dashboard')} />;
   }
 
   // Recordings Library
