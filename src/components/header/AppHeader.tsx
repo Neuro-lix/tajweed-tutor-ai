@@ -34,7 +34,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={logoImage} alt="Tajweed Tutor AI" className="h-10 w-10 object-contain rounded-xl bg-white p-0.5" />
+            <img src={logoImage} alt="Tajweed Tutor AI" className="h-10 w-10 object-contain rounded-xl" />
             <div className="flex flex-col">
               <span className="font-semibold text-lg text-foreground leading-tight">Tajweed Tutor AI</span>
               {fullName && <span className="text-xs text-muted-foreground">{fullName}</span>}
