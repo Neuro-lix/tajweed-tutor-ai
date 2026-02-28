@@ -573,7 +573,7 @@ const Index = () => {
               <img 
                 src={logoImage} 
                 alt="Tajweed Tutor AI" 
-                className="h-20 w-20 object-contain cursor-pointer rounded-2xl bg-white p-1 shadow-sm"
+                className="h-24 w-24 object-contain cursor-pointer rounded-2xl shadow-lg"
                 onClick={handleLogoClick}
               />
             </div>
@@ -1099,6 +1099,7 @@ const Index = () => {
   if (currentView === 'ijaza') {
     return <IjazaPage 
       onBack={() => setCurrentView('dashboard')}
+      isAdmin={devMode}
       masteredSurahs={0}
       totalSurahs={114}
       averageScore={0}
