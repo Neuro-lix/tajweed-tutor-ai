@@ -284,14 +284,14 @@ export const IjazaPage: React.FC<IjazaPageProps> = ({
                     <p className="text-xs text-muted-foreground">5 séances d'1 heure</p>
                     <p className="text-4xl font-bold text-primary">120€</p>
                     <p className="text-xs text-muted-foreground">24€/séance (−20%)</p>
-                    <Button size="sm" className="w-full mt-2" onClick={() => setShowForm(true)}>Réserver</Button>
+                    <Button size="sm" className="w-full mt-2" onClick={() => window.open('mailto:contact@tajweedtutorai.com?subject=Pack 5 cours privés', '_blank')}>Réserver</Button>
                   </div>
                   <div className="border rounded-xl p-5 text-center space-y-2">
                     <p className="font-medium">Pack 10 cours</p>
                     <p className="text-xs text-muted-foreground">10 séances d'1 heure</p>
                     <p className="text-4xl font-bold text-primary">200€</p>
                     <p className="text-xs text-muted-foreground">20€/séance (−33%)</p>
-                    <Button size="sm" className="w-full mt-2" onClick={() => setShowForm(true)}>Réserver</Button>
+                    <Button size="sm" className="w-full mt-2" onClick={() => window.open('mailto:contact@tajweedtutorai.com?subject=Pack 10 cours privés', '_blank')}>Réserver</Button>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground text-center mt-4">
@@ -322,17 +322,13 @@ export const IjazaPage: React.FC<IjazaPageProps> = ({
               </CardContent>
             </Card>
 
-            {/* Réserver */}
-            {showForm ? (
-              <IjazaRequestForm userName={userName} userEmail={user?.email || ''} selectedSheikh={selectedSlotData?.sheikh || null} selectedSlot={selectedSlotData?.slot || null} sheikhs={sheikhs} onSubmit={handleSubmitRequest} onCancel={handleCancelForm} getDayName={getDayName} formatTime={formatTime} isEligible={true} />
-            ) : (
-              <div className="text-center">
-                <Button size="lg" onClick={() => setShowForm(true)} className="gap-2">
-                  <Calendar className="w-5 h-5" />
-                  Réserver un cours privé
-                </Button>
-              </div>
-            )}
+            {/* Réserver cours privé */}
+            <div className="text-center">
+              <Button size="lg" onClick={() => window.open('mailto:contact@tajweedtutorai.com?subject=Réservation cours privé', '_blank')} className="gap-2">
+                <Calendar className="w-5 h-5" />
+                Réserver un cours privé
+              </Button>
+            </div>
           </div>
         )}
       </main>
