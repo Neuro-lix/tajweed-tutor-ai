@@ -4,7 +4,7 @@ import { LanguageSelector } from '@/components/settings/LanguageSelector';
 import { OfflineIndicator } from '@/components/offline/OfflineIndicator';
 import { LogOut, MessageSquareHeart, Award, Music, ShoppingBag, GraduationCap } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import logoImage from '@/assets/logo.png';
+import logoImage from '@/logo.png';
 
 interface AppHeaderProps {
   fullName?: string | null;
