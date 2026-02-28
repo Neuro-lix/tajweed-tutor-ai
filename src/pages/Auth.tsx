@@ -147,7 +147,7 @@ const Auth = () => {
       <Card variant="elevated" className="w-full max-w-md relative z-10">
         <CardHeader className="text-center space-y-2">
           <div className="flex justify-center mb-4">
-            <img src={logoImage} alt="Tajweed Tutor AI" className="h-20 w-20 object-contain rounded-xl" />
+            <img src={logoImage} alt="Tajweed Tutor AI" className="h-24 w-24 object-contain rounded-2xl" />
           </div>
           <CardTitle className="text-3xl font-amiri">
             {view === 'login' ? 'Connexion' : view === 'signup' ? 'Inscription' : 'Mot de passe oublié'}
