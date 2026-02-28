@@ -55,7 +55,7 @@ import { Loader2, LogOut, MessageSquareHeart, Award, Globe, Trophy, Music, FileT
 import { toast } from 'sonner';
 import { fetchAyah } from '@/lib/quranApi';
 import { TranslationToggle } from '@/components/recitation/TranslationToggle';
-import logoImage from '@/assets/logo.png';
+import logoImage from '@/logo.png';
 
 type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections' | 'pricing' | 'recordings' | 'boutique' | 'ijaza' | 'admin';
 
