@@ -35,22 +35,8 @@ const RECITERS: ReciterInfo[] = [
     audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.alafasy',
     color: 'bg-emerald-500',
   },
-  {
-    id: 'sudais',
-    name: 'Abdurrahman As-Sudais',
-    nameArabic: 'عبدالرحمن السديس',
-    style: 'Imam de La Mecque',
-    audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.sudais',
-    color: 'bg-purple-500',
-  },
-  {
-    id: 'shuraim',
-    name: 'Saud Al-Shuraim',
-    nameArabic: 'سعود الشريم',
-    style: 'Imam de La Mecque',
-    audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.shuraym',
-    color: 'bg-red-500',
-  },
+
+
   {
     id: 'minshawi',
     name: 'Mohamed Siddiq El-Minshawi',
@@ -140,9 +126,7 @@ export const ReferenceRecitations: React.FC<ReferenceRecitationsProps> = ({
 
   // Fallback URLs for reciters
   const FALLBACK_URLS: Record<string, string> = {
-    'sudais': 'https://cdn.islamic.network/quran/audio/128/ar.alafasy',
-    'shuraim': 'https://cdn.islamic.network/quran/audio/128/ar.alafasy',
-  };
+      };
 
   // Build audio URL
   const getAudioUrl = (reciter: ReciterInfo): string => {
