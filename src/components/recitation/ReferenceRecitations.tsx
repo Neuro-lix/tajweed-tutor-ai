@@ -40,7 +40,7 @@ const RECITERS: ReciterInfo[] = [
     name: 'Abdurrahman As-Sudais',
     nameArabic: 'عبدالرحمن السديس',
     style: 'Imam de La Mecque',
-    audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.abdurrahmaansudais',
+    audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.sudais',
     color: 'bg-purple-500',
   },
   {
@@ -48,7 +48,7 @@ const RECITERS: ReciterInfo[] = [
     name: 'Saud Al-Shuraim',
     nameArabic: 'سعود الشريم',
     style: 'Imam de La Mecque',
-    audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.saaboralshatreem',
+    audioBaseUrl: 'https://cdn.islamic.network/quran/audio/128/ar.shuraym',
     color: 'bg-red-500',
   },
   {
@@ -138,10 +138,23 @@ export const ReferenceRecitations: React.FC<ReferenceRecitationsProps> = ({
     return CUMULATIVE_VERSES[surah - 1] + verse;
   };
 
+  // Fallback URLs for reciters
+  const FALLBACK_URLS: Record<string, string> = {
+    'sudais': 'https://cdn.islamic.network/quran/audio/128/ar.alafasy',
+    'shuraim': 'https://cdn.islamic.network/quran/audio/128/ar.alafasy',
+  };
+
   // Build audio URL
   const getAudioUrl = (reciter: ReciterInfo): string => {
     const ayahNumber = getAyahNumber(surahNumber, verseNumber);
     return `${reciter.audioBaseUrl}/${ayahNumber}.mp3`;
+  };
+  
+  const getFallbackUrl = (reciter: ReciterInfo): string | null => {
+    const fallback = FALLBACK_URLS[reciter.id];
+    if (!fallback) return null;
+    const ayahNumber = getAyahNumber(surahNumber, verseNumber);
+    return `${fallback}/${ayahNumber}.mp3`;
   };
 
   // Cleanup audio on unmount or verse change
@@ -247,9 +260,20 @@ export const ReferenceRecitations: React.FC<ReferenceRecitationsProps> = ({
         };
         
         audio.onerror = () => {
-          setError('Audio non disponible pour ce verset');
-          setIsLoading(false);
-          setIsPlaying(false);
+          const fallbackUrl = getFallbackUrl(selectedReciter);
+          if (fallbackUrl && audio.src !== fallbackUrl) {
+            audio.src = fallbackUrl;
+            audio.load();
+            audio.play().catch(() => {
+              setError('Audio non disponible pour ce verset');
+              setIsLoading(false);
+              setIsPlaying(false);
+            });
+          } else {
+            setError('Audio non disponible pour ce verset');
+            setIsLoading(false);
+            setIsPlaying(false);
+          }
         };
         
         audioRef.current = audio;
