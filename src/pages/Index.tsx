@@ -572,7 +572,7 @@ const Index = () => {
               <img 
                 src={logoImage} 
                 alt="Tajweed Tutor AI" 
-                className="h-20 w-20 object-contain cursor-pointer"
+                className="h-20 w-20 object-contain cursor-pointer rounded-2xl bg-white p-1 shadow-sm"
                 onClick={handleLogoClick}
               />
             </div>
@@ -680,9 +680,7 @@ const Index = () => {
             >
               <p className="text-foreground">
                 <span className="text-2xl font-bold text-primary">3€</span>
-                <span className="text-muted-foreground"> / heure</span>
-                <span className="mx-4 text-border">|</span>
-                <span className="text-muted-foreground">Abonnement illimité à 29€/mois</span>
+                <span className="text-muted-foreground"> / heure d'analyse IA</span>
               </p>
             </Card>
           </div>
@@ -690,7 +688,7 @@ const Index = () => {
           {/* Disclaimer */}
           <p className="text-center text-sm text-muted-foreground mt-8 max-w-xl mx-auto">
             Outil d'apprentissage et d'assistance à la récitation. 
-            Complément au professeur humain — ne délivre pas d'ijazah.
+            Ijaza disponible avec un professeur diplômé d'Al-Azhar.
           </p>
         </div>
       </div>
