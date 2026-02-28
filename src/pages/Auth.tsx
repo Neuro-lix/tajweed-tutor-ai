@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Star8Point } from '@/components/decorative/GeometricPattern';
+import logoImage from '@/assets/logo.png';
 import { Loader2, Mail, Lock, User, Eye, EyeOff, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
 
 type AuthView = 'login' | 'signup' | 'forgot';
@@ -146,7 +147,7 @@ const Auth = () => {
       <Card variant="elevated" className="w-full max-w-md relative z-10">
         <CardHeader className="text-center space-y-2">
           <div className="flex justify-center mb-4">
-            <Star8Point size={48} className="text-primary" />
+            <img src={logoImage} alt="Tajweed Tutor AI" className="h-20 w-20 object-contain rounded-xl" />
           </div>
           <CardTitle className="text-3xl font-amiri">
             {view === 'login' ? 'Connexion' : view === 'signup' ? 'Inscription' : 'Mot de passe oublié'}
