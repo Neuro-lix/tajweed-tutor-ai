@@ -13,7 +13,7 @@ const products = [
   // PDF / Livres
   {
     id: 1, category: 'pdf',
-    title: 'Guide complet du Tajwīd',
+    title: 'Guide complet du Tajwid',
     titleAr: 'دليل التجويد الشامل',
     description: 'Toutes les règles illustrées avec exemples coraniques — 120 pages',
     price: 9.90, originalPrice: 14.90,
@@ -22,7 +22,7 @@ const products = [
   },
   {
     id: 2, category: 'pdf',
-    title: 'Fiches mémo — 10 Qirā'āt',
+      title: "Fiches mémo — 10 Qira'at",
     titleAr: 'بطاقات القراءات العشر',
     description: 'Résumé visuel des 10 lectures canoniques — 40 fiches PDF',
     price: 7.90, originalPrice: null,
@@ -59,7 +59,7 @@ const products = [
   },
   {
     id: 6, category: 'audio',
-    title: 'Cours audio Tajwīd débutant',
+    title: 'Cours audio Tajwid débutant',
     titleAr: 'دروس التجويد الصوتية للمبتدئين',
     description: '20 leçons audio expliquées en français — 4h de contenu',
     price: 14.90, originalPrice: null,
@@ -78,7 +78,7 @@ const products = [
   },
   {
     id: 8, category: 'video',
-    title: 'Mini-cours Tajwīd — Règles essentielles',
+    title: 'Mini-cours Tajwid — Règles essentielles',
     titleAr: 'أحكام التجويد الأساسية',
     description: '10 vidéos — Madd, Ghunna, Qalqala, Idgham expliqués',
     price: 24.90, originalPrice: null,
@@ -138,7 +138,7 @@ export const Boutique: React.FC<BoutiqueProps> = ({ onBack }) => {
         <div className="text-center mb-10 space-y-3">
           <h1 className="text-3xl font-bold">Ressources islamiques digitales</h1>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            PDF, audio, vidéos — tout ce qu'il faut pour progresser dans l'apprentissage du Coran et du Tajwīd
+            PDF, audio, vidéos — tout ce qu'il faut pour progresser dans l'apprentissage du Coran et du Tajwid
           </p>
         </div>
 
