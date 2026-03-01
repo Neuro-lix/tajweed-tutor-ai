@@ -27,7 +27,7 @@ interface IjazaPageProps {
 
 interface SelectedSlotData {
   sheikh: { id: string; name: string; specialty: string | null; languages: string[] };
-  slot: { id: string; sheikhId: string; dayOfWeek: number; startTime: string; endTime: string; isBooked: boolean };
+  slot: { id: string; sheikhId: string; dayOfWeek: number; startTime: string; endTime: string; isBooked: boolean; booking_date?: string };
 }
 
 export const IjazaPage: React.FC<IjazaPageProps> = ({
@@ -208,7 +208,7 @@ export const IjazaPage: React.FC<IjazaPageProps> = ({
             <IjazaCalendar
               isAdmin={false}
               onSlotSelect={(slotId, date, time) => {
-                setSelectedSlotData({ sheikh: sheikhs[0] || null, slot: { id: slotId, booking_date: date, start_time: time } });
+                setSelectedSlotData({ sheikh: sheikhs[0] || null, slot: { id: slotId, sheikhId: sheikhs[0]?.id || '', dayOfWeek: 0, startTime: time, endTime: '', isBooked: false, booking_date: date } });
                 setShowForm(true);
               }}
             />

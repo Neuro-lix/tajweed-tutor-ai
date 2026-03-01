@@ -1099,7 +1099,6 @@ const Index = () => {
   if (currentView === 'ijaza') {
     return <IjazaPage 
       onBack={() => setCurrentView('dashboard')}
-      isAdmin={devMode}
       masteredSurahs={0}
       totalSurahs={114}
       averageScore={0}

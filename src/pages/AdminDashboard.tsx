@@ -61,7 +61,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
       // Users from profiles
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("user_id, full_name, country_name, country_code, language, created_at")
+        .select("user_id, full_name, created_at")
         .order("created_at", { ascending: false });
 
       // Recitation sessions
@@ -96,17 +96,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
         : 0;
 
-      // Top countries
-      const countryCounts: Record<string, { name: string; code: string; count: number }> = {};
-      (profiles || []).forEach(p => {
-        if (p.country_code) {
-          if (!countryCounts[p.country_code]) {
-            countryCounts[p.country_code] = { name: p.country_name || p.country_code, code: p.country_code, count: 0 };
-          }
-          countryCounts[p.country_code].count++;
-        }
-      });
-      const topCountries = Object.values(countryCounts).sort((a, b) => b.count - a.count).slice(0, 8);
+      // Top countries - skipped since profiles table doesn't have country columns
+      const topCountries: { name: string; code: string; count: number }[] = [];
 
       // Registrations by day (last 14 days)
       const last14 = Array.from({ length: 14 }, (_, i) => {
@@ -129,9 +120,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         return {
           user_id: p.user_id,
           full_name: p.full_name,
-          country_name: p.country_name,
-          country_code: p.country_code,
-          language: p.language,
+          country_name: null,
+          country_code: null,
+          language: null,
           registered_at: p.created_at,
           total_sessions: userSessions.length,
           avg_score: userScores.length ? Math.round(userScores.reduce((a, b) => a + b, 0) / userScores.length) : 0,
