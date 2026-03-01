@@ -58,7 +58,7 @@ const RECITERS: ReciterInfo[] = [
     name: 'Al-Husary (Mujawwad)',
     nameArabic: 'الحصري مجود',
     style: 'Style mujawwad mélodique',
-    audioBaseUrl: 'https://everyayah.com/data/Husary_Mujawwad_128kbps',
+    audioBaseUrl: 'https://everyayah.com/data/Husary_128kbps_Mujawwad',
     color: 'bg-cyan-500',
   },
   {
@@ -74,7 +74,7 @@ const RECITERS: ReciterInfo[] = [
     name: 'Saad Al-Ghamdi',
     nameArabic: 'سعد الغامدي',
     style: 'Voix douce et apaisante',
-    audioBaseUrl: 'https://everyayah.com/data/Saad_Al-Ghamdi_128kbps',
+    audioBaseUrl: 'https://everyayah.com/data/Ghamadi_40kbps',
     color: 'bg-teal-500',
   },
 ];
