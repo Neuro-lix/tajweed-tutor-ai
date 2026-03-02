@@ -11,100 +11,75 @@ serve(async (req) => {
   }
 
   try {
-    const {
-      audioBase64,
-      audioMimeType,
-      surahNumber,
-      verseNumber,
-      expectedText,
-      qiraat,
-    } = await req.json();
+    const { audioBase64, audioMimeType, surahNumber, verseNumber, expectedText, qiraat } = await req.json();
+
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
 
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-
-    console.log("[analyze-recitation] Request received:", { 
-      surahNumber, verseNumber, qiraat,
-      hasAudio: !!audioBase64,
-      audioLength: audioBase64?.length || 0,
-      mimeType: audioMimeType 
-    });
+    console.log("[analyze-recitation] Request:", { surahNumber, verseNumber, qiraat, hasAudio: !!audioBase64, mimeType: audioMimeType });
 
     const hasAudio = typeof audioBase64 === "string" && audioBase64.trim().length > 100;
     let transcribedText = "";
     let transcriptionOk = false;
     let whisperError: string | null = null;
 
-    // 1) Transcription via Gemini multimodal
+    // 1) Transcription via OpenAI Whisper
     if (hasAudio) {
-      console.log("[analyze-recitation] Starting Gemini audio transcription...");
+      console.log("[analyze-recitation] Starting Whisper transcription...");
       try {
         const base64Payload = audioBase64.includes(",") ? audioBase64.split(",")[1] : audioBase64;
-        const rawMime = (audioMimeType || "audio/wav").split(";")[0].trim();
+        const binaryString = atob(base64Payload);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
 
-        const transcribeResponse = await fetch(geminiUrl, {
+        const rawMime = (audioMimeType || "audio/wav").split(";")[0].trim();
+        const ext = rawMime.includes("webm") ? "webm" : rawMime.includes("mp4") ? "mp4" : "wav";
+
+        const formData = new FormData();
+        formData.append("file", new Blob([bytes], { type: rawMime }), `audio.${ext}`);
+        formData.append("model", "whisper-1");
+        formData.append("language", "ar");
+        formData.append("prompt", `بسم الله الرحمن الرحيم. سورة ${surahNumber} آية ${verseNumber}`);
+
+        const whisperResponse = await fetch("https://api.openai.com/v1/audio/transcriptions", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{
-              parts: [
-                {
-                  inline_data: {
-                    mime_type: rawMime,
-                    data: base64Payload,
-                  },
-                },
-                {
-                  text: `Transcris EXACTEMENT le texte arabe récité dans cet audio. C'est une récitation coranique (Sourate ${surahNumber}, verset ${verseNumber}). Retourne UNIQUEMENT le texte arabe transcrit, sans aucune explication ni commentaire. Si tu n'entends rien ou ne peux pas transcrire, retourne exactement: EMPTY`,
-                },
-              ],
-            }],
-            generationConfig: { temperature: 0.0, maxOutputTokens: 500 },
-          }),
+          headers: { "Authorization": `Bearer ${OPENAI_API_KEY}` },
+          body: formData,
         });
 
-        console.log("[analyze-recitation] Transcription response status:", transcribeResponse.status);
+        console.log("[analyze-recitation] Whisper status:", whisperResponse.status);
 
-        if (!transcribeResponse.ok) {
-          const errorText = await transcribeResponse.text();
-          console.error("[analyze-recitation] Transcription error:", transcribeResponse.status, errorText);
-          whisperError = transcribeResponse.status === 429 ? "Limite de requêtes atteinte" :
-                         transcribeResponse.status === 402 ? "Crédits épuisés" :
-                         `Erreur transcription: ${transcribeResponse.status}`;
+        if (!whisperResponse.ok) {
+          const errorText = await whisperResponse.text();
+          console.error("[analyze-recitation] Whisper error:", errorText);
+          whisperError = whisperResponse.status === 429 ? "Limite de requêtes Whisper" : `Whisper error: ${whisperResponse.status}`;
         } else {
-          const result = await transcribeResponse.json();
-          const content = result?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-          transcribedText = content.trim();
-          
-          if (transcribedText === "EMPTY" || transcribedText.length < 3) {
-            transcribedText = "";
-            transcriptionOk = false;
+          const result = await whisperResponse.json();
+          transcribedText = (result.text || "").trim();
+          transcriptionOk = transcribedText.length >= 3;
+          if (!transcriptionOk) {
             whisperError = "Transcription vide";
-          } else {
-            transcriptionOk = true;
           }
-          console.log("[analyze-recitation] Transcription result:", transcribedText.substring(0, 100));
+          console.log("[analyze-recitation] Whisper result:", transcribedText.substring(0, 100));
         }
       } catch (e) {
-        console.error("[analyze-recitation] Transcription exception:", e);
+        console.error("[analyze-recitation] Whisper exception:", e);
         whisperError = e instanceof Error ? e.message : "Erreur de transcription";
       }
     }
 
     // 2) Early return if transcription failed
-    const transcriptionImpossible = hasAudio && !transcriptionOk;
-    if (transcriptionImpossible) {
+    if (hasAudio && !transcriptionOk) {
       return new Response(JSON.stringify({
         isCorrect: false, overallScore: 0,
-        feedback: "La transcription est vide. Veuillez réenregistrer.",
+        feedback: whisperError || "La transcription est vide. Veuillez réenregistrer.",
         encouragement: "Réessaie en te rapprochant du micro et en parlant clairement.",
-        priorityFixes: [
-          "Réenregistre dans un endroit calme",
-          "Rapproche le micro et augmente le volume",
-          "Réessaie avec un verset court (ex: Al-Ikhlâs 112:1)",
-        ],
+        priorityFixes: ["Réenregistre dans un endroit calme", "Rapproche le micro", "Réessaie avec un verset court"],
         errors: [], textComparison: "",
         audioAnalyzed: true, audioMimeType: audioMimeType ?? null,
         transcribedText: null, expectedText,
@@ -113,6 +88,8 @@ serve(async (req) => {
     }
 
     // 3) Tajweed analysis via Gemini
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
     const systemPrompt = `Tu es Cheikh Al-Muqri', un maître de tajwīd extrêmement strict et expert en lecture ${qiraat}.
 
 ## TON RÔLE
@@ -155,18 +132,12 @@ Réponds UNIQUEMENT en JSON valide.`;
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [
-          { role: "user", parts: [{ text: systemPrompt + "\n\n" + userPrompt }] },
-        ],
-        generationConfig: {
-          temperature: 0.1,
-          maxOutputTokens: 2000,
-          responseMimeType: "application/json",
-        },
+        contents: [{ role: "user", parts: [{ text: systemPrompt + "\n\n" + userPrompt }] }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 2000, responseMimeType: "application/json" },
       }),
     });
 
-    console.log("[analyze-recitation] Gemini response status:", response.status);
+    console.log("[analyze-recitation] Gemini status:", response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -180,13 +151,11 @@ Réponds UNIQUEMENT en JSON valide.`;
 
     const aiResponse = await response.json();
     const content = aiResponse?.candidates?.[0]?.content?.parts?.[0]?.text;
-    console.log("[analyze-recitation] AI response:", content?.substring(0, 200));
 
     let analysis: any;
     try {
       analysis = JSON.parse(content);
     } catch {
-      console.error("[analyze-recitation] JSON parse error");
       analysis = {
         isCorrect: false, overallScore: 0,
         feedback: "Erreur d'analyse. Veuillez réessayer.",
@@ -199,7 +168,7 @@ Réponds UNIQUEMENT en JSON valide.`;
     analysis.audioMimeType = hasAudio ? (audioMimeType ?? null) : null;
     analysis.transcribedText = transcriptionOk ? transcribedText : null;
     analysis.expectedText = expectedText;
-    analysis.transcriptionImpossible = transcriptionImpossible;
+    analysis.transcriptionImpossible = false;
     analysis.whisperError = whisperError;
 
     return new Response(JSON.stringify(analysis), {
