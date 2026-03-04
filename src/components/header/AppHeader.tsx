@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { LanguageSelector } from '@/components/settings/LanguageSelector';
 import { OfflineIndicator } from '@/components/offline/OfflineIndicator';
-import { LogOut, MessageSquareHeart, Award, Music, ShoppingBag, GraduationCap } from 'lucide-react';
+import { LogOut, MessageSquareHeart, Award, Music, ShoppingBag, GraduationCap, Zap } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import logoImage from '@/logo.png';
 
@@ -13,6 +13,8 @@ interface AppHeaderProps {
   cacheStats: { verses: number; audio: number; size: number };
   formatCacheSize: (bytes: number) => string;
   correctionsCount: number;
+  credits?: number | null;
+  isLowCredits?: boolean;
   onFeedbackClick: () => void;
   onRecordingsClick: () => void;
   onCorrectionsClick: () => void;
@@ -24,7 +26,7 @@ interface AppHeaderProps {
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
   fullName, isOnline, isOfflineReady, cacheStats, formatCacheSize,
-  correctionsCount, onFeedbackClick, onRecordingsClick, onCorrectionsClick,
+  correctionsCount, credits, isLowCredits, onFeedbackClick, onRecordingsClick, onCorrectionsClick,
   onRecitationClick, onBoutiqueClick, onIjazaClick, onSignOut,
 }) => {
   const { t } = useLanguage();
@@ -42,6 +44,20 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             <OfflineIndicator isOnline={isOnline} isOfflineReady={isOfflineReady} cacheStats={cacheStats} formatCacheSize={formatCacheSize} />
           </div>
           <nav className="flex items-center gap-1 md:gap-2">
+            {credits !== null && credits !== undefined && (
+              <div
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
+                  credits === 0
+                    ? 'bg-destructive/15 text-destructive'
+                    : isLowCredits
+                      ? 'bg-amber-500/15 text-amber-600'
+                      : 'bg-primary/15 text-primary'
+                }`}
+              >
+                <Zap className="h-3.5 w-3.5" />
+                <span>{credits}</span>
+              </div>
+            )}
             <LanguageSelector />
             <Button variant="ghost" size="sm" onClick={onFeedbackClick} className="hidden sm:flex">
               <MessageSquareHeart className="h-4 w-4" />

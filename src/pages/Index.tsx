@@ -47,11 +47,13 @@ import { useStreakNotifications } from '@/hooks/useStreakNotifications';
 import { useOfflineMode } from '@/hooks/useOfflineMode';
 import { useCertificates } from '@/hooks/useCertificates';
 import { useRecitationStorage } from '@/hooks/useRecitationStorage';
+import { useCredits } from '@/hooks/useCredits';
+import { useSessionTimer } from '@/hooks/useSessionTimer';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslationSettings } from '@/contexts/TranslationContext';
 import { supabase } from '@/integrations/supabase/client';
 import { SURAHS } from '@/data/quranData';
-import { Loader2, LogOut, MessageSquareHeart, Award, Globe, Trophy, Music, FileText } from 'lucide-react';
+import { Loader2, LogOut, MessageSquareHeart, Award, Globe, Trophy, Music, FileText, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { fetchAyah } from '@/lib/quranApi';
 import { TranslationToggle } from '@/components/recitation/TranslationToggle';
@@ -125,6 +127,7 @@ const Index = () => {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [pendingSaveBlob, setPendingSaveBlob] = useState<Blob | null>(null);
   const [pendingSaveScore, setPendingSaveScore] = useState<number | null>(null);
+  const [showNoCredits, setShowNoCredits] = useState(false);
   
   const {
     isRecording,
@@ -139,6 +142,8 @@ const Index = () => {
   } = useAudioRecorder();
 
   const { saveRecording } = useRecitationStorage();
+  const { credits, hasCredits, isLowCredits, deductCredit, refetch: refetchCredits } = useCredits();
+  const sessionTimer = useSessionTimer();
 
   const [currentVerseText, setCurrentVerseText] = useState<string>('');
   const [currentVerseTranslation, setCurrentVerseTranslation] = useState<string | null>(null);
@@ -294,17 +299,24 @@ const Index = () => {
   }, [audioBlob, isRecording]);
 
   const handleStartRecording = async () => {
+    // Check credits before allowing recording
+    if (!devMode && !hasCredits) {
+      setShowNoCredits(true);
+      return;
+    }
     setShowFeedback(false);
     setAiFeedback(null);
     setAnalysisResult(null);
     setShowReport(false);
     setTranscriptionFailed(false);
+    sessionTimer.start();
     await startRecording();
   };
 
   const handleStopRecording = async () => {
     setAnalyzing(true);
     setAnalysisStep('upload');
+    sessionTimer.pause();
 
     const recording = await stopRecording();
 
@@ -371,6 +383,12 @@ const Index = () => {
       if (data?.error) throw new Error(String(data.error));
 
       setAnalysisStep('complete');
+
+      // Deduct 1 credit after successful analysis
+      if (!devMode) {
+        await deductCredit();
+        refetchCredits();
+      }
 
       const transcriptionImpossible = data?.transcriptionImpossible === true;
       setTranscriptionFailed(transcriptionImpossible);
@@ -808,6 +826,8 @@ const Index = () => {
           cacheStats={cacheStats}
           formatCacheSize={formatCacheSize}
           correctionsCount={corrections.length}
+          credits={credits}
+          isLowCredits={isLowCredits}
           onFeedbackClick={() => setShowFeedbackForm(true)}
           onRecordingsClick={() => setCurrentView('recordings')}
           onCorrectionsClick={() => setCurrentView('corrections')}
@@ -903,13 +923,26 @@ const Index = () => {
         <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <Button variant="ghost" onClick={() => setCurrentView('dashboard')}>
+              <Button variant="ghost" onClick={() => { sessionTimer.reset(); setCurrentView('dashboard'); }}>
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
                 Retour
               </Button>
               <div className="flex items-center gap-3">
+                {/* Session timer */}
+                <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-mono ${sessionTimer.isRunning ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                  ⏱ {sessionTimer.formatted}
+                </div>
+                {/* Credits badge */}
+                {credits !== null && (
+                  <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
+                    credits === 0 ? 'bg-destructive/15 text-destructive' : isLowCredits ? 'bg-amber-500/15 text-amber-600' : 'bg-primary/15 text-primary'
+                  }`}>
+                    <Zap className="h-3.5 w-3.5" />
+                    <span>{credits}</span>
+                  </div>
+                )}
                 <Star8Point size={24} className="text-primary" />
               </div>
             </div>
@@ -1053,6 +1086,23 @@ const Index = () => {
             surahName={SURAHS.find((s) => s.id === currentSurah)?.name}
             verseNumber={currentVerse}
           />
+          {/* No Credits Dialog */}
+          <Dialog open={showNoCredits} onOpenChange={setShowNoCredits}>
+            <DialogContent className="text-center max-w-sm">
+              <div className="flex flex-col items-center gap-4 py-4">
+                <div className="w-16 h-16 rounded-full bg-destructive/15 flex items-center justify-center">
+                  <Zap className="h-8 w-8 text-destructive" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">Plus de crédits</h3>
+                <p className="text-muted-foreground text-sm">
+                  Vous n'avez plus de crédits. Rechargez votre compte pour continuer les analyses.
+                </p>
+                <Button variant="default" onClick={() => { setShowNoCredits(false); navigate('/shop'); }}>
+                  Recharger mes crédits
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </main>
       </div>
     );
