@@ -12,6 +12,8 @@ import Auth from "./pages/Auth";
 import Ijaza from "./pages/IjazaWrapper";
 import VerifyCertificate from "./pages/VerifyCertificate";
 import NotFound from "./pages/NotFound";
+import Shop from "./pages/Shop";
+import ShopSuccess from "./pages/ShopSuccess";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +31,8 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/ijaza" element={<Ijaza />} />
+                <Route path="/shop" element={<Shop />} />
+                <Route path="/shop/success" element={<ShopSuccess />} />
                 <Route path="/verify/:id" element={<VerifyCertificate />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

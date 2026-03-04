@@ -50,7 +50,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               <GraduationCap className="h-4 w-4 md:mr-1" />
               <span className="hidden md:inline">Ijaza</span>
             </Button>
-            <Button variant="ghost" size="sm" onClick={onBoutiqueClick} className="hidden sm:flex">
+            <Button variant="ghost" size="sm" onClick={() => window.location.href = '/shop'} className="hidden sm:flex">
               <ShoppingBag className="h-4 w-4 md:mr-1" />
               <span className="hidden md:inline">Boutique</span>
             </Button>
