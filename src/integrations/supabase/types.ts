@@ -53,6 +53,33 @@ export type Database = {
         }
         Relationships: []
       }
+      credit_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ijaza_requests: {
         Row: {
           created_at: string
@@ -430,6 +457,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_credits: {
+        Row: {
+          created_at: string
+          credits: number
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits?: number
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_feedback: {
         Row: {
           category: string | null
@@ -600,7 +651,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      deduct_credit: { Args: { p_user_id: string }; Returns: number }
     }
     Enums: {
       qiraat_type:
