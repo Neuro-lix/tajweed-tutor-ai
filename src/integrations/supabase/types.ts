@@ -651,6 +651,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_credits: {
+        Args: { p_amount: number; p_description: string; p_user_id: string }
+        Returns: number
+      }
       deduct_credit: { Args: { p_user_id: string }; Returns: number }
     }
     Enums: {
