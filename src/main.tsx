@@ -9,11 +9,12 @@ createRoot(document.getElementById("root")!).render(
   </HelmetProvider>
 );
 
-// PWA: register service worker (required for install prompt)
-if (import.meta.env.PROD && "serviceWorker" in navigator) {
+// Register Service Worker for PWA
+if ("serviceWorker" in navigator && import.meta.env.PROD) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch((err) => {
-      console.warn("[PWA] Service worker registration failed", err);
-    });
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((reg) => console.log("[SW] Registered:", reg.scope))
+      .catch((err) => console.warn("[SW] Registration failed:", err));
   });
 }

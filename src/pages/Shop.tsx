@@ -1,11 +1,13 @@
 import React from 'react';
-import { ShoppingBag, Star, Sparkles, BookOpen, ArrowLeft } from 'lucide-react';
+import { ShoppingBag, Star, Sparkles, BookOpen, ArrowLeft, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
+import { useCredits } from '@/hooks/useCredits';
 
 const PAYPAL_EMAIL = 'YOUR_PAYPAL_EMAIL@example.com';
 const RETURN_URL = 'https://tajweedtutorai.com/shop/success';
+const CANCEL_URL = 'https://tajweedtutorai.com/shop';
 
 interface Product {
   id: string;
@@ -13,8 +15,23 @@ interface Product {
   description: string;
   price: number;
   icon: string;
-  pdfFile: string;
+  pdfFile?: string;
 }
+
+interface CreditPack {
+  id: string;
+  name: string;
+  credits: number;
+  price: number;
+  badge?: string;
+  popular?: boolean;
+}
+
+const creditPacks: CreditPack[] = [
+  { id: 'starter', name: 'Pack Starter', credits: 50, price: 1.99 },
+  { id: 'standard', name: 'Pack Standard', credits: 150, price: 4.99, popular: true },
+  { id: 'premium', name: 'Pack Premium', credits: 400, price: 9.99, badge: 'Meilleur prix' },
+];
 
 const individualSheets: Product[] = [
   { id: 'hifz', name: 'Hifz Tracker', description: 'Objectif Mémorisation', price: 0.99, icon: '📊', pdfFile: 'hifz-tracker.pdf' },
@@ -27,13 +44,17 @@ const individualSheets: Product[] = [
   { id: 'duas', name: "Dou'as du Coran", description: 'Invocations coraniques essentielles', price: 0.99, icon: '🕌', pdfFile: 'duas-coran.pdf' },
 ];
 
-const handleBuy = (itemName: string, price: number) => {
-  const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${PAYPAL_EMAIL}&item_name=${encodeURIComponent(itemName)}&amount=${price}&currency_code=EUR&return=${encodeURIComponent(RETURN_URL)}`;
+const handleBuy = (itemName: string, price: number, packId?: string) => {
+  const returnUrl = packId
+    ? `${RETURN_URL}?pack=${packId}`
+    : RETURN_URL;
+  const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${PAYPAL_EMAIL}&item_name=${encodeURIComponent(itemName)}&amount=${price}&currency_code=EUR&return=${encodeURIComponent(returnUrl)}&cancel_return=${encodeURIComponent(CANCEL_URL)}`;
   window.open(paypalUrl, '_blank');
 };
 
 const Shop: React.FC = () => {
   const navigate = useNavigate();
+  const { credits } = useCredits();
 
   return (
     <div className="min-h-screen bg-background">
@@ -45,6 +66,11 @@ const Shop: React.FC = () => {
           </Button>
           <ShoppingBag className="h-5 w-5 text-primary" />
           <span className="font-semibold text-lg text-foreground">Boutique</span>
+          {credits !== null && credits !== undefined && (
+            <Badge variant="outline" className="ml-auto">
+              <Zap className="h-3 w-3 mr-1" /> {credits} crédits
+            </Badge>
+          )}
         </div>
       </header>
 
@@ -55,12 +81,61 @@ const Shop: React.FC = () => {
             ✨ Boutique
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            Des outils premium pour votre parcours coranique
+            Rechargez vos crédits et accédez à nos ressources premium
           </p>
         </div>
       </section>
 
       <div className="container mx-auto px-4 pb-20 space-y-16">
+
+        {/* Credit Packs */}
+        <section>
+          <div className="flex items-center gap-2 mb-2">
+            <Zap className="h-5 w-5 text-primary" />
+            <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
+              Crédits d'analyse
+            </h2>
+          </div>
+          <p className="text-muted-foreground mb-8">Chaque analyse IA consomme 1 crédit</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {creditPacks.map((pack) => (
+              <div
+                key={pack.id}
+                className={`relative rounded-3xl border-2 p-8 flex flex-col items-center text-center shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-card ${
+                  pack.popular
+                    ? 'border-primary bg-gradient-to-b from-primary/10 to-card'
+                    : 'border-border bg-card'
+                }`}
+              >
+                {pack.badge && (
+                  <Badge className="absolute -top-3 bg-accent text-accent-foreground text-xs font-bold px-3 py-1">
+                    <Star className="h-3 w-3 mr-1" /> {pack.badge}
+                  </Badge>
+                )}
+                {pack.popular && !pack.badge && (
+                  <Badge className="absolute -top-3 bg-primary text-primary-foreground text-xs font-bold px-3 py-1">
+                    Populaire
+                  </Badge>
+                )}
+                <Zap className="h-10 w-10 text-primary mb-4" />
+                <h3 className="font-serif text-xl font-bold text-foreground mb-1">{pack.name}</h3>
+                <p className="text-3xl font-bold text-primary mb-1">{pack.credits}</p>
+                <p className="text-sm text-muted-foreground mb-6">analyses</p>
+                <div className="mt-auto w-full">
+                  <div className="text-2xl font-bold text-foreground mb-3">{pack.price.toFixed(2)}€</div>
+                  <Button
+                    size="lg"
+                    className="w-full rounded-2xl"
+                    onClick={() => handleBuy(`${pack.name} - ${pack.credits} crédits`, pack.price, pack.id)}
+                  >
+                    <Zap className="h-4 w-4 mr-2" />
+                    Acheter
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* Bundle Banner */}
         <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary/90 to-accent/80 p-8 md:p-12 text-primary-foreground shadow-glow">
@@ -79,7 +154,9 @@ const Shop: React.FC = () => {
               <p className="text-primary-foreground/80 text-lg">
                 "Mon Voyage avec le Coran" + "Master Collection Tajweed"
               </p>
-              <p className="text-sm text-primary-foreground/60 mt-2 line-through">10€</p>
+              <p className="text-sm text-primary-foreground/60 mt-2">
+                <span className="line-through">10€</span> — Économisez 1€
+              </p>
             </div>
             <div className="text-center flex-shrink-0">
               <div className="text-5xl font-bold mb-3">9€</div>
@@ -139,24 +216,17 @@ const Shop: React.FC = () => {
               <div className="flex items-start gap-4 mb-4">
                 <div className="text-5xl">📗</div>
                 <div>
-                  <h3 className="font-serif text-xl md:text-2xl font-bold text-foreground">
-                    Livret 1
-                  </h3>
+                  <h3 className="font-serif text-xl md:text-2xl font-bold text-foreground">Livret 1</h3>
                   <p className="text-primary font-semibold">Mon Voyage avec le Coran</p>
                 </div>
               </div>
               <p className="text-muted-foreground mb-6 text-sm">
-                Le guide complet pour démarrer votre parcours de mémorisation et de récitation avec des outils structurés et motivants.
+                Le guide complet pour démarrer votre parcours de mémorisation et de récitation.
               </p>
               <div className="flex items-center justify-between">
                 <span className="text-3xl font-bold text-foreground">5€</span>
-                <Button
-                  size="lg"
-                  className="rounded-2xl px-6"
-                  onClick={() => handleBuy('Livret 1 - Mon Voyage avec le Coran', 5)}
-                >
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  Acheter
+                <Button size="lg" className="rounded-2xl px-6" onClick={() => handleBuy('Livret 1 - Mon Voyage avec le Coran', 5)}>
+                  <BookOpen className="h-4 w-4 mr-2" /> Acheter
                 </Button>
               </div>
             </div>
@@ -166,25 +236,17 @@ const Shop: React.FC = () => {
               <div className="flex items-start gap-4 mb-4">
                 <div className="text-5xl">📘</div>
                 <div>
-                  <h3 className="font-serif text-xl md:text-2xl font-bold text-foreground">
-                    Livret 2
-                  </h3>
+                  <h3 className="font-serif text-xl md:text-2xl font-bold text-foreground">Livret 2</h3>
                   <p className="text-accent font-semibold">Master Collection Tajweed</p>
                 </div>
               </div>
               <p className="text-muted-foreground mb-6 text-sm">
-                La collection complète de 8 fiches spécialisées pour maîtriser tous les aspects du Tajweed et de la récitation.
+                La collection complète de 8 fiches spécialisées pour maîtriser le Tajweed.
               </p>
               <div className="flex items-center justify-between">
                 <span className="text-3xl font-bold text-foreground">5€</span>
-                <Button
-                  size="lg"
-                  variant="gold"
-                  className="rounded-2xl px-6"
-                  onClick={() => handleBuy('Livret 2 - Master Collection Tajweed', 5)}
-                >
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  Acheter
+                <Button size="lg" variant="gold" className="rounded-2xl px-6" onClick={() => handleBuy('Livret 2 - Master Collection Tajweed', 5)}>
+                  <BookOpen className="h-4 w-4 mr-2" /> Acheter
                 </Button>
               </div>
             </div>

@@ -66,7 +66,7 @@ const RECITERS: ReciterInfo[] = [
     name: 'Abdul Basit Abdul Samad',
     nameArabic: 'عبدالباسط عبدالصمد',
     style: 'Légende mondiale du tajwīd',
-    audioBaseUrl: 'https://everyayah.com/data/Abdul_Basit_Murattal_192kbps',
+    audioBaseUrl: 'https://everyayah.com/data/Abdul_Basit_Murattal_64kbps',
     color: 'bg-orange-500',
   },
   {
