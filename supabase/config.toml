@@ -14,3 +14,9 @@ verify_jwt = false
 
 [functions.chat-assistant]
 verify_jwt = false
+
+[functions.create-crypto-payment]
+verify_jwt = false
+
+[functions.crypto-webhook]
+verify_jwt = false
