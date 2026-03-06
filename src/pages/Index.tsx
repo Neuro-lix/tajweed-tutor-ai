@@ -1047,7 +1047,7 @@ const Index = () => {
                 </div>
                 <Button variant="outline" onClick={() => setShowReport(true)} className="gap-2">
                   <FileText className="h-4 w-4" />
-                  Voir le rapport
+                  {t.viewReport}
                 </Button>
               </CardContent>
             </Card>
