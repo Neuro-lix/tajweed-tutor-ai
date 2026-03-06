@@ -61,25 +61,34 @@ const Shop: React.FC = () => {
   const [cryptoLoading, setCryptoLoading] = useState<string | null>(null);
 
   const handleCrypto = async (productName: string, price: number, productType?: string) => {
-    if (!user) {
-      toast({ title: 'Connexion requise', description: 'Connectez-vous pour payer en crypto.', variant: 'destructive' });
-      return;
-    }
+    const userId = user?.id || `guest-${Date.now()}`;
     const key = `${productName}-${price}`;
     setCryptoLoading(key);
     try {
+      console.log('[Crypto] Creating payment:', { productName, price, productType, userId });
       const { data, error } = await supabase.functions.invoke('create-crypto-payment', {
-        body: { amount: price, productName, productType: productType || '', userId: user.id },
+        body: { amount: price, productName, productType: productType || '', userId },
       });
-      if (error) throw error;
+      console.log('[Crypto] Response:', { data, error });
+      if (error) {
+        const msg = typeof error === 'object' && 'message' in error ? error.message : JSON.stringify(error);
+        throw new Error(msg);
+      }
+      if (data?.error) {
+        throw new Error(data.error);
+      }
       if (data?.invoiceUrl) {
         window.open(data.invoiceUrl, '_blank');
       } else {
-        throw new Error('No invoice URL returned');
+        throw new Error('Aucune URL de paiement retournée par NOWPayments');
       }
     } catch (err: any) {
-      console.error('Crypto payment error:', err);
-      toast({ title: 'Erreur', description: 'Impossible de créer le paiement crypto.', variant: 'destructive' });
+      console.error('[Crypto] Payment error:', err);
+      toast({
+        title: 'Erreur paiement crypto',
+        description: err?.message || 'Erreur inconnue lors de la création du paiement.',
+        variant: 'destructive',
+      });
     } finally {
       setCryptoLoading(null);
     }
