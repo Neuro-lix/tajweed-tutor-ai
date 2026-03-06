@@ -285,8 +285,8 @@ const Shop: React.FC = () => {
 
             {/* Individual Sheets */}
             <section>
-              <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-2">Fiches Individuelles</h2>
-              <p className="text-muted-foreground mb-8">Extraites du Livret 2 — 0,99€ chacune</p>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-2">{t.individualSheets}</h2>
+              <p className="text-muted-foreground mb-8">{t.individualDesc}</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                 {individualSheets.map((sheet) => (
                   <div key={sheet.id} className="group rounded-3xl border border-border bg-card p-5 md:p-6 flex flex-col items-center text-center shadow-soft hover:shadow-card transition-all duration-300 hover:-translate-y-1">
