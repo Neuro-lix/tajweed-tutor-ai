@@ -192,10 +192,10 @@ const Shop: React.FC = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <ShoppingBag className="h-5 w-5 text-primary" />
-          <span className="font-semibold text-lg text-foreground">Boutique</span>
+          <span className="font-semibold text-lg text-foreground">{t.shopTitle}</span>
           {credits !== null && credits !== undefined && (
             <Badge variant="outline" className="ml-auto">
-              <Zap className="h-3 w-3 mr-1" /> {credits} crédits
+              <Zap className="h-3 w-3 mr-1" /> {credits} {t.creditsLabel}
             </Badge>
           )}
         </div>
