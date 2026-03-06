@@ -296,7 +296,7 @@ const Shop: React.FC = () => {
                     <div className="mt-auto w-full space-y-2">
                       <div className="text-lg font-bold text-primary mb-2">0,99€</div>
                       <Button size="sm" variant="outline" className="w-full rounded-2xl" onClick={() => openSheetPreview(sheet)}>
-                        <Eye className="h-3 w-3 mr-1" /> Aperçu
+                        <Eye className="h-3 w-3 mr-1" /> {t.previewLabel}
                       </Button>
                       <Button size="sm" className="w-full rounded-2xl" onClick={() => handlePaypal(sheet.name, sheet.price)}>PayPal</Button>
                       <CryptoButton name={sheet.name} price={sheet.price} size="sm" />
