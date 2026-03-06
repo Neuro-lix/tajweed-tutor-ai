@@ -308,7 +308,7 @@ const Shop: React.FC = () => {
 
             {/* Workbooks */}
             <section>
-              <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-2">Livrets Complets</h2>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-2">{t.workbooksLabel}</h2>
               <p className="text-muted-foreground mb-8">Tout-en-un pour un apprentissage structuré</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Livret 1 */}
