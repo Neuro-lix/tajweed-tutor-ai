@@ -606,18 +606,17 @@ const Index = () => {
               </div>
             )}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
-              Apprends le Coran avec{' '}
-              <span className="text-gradient-gold">rigueur</span>{' '}
-              et{' '}
-              <span className="text-primary">bienveillance</span>
+              {t.heroTitle.split(t.heroRigor)[0]}
+              <span className="text-gradient-gold">{t.heroRigor}</span>
+              {' '}
+              {t.heroTitle.split(t.heroKindness)[0]?.split(t.heroRigor)[1] || ''}
+              <span className="text-primary">{t.heroKindness}</span>
             </h1>
             
             <Ornament className="mx-auto text-primary/40 my-8" />
             
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-              Une assistance IA disponible 24/7 pour ta récitation. 
-              Correction précise du tajwīd, suivi de progression, 
-              encouragement sans compromis sur la qualité.
+              {t.heroDescription}
             </p>
 
             <Button 
