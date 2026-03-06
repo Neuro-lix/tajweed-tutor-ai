@@ -749,7 +749,7 @@ const Index = () => {
 
           <div className="flex justify-center gap-4">
             <Button variant="ghost" onClick={() => setCurrentView('landing')}>
-              Retour
+              {t.backLabel}
             </Button>
             <Button 
               variant="hero" 
