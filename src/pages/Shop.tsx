@@ -222,9 +222,9 @@ const Shop: React.FC = () => {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Zap className="h-5 w-5 text-primary" />
-                <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground">Crédits d'analyse</h2>
+                <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground">{t.creditsTab}</h2>
               </div>
-              <p className="text-muted-foreground mb-8">Chaque analyse IA consomme 1 crédit</p>
+              <p className="text-muted-foreground mb-8">{t.eachAnalysisCredit}</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {creditPacks.map((pack) => (
                   <div key={pack.id} className={`relative rounded-3xl border-2 p-8 flex flex-col items-center text-center shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-card ${pack.popular ? 'border-primary bg-gradient-to-b from-primary/10 to-card' : 'border-border bg-card'}`}>
