@@ -1023,7 +1023,7 @@ const Index = () => {
               <CardContent className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">Score :</span>
+                    <span className="font-medium">{t.score} :</span>
                     <span className="font-semibold text-foreground">
                       {typeof analysisResult.overallScore === 'number' ? analysisResult.overallScore : Number(analysisResult.overallScore ?? 0)}
                       /100
