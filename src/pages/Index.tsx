@@ -1036,7 +1036,7 @@ const Index = () => {
                   </div>
                   {analysisResult.transcriptionImpossible && (
                     <p className="text-sm text-destructive">
-                      Transcription impossible{analysisResult.whisperError ? ` : ${analysisResult.whisperError}` : ''}.
+                      {t.transcriptionImpossibleMsg}{analysisResult.whisperError ? ` : ${analysisResult.whisperError}` : ''}.
                     </p>
                   )}
                   {!analysisResult.transcriptionImpossible && (!analysisResult.errors || analysisResult.errors.length === 0) && !analysisResult.isCorrect && (
