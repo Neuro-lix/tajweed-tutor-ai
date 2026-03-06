@@ -664,8 +664,8 @@ const Index = () => {
                     <path d="M12 6v6M9 9h6" />
                   </svg>
                 ),
-                title: '10 lectures canoniques',
-                description: 'Ḥafṣ, Warsh, Qālūn et les 7 autres qirā\'āt authentiques',
+                title: t.tenCanonicalReadings,
+                description: t.tenReadingsDesc,
               },
               {
                 icon: (
