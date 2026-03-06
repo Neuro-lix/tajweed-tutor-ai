@@ -568,12 +568,12 @@ const Index = () => {
           <div className="absolute top-4 right-4 flex gap-2">
             {user ? (
               <>
-                <Button variant="ghost" size="sm" onClick={() => setCurrentView('dashboard')}>
-                  Mon tableau de bord
+              <Button variant="ghost" size="sm" onClick={() => setCurrentView('dashboard')}>
+                  {t.myDashboard}
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
-                  Déconnexion
+                  {t.logout}
                 </Button>
               </>
             ) : (
