@@ -64,15 +64,15 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             </Button>
             <Button variant="ghost" size="sm" onClick={onIjazaClick} className="hidden sm:flex">
               <GraduationCap className="h-4 w-4 md:mr-1" />
-              <span className="hidden md:inline">Ijaza</span>
+              <span className="hidden md:inline">{t.ijaza}</span>
             </Button>
             <Button variant="ghost" size="sm" onClick={() => window.location.href = '/shop'} className="hidden sm:flex">
               <ShoppingBag className="h-4 w-4 md:mr-1" />
-              <span className="hidden md:inline">Boutique</span>
+              <span className="hidden md:inline">{t.boutiqueLabel}</span>
             </Button>
             <Button variant="ghost" size="sm" onClick={onRecordingsClick} className="hidden sm:flex">
               <Music className="h-4 w-4 md:mr-1" />
-              <span className="hidden md:inline">Mes récitations</span>
+              <span className="hidden md:inline">{t.myRecitations}</span>
             </Button>
             <Button variant="ghost" size="sm" onClick={onCorrectionsClick}>
               <span className="hidden sm:inline">{t.corrections}</span>

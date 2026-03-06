@@ -8,6 +8,7 @@ import { useCredits } from '@/hooks/useCredits';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useLanguage } from '@/contexts/LanguageContext';
 import ProductPreviewModal from '@/components/shop/ProductPreviewModal';
 import { sheetPreviews, livret1Pages, livret2Pages } from '@/data/shopPreviews';
 
@@ -72,6 +73,7 @@ const Shop: React.FC = () => {
   const { credits } = useCredits();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [cryptoLoading, setCryptoLoading] = useState<string | null>(null);
   const [preview, setPreview] = useState<PreviewData | null>(null);
 
@@ -190,10 +192,10 @@ const Shop: React.FC = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <ShoppingBag className="h-5 w-5 text-primary" />
-          <span className="font-semibold text-lg text-foreground">Boutique</span>
+          <span className="font-semibold text-lg text-foreground">{t.shopTitle}</span>
           {credits !== null && credits !== undefined && (
             <Badge variant="outline" className="ml-auto">
-              <Zap className="h-3 w-3 mr-1" /> {credits} crédits
+              <Zap className="h-3 w-3 mr-1" /> {credits} {t.creditsLabel}
             </Badge>
           )}
         </div>
@@ -202,8 +204,8 @@ const Shop: React.FC = () => {
       {/* Hero */}
       <section className="py-16 px-4 text-center bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto max-w-3xl">
-          <h1 className="font-serif text-4xl md:text-5xl font-bold text-foreground mb-4">✨ Boutique</h1>
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto">Rechargez vos crédits et accédez à nos ressources premium</p>
+          <h1 className="font-serif text-4xl md:text-5xl font-bold text-foreground mb-4">✨ {t.shopTitle}</h1>
+          <p className="text-lg text-muted-foreground max-w-xl mx-auto">{t.shopSubtitle}</p>
         </div>
       </section>
 
@@ -211,8 +213,8 @@ const Shop: React.FC = () => {
       <div className="container mx-auto px-4 pb-20">
         <Tabs defaultValue="credits" className="w-full">
           <TabsList className="w-full max-w-md mx-auto grid grid-cols-2 mb-10">
-            <TabsTrigger value="credits" className="text-sm">⚡ Crédits d'analyse</TabsTrigger>
-            <TabsTrigger value="pdf" className="text-sm">📚 Ressources PDF</TabsTrigger>
+            <TabsTrigger value="credits" className="text-sm">⚡ {t.creditsTab}</TabsTrigger>
+            <TabsTrigger value="pdf" className="text-sm">📚 {t.pdfTab}</TabsTrigger>
           </TabsList>
 
           {/* Credits Tab */}
@@ -220,9 +222,9 @@ const Shop: React.FC = () => {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Zap className="h-5 w-5 text-primary" />
-                <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground">Crédits d'analyse</h2>
+                <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground">{t.creditsTab}</h2>
               </div>
-              <p className="text-muted-foreground mb-8">Chaque analyse IA consomme 1 crédit</p>
+              <p className="text-muted-foreground mb-8">{t.eachAnalysisCredit}</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {creditPacks.map((pack) => (
                   <div key={pack.id} className={`relative rounded-3xl border-2 p-8 flex flex-col items-center text-center shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-card ${pack.popular ? 'border-primary bg-gradient-to-b from-primary/10 to-card' : 'border-border bg-card'}`}>
@@ -235,7 +237,7 @@ const Shop: React.FC = () => {
                     <Zap className="h-10 w-10 text-primary mb-4" />
                     <h3 className="font-serif text-xl font-bold text-foreground mb-1">{pack.name}</h3>
                     <p className="text-3xl font-bold text-primary mb-1">{pack.credits}</p>
-                    <p className="text-sm text-muted-foreground mb-6">analyses</p>
+                    <p className="text-sm text-muted-foreground mb-6">{t.analysesLabel}</p>
                     <div className="mt-auto w-full space-y-2">
                       <div className="text-2xl font-bold text-foreground mb-3">{pack.price.toFixed(2)}€</div>
                       <Button size="lg" className="w-full rounded-2xl" onClick={() => handlePaypal(`${pack.name} - ${pack.credits} crédits`, pack.price, pack.id)}>
@@ -283,8 +285,8 @@ const Shop: React.FC = () => {
 
             {/* Individual Sheets */}
             <section>
-              <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-2">Fiches Individuelles</h2>
-              <p className="text-muted-foreground mb-8">Extraites du Livret 2 — 0,99€ chacune</p>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-2">{t.individualSheets}</h2>
+              <p className="text-muted-foreground mb-8">{t.individualDesc}</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                 {individualSheets.map((sheet) => (
                   <div key={sheet.id} className="group rounded-3xl border border-border bg-card p-5 md:p-6 flex flex-col items-center text-center shadow-soft hover:shadow-card transition-all duration-300 hover:-translate-y-1">
@@ -294,7 +296,7 @@ const Shop: React.FC = () => {
                     <div className="mt-auto w-full space-y-2">
                       <div className="text-lg font-bold text-primary mb-2">0,99€</div>
                       <Button size="sm" variant="outline" className="w-full rounded-2xl" onClick={() => openSheetPreview(sheet)}>
-                        <Eye className="h-3 w-3 mr-1" /> Aperçu
+                        <Eye className="h-3 w-3 mr-1" /> {t.previewLabel}
                       </Button>
                       <Button size="sm" className="w-full rounded-2xl" onClick={() => handlePaypal(sheet.name, sheet.price)}>PayPal</Button>
                       <CryptoButton name={sheet.name} price={sheet.price} size="sm" />
@@ -306,7 +308,7 @@ const Shop: React.FC = () => {
 
             {/* Workbooks */}
             <section>
-              <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-2">Livrets Complets</h2>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-2">{t.workbooksLabel}</h2>
               <p className="text-muted-foreground mb-8">Tout-en-un pour un apprentissage structuré</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Livret 1 */}

@@ -9,10 +9,12 @@ import {
 } from '@/components/ui/select';
 import { useTranslationSettings, TranslationId, AVAILABLE_TRANSLATIONS } from '@/contexts/TranslationContext';
 import { Languages } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export const TranslationToggle: React.FC = () => {
   const { showTranslation, setShowTranslation, currentTranslationId, setCurrentTranslationId, availableTranslations } =
     useTranslationSettings();
+  const { t } = useLanguage();
 
   return (
     <div className="flex items-center gap-3 text-sm">
@@ -20,7 +22,7 @@ export const TranslationToggle: React.FC = () => {
         <Languages className="h-4 w-4 text-muted-foreground" />
         <Switch checked={showTranslation} onCheckedChange={setShowTranslation} id="translation-toggle" />
         <label htmlFor="translation-toggle" className="text-muted-foreground cursor-pointer select-none">
-          Traduction
+          {t.translationLabel}
         </label>
       </div>
       {showTranslation && (
@@ -29,9 +31,9 @@ export const TranslationToggle: React.FC = () => {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {availableTranslations.map((t) => (
-              <SelectItem key={t.id} value={t.id}>
-                {t.label}
+            {availableTranslations.map((tr) => (
+              <SelectItem key={tr.id} value={tr.id}>
+                {tr.label}
               </SelectItem>
             ))}
           </SelectContent>

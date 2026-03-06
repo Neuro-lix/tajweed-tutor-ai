@@ -3,6 +3,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Star8Point } from '@/components/decorative/GeometricPattern';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ProgressData {
   totalSurahs: number;
@@ -19,28 +20,27 @@ interface ProgressDashboardProps {
 }
 
 export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ data }) => {
+  const { t } = useLanguage();
   const surahProgress = (data.completedSurahs / data.totalSurahs) * 100;
   const verseProgress = (data.masteredVerses / data.totalVerses) * 100;
 
   return (
     <div className="space-y-6">
-      {/* Main progress card */}
       <Card variant="elevated" className="overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-gold-warm to-primary" />
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-2xl">Ta Progression</CardTitle>
+            <CardTitle className="text-2xl">{t.yourProgress}</CardTitle>
             <div className="flex items-center gap-2 text-gold-warm">
               <Star8Point size={20} />
-              <span className="font-semibold">{data.currentStreak} jours</span>
+              <span className="font-semibold">{data.currentStreak} {t.daysStreak}</span>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Surah progress */}
           <div>
             <div className="flex justify-between mb-2">
-              <span className="text-sm font-medium">Sourates</span>
+              <span className="text-sm font-medium">{t.surahsLabel}</span>
               <span className="text-sm text-muted-foreground">
                 {data.completedSurahs} / {data.totalSurahs}
               </span>
@@ -48,10 +48,9 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ data }) =>
             <Progress value={surahProgress} variant="gold" className="h-3" />
           </div>
 
-          {/* Verse progress */}
           <div>
             <div className="flex justify-between mb-2">
-              <span className="text-sm font-medium">Versets maîtrisés</span>
+              <span className="text-sm font-medium">{t.masteredVersesLabel}</span>
               <span className="text-sm text-muted-foreground">
                 {data.masteredVerses} / {data.totalVerses}
               </span>
@@ -59,25 +58,23 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ data }) =>
             <Progress value={verseProgress} variant="success" className="h-3" />
           </div>
 
-          {/* Stats grid */}
           <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
             <div className="text-center">
               <p className="text-2xl font-bold text-primary">{data.totalHours}h</p>
-              <p className="text-xs text-muted-foreground">Temps total</p>
+              <p className="text-xs text-muted-foreground">{t.totalTimeLabel}</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold text-gold-warm">{data.completedSurahs}</p>
-              <p className="text-xs text-muted-foreground">Sourates</p>
+              <p className="text-xs text-muted-foreground">{t.surahsLabel}</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold text-destructive">{data.reviewNeeded}</p>
-              <p className="text-xs text-muted-foreground">À revoir</p>
+              <p className="text-xs text-muted-foreground">{t.toReviewLabel}</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Alerts */}
       {data.reviewNeeded > 0 && (
         <Card variant="progress" className="border-l-4 border-l-gold-warm">
           <CardContent className="py-4">
@@ -89,9 +86,9 @@ export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({ data }) =>
                 </svg>
               </div>
               <div>
-                <p className="font-medium text-foreground">Révision recommandée</p>
+                <p className="font-medium text-foreground">{t.revisionRecommended}</p>
                 <p className="text-sm text-muted-foreground">
-                  {data.reviewNeeded} versets nécessitent une consolidation
+                  {data.reviewNeeded} {t.versesNeedConsolidation}
                 </p>
               </div>
             </div>

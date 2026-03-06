@@ -551,7 +551,7 @@ const Index = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Chargement...</p>
+          <p className="text-muted-foreground">{t.loading}</p>
         </div>
       </div>
     );
@@ -568,18 +568,18 @@ const Index = () => {
           <div className="absolute top-4 right-4 flex gap-2">
             {user ? (
               <>
-                <Button variant="ghost" size="sm" onClick={() => setCurrentView('dashboard')}>
-                  Mon tableau de bord
+              <Button variant="ghost" size="sm" onClick={() => setCurrentView('dashboard')}>
+                  {t.myDashboard}
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
-                  Déconnexion
+                  {t.logout}
                 </Button>
               </>
             ) : (
               <Link to="/auth">
                 <Button variant="outline" size="sm">
-                  Connexion
+                  {t.login}
                 </Button>
               </Link>
             )}
@@ -598,26 +598,25 @@ const Index = () => {
             {devMode && (
               <div className="flex flex-col items-center gap-2 mb-4">
                 <div className="inline-flex items-center gap-1 px-3 py-1 bg-amber-500/20 border border-amber-500/40 rounded-full text-xs text-amber-600 font-medium">
-                  🛠️ Mode développeur actif
+                  🛠️ {t.devModeActive}
                 </div>
                 <button onClick={() => setCurrentView('admin')} className="text-xs text-muted-foreground underline hover:text-primary transition-colors">
-                  ⚙️ Ouvrir le dashboard admin
+                  ⚙️ {t.openAdminDashboard}
                 </button>
               </div>
             )}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
-              Apprends le Coran avec{' '}
-              <span className="text-gradient-gold">rigueur</span>{' '}
-              et{' '}
-              <span className="text-primary">bienveillance</span>
+              {t.heroTitle.split(t.heroRigor)[0]}
+              <span className="text-gradient-gold">{t.heroRigor}</span>
+              {' '}
+              {t.heroTitle.split(t.heroKindness)[0]?.split(t.heroRigor)[1] || ''}
+              <span className="text-primary">{t.heroKindness}</span>
             </h1>
             
             <Ornament className="mx-auto text-primary/40 my-8" />
             
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-              Une assistance IA disponible 24/7 pour ta récitation. 
-              Correction précise du tajwīd, suivi de progression, 
-              encouragement sans compromis sur la qualité.
+              {t.heroDescription}
             </p>
 
             <Button 
@@ -637,7 +636,7 @@ const Index = () => {
               className="animate-scale-in"
               style={{ animationDelay: '0.3s' }}
             >
-              {user ? 'Continuer mon apprentissage' : 'Commencer mon apprentissage'}
+              {user ? t.continueLearning : t.startLearning}
               <svg className="w-5 h-5 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
@@ -654,8 +653,8 @@ const Index = () => {
                     <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3" />
                   </svg>
                 ),
-                title: 'Récitation corrigée',
-                description: 'Analyse précise des makharij, sifat et règles de tajwīd selon ta lecture choisie',
+                title: t.correctedRecitation,
+                description: t.correctedRecitationDesc,
               },
               {
                 icon: (
@@ -665,8 +664,8 @@ const Index = () => {
                     <path d="M12 6v6M9 9h6" />
                   </svg>
                 ),
-                title: '10 lectures canoniques',
-                description: 'Ḥafṣ, Warsh, Qālūn et les 7 autres qirā\'āt authentiques',
+                title: t.tenCanonicalReadings,
+                description: t.tenReadingsDesc,
               },
               {
                 icon: (
@@ -674,8 +673,8 @@ const Index = () => {
                     <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                   </svg>
                 ),
-                title: 'Suivi complet',
-                description: 'Progression détaillée, rapport de corrections imprimable, alertes intelligentes',
+                title: t.fullTrackingTitle,
+                description: t.fullTrackingDesc,
               },
             ].map((feature, i) => (
               <Card 
@@ -704,15 +703,14 @@ const Index = () => {
             >
               <p className="text-foreground">
                 <span className="text-2xl font-bold text-primary">3€</span>
-                <span className="text-muted-foreground"> / heure d'analyse IA</span>
+                <span className="text-muted-foreground"> {t.perHourAnalysis}</span>
               </p>
             </Card>
           </div>
 
           {/* Disclaimer */}
           <p className="text-center text-sm text-muted-foreground mt-8 max-w-xl mx-auto">
-            Outil d'apprentissage et d'assistance à la récitation. 
-            Ijaza disponible avec un professeur diplômé d'Al-Azhar.
+            {t.landingDisclaimer}
           </p>
         </div>
       </div>
@@ -729,10 +727,10 @@ const Index = () => {
           <div className="text-center mb-12">
             <Star8Point size={32} className="mx-auto text-primary mb-6" />
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Choisis ta session
+              {t.chooseSession}
             </h2>
             <p className="text-muted-foreground">
-              Les sessions sont adaptées pour une expérience respectueuse
+              {t.sessionAdapted}
             </p>
           </div>
 
@@ -751,14 +749,14 @@ const Index = () => {
 
           <div className="flex justify-center gap-4">
             <Button variant="ghost" onClick={() => setCurrentView('landing')}>
-              Retour
+              {t.backLabel}
             </Button>
             <Button 
               variant="hero" 
               disabled={!selectedSession}
               onClick={() => setCurrentView('qiraat-select')}
             >
-              Continuer
+              {t.continueLabel}
               <svg className="w-4 h-4 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
@@ -779,11 +777,10 @@ const Index = () => {
           <div className="text-center mb-10">
             <Star8Point size={32} className="mx-auto text-primary mb-6" />
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Choisis ta lecture
+              {t.chooseReading}
             </h2>
             <p className="text-muted-foreground max-w-lg mx-auto">
-              Sélectionne une qirā'ah. Les règles de tajwīd seront strictement 
-              appliquées selon la lecture choisie.
+              {t.selectQiraatDesc}
             </p>
           </div>
 
@@ -796,14 +793,14 @@ const Index = () => {
 
           <div className="flex justify-center gap-4">
             <Button variant="ghost" onClick={() => setCurrentView('session-select')}>
-              Retour
+              {t.backLabel}
             </Button>
             <Button 
               variant="hero" 
               disabled={!selectedQiraat}
               onClick={() => setCurrentView('dashboard')}
             >
-              Commencer
+              {t.startLabel}
               <svg className="w-4 h-4 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
@@ -927,7 +924,7 @@ const Index = () => {
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
-                Retour
+                {t.backLabel}
               </Button>
               <div className="flex items-center gap-3">
                 {/* Session timer */}
@@ -1026,20 +1023,20 @@ const Index = () => {
               <CardContent className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">Score :</span>
+                    <span className="font-medium">{t.score} :</span>
                     <span className="font-semibold text-foreground">
                       {typeof analysisResult.overallScore === 'number' ? analysisResult.overallScore : Number(analysisResult.overallScore ?? 0)}
                       /100
                     </span>
                     {Array.isArray(analysisResult.errors) && analysisResult.errors.length > 0 && (
                       <span className="text-sm text-muted-foreground">
-                        • {analysisResult.errors.length} erreur(s)
+                        • {analysisResult.errors.length} {t.errorsCount}
                       </span>
                     )}
                   </div>
                   {analysisResult.transcriptionImpossible && (
                     <p className="text-sm text-destructive">
-                      Transcription impossible{analysisResult.whisperError ? ` : ${analysisResult.whisperError}` : ''}.
+                      {t.transcriptionImpossibleMsg}{analysisResult.whisperError ? ` : ${analysisResult.whisperError}` : ''}.
                     </p>
                   )}
                   {!analysisResult.transcriptionImpossible && (!analysisResult.errors || analysisResult.errors.length === 0) && !analysisResult.isCorrect && (
@@ -1050,7 +1047,7 @@ const Index = () => {
                 </div>
                 <Button variant="outline" onClick={() => setShowReport(true)} className="gap-2">
                   <FileText className="h-4 w-4" />
-                  Voir le rapport
+                  {t.viewReport}
                 </Button>
               </CardContent>
             </Card>
@@ -1093,12 +1090,12 @@ const Index = () => {
                 <div className="w-16 h-16 rounded-full bg-destructive/15 flex items-center justify-center">
                   <Zap className="h-8 w-8 text-destructive" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Plus de crédits</h3>
+                <h3 className="text-lg font-semibold text-foreground">{t.noMoreCredits}</h3>
                 <p className="text-muted-foreground text-sm">
-                  Vous n'avez plus de crédits. Rechargez votre compte pour continuer les analyses.
+                  {t.noCreditsDesc}
                 </p>
                 <Button variant="default" onClick={() => { setShowNoCredits(false); navigate('/shop'); }}>
-                  Recharger mes crédits
+                  {t.rechargeCredits}
                 </Button>
               </div>
             </DialogContent>
@@ -1120,7 +1117,7 @@ const Index = () => {
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
-                Retour au tableau de bord
+                {t.backToDashboard}
               </Button>
               <Star8Point size={24} className="text-primary" />
             </div>
@@ -1170,7 +1167,7 @@ const Index = () => {
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
-                Retour au tableau de bord
+                {t.backToDashboard}
               </Button>
               <Star8Point size={24} className="text-primary" />
             </div>

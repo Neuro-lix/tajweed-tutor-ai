@@ -10,6 +10,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Download, Trash2 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SaveRecordingDialogProps {
   open: boolean;
@@ -21,35 +22,31 @@ interface SaveRecordingDialogProps {
 }
 
 export const SaveRecordingDialog: React.FC<SaveRecordingDialogProps> = ({
-  open,
-  onOpenChange,
-  onSave,
-  onDiscard,
-  surahName,
-  verseNumber,
+  open, onOpenChange, onSave, onDiscard, surahName, verseNumber,
 }) => {
+  const { t } = useLanguage();
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Garder cette récitation ?</AlertDialogTitle>
+          <AlertDialogTitle>{t.keepRecitation}</AlertDialogTitle>
           <AlertDialogDescription>
             {surahName && verseNumber
-              ? `Tu viens de réciter ${surahName}, verset ${verseNumber}.`
-              : 'Tu viens de terminer une récitation.'}
-            <br />
-            <br />
-            Veux-tu la sauvegarder pour pouvoir la réécouter et la télécharger plus tard ?
+              ? `${t.justRecited} ${surahName}, ${t.verse} ${verseNumber}.`
+              : `${t.justRecited}.`}
+            <br /><br />
+            {t.saveForLater}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={onDiscard} className="gap-2">
             <Trash2 className="h-4 w-4" />
-            Non, supprimer
+            {t.noDiscard}
           </AlertDialogCancel>
           <AlertDialogAction onClick={onSave} className="gap-2">
             <Download className="h-4 w-4" />
-            Oui, garder
+            {t.yesKeep}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

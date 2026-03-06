@@ -102,9 +102,156 @@ export interface TranslationKeys {
   generatingReport: string;
   transcriptionFailed: string;
   retrying: string;
+
+  // ── NEW UI KEYS ──
+
+  // Dashboard UI
+  yourProgress: string;
+  daysStreak: string;
+  surahsLabel: string;
+  masteredVersesLabel: string;
+  totalTimeLabel: string;
+  toReviewLabel: string;
+  revisionRecommended: string;
+  versesNeedConsolidation: string;
+
+  // Quran Map
+  quranMap: string;
+  selectSurahToStart: string;
+  mastered: string;
+  inProgressLabel: string;
+  notStartedLabel: string;
+  showAll114: string;
+  showLess: string;
+  allLabel: string;
+  filterByJuz: string;
+  showingXof114: string;
+
+  // Recitation UI
+  verseOf: string;
+  recordingInProgress: string;
+
+  // Navigation UI
+  backLabel: string;
+  continueLabel: string;
+  startLabel: string;
+  myDashboard: string;
+  backToDashboard: string;
+
+  // Landing UI
+  heroRigor: string;
+  heroKindness: string;
+  heroDescription: string;
+  correctedRecitation: string;
+  correctedRecitationDesc: string;
+  tenCanonicalReadings: string;
+  tenReadingsDesc: string;
+  fullTrackingTitle: string;
+  fullTrackingDesc: string;
+  perHourAnalysis: string;
+  landingDisclaimer: string;
+
+  // Session / Qiraat
+  chooseSession: string;
+  sessionAdapted: string;
+  chooseReading: string;
+  selectQiraatDesc: string;
+
+  // Credits
+  noMoreCredits: string;
+  noCreditsDesc: string;
+  rechargeCredits: string;
+
+  // Report
+  viewReport: string;
+  errorsCount: string;
+  transcriptionImpossibleMsg: string;
+  noErrorDetails: string;
+
+  // Save Recording
+  keepRecitation: string;
+  justRecited: string;
+  saveForLater: string;
+  noDiscard: string;
+  yesKeep: string;
+
+  // Mic Quality
+  micReady: string;
+  micClipping: string;
+  micClippingHint: string;
+  micSilence: string;
+  micSilenceHint: string;
+  micWeak: string;
+  micWeakHint: string;
+  micGood: string;
+
+  // Shop
+  shopTitle: string;
+  shopSubtitle: string;
+  creditsTab: string;
+  pdfTab: string;
+  eachAnalysisCredit: string;
+  popularLabel: string;
+  bestPriceLabel: string;
+  analysesLabel: string;
+  previewLabel: string;
+  boutiqueLabel: string;
+  myRecitations: string;
+  creditsLabel: string;
+  translationLabel: string;
+  individualSheets: string;
+  individualDesc: string;
+  workbooksLabel: string;
+  bundleTitle: string;
+  bundleDesc: string;
+  bundleSave: string;
+
+  // Auth UI
+  loginTitle: string;
+  signupTitle: string;
+  forgotPasswordTitle: string;
+  accessLearning: string;
+  startJourney: string;
+  resetPasswordDesc: string;
+  loginErrorTitle: string;
+  emailOrPasswordWrong: string;
+  welcomeBack: string;
+  loginSuccessDesc: string;
+  accountCreated: string;
+  checkEmailConfirm: string;
+  emailSentTitle: string;
+  checkMailReset: string;
+  backToLogin: string;
+  connectButton: string;
+  creatingButton: string;
+  createAccount: string;
+  noAccountSignup: string;
+  alreadyHaveAccount: string;
+  fullNameLabel: string;
+  yourNamePlaceholder: string;
+  confirmPasswordLabel: string;
+  passwordsNoMatch: string;
+  sendLinkButton: string;
+  sendingButton: string;
+  minChars: string;
+  oneUppercase: string;
+  oneLowercase: string;
+  oneDigit: string;
+  unexpectedError: string;
+  invalidPassword: string;
+  passwordCriteria: string;
+  emailAlreadyUsed: string;
+  emailRequired: string;
+  enterEmail: string;
+
+  // Misc
+  devModeActive: string;
+  openAdminDashboard: string;
+  offlinePractice: string;
+  scoreSuffix: string;
 }
 
-const translations: Record<LanguageCode, TranslationKeys> = {
+const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: TranslationKeys } = {
   fr: {
     appName: 'Quran Tajwid',
     loading: 'Chargement...',
@@ -182,6 +329,126 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     generatingReport: 'Génération du rapport...',
     transcriptionFailed: 'Transcription échouée',
     retrying: 'Nouvelle tentative...',
+    // UI keys
+    yourProgress: 'Ta Progression',
+    daysStreak: 'jours',
+    surahsLabel: 'Sourates',
+    masteredVersesLabel: 'Versets maîtrisés',
+    totalTimeLabel: 'Temps total',
+    toReviewLabel: 'À revoir',
+    revisionRecommended: 'Révision recommandée',
+    versesNeedConsolidation: 'versets nécessitent une consolidation',
+    quranMap: 'Carte du Coran',
+    selectSurahToStart: 'Sélectionne une sourate pour commencer ta récitation',
+    mastered: 'Maîtrisé',
+    inProgressLabel: 'En cours',
+    notStartedLabel: 'Non commencé',
+    showAll114: 'Afficher les 114 sourates',
+    showLess: 'Afficher moins',
+    allLabel: 'Tout',
+    filterByJuz: 'Filtrer par Juz:',
+    showingXof114: 'Affichage de 30 sourates sur 114',
+    verseOf: 'sur',
+    recordingInProgress: 'Enregistrement...',
+    backLabel: 'Retour',
+    continueLabel: 'Continuer',
+    startLabel: 'Commencer',
+    myDashboard: 'Mon tableau de bord',
+    backToDashboard: 'Retour au tableau de bord',
+    heroRigor: 'rigueur',
+    heroKindness: 'bienveillance',
+    heroDescription: 'Une assistance IA disponible 24/7 pour ta récitation. Correction précise du tajwīd, suivi de progression, encouragement sans compromis sur la qualité.',
+    correctedRecitation: 'Récitation corrigée',
+    correctedRecitationDesc: 'Analyse précise des makharij, sifat et règles de tajwīd selon ta lecture choisie',
+    tenCanonicalReadings: '10 lectures canoniques',
+    tenReadingsDesc: "Ḥafṣ, Warsh, Qālūn et les 7 autres qirā'āt authentiques",
+    fullTrackingTitle: 'Suivi complet',
+    fullTrackingDesc: 'Progression détaillée, rapport de corrections imprimable, alertes intelligentes',
+    perHourAnalysis: "/ heure d'analyse IA",
+    landingDisclaimer: "Outil d'apprentissage et d'assistance à la récitation. Ijaza disponible avec un professeur diplômé d'Al-Azhar.",
+    chooseSession: 'Choisis ta session',
+    sessionAdapted: 'Les sessions sont adaptées pour une expérience respectueuse',
+    chooseReading: 'Choisis ta lecture',
+    selectQiraatDesc: "Sélectionne une qirā'ah. Les règles de tajwīd seront strictement appliquées selon la lecture choisie.",
+    noMoreCredits: 'Plus de crédits',
+    noCreditsDesc: "Vous n'avez plus de crédits. Rechargez votre compte pour continuer les analyses.",
+    rechargeCredits: 'Recharger mes crédits',
+    viewReport: 'Voir le rapport',
+    errorsCount: 'erreur(s)',
+    transcriptionImpossibleMsg: 'Transcription impossible',
+    noErrorDetails: "Aucun détail d'erreur n'a été renvoyé — clique sur « Voir le rapport » puis réessaie.",
+    keepRecitation: 'Garder cette récitation ?',
+    justRecited: 'Tu viens de réciter',
+    saveForLater: 'Veux-tu la sauvegarder pour pouvoir la réécouter et la télécharger plus tard ?',
+    noDiscard: 'Non, supprimer',
+    yesKeep: 'Oui, garder',
+    micReady: 'Prêt',
+    micClipping: 'Clipping !',
+    micClippingHint: 'Éloigne le micro, volume trop fort.',
+    micSilence: 'Silence',
+    micSilenceHint: 'Parle plus fort ou rapproche le micro.',
+    micWeak: 'Faible',
+    micWeakHint: 'Augmente légèrement le volume.',
+    micGood: 'Bon',
+    shopTitle: 'Boutique',
+    shopSubtitle: 'Rechargez vos crédits et accédez à nos ressources premium',
+    creditsTab: "Crédits d'analyse",
+    pdfTab: 'Ressources PDF',
+    eachAnalysisCredit: 'Chaque analyse IA consomme 1 crédit',
+    popularLabel: 'Populaire',
+    bestPriceLabel: 'Meilleur prix',
+    analysesLabel: 'analyses',
+    previewLabel: 'Aperçu',
+    boutiqueLabel: 'Boutique',
+    myRecitations: 'Mes récitations',
+    creditsLabel: 'crédits',
+    translationLabel: 'Traduction',
+    individualSheets: 'Fiches Individuelles',
+    individualDesc: 'Extraites du Livret 2 — 0,99€ chacune',
+    workbooksLabel: 'Livrets Complets',
+    bundleTitle: 'Bundle Complet — Les 2 Livrets',
+    bundleDesc: '"Mon Voyage avec le Coran" + "Master Collection Tajweed"',
+    bundleSave: 'Économisez 1€',
+    loginTitle: 'Connexion',
+    signupTitle: 'Inscription',
+    forgotPasswordTitle: 'Mot de passe oublié',
+    accessLearning: "Accédez à votre parcours d'apprentissage",
+    startJourney: 'Commencez votre voyage avec le Coran',
+    resetPasswordDesc: 'Réinitialisez votre mot de passe',
+    loginErrorTitle: 'Erreur de connexion',
+    emailOrPasswordWrong: 'Email ou mot de passe incorrect.',
+    welcomeBack: 'Bienvenue !',
+    loginSuccessDesc: 'Connexion réussie.',
+    accountCreated: 'Compte créé !',
+    checkEmailConfirm: 'Vérifiez vos emails pour confirmer votre compte.',
+    emailSentTitle: 'Email envoyé !',
+    checkMailReset: 'Vérifiez votre boîte mail et cliquez sur le lien pour réinitialiser votre mot de passe.',
+    backToLogin: 'Retour à la connexion',
+    connectButton: 'Se connecter',
+    creatingButton: 'Création...',
+    createAccount: 'Créer mon compte',
+    noAccountSignup: "Pas encore de compte ? S'inscrire",
+    alreadyHaveAccount: 'Déjà un compte ? Se connecter',
+    fullNameLabel: 'Nom complet',
+    yourNamePlaceholder: 'Votre nom',
+    confirmPasswordLabel: 'Confirmer le mot de passe',
+    passwordsNoMatch: 'Les mots de passe ne correspondent pas',
+    sendLinkButton: 'Envoyer le lien',
+    sendingButton: 'Envoi...',
+    minChars: '8 caractères min',
+    oneUppercase: '1 majuscule',
+    oneLowercase: '1 minuscule',
+    oneDigit: '1 chiffre',
+    unexpectedError: "Une erreur inattendue s'est produite.",
+    invalidPassword: 'Mot de passe invalide',
+    passwordCriteria: 'Le mot de passe ne respecte pas les critères.',
+    emailAlreadyUsed: 'Cet email est déjà utilisé. Essayez de vous connecter.',
+    emailRequired: 'Email requis',
+    enterEmail: 'Entrez votre adresse email.',
+    devModeActive: 'Mode développeur actif',
+    openAdminDashboard: 'Ouvrir le dashboard admin',
+    offlinePractice: 'Mode pratique sans analyse IA',
+    scoreSuffix: '/100',
   },
   en: {
     appName: 'Quran Tajweed',
@@ -260,6 +527,126 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     generatingReport: 'Generating report...',
     transcriptionFailed: 'Transcription failed',
     retrying: 'Retrying...',
+    // UI keys
+    yourProgress: 'Your Progress',
+    daysStreak: 'days',
+    surahsLabel: 'Surahs',
+    masteredVersesLabel: 'Mastered verses',
+    totalTimeLabel: 'Total time',
+    toReviewLabel: 'To review',
+    revisionRecommended: 'Revision recommended',
+    versesNeedConsolidation: 'verses need consolidation',
+    quranMap: 'Quran Map',
+    selectSurahToStart: 'Select a surah to start your recitation',
+    mastered: 'Mastered',
+    inProgressLabel: 'In progress',
+    notStartedLabel: 'Not started',
+    showAll114: 'Show all 114 surahs',
+    showLess: 'Show less',
+    allLabel: 'All',
+    filterByJuz: 'Filter by Juz:',
+    showingXof114: 'Showing 30 of 114 surahs',
+    verseOf: 'of',
+    recordingInProgress: 'Recording...',
+    backLabel: 'Back',
+    continueLabel: 'Continue',
+    startLabel: 'Start',
+    myDashboard: 'My Dashboard',
+    backToDashboard: 'Back to dashboard',
+    heroRigor: 'rigor',
+    heroKindness: 'kindness',
+    heroDescription: 'AI assistance available 24/7 for your recitation. Precise tajweed correction, progress tracking, encouragement without compromising quality.',
+    correctedRecitation: 'Corrected Recitation',
+    correctedRecitationDesc: 'Precise analysis of makharij, sifat and tajweed rules according to your chosen reading',
+    tenCanonicalReadings: '10 canonical readings',
+    tenReadingsDesc: "Hafs, Warsh, Qalun and 7 other authentic qira'at",
+    fullTrackingTitle: 'Full Tracking',
+    fullTrackingDesc: 'Detailed progress, printable correction report, smart alerts',
+    perHourAnalysis: '/ hour of AI analysis',
+    landingDisclaimer: 'Learning and recitation assistance tool. Ijaza available with an Al-Azhar certified teacher.',
+    chooseSession: 'Choose your session',
+    sessionAdapted: 'Sessions are adapted for a respectful experience',
+    chooseReading: 'Choose your reading',
+    selectQiraatDesc: "Select a qira'ah. Tajweed rules will be strictly applied according to your chosen reading.",
+    noMoreCredits: 'No more credits',
+    noCreditsDesc: 'You have no credits left. Recharge your account to continue analyses.',
+    rechargeCredits: 'Recharge my credits',
+    viewReport: 'View report',
+    errorsCount: 'error(s)',
+    transcriptionImpossibleMsg: 'Transcription impossible',
+    noErrorDetails: 'No error details returned — click "View report" then try again.',
+    keepRecitation: 'Keep this recitation?',
+    justRecited: 'You just recited',
+    saveForLater: 'Would you like to save it to listen and download later?',
+    noDiscard: 'No, delete',
+    yesKeep: 'Yes, keep',
+    micReady: 'Ready',
+    micClipping: 'Clipping!',
+    micClippingHint: 'Move the mic away, volume too high.',
+    micSilence: 'Silence',
+    micSilenceHint: 'Speak louder or move the mic closer.',
+    micWeak: 'Weak',
+    micWeakHint: 'Slightly increase the volume.',
+    micGood: 'Good',
+    shopTitle: 'Shop',
+    shopSubtitle: 'Recharge your credits and access premium resources',
+    creditsTab: 'Analysis Credits',
+    pdfTab: 'PDF Resources',
+    eachAnalysisCredit: 'Each AI analysis uses 1 credit',
+    popularLabel: 'Popular',
+    bestPriceLabel: 'Best price',
+    analysesLabel: 'analyses',
+    previewLabel: 'Preview',
+    boutiqueLabel: 'Shop',
+    myRecitations: 'My Recitations',
+    creditsLabel: 'credits',
+    translationLabel: 'Translation',
+    individualSheets: 'Individual Sheets',
+    individualDesc: 'From Workbook 2 — €0.99 each',
+    workbooksLabel: 'Complete Workbooks',
+    bundleTitle: 'Complete Bundle — Both Workbooks',
+    bundleDesc: '"My Journey with the Quran" + "Master Collection Tajweed"',
+    bundleSave: 'Save €1',
+    loginTitle: 'Login',
+    signupTitle: 'Sign up',
+    forgotPasswordTitle: 'Forgot password',
+    accessLearning: 'Access your learning journey',
+    startJourney: 'Start your journey with the Quran',
+    resetPasswordDesc: 'Reset your password',
+    loginErrorTitle: 'Login error',
+    emailOrPasswordWrong: 'Incorrect email or password.',
+    welcomeBack: 'Welcome!',
+    loginSuccessDesc: 'Login successful.',
+    accountCreated: 'Account created!',
+    checkEmailConfirm: 'Check your email to confirm your account.',
+    emailSentTitle: 'Email sent!',
+    checkMailReset: 'Check your inbox and click the link to reset your password.',
+    backToLogin: 'Back to login',
+    connectButton: 'Log in',
+    creatingButton: 'Creating...',
+    createAccount: 'Create my account',
+    noAccountSignup: "Don't have an account? Sign up",
+    alreadyHaveAccount: 'Already have an account? Log in',
+    fullNameLabel: 'Full name',
+    yourNamePlaceholder: 'Your name',
+    confirmPasswordLabel: 'Confirm password',
+    passwordsNoMatch: 'Passwords do not match',
+    sendLinkButton: 'Send link',
+    sendingButton: 'Sending...',
+    minChars: '8 characters min',
+    oneUppercase: '1 uppercase',
+    oneLowercase: '1 lowercase',
+    oneDigit: '1 digit',
+    unexpectedError: 'An unexpected error occurred.',
+    invalidPassword: 'Invalid password',
+    passwordCriteria: 'Password does not meet the criteria.',
+    emailAlreadyUsed: 'This email is already in use. Try logging in.',
+    emailRequired: 'Email required',
+    enterEmail: 'Enter your email address.',
+    devModeActive: 'Developer mode active',
+    openAdminDashboard: 'Open admin dashboard',
+    offlinePractice: 'Practice mode without AI analysis',
+    scoreSuffix: '/100',
   },
   ar: {
     appName: 'تجويد القرآن',
@@ -338,6 +725,126 @@ const translations: Record<LanguageCode, TranslationKeys> = {
     generatingReport: 'إنشاء التقرير...',
     transcriptionFailed: 'فشل النسخ',
     retrying: 'إعادة المحاولة...',
+    // UI keys
+    yourProgress: 'تقدمك',
+    daysStreak: 'أيام',
+    surahsLabel: 'السور',
+    masteredVersesLabel: 'الآيات المتقنة',
+    totalTimeLabel: 'الوقت الكلي',
+    toReviewLabel: 'للمراجعة',
+    revisionRecommended: 'مراجعة موصى بها',
+    versesNeedConsolidation: 'آية تحتاج إلى تعزيز',
+    quranMap: 'خريطة القرآن',
+    selectSurahToStart: 'اختر سورة لبدء تلاوتك',
+    mastered: 'متقن',
+    inProgressLabel: 'قيد التعلم',
+    notStartedLabel: 'لم يبدأ',
+    showAll114: 'عرض جميع السور الـ 114',
+    showLess: 'عرض أقل',
+    allLabel: 'الكل',
+    filterByJuz: 'تصفية حسب الجزء:',
+    showingXof114: 'عرض 30 من 114 سورة',
+    verseOf: 'من',
+    recordingInProgress: 'جارٍ التسجيل...',
+    backLabel: 'رجوع',
+    continueLabel: 'متابعة',
+    startLabel: 'ابدأ',
+    myDashboard: 'لوحتي',
+    backToDashboard: 'العودة إلى لوحة التحكم',
+    heroRigor: 'إتقان',
+    heroKindness: 'رحمة',
+    heroDescription: 'مساعدة ذكية متاحة على مدار الساعة لتلاوتك. تصحيح دقيق للتجويد، متابعة التقدم، تشجيع دون التنازل عن الجودة.',
+    correctedRecitation: 'تلاوة مصححة',
+    correctedRecitationDesc: 'تحليل دقيق للمخارج والصفات وأحكام التجويد حسب القراءة المختارة',
+    tenCanonicalReadings: '10 قراءات معتمدة',
+    tenReadingsDesc: 'حفص، ورش، قالون و7 قراءات أخرى أصيلة',
+    fullTrackingTitle: 'متابعة شاملة',
+    fullTrackingDesc: 'تقدم مفصل، تقرير تصحيحات قابل للطباعة، تنبيهات ذكية',
+    perHourAnalysis: '/ ساعة تحليل بالذكاء الاصطناعي',
+    landingDisclaimer: 'أداة تعلم ومساعدة في التلاوة. الإجازة متاحة مع معلم حاصل على شهادة الأزهر.',
+    chooseSession: 'اختر جلستك',
+    sessionAdapted: 'الجلسات مُعدّة لتجربة محترمة',
+    chooseReading: 'اختر قراءتك',
+    selectQiraatDesc: 'اختر قراءة. سيتم تطبيق أحكام التجويد بدقة حسب القراءة المختارة.',
+    noMoreCredits: 'لا رصيد متبقٍ',
+    noCreditsDesc: 'ليس لديك رصيد. أعد شحن حسابك لمتابعة التحليلات.',
+    rechargeCredits: 'إعادة شحن رصيدي',
+    viewReport: 'عرض التقرير',
+    errorsCount: 'خطأ',
+    transcriptionImpossibleMsg: 'تعذر النسخ',
+    noErrorDetails: 'لم تُرجع تفاصيل خطأ — انقر على "عرض التقرير" ثم أعد المحاولة.',
+    keepRecitation: 'الاحتفاظ بهذه التلاوة؟',
+    justRecited: 'لقد تلوت للتو',
+    saveForLater: 'هل تريد حفظها للاستماع والتحميل لاحقاً؟',
+    noDiscard: 'لا، احذف',
+    yesKeep: 'نعم، احتفظ',
+    micReady: 'جاهز',
+    micClipping: 'تشويش!',
+    micClippingHint: 'ابعد الميكروفون، الصوت مرتفع جداً.',
+    micSilence: 'صمت',
+    micSilenceHint: 'تحدث بصوت أعلى أو قرّب الميكروفون.',
+    micWeak: 'ضعيف',
+    micWeakHint: 'ارفع مستوى الصوت قليلاً.',
+    micGood: 'جيد',
+    shopTitle: 'المتجر',
+    shopSubtitle: 'أعد شحن رصيدك وادخل إلى الموارد المميزة',
+    creditsTab: 'أرصدة التحليل',
+    pdfTab: 'موارد PDF',
+    eachAnalysisCredit: 'كل تحليل بالذكاء الاصطناعي يستهلك رصيداً واحداً',
+    popularLabel: 'الأكثر شعبية',
+    bestPriceLabel: 'أفضل سعر',
+    analysesLabel: 'تحليلات',
+    previewLabel: 'معاينة',
+    boutiqueLabel: 'المتجر',
+    myRecitations: 'تلاواتي',
+    creditsLabel: 'أرصدة',
+    translationLabel: 'ترجمة',
+    individualSheets: 'الأوراق الفردية',
+    individualDesc: 'من الكتيب الثاني — 0.99€ للورقة',
+    workbooksLabel: 'الكتيبات الكاملة',
+    bundleTitle: 'الحزمة الكاملة — الكتيبان',
+    bundleDesc: '"رحلتي مع القرآن" + "المجموعة الشاملة للتجويد"',
+    bundleSave: 'وفر 1€',
+    loginTitle: 'تسجيل الدخول',
+    signupTitle: 'إنشاء حساب',
+    forgotPasswordTitle: 'نسيت كلمة المرور',
+    accessLearning: 'ادخل إلى مسار تعلمك',
+    startJourney: 'ابدأ رحلتك مع القرآن',
+    resetPasswordDesc: 'أعد تعيين كلمة المرور',
+    loginErrorTitle: 'خطأ في تسجيل الدخول',
+    emailOrPasswordWrong: 'البريد أو كلمة المرور غير صحيحة.',
+    welcomeBack: 'أهلاً بك!',
+    loginSuccessDesc: 'تم تسجيل الدخول بنجاح.',
+    accountCreated: 'تم إنشاء الحساب!',
+    checkEmailConfirm: 'تحقق من بريدك لتأكيد حسابك.',
+    emailSentTitle: 'تم إرسال البريد!',
+    checkMailReset: 'تحقق من بريدك وانقر على الرابط لإعادة تعيين كلمة المرور.',
+    backToLogin: 'العودة لتسجيل الدخول',
+    connectButton: 'تسجيل الدخول',
+    creatingButton: 'جارٍ الإنشاء...',
+    createAccount: 'إنشاء حسابي',
+    noAccountSignup: 'ليس لديك حساب؟ أنشئ حساباً',
+    alreadyHaveAccount: 'لديك حساب بالفعل؟ سجل الدخول',
+    fullNameLabel: 'الاسم الكامل',
+    yourNamePlaceholder: 'اسمك',
+    confirmPasswordLabel: 'تأكيد كلمة المرور',
+    passwordsNoMatch: 'كلمتا المرور غير متطابقتين',
+    sendLinkButton: 'إرسال الرابط',
+    sendingButton: 'جارٍ الإرسال...',
+    minChars: '8 أحرف كحد أدنى',
+    oneUppercase: '1 حرف كبير',
+    oneLowercase: '1 حرف صغير',
+    oneDigit: '1 رقم',
+    unexpectedError: 'حدث خطأ غير متوقع.',
+    invalidPassword: 'كلمة مرور غير صالحة',
+    passwordCriteria: 'كلمة المرور لا تستوفي المعايير.',
+    emailAlreadyUsed: 'هذا البريد مستخدم بالفعل. حاول تسجيل الدخول.',
+    emailRequired: 'البريد مطلوب',
+    enterEmail: 'أدخل عنوان بريدك الإلكتروني.',
+    devModeActive: 'وضع المطور نشط',
+    openAdminDashboard: 'فتح لوحة المسؤول',
+    offlinePractice: 'وضع التدريب بدون تحليل ذكي',
+    scoreSuffix: '/100',
   },
   de: {
     appName: 'Quran Tajweed',
@@ -1691,7 +2198,7 @@ export const LANGUAGE_LIST = [
 ];
 
 export const getTranslations = (lang: LanguageCode): TranslationKeys => {
-  return translations[lang] || translations.en;
+  return { ...translations.fr, ...(translations[lang] || {}) } as TranslationKeys;
 };
 
 export const getLanguageDirection = (lang: LanguageCode): 'ltr' | 'rtl' => {
