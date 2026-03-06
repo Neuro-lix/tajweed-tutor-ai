@@ -598,10 +598,10 @@ const Index = () => {
             {devMode && (
               <div className="flex flex-col items-center gap-2 mb-4">
                 <div className="inline-flex items-center gap-1 px-3 py-1 bg-amber-500/20 border border-amber-500/40 rounded-full text-xs text-amber-600 font-medium">
-                  🛠️ Mode développeur actif
+                  🛠️ {t.devModeActive}
                 </div>
                 <button onClick={() => setCurrentView('admin')} className="text-xs text-muted-foreground underline hover:text-primary transition-colors">
-                  ⚙️ Ouvrir le dashboard admin
+                  ⚙️ {t.openAdminDashboard}
                 </button>
               </div>
             )}
