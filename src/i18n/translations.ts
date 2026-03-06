@@ -251,7 +251,7 @@ export interface TranslationKeys {
   scoreSuffix: string;
 }
 
-const translations: Record<LanguageCode, TranslationKeys> = {
+const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: TranslationKeys } = {
   fr: {
     appName: 'Quran Tajwid',
     loading: 'Chargement...',
