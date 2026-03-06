@@ -102,6 +102,153 @@ export interface TranslationKeys {
   generatingReport: string;
   transcriptionFailed: string;
   retrying: string;
+
+  // ── NEW UI KEYS ──
+
+  // Dashboard UI
+  yourProgress: string;
+  daysStreak: string;
+  surahsLabel: string;
+  masteredVersesLabel: string;
+  totalTimeLabel: string;
+  toReviewLabel: string;
+  revisionRecommended: string;
+  versesNeedConsolidation: string;
+
+  // Quran Map
+  quranMap: string;
+  selectSurahToStart: string;
+  mastered: string;
+  inProgressLabel: string;
+  notStartedLabel: string;
+  showAll114: string;
+  showLess: string;
+  allLabel: string;
+  filterByJuz: string;
+  showingXof114: string;
+
+  // Recitation UI
+  verseOf: string;
+  recordingInProgress: string;
+
+  // Navigation UI
+  backLabel: string;
+  continueLabel: string;
+  startLabel: string;
+  myDashboard: string;
+  backToDashboard: string;
+
+  // Landing UI
+  heroRigor: string;
+  heroKindness: string;
+  heroDescription: string;
+  correctedRecitation: string;
+  correctedRecitationDesc: string;
+  tenCanonicalReadings: string;
+  tenReadingsDesc: string;
+  fullTrackingTitle: string;
+  fullTrackingDesc: string;
+  perHourAnalysis: string;
+  landingDisclaimer: string;
+
+  // Session / Qiraat
+  chooseSession: string;
+  sessionAdapted: string;
+  chooseReading: string;
+  selectQiraatDesc: string;
+
+  // Credits
+  noMoreCredits: string;
+  noCreditsDesc: string;
+  rechargeCredits: string;
+
+  // Report
+  viewReport: string;
+  errorsCount: string;
+  transcriptionImpossibleMsg: string;
+  noErrorDetails: string;
+
+  // Save Recording
+  keepRecitation: string;
+  justRecited: string;
+  saveForLater: string;
+  noDiscard: string;
+  yesKeep: string;
+
+  // Mic Quality
+  micReady: string;
+  micClipping: string;
+  micClippingHint: string;
+  micSilence: string;
+  micSilenceHint: string;
+  micWeak: string;
+  micWeakHint: string;
+  micGood: string;
+
+  // Shop
+  shopTitle: string;
+  shopSubtitle: string;
+  creditsTab: string;
+  pdfTab: string;
+  eachAnalysisCredit: string;
+  popularLabel: string;
+  bestPriceLabel: string;
+  analysesLabel: string;
+  previewLabel: string;
+  boutiqueLabel: string;
+  myRecitations: string;
+  creditsLabel: string;
+  translationLabel: string;
+  individualSheets: string;
+  individualDesc: string;
+  workbooksLabel: string;
+  bundleTitle: string;
+  bundleDesc: string;
+  bundleSave: string;
+
+  // Auth UI
+  loginTitle: string;
+  signupTitle: string;
+  forgotPasswordTitle: string;
+  accessLearning: string;
+  startJourney: string;
+  resetPasswordDesc: string;
+  loginErrorTitle: string;
+  emailOrPasswordWrong: string;
+  welcomeBack: string;
+  loginSuccessDesc: string;
+  accountCreated: string;
+  checkEmailConfirm: string;
+  emailSentTitle: string;
+  checkMailReset: string;
+  backToLogin: string;
+  connectButton: string;
+  creatingButton: string;
+  createAccount: string;
+  noAccountSignup: string;
+  alreadyHaveAccount: string;
+  fullNameLabel: string;
+  yourNamePlaceholder: string;
+  confirmPasswordLabel: string;
+  passwordsNoMatch: string;
+  sendLinkButton: string;
+  sendingButton: string;
+  minChars: string;
+  oneUppercase: string;
+  oneLowercase: string;
+  oneDigit: string;
+  unexpectedError: string;
+  invalidPassword: string;
+  passwordCriteria: string;
+  emailAlreadyUsed: string;
+  emailRequired: string;
+  enterEmail: string;
+
+  // Misc
+  devModeActive: string;
+  openAdminDashboard: string;
+  offlinePractice: string;
+  scoreSuffix: string;
 }
 
 const translations: Record<LanguageCode, TranslationKeys> = {
