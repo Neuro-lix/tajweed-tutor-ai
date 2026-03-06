@@ -237,7 +237,7 @@ const Shop: React.FC = () => {
                     <Zap className="h-10 w-10 text-primary mb-4" />
                     <h3 className="font-serif text-xl font-bold text-foreground mb-1">{pack.name}</h3>
                     <p className="text-3xl font-bold text-primary mb-1">{pack.credits}</p>
-                    <p className="text-sm text-muted-foreground mb-6">analyses</p>
+                    <p className="text-sm text-muted-foreground mb-6">{t.analysesLabel}</p>
                     <div className="mt-auto w-full space-y-2">
                       <div className="text-2xl font-bold text-foreground mb-3">{pack.price.toFixed(2)}€</div>
                       <Button size="lg" className="w-full rounded-2xl" onClick={() => handlePaypal(`${pack.name} - ${pack.credits} crédits`, pack.price, pack.id)}>
