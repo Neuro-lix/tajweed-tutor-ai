@@ -1090,12 +1090,12 @@ const Index = () => {
                 <div className="w-16 h-16 rounded-full bg-destructive/15 flex items-center justify-center">
                   <Zap className="h-8 w-8 text-destructive" />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Plus de crédits</h3>
+                <h3 className="text-lg font-semibold text-foreground">{t.noMoreCredits}</h3>
                 <p className="text-muted-foreground text-sm">
-                  Vous n'avez plus de crédits. Rechargez votre compte pour continuer les analyses.
+                  {t.noCreditsDesc}
                 </p>
                 <Button variant="default" onClick={() => { setShowNoCredits(false); navigate('/shop'); }}>
-                  Recharger mes crédits
+                  {t.rechargeCredits}
                 </Button>
               </div>
             </DialogContent>
