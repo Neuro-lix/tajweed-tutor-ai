@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SURAHS } from '@/data/quranData';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SurahStatus {
   id: number;
@@ -31,10 +32,10 @@ const getStatusColor = (status: SurahStatus['status']) => {
 };
 
 export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect }) => {
+  const { t } = useLanguage();
   const [showAll, setShowAll] = useState(false);
   const [selectedJuz, setSelectedJuz] = useState<number | null>(null);
 
-  // Group surahs by Juz (30 parts)
   const surahsByJuz: Record<number, typeof SURAHS> = {};
   SURAHS.forEach((surah) => {
     if (!surahsByJuz[surah.juz]) surahsByJuz[surah.juz] = [];
@@ -49,7 +50,6 @@ export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect
     };
   };
 
-  // Filter surahs based on view mode
   const displayedSurahs = showAll 
     ? (selectedJuz ? surahsByJuz[selectedJuz] || [] : SURAHS)
     : SURAHS.slice(0, 30);
@@ -59,34 +59,32 @@ export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-semibold text-foreground mb-2">Carte du Coran</h2>
-        <p className="text-muted-foreground">Sélectionne une sourate pour commencer ta récitation</p>
+        <h2 className="text-2xl font-semibold text-foreground mb-2">{t.quranMap}</h2>
+        <p className="text-muted-foreground">{t.selectSurahToStart}</p>
       </div>
 
-      {/* Legend */}
       <div className="flex flex-wrap justify-center gap-4">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-primary/20 border border-primary/40" />
-          <span className="text-sm text-muted-foreground">Maîtrisé</span>
+          <span className="text-sm text-muted-foreground">{t.mastered}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-gold-warm/20 border border-gold-warm/40" />
-          <span className="text-sm text-muted-foreground">En cours</span>
+          <span className="text-sm text-muted-foreground">{t.inProgressLabel}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-destructive/20 border border-destructive/40" />
-          <span className="text-sm text-muted-foreground">À revoir</span>
+          <span className="text-sm text-muted-foreground">{t.toReviewLabel}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-muted border border-border" />
-          <span className="text-sm text-muted-foreground">Non commencé</span>
+          <span className="text-sm text-muted-foreground">{t.notStartedLabel}</span>
         </div>
       </div>
 
-      {/* Juz filter */}
       {showAll && (
         <div className="space-y-2">
-          <p className="text-sm text-muted-foreground text-center">Filtrer par Juz:</p>
+          <p className="text-sm text-muted-foreground text-center">{t.filterByJuz}</p>
           <ScrollArea className="w-full">
             <div className="flex gap-2 pb-2 justify-center flex-wrap">
               <Button
@@ -94,7 +92,7 @@ export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect
                 size="sm"
                 onClick={() => setSelectedJuz(null)}
               >
-                Tout
+                {t.allLabel}
               </Button>
               {juzNumbers.map((juz) => (
                 <Button
@@ -112,7 +110,6 @@ export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect
         </div>
       )}
 
-      {/* Surah grid */}
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2">
         {displayedSurahs.map((surah) => {
           const status = getSurahStatus(surah.id);
@@ -150,7 +147,6 @@ export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect
         })}
       </div>
 
-      {/* Show more/less toggle */}
       <div className="text-center">
         <Button
           variant="outline"
@@ -163,18 +159,18 @@ export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect
           {showAll ? (
             <>
               <ChevronUp className="w-4 h-4" />
-              Afficher moins
+              {t.showLess}
             </>
           ) : (
             <>
               <ChevronDown className="w-4 h-4" />
-              Afficher les 114 sourates
+              {t.showAll114}
             </>
           )}
         </Button>
         {!showAll && (
           <p className="text-sm text-muted-foreground mt-2">
-            Affichage de 30 sourates sur 114
+            {t.showingXof114}
           </p>
         )}
       </div>

@@ -1,36 +1,33 @@
 import React, { useMemo } from 'react';
 import { AlertCircle, Mic } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface MicQualityIndicatorProps {
-  level: number; // 0..1
-  peak: number; // 0..1
+  level: number;
+  peak: number;
   isRecording: boolean;
 }
 
 export const MicQualityIndicator: React.FC<MicQualityIndicatorProps> = ({
-  level,
-  peak,
-  isRecording,
+  level, peak, isRecording,
 }) => {
+  const { t } = useLanguage();
+
   const status = useMemo<{ label: string; color: string; hint: string | null }>(() => {
     if (!isRecording) {
-      return { label: 'Prêt', color: 'text-muted-foreground', hint: null };
+      return { label: t.micReady, color: 'text-muted-foreground', hint: null };
     }
-
     if (peak >= 0.98) {
-      return { label: 'Clipping !', color: 'text-destructive', hint: 'Éloigne le micro, volume trop fort.' };
+      return { label: t.micClipping, color: 'text-destructive', hint: t.micClippingHint };
     }
-
     if (level < 0.05) {
-      return { label: 'Silence', color: 'text-amber-500', hint: 'Parle plus fort ou rapproche le micro.' };
+      return { label: t.micSilence, color: 'text-amber-500', hint: t.micSilenceHint };
     }
-
     if (level < 0.15) {
-      return { label: 'Faible', color: 'text-amber-500', hint: 'Augmente légèrement le volume.' };
+      return { label: t.micWeak, color: 'text-amber-500', hint: t.micWeakHint };
     }
-
-    return { label: 'Bon', color: 'text-primary', hint: null };
-  }, [level, peak, isRecording]);
+    return { label: t.micGood, color: 'text-primary', hint: null };
+  }, [level, peak, isRecording, t]);
 
   return (
     <div className="flex items-center gap-2 text-sm">
