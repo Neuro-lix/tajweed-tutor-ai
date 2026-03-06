@@ -1030,7 +1030,7 @@ const Index = () => {
                     </span>
                     {Array.isArray(analysisResult.errors) && analysisResult.errors.length > 0 && (
                       <span className="text-sm text-muted-foreground">
-                        • {analysisResult.errors.length} erreur(s)
+                        • {analysisResult.errors.length} {t.errorsCount}
                       </span>
                     )}
                   </div>
