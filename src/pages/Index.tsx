@@ -777,11 +777,10 @@ const Index = () => {
           <div className="text-center mb-10">
             <Star8Point size={32} className="mx-auto text-primary mb-6" />
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Choisis ta lecture
+              {t.chooseReading}
             </h2>
             <p className="text-muted-foreground max-w-lg mx-auto">
-              Sélectionne une qirā'ah. Les règles de tajwīd seront strictement 
-              appliquées selon la lecture choisie.
+              {t.selectQiraatDesc}
             </p>
           </div>
 
