@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Star8Point } from '@/components/decorative/GeometricPattern';
+import { useLanguage } from '@/contexts/LanguageContext';
 import logoImage from '@/logo.png';
 import { Loader2, Mail, Lock, User, Eye, EyeOff, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
 
@@ -24,6 +25,7 @@ const Auth = () => {
   const [forgotSent, setForgotSent] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const passwordChecks = {
     minLength: password.length >= 8,
@@ -54,17 +56,17 @@ const Auth = () => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         toast({
-          title: "Erreur de connexion",
+          title: t.loginErrorTitle,
           description: error.message.includes('Invalid login credentials')
-            ? "Email ou mot de passe incorrect."
+            ? t.emailOrPasswordWrong
             : error.message,
           variant: "destructive",
         });
       } else {
-        toast({ title: "Bienvenue !", description: "Connexion réussie." });
+        toast({ title: t.welcomeBack, description: t.loginSuccessDesc });
       }
     } catch {
-      toast({ title: "Erreur", description: "Une erreur inattendue s'est produite.", variant: "destructive" });
+      toast({ title: t.error, description: t.unexpectedError, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -73,11 +75,11 @@ const Auth = () => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isPasswordValid) {
-      toast({ title: "Mot de passe invalide", description: "Le mot de passe ne respecte pas les critères.", variant: "destructive" });
+      toast({ title: t.invalidPassword, description: t.passwordCriteria, variant: "destructive" });
       return;
     }
     if (password !== confirmPassword) {
-      toast({ title: "Erreur", description: "Les mots de passe ne correspondent pas.", variant: "destructive" });
+      toast({ title: t.error, description: t.passwordsNoMatch, variant: "destructive" });
       return;
     }
     setLoading(true);
@@ -91,17 +93,17 @@ const Auth = () => {
       });
       if (error) {
         toast({
-          title: "Erreur",
+          title: t.error,
           description: error.message.includes('already registered')
-            ? "Cet email est déjà utilisé. Essayez de vous connecter."
+            ? t.emailAlreadyUsed
             : error.message,
           variant: "destructive",
         });
       } else {
-        toast({ title: "Compte créé !", description: "Vérifiez vos emails pour confirmer votre compte." });
+        toast({ title: t.accountCreated, description: t.checkEmailConfirm });
       }
     } catch {
-      toast({ title: "Erreur", description: "Une erreur inattendue s'est produite.", variant: "destructive" });
+      toast({ title: t.error, description: t.unexpectedError, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -110,7 +112,7 @@ const Auth = () => {
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
-      toast({ title: "Email requis", description: "Entrez votre adresse email.", variant: "destructive" });
+      toast({ title: t.emailRequired, description: t.enterEmail, variant: "destructive" });
       return;
     }
     setLoading(true);
@@ -119,12 +121,12 @@ const Auth = () => {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) {
-        toast({ title: "Erreur", description: error.message, variant: "destructive" });
+        toast({ title: t.error, description: error.message, variant: "destructive" });
       } else {
         setForgotSent(true);
       }
     } catch {
-      toast({ title: "Erreur", description: "Une erreur inattendue s'est produite.", variant: "destructive" });
+      toast({ title: t.error, description: t.unexpectedError, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -150,12 +152,12 @@ const Auth = () => {
             <img src={logoImage} alt="Tajweed Tutor AI" className="h-24 w-24 object-contain rounded-2xl" />
           </div>
           <CardTitle className="text-3xl font-amiri">
-            {view === 'login' ? 'Connexion' : view === 'signup' ? 'Inscription' : 'Mot de passe oublié'}
+            {view === 'login' ? t.loginTitle : view === 'signup' ? t.signupTitle : t.forgotPasswordTitle}
           </CardTitle>
           <CardDescription className="text-base">
-            {view === 'login' ? "Accédez à votre parcours d'apprentissage"
-              : view === 'signup' ? 'Commencez votre voyage avec le Coran'
-              : 'Réinitialisez votre mot de passe'}
+            {view === 'login' ? t.accessLearning
+              : view === 'signup' ? t.startJourney
+              : t.resetPasswordDesc}
           </CardDescription>
         </CardHeader>
 
@@ -167,28 +169,26 @@ const Auth = () => {
               {forgotSent ? (
                 <div className="text-center space-y-4 py-4">
                   <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto" />
-                  <p className="font-medium">Email envoyé !</p>
-                  <p className="text-sm text-muted-foreground">
-                    Vérifiez votre boîte mail et cliquez sur le lien pour réinitialiser votre mot de passe.
-                  </p>
+                  <p className="font-medium">{t.emailSentTitle}</p>
+                  <p className="text-sm text-muted-foreground">{t.checkMailReset}</p>
                   <Button variant="outline" className="w-full" onClick={() => { setView('login'); setForgotSent(false); }}>
-                    <ArrowLeft className="w-4 h-4 mr-2" />Retour à la connexion
+                    <ArrowLeft className="w-4 h-4 mr-2" />{t.backToLogin}
                   </Button>
                 </div>
               ) : (
                 <form onSubmit={handleForgotPassword} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">{t.email}</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input id="email" type="email" placeholder="votre@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required />
                     </div>
                   </div>
                   <Button type="submit" className="w-full" size="lg" disabled={loading}>
-                    {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Envoi...</> : 'Envoyer le lien'}
+                    {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t.sendingButton}</> : t.sendLinkButton}
                   </Button>
                   <button type="button" onClick={() => setView('login')} className="w-full text-sm text-primary hover:underline flex items-center justify-center gap-1">
-                    <ArrowLeft className="w-3 h-3" />Retour à la connexion
+                    <ArrowLeft className="w-3 h-3" />{t.backToLogin}
                   </button>
                 </form>
               )}
@@ -199,7 +199,7 @@ const Auth = () => {
           {view === 'login' && (
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t.email}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input id="email" type="email" placeholder="votre@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required />
@@ -207,9 +207,9 @@ const Auth = () => {
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Mot de passe</Label>
+                  <Label htmlFor="password">{t.password}</Label>
                   <button type="button" onClick={() => setView('forgot')} className="text-xs text-primary hover:underline">
-                    Mot de passe oublié ?
+                    {t.forgotPassword}
                   </button>
                 </div>
                 <div className="relative">
@@ -221,11 +221,11 @@ const Auth = () => {
                 </div>
               </div>
               <Button type="submit" className="w-full" size="lg" disabled={loading}>
-                {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Connexion...</> : 'Se connecter'}
+                {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t.loginTitle}...</> : t.connectButton}
               </Button>
               <div className="text-center">
                 <button type="button" onClick={() => setView('signup')} className="text-sm text-primary hover:underline">
-                  Pas encore de compte ? S'inscrire
+                  {t.noAccountSignup}
                 </button>
               </div>
             </form>
@@ -235,21 +235,21 @@ const Auth = () => {
           {view === 'signup' && (
             <form onSubmit={handleSignup} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName">Nom complet</Label>
+                <Label htmlFor="fullName">{t.fullNameLabel}</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input id="fullName" type="text" placeholder="Votre nom" value={fullName} onChange={(e) => setFullName(e.target.value)} className="pl-10" required />
+                  <Input id="fullName" type="text" placeholder={t.yourNamePlaceholder} value={fullName} onChange={(e) => setFullName(e.target.value)} className="pl-10" required />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t.email}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input id="email" type="email" placeholder="votre@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Mot de passe</Label>
+                <Label htmlFor="password">{t.password}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10" required minLength={8} />
@@ -259,15 +259,15 @@ const Auth = () => {
                 </div>
                 {password.length > 0 && (
                   <div className="grid grid-cols-2 gap-1 pt-2">
-                    <PasswordCheck valid={passwordChecks.minLength} label="8 caractères min" />
-                    <PasswordCheck valid={passwordChecks.hasUppercase} label="1 majuscule" />
-                    <PasswordCheck valid={passwordChecks.hasLowercase} label="1 minuscule" />
-                    <PasswordCheck valid={passwordChecks.hasNumber} label="1 chiffre" />
+                    <PasswordCheck valid={passwordChecks.minLength} label={t.minChars} />
+                    <PasswordCheck valid={passwordChecks.hasUppercase} label={t.oneUppercase} />
+                    <PasswordCheck valid={passwordChecks.hasLowercase} label={t.oneLowercase} />
+                    <PasswordCheck valid={passwordChecks.hasNumber} label={t.oneDigit} />
                   </div>
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+                <Label htmlFor="confirmPassword">{t.confirmPasswordLabel}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input id="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={`pl-10 pr-10 ${confirmPassword.length > 0 ? passwordChecks.passwordsMatch ? 'border-green-500' : 'border-red-500' : ''}`} required />
@@ -276,15 +276,15 @@ const Auth = () => {
                   </button>
                 </div>
                 {confirmPassword.length > 0 && !passwordChecks.passwordsMatch && (
-                  <p className="text-xs text-red-500">Les mots de passe ne correspondent pas</p>
+                  <p className="text-xs text-red-500">{t.passwordsNoMatch}</p>
                 )}
               </div>
               <Button type="submit" className="w-full" size="lg" disabled={loading || !canSubmitSignup}>
-                {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Création...</> : 'Créer mon compte'}
+                {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t.creatingButton}</> : t.createAccount}
               </Button>
               <div className="text-center">
                 <button type="button" onClick={() => setView('login')} className="text-sm text-primary hover:underline">
-                  Déjà un compte ? Se connecter
+                  {t.alreadyHaveAccount}
                 </button>
               </div>
             </form>
