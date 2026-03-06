@@ -703,7 +703,7 @@ const Index = () => {
             >
               <p className="text-foreground">
                 <span className="text-2xl font-bold text-primary">3€</span>
-                <span className="text-muted-foreground"> / heure d'analyse IA</span>
+                <span className="text-muted-foreground"> {t.perHourAnalysis}</span>
               </p>
             </Card>
           </div>
