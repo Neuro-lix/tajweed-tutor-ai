@@ -213,8 +213,8 @@ const Shop: React.FC = () => {
       <div className="container mx-auto px-4 pb-20">
         <Tabs defaultValue="credits" className="w-full">
           <TabsList className="w-full max-w-md mx-auto grid grid-cols-2 mb-10">
-            <TabsTrigger value="credits" className="text-sm">⚡ Crédits d'analyse</TabsTrigger>
-            <TabsTrigger value="pdf" className="text-sm">📚 Ressources PDF</TabsTrigger>
+            <TabsTrigger value="credits" className="text-sm">⚡ {t.creditsTab}</TabsTrigger>
+            <TabsTrigger value="pdf" className="text-sm">📚 {t.pdfTab}</TabsTrigger>
           </TabsList>
 
           {/* Credits Tab */}
