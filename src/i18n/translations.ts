@@ -2198,7 +2198,7 @@ export const LANGUAGE_LIST = [
 ];
 
 export const getTranslations = (lang: LanguageCode): TranslationKeys => {
-  return translations[lang] || translations.en;
+  return { ...translations.fr, ...(translations[lang] || {}) } as TranslationKeys;
 };
 
 export const getLanguageDirection = (lang: LanguageCode): 'ltr' | 'rtl' => {
