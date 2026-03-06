@@ -710,8 +710,7 @@ const Index = () => {
 
           {/* Disclaimer */}
           <p className="text-center text-sm text-muted-foreground mt-8 max-w-xl mx-auto">
-            Outil d'apprentissage et d'assistance à la récitation. 
-            Ijaza disponible avec un professeur diplômé d'Al-Azhar.
+            {t.landingDisclaimer}
           </p>
         </div>
       </div>
