@@ -579,7 +579,7 @@ const Index = () => {
             ) : (
               <Link to="/auth">
                 <Button variant="outline" size="sm">
-                  Connexion
+                  {t.login}
                 </Button>
               </Link>
             )}
