@@ -73,6 +73,7 @@ const Shop: React.FC = () => {
   const { credits } = useCredits();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [cryptoLoading, setCryptoLoading] = useState<string | null>(null);
   const [preview, setPreview] = useState<PreviewData | null>(null);
 
