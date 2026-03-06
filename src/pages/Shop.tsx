@@ -204,8 +204,8 @@ const Shop: React.FC = () => {
       {/* Hero */}
       <section className="py-16 px-4 text-center bg-gradient-to-b from-primary/5 to-background">
         <div className="container mx-auto max-w-3xl">
-          <h1 className="font-serif text-4xl md:text-5xl font-bold text-foreground mb-4">✨ Boutique</h1>
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto">Rechargez vos crédits et accédez à nos ressources premium</p>
+          <h1 className="font-serif text-4xl md:text-5xl font-bold text-foreground mb-4">✨ {t.shopTitle}</h1>
+          <p className="text-lg text-muted-foreground max-w-xl mx-auto">{t.shopSubtitle}</p>
         </div>
       </section>
 
