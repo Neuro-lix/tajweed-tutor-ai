@@ -653,8 +653,8 @@ const Index = () => {
                     <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3" />
                   </svg>
                 ),
-                title: 'Récitation corrigée',
-                description: 'Analyse précise des makharij, sifat et règles de tajwīd selon ta lecture choisie',
+                title: t.correctedRecitation,
+                description: t.correctedRecitationDesc,
               },
               {
                 icon: (
