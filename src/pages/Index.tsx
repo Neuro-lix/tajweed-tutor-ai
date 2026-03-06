@@ -727,10 +727,10 @@ const Index = () => {
           <div className="text-center mb-12">
             <Star8Point size={32} className="mx-auto text-primary mb-6" />
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Choisis ta session
+              {t.chooseSession}
             </h2>
             <p className="text-muted-foreground">
-              Les sessions sont adaptées pour une expérience respectueuse
+              {t.sessionAdapted}
             </p>
           </div>
 
