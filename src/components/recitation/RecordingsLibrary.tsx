@@ -5,9 +5,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Download, Trash2, Music, Loader2 } from 'lucide-react';
 import { useRecitationStorage, StoredRecitation } from '@/hooks/useRecitationStorage';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { SURAHS } from '@/data/quranData';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 interface RecordingsLibraryProps {
   onClose?: () => void;
@@ -15,6 +17,7 @@ interface RecordingsLibraryProps {
 
 export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({ onClose }) => {
   const { recordings, loading, fetchRecordings, downloadRecording, deleteRecording } = useRecitationStorage();
+  const { t } = useLanguage();
 
   useEffect(() => {
     fetchRecordings();
@@ -22,7 +25,7 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({ onClose })
 
   const getSurahName = (num: number) => {
     const surah = SURAHS.find((s) => s.id === num);
-    return surah ? surah.name : `Sourate ${num}`;
+    return surah ? surah.name : `${t.surah} ${num}`;
   };
 
   const handleDownload = async (rec: StoredRecitation) => {
@@ -31,7 +34,7 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({ onClose })
   };
 
   const handleDelete = async (rec: StoredRecitation) => {
-    if (confirm('Supprimer cette récitation ?')) {
+    if (confirm(t.recordingsDelete)) {
       await deleteRecording(rec.id, rec.storagePath);
     }
   };
@@ -41,11 +44,11 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({ onClose })
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
           <Music className="h-5 w-5 text-primary" />
-          Mes récitations
+          {t.recordingsTitle}
         </CardTitle>
         {onClose && (
           <Button variant="ghost" size="sm" onClick={onClose}>
-            Fermer
+            {t.close}
           </Button>
         )}
       </CardHeader>
@@ -56,9 +59,9 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({ onClose })
           </div>
         ) : recordings.length === 0 ? (
           <p className="text-center text-muted-foreground py-8">
-            Aucune récitation sauvegardée.
+            {t.recordingsEmpty}
             <br />
-            Après chaque récitation, tu pourras choisir de la garder.
+            {t.recordingsEmptyHint}
           </p>
         ) : (
           <ScrollArea className="h-[400px] pr-4">
@@ -85,14 +88,14 @@ export const RecordingsLibrary: React.FC<RecordingsLibraryProps> = ({ onClose })
                     </p>
                   </div>
                   <div className="flex items-center gap-2 ml-4">
-                    <Button variant="ghost" size="icon" onClick={() => handleDownload(rec)} title="Télécharger">
+                    <Button variant="ghost" size="icon" onClick={() => handleDownload(rec)} title={t.recordingsDownload}>
                       <Download className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDelete(rec)}
-                      title="Supprimer"
+                      title={t.delete}
                       className="text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
