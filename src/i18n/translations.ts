@@ -376,6 +376,51 @@ export interface TranslationKeys {
   ijazaSending: string;
   ijazaSendRequest: string;
   ijazaEligibility: string;
+
+  // Ijaza Requests
+  ijazaMyRequestsTitle: string;
+  ijazaMyRequestsDesc: string;
+  ijazaNotAssigned: string;
+  ijazaUnknown: string;
+  ijazaRequestDate: string;
+  ijazaSheikh: string;
+  ijazaTimeSlot: string;
+  ijazaScheduledSession: string;
+  ijazaReason: string;
+  ijazaStatusPending: string;
+  ijazaStatusApproved: string;
+  ijazaStatusRejected: string;
+  ijazaStatusScheduled: string;
+  ijazaStatusCompleted: string;
+  ijazaRequestSent: string;
+  ijazaRequestError: string;
+  ijazaMustBeLoggedIn: string;
+
+  // Day names
+  daySunday: string;
+  dayMonday: string;
+  dayTuesday: string;
+  dayWednesday: string;
+  dayThursday: string;
+  dayFriday: string;
+  daySaturday: string;
+
+  // Shop Success
+  shopSuccessTitle: string;
+  shopSuccessWaitingConfirm: string;
+  shopSuccessWaitingDesc: string;
+  shopSuccessAddingCredits: string;
+  shopSuccessCreditsAdded: string;
+  shopSuccessCreditsAddedDesc: string;
+  shopSuccessCurrentBalance: string;
+  shopSuccessBackToRecitation: string;
+  shopSuccessDownloadDesc: string;
+  shopSuccessBackToShop: string;
+  shopSuccessDownloadError: string;
+  shopSuccessRetryLater: string;
+  shopCryptoError: string;
+  shopCryptoUnknown: string;
+  shopNoCryptoUrl: string;
 }
 
 const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: TranslationKeys } = {
