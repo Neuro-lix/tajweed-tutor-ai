@@ -73,7 +73,16 @@ const Shop: React.FC = () => {
   const [cryptoLoading, setCryptoLoading] = useState<string | null>(null);
   const [preview, setPreview] = useState<PreviewData | null>(null);
 
-  const handleCrypto = async (productName: string, price: number, productType?: string) => {
+  const handlePaypal = (itemName: string, price: number, packId?: string) => {
+    if (!PAYPAL_EMAIL || PAYPAL_EMAIL.includes('example.com')) {
+      toast({ title: 'PayPal non configuré', description: 'Utilisez le paiement crypto.', variant: 'destructive' });
+      return;
+    }
+    const returnUrl = packId ? `${RETURN_URL}?pack=${packId}` : RETURN_URL;
+    const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${PAYPAL_EMAIL}&item_name=${encodeURIComponent(itemName)}&amount=${price}&currency_code=EUR&return=${encodeURIComponent(returnUrl)}&cancel_return=${encodeURIComponent(CANCEL_URL)}`;
+    window.open(paypalUrl, '_blank');
+  };
+
     const userId = user?.id || `guest-${Date.now()}`;
     const key = `${productName}-${price}`;
     setCryptoLoading(key);
