@@ -376,6 +376,51 @@ export interface TranslationKeys {
   ijazaSending: string;
   ijazaSendRequest: string;
   ijazaEligibility: string;
+
+  // Ijaza Requests
+  ijazaMyRequestsTitle: string;
+  ijazaMyRequestsDesc: string;
+  ijazaNotAssigned: string;
+  ijazaUnknown: string;
+  ijazaRequestDate: string;
+  ijazaSheikh: string;
+  ijazaTimeSlot: string;
+  ijazaScheduledSession: string;
+  ijazaReason: string;
+  ijazaStatusPending: string;
+  ijazaStatusApproved: string;
+  ijazaStatusRejected: string;
+  ijazaStatusScheduled: string;
+  ijazaStatusCompleted: string;
+  ijazaRequestSent: string;
+  ijazaRequestError: string;
+  ijazaMustBeLoggedIn: string;
+
+  // Day names
+  daySunday: string;
+  dayMonday: string;
+  dayTuesday: string;
+  dayWednesday: string;
+  dayThursday: string;
+  dayFriday: string;
+  daySaturday: string;
+
+  // Shop Success
+  shopSuccessTitle: string;
+  shopSuccessWaitingConfirm: string;
+  shopSuccessWaitingDesc: string;
+  shopSuccessAddingCredits: string;
+  shopSuccessCreditsAdded: string;
+  shopSuccessCreditsAddedDesc: string;
+  shopSuccessCurrentBalance: string;
+  shopSuccessBackToRecitation: string;
+  shopSuccessDownloadDesc: string;
+  shopSuccessBackToShop: string;
+  shopSuccessDownloadError: string;
+  shopSuccessRetryLater: string;
+  shopCryptoError: string;
+  shopCryptoUnknown: string;
+  shopNoCryptoUrl: string;
 }
 
 const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: TranslationKeys } = {
@@ -694,6 +739,45 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
     ijazaSending: 'Envoi en cours...',
     ijazaSendRequest: 'Envoyer ma demande',
     ijazaEligibility: 'Tu dois maîtriser au moins 30 sourates avec un score moyen de 85% pour demander une Ijaza',
+    ijazaMyRequestsTitle: "Mes demandes d'Ijaza",
+    ijazaMyRequestsDesc: 'Historique et statut de tes demandes',
+    ijazaNotAssigned: 'Non assigné',
+    ijazaUnknown: 'Inconnu',
+    ijazaRequestDate: 'Demande du',
+    ijazaSheikh: 'Cheikh',
+    ijazaTimeSlot: 'Créneau',
+    ijazaScheduledSession: 'Session prévue le',
+    ijazaReason: 'Raison',
+    ijazaStatusPending: 'En attente',
+    ijazaStatusApproved: 'Approuvée',
+    ijazaStatusRejected: 'Refusée',
+    ijazaStatusScheduled: 'Planifiée',
+    ijazaStatusCompleted: 'Terminée',
+    ijazaRequestSent: "Demande d'Ijaza envoyée !",
+    ijazaRequestError: "Erreur lors de l'envoi",
+    ijazaMustBeLoggedIn: 'Vous devez être connecté',
+    daySunday: 'Dimanche',
+    dayMonday: 'Lundi',
+    dayTuesday: 'Mardi',
+    dayWednesday: 'Mercredi',
+    dayThursday: 'Jeudi',
+    dayFriday: 'Vendredi',
+    daySaturday: 'Samedi',
+    shopSuccessTitle: 'Merci pour votre achat ! 🎉',
+    shopSuccessWaitingConfirm: 'En attente de confirmation',
+    shopSuccessWaitingDesc: 'Vos crédits seront ajoutés dès confirmation du paiement.',
+    shopSuccessAddingCredits: 'Ajout des crédits en cours...',
+    shopSuccessCreditsAdded: '✅ Crédits ajoutés !',
+    shopSuccessCreditsAddedDesc: 'Vos crédits ont été ajoutés à votre compte.',
+    shopSuccessCurrentBalance: 'Solde actuel',
+    shopSuccessBackToRecitation: 'Retour à la récitation',
+    shopSuccessDownloadDesc: 'Téléchargez vos fichiers ci-dessous. Les liens expirent dans 1 heure.',
+    shopSuccessBackToShop: 'Retour à la boutique',
+    shopSuccessDownloadError: 'Erreur de téléchargement',
+    shopSuccessRetryLater: 'Veuillez réessayer plus tard.',
+    shopCryptoError: 'Erreur paiement crypto',
+    shopCryptoUnknown: 'Erreur inconnue.',
+    shopNoCryptoUrl: 'Aucune URL de paiement retournée',
   },
   en: {
     appName: 'Quran Tajweed',
@@ -1001,6 +1085,45 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
     ijazaSending: 'Sending...',
     ijazaSendRequest: 'Send my request',
     ijazaEligibility: 'You must master at least 30 surahs with an average score of 85% to request an Ijaza',
+    ijazaMyRequestsTitle: 'My Ijaza Requests',
+    ijazaMyRequestsDesc: 'History and status of your requests',
+    ijazaNotAssigned: 'Not assigned',
+    ijazaUnknown: 'Unknown',
+    ijazaRequestDate: 'Requested on',
+    ijazaSheikh: 'Sheikh',
+    ijazaTimeSlot: 'Time slot',
+    ijazaScheduledSession: 'Session scheduled on',
+    ijazaReason: 'Reason',
+    ijazaStatusPending: 'Pending',
+    ijazaStatusApproved: 'Approved',
+    ijazaStatusRejected: 'Rejected',
+    ijazaStatusScheduled: 'Scheduled',
+    ijazaStatusCompleted: 'Completed',
+    ijazaRequestSent: 'Ijaza request sent!',
+    ijazaRequestError: 'Error sending request',
+    ijazaMustBeLoggedIn: 'You must be logged in',
+    daySunday: 'Sunday',
+    dayMonday: 'Monday',
+    dayTuesday: 'Tuesday',
+    dayWednesday: 'Wednesday',
+    dayThursday: 'Thursday',
+    dayFriday: 'Friday',
+    daySaturday: 'Saturday',
+    shopSuccessTitle: 'Thank you for your purchase! 🎉',
+    shopSuccessWaitingConfirm: 'Waiting for confirmation',
+    shopSuccessWaitingDesc: 'Your credits will be added once payment is confirmed.',
+    shopSuccessAddingCredits: 'Adding credits...',
+    shopSuccessCreditsAdded: '✅ Credits added!',
+    shopSuccessCreditsAddedDesc: 'Your credits have been added to your account.',
+    shopSuccessCurrentBalance: 'Current balance',
+    shopSuccessBackToRecitation: 'Back to recitation',
+    shopSuccessDownloadDesc: 'Download your files below. Links expire in 1 hour.',
+    shopSuccessBackToShop: 'Back to shop',
+    shopSuccessDownloadError: 'Download error',
+    shopSuccessRetryLater: 'Please try again later.',
+    shopCryptoError: 'Crypto payment error',
+    shopCryptoUnknown: 'Unknown error.',
+    shopNoCryptoUrl: 'No payment URL returned',
   },
   ar: {
     appName: 'تجويد القرآن',
@@ -1308,6 +1431,45 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
     ijazaSending: 'جارٍ الإرسال...',
     ijazaSendRequest: 'إرسال طلبي',
     ijazaEligibility: 'يجب إتقان 30 سورة على الأقل بمتوسط 85% لطلب الإجازة',
+    ijazaMyRequestsTitle: 'طلبات الإجازة',
+    ijazaMyRequestsDesc: 'سجل وحالة طلباتك',
+    ijazaNotAssigned: 'غير معيّن',
+    ijazaUnknown: 'غير معروف',
+    ijazaRequestDate: 'طلب بتاريخ',
+    ijazaSheikh: 'الشيخ',
+    ijazaTimeSlot: 'الموعد',
+    ijazaScheduledSession: 'جلسة مجدولة في',
+    ijazaReason: 'السبب',
+    ijazaStatusPending: 'قيد الانتظار',
+    ijazaStatusApproved: 'مقبول',
+    ijazaStatusRejected: 'مرفوض',
+    ijazaStatusScheduled: 'مجدول',
+    ijazaStatusCompleted: 'مكتمل',
+    ijazaRequestSent: 'تم إرسال طلب الإجازة!',
+    ijazaRequestError: 'خطأ في الإرسال',
+    ijazaMustBeLoggedIn: 'يجب تسجيل الدخول',
+    daySunday: 'الأحد',
+    dayMonday: 'الاثنين',
+    dayTuesday: 'الثلاثاء',
+    dayWednesday: 'الأربعاء',
+    dayThursday: 'الخميس',
+    dayFriday: 'الجمعة',
+    daySaturday: 'السبت',
+    shopSuccessTitle: 'شكراً لشرائك! 🎉',
+    shopSuccessWaitingConfirm: 'في انتظار التأكيد',
+    shopSuccessWaitingDesc: 'ستُضاف أرصدتك بمجرد تأكيد الدفع.',
+    shopSuccessAddingCredits: 'جارٍ إضافة الأرصدة...',
+    shopSuccessCreditsAdded: '✅ تمت إضافة الأرصدة!',
+    shopSuccessCreditsAddedDesc: 'تمت إضافة الأرصدة إلى حسابك.',
+    shopSuccessCurrentBalance: 'الرصيد الحالي',
+    shopSuccessBackToRecitation: 'العودة إلى التلاوة',
+    shopSuccessDownloadDesc: 'حمّل ملفاتك أدناه. تنتهي الروابط خلال ساعة.',
+    shopSuccessBackToShop: 'العودة إلى المتجر',
+    shopSuccessDownloadError: 'خطأ في التحميل',
+    shopSuccessRetryLater: 'يرجى المحاولة لاحقاً.',
+    shopCryptoError: 'خطأ في الدفع بالعملات الرقمية',
+    shopCryptoUnknown: 'خطأ غير معروف.',
+    shopNoCryptoUrl: 'لم يتم إرجاع رابط الدفع',
   },
   de: {
     appName: 'Quran Tajweed',
@@ -1614,6 +1776,45 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
     ijazaSending: 'Wird gesendet...',
     ijazaSendRequest: 'Antrag senden',
     ijazaEligibility: 'Du musst mindestens 30 Suren mit einem Durchschnitt von 85% beherrschen, um eine Ijaza zu beantragen',
+    ijazaMyRequestsTitle: 'Meine Ijaza-Anträge',
+    ijazaMyRequestsDesc: 'Verlauf und Status deiner Anträge',
+    ijazaNotAssigned: 'Nicht zugewiesen',
+    ijazaUnknown: 'Unbekannt',
+    ijazaRequestDate: 'Beantragt am',
+    ijazaSheikh: 'Scheich',
+    ijazaTimeSlot: 'Zeitslot',
+    ijazaScheduledSession: 'Sitzung geplant am',
+    ijazaReason: 'Grund',
+    ijazaStatusPending: 'Ausstehend',
+    ijazaStatusApproved: 'Genehmigt',
+    ijazaStatusRejected: 'Abgelehnt',
+    ijazaStatusScheduled: 'Geplant',
+    ijazaStatusCompleted: 'Abgeschlossen',
+    ijazaRequestSent: 'Ijaza-Antrag gesendet!',
+    ijazaRequestError: 'Fehler beim Senden',
+    ijazaMustBeLoggedIn: 'Du musst angemeldet sein',
+    daySunday: 'Sonntag',
+    dayMonday: 'Montag',
+    dayTuesday: 'Dienstag',
+    dayWednesday: 'Mittwoch',
+    dayThursday: 'Donnerstag',
+    dayFriday: 'Freitag',
+    daySaturday: 'Samstag',
+    shopSuccessTitle: 'Vielen Dank für deinen Kauf! 🎉',
+    shopSuccessWaitingConfirm: 'Warte auf Bestätigung',
+    shopSuccessWaitingDesc: 'Dein Guthaben wird nach Zahlungsbestätigung hinzugefügt.',
+    shopSuccessAddingCredits: 'Guthaben wird hinzugefügt...',
+    shopSuccessCreditsAdded: '✅ Guthaben hinzugefügt!',
+    shopSuccessCreditsAddedDesc: 'Dein Guthaben wurde deinem Konto gutgeschrieben.',
+    shopSuccessCurrentBalance: 'Aktueller Kontostand',
+    shopSuccessBackToRecitation: 'Zurück zur Rezitation',
+    shopSuccessDownloadDesc: 'Lade deine Dateien unten herunter. Links verfallen in 1 Stunde.',
+    shopSuccessBackToShop: 'Zurück zum Shop',
+    shopSuccessDownloadError: 'Download-Fehler',
+    shopSuccessRetryLater: 'Bitte versuche es später erneut.',
+    shopCryptoError: 'Krypto-Zahlungsfehler',
+    shopCryptoUnknown: 'Unbekannter Fehler.',
+    shopNoCryptoUrl: 'Keine Zahlungs-URL zurückgegeben',
   },
   es: {
     appName: 'Quran Tajweed',
@@ -1920,6 +2121,45 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
     ijazaSending: 'Enviando...',
     ijazaSendRequest: 'Enviar mi solicitud',
     ijazaEligibility: 'Debes dominar al menos 30 suras con una puntuación media del 85% para solicitar una Ijaza',
+    ijazaMyRequestsTitle: 'Mis solicitudes de Ijaza',
+    ijazaMyRequestsDesc: 'Historial y estado de tus solicitudes',
+    ijazaNotAssigned: 'No asignado',
+    ijazaUnknown: 'Desconocido',
+    ijazaRequestDate: 'Solicitud del',
+    ijazaSheikh: 'Sheij',
+    ijazaTimeSlot: 'Horario',
+    ijazaScheduledSession: 'Sesión programada el',
+    ijazaReason: 'Razón',
+    ijazaStatusPending: 'Pendiente',
+    ijazaStatusApproved: 'Aprobada',
+    ijazaStatusRejected: 'Rechazada',
+    ijazaStatusScheduled: 'Programada',
+    ijazaStatusCompleted: 'Completada',
+    ijazaRequestSent: '¡Solicitud de Ijaza enviada!',
+    ijazaRequestError: 'Error al enviar la solicitud',
+    ijazaMustBeLoggedIn: 'Debes iniciar sesión',
+    daySunday: 'Domingo',
+    dayMonday: 'Lunes',
+    dayTuesday: 'Martes',
+    dayWednesday: 'Miércoles',
+    dayThursday: 'Jueves',
+    dayFriday: 'Viernes',
+    daySaturday: 'Sábado',
+    shopSuccessTitle: '¡Gracias por tu compra! 🎉',
+    shopSuccessWaitingConfirm: 'Esperando confirmación',
+    shopSuccessWaitingDesc: 'Tus créditos se añadirán una vez confirmado el pago.',
+    shopSuccessAddingCredits: 'Añadiendo créditos...',
+    shopSuccessCreditsAdded: '✅ ¡Créditos añadidos!',
+    shopSuccessCreditsAddedDesc: 'Tus créditos han sido añadidos a tu cuenta.',
+    shopSuccessCurrentBalance: 'Saldo actual',
+    shopSuccessBackToRecitation: 'Volver a la recitación',
+    shopSuccessDownloadDesc: 'Descarga tus archivos abajo. Los enlaces expiran en 1 hora.',
+    shopSuccessBackToShop: 'Volver a la tienda',
+    shopSuccessDownloadError: 'Error de descarga',
+    shopSuccessRetryLater: 'Por favor, inténtalo más tarde.',
+    shopCryptoError: 'Error de pago cripto',
+    shopCryptoUnknown: 'Error desconocido.',
+    shopNoCryptoUrl: 'No se devolvió URL de pago',
   },
   it: {
     appName: 'Quran Tajweed',

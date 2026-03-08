@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useCredits } from '@/hooks/useCredits';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const PDF_FILES = [
   { name: 'Hifz Tracker', file: 'hifz-tracker.pdf' },
@@ -32,6 +33,7 @@ const ShopSuccess: React.FC = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { credits, refetch } = useCredits();
+  const { t } = useLanguage();
   const [downloading, setDownloading] = useState<string | null>(null);
   const [creditsAdded, setCreditsAdded] = useState(false);
   const [addingCredits, setAddingCredits] = useState(false);
@@ -39,24 +41,21 @@ const ShopSuccess: React.FC = () => {
   const packId = searchParams.get('pack');
   const packInfo = packId ? PACK_CREDITS[packId] : null;
 
-  // Poll for credits to be added by server-side webhook (no client-side credit add)
   useEffect(() => {
     if (!packInfo || !user) return;
 
     setAddingCredits(true);
-    const initialCredits = credits;
     const interval = setInterval(async () => {
       await refetch();
     }, 2000);
 
-    // Stop polling after 30s
     const timeout = setTimeout(() => {
       clearInterval(interval);
       setAddingCredits(false);
       if (!creditsAdded) {
         toast({
-          title: 'En attente de confirmation',
-          description: 'Vos crédits seront ajoutés dès confirmation du paiement.',
+          title: t.shopSuccessWaitingConfirm,
+          description: t.shopSuccessWaitingDesc,
         });
       }
     }, 30000);
@@ -67,15 +66,14 @@ const ShopSuccess: React.FC = () => {
     };
   }, [packInfo, user]);
 
-  // Detect when credits have been added by webhook
   useEffect(() => {
     if (!packInfo || creditsAdded || !addingCredits) return;
     if (credits !== null && credits > 0) {
       setCreditsAdded(true);
       setAddingCredits(false);
       toast({
-        title: '✅ Crédits ajoutés !',
-        description: `Vos crédits ont été ajoutés à votre compte.`,
+        title: t.shopSuccessCreditsAdded,
+        description: t.shopSuccessCreditsAddedDesc,
       });
     }
   }, [credits, packInfo, creditsAdded, addingCredits]);
@@ -88,14 +86,14 @@ const ShopSuccess: React.FC = () => {
         .createSignedUrl(fileName, 3600);
 
       if (error || !data?.signedUrl) {
-        throw new Error(error?.message || 'Impossible de générer le lien');
+        throw new Error(error?.message || t.shopSuccessDownloadError);
       }
 
       window.open(data.signedUrl, '_blank');
     } catch (err: any) {
       toast({
-        title: 'Erreur de téléchargement',
-        description: err.message || 'Veuillez réessayer plus tard.',
+        title: t.shopSuccessDownloadError,
+        description: err.message || t.shopSuccessRetryLater,
         variant: 'destructive',
       });
     } finally {
@@ -108,26 +106,25 @@ const ShopSuccess: React.FC = () => {
       <div className="max-w-2xl w-full text-center space-y-8">
         <CheckCircle className="h-20 w-20 text-primary mx-auto" />
         <h1 className="font-serif text-3xl md:text-4xl font-bold text-foreground">
-          Merci pour votre achat ! 🎉
+          {t.shopSuccessTitle}
         </h1>
 
-        {/* Credit pack success */}
         {packInfo && (
           <div className="rounded-3xl border-2 border-primary/20 bg-gradient-to-b from-primary/10 to-card p-8 space-y-4">
             {addingCredits ? (
               <div className="flex items-center justify-center gap-2 text-muted-foreground">
                 <Loader2 className="h-5 w-5 animate-spin" />
-                <span>Ajout des crédits en cours...</span>
+                <span>{t.shopSuccessAddingCredits}</span>
               </div>
             ) : (
               <>
                 <div className="flex items-center justify-center gap-2 text-primary">
                   <Zap className="h-6 w-6" />
-                  <span className="text-2xl font-bold">+{packInfo.amount} crédits</span>
+                  <span className="text-2xl font-bold">+{packInfo.amount} {t.creditsLabel}</span>
                 </div>
                 {credits !== null && (
                   <p className="text-muted-foreground">
-                    Solde actuel : <span className="font-semibold text-foreground">{credits} crédits</span>
+                    {t.shopSuccessCurrentBalance} : <span className="font-semibold text-foreground">{credits} {t.creditsLabel}</span>
                   </p>
                 )}
               </>
@@ -137,16 +134,15 @@ const ShopSuccess: React.FC = () => {
               className="rounded-2xl"
               onClick={() => navigate('/')}
             >
-              Retour à la récitation
+              {t.shopSuccessBackToRecitation}
             </Button>
           </div>
         )}
 
-        {/* PDF downloads */}
         {!packInfo && (
           <>
             <p className="text-muted-foreground text-lg">
-              Téléchargez vos fichiers ci-dessous. Les liens expirent dans 1 heure.
+              {t.shopSuccessDownloadDesc}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
               {PDF_FILES.map((pdf) => (
@@ -175,7 +171,7 @@ const ShopSuccess: React.FC = () => {
           onClick={() => navigate('/shop')}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Retour à la boutique
+          {t.shopSuccessBackToShop}
         </Button>
       </div>
     </div>

@@ -100,11 +100,11 @@ const Shop: React.FC = () => {
       if (data?.invoiceUrl) {
         window.open(data.invoiceUrl, '_blank');
       } else {
-        throw new Error('Aucune URL de paiement retournée par NOWPayments');
+        throw new Error('No payment URL returned');
       }
     } catch (err: any) {
       console.error('[Crypto] Payment error:', err);
-      toast({ title: 'Erreur paiement crypto', description: err?.message || 'Erreur inconnue.', variant: 'destructive' });
+      toast({ title: t.shopCryptoError, description: err?.message || t.shopCryptoUnknown, variant: 'destructive' });
     } finally {
       setCryptoLoading(null);
     }

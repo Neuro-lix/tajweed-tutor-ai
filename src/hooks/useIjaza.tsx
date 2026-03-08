@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 
 interface Sheikh {
@@ -52,6 +53,7 @@ interface CreateIjazaRequest {
 
 export const useIjaza = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [sheikhs, setSheikhs] = useState<Sheikh[]>([]);
   const [availability, setAvailability] = useState<AvailabilitySlot[]>([]);
   const [myRequests, setMyRequests] = useState<IjazaRequest[]>([]);
@@ -96,11 +98,11 @@ export const useIjaza = () => {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const getSheikhAvailability = (sheikhId: string) => availability.filter((a) => a.sheikhId === sheikhId);
-  const getDayName = (dayOfWeek: number) => ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'][dayOfWeek];
+  const getDayName = (dayOfWeek: number) => [t.daySunday, t.dayMonday, t.dayTuesday, t.dayWednesday, t.dayThursday, t.dayFriday, t.daySaturday][dayOfWeek];
   const formatTime = (time: string) => time.substring(0, 5);
 
   const submitRequest = async (request: CreateIjazaRequest) => {
-    if (!user) { toast.error('Vous devez être connecté'); return null; }
+    if (!user) { toast.error(t.ijazaMustBeLoggedIn); return null; }
     try {
       const { data, error } = await supabase.from('ijaza_requests').insert({
         user_id: user.id, sheikh_id: request.sheikhId || null, full_name: request.fullName,
@@ -118,16 +120,16 @@ export const useIjaza = () => {
         rejectionReason: data.rejection_reason, createdAt: data.created_at,
       };
       setMyRequests((prev) => [newRequest, ...prev]);
-      toast.success('Demande d\'Ijaza envoyée !');
+      toast.success(t.ijazaRequestSent);
       return newRequest;
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Erreur lors de l\'envoi');
+      toast.error(t.ijazaRequestError);
       return null;
     }
   };
 
-  const getStatusLabel = (status: IjazaRequest['status']) => ({ pending: 'En attente', approved: 'Approuvée', rejected: 'Refusée', scheduled: 'Planifiée', completed: 'Terminée' }[status]);
+  const getStatusLabel = (status: IjazaRequest['status']) => ({ pending: t.ijazaStatusPending, approved: t.ijazaStatusApproved, rejected: t.ijazaStatusRejected, scheduled: t.ijazaStatusScheduled, completed: t.ijazaStatusCompleted }[status]);
   const getStatusColor = (status: IjazaRequest['status']) => ({ pending: 'bg-amber-100 text-amber-700', approved: 'bg-green-100 text-green-700', rejected: 'bg-red-100 text-red-700', scheduled: 'bg-blue-100 text-blue-700', completed: 'bg-primary/10 text-primary' }[status]);
 
   return { sheikhs, availability, myRequests, loading, getSheikhAvailability, getDayName, formatTime, submitRequest, getStatusLabel, getStatusColor, refetch: fetchData };

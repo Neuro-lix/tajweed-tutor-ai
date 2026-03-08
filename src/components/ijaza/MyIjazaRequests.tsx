@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FileText, Calendar, Clock, User } from 'lucide-react';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface IjazaRequest {
   id: string;
@@ -40,10 +40,12 @@ export const MyIjazaRequests: React.FC<MyIjazaRequestsProps> = ({
   getStatusLabel,
   getStatusColor,
 }) => {
+  const { t } = useLanguage();
+
   const getSheikhName = (sheikhId: string | null) => {
-    if (!sheikhId) return 'Non assigné';
+    if (!sheikhId) return t.ijazaNotAssigned;
     const sheikh = sheikhs.find(s => s.id === sheikhId);
-    return sheikh?.name || 'Inconnu';
+    return sheikh?.name || t.ijazaUnknown;
   };
 
   if (requests.length === 0) {
@@ -55,10 +57,10 @@ export const MyIjazaRequests: React.FC<MyIjazaRequestsProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileText className="w-5 h-5 text-primary" />
-          Mes demandes d'Ijaza
+          {t.ijazaMyRequestsTitle}
         </CardTitle>
         <CardDescription>
-          Historique et statut de tes demandes
+          {t.ijazaMyRequestsDesc}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -76,20 +78,20 @@ export const MyIjazaRequests: React.FC<MyIjazaRequestsProps> = ({
                         {getStatusLabel(request.status)}
                       </Badge>
                       <span className="text-sm text-muted-foreground">
-                        Demande du {format(new Date(request.createdAt), 'dd MMMM yyyy', { locale: fr })}
+                        {t.ijazaRequestDate} {format(new Date(request.createdAt), 'dd/MM/yyyy')}
                       </span>
                     </div>
                     
                     <div className="space-y-1 text-sm">
                       <div className="flex items-center gap-2">
                         <User className="w-4 h-4 text-muted-foreground" />
-                        <span>Cheikh: {getSheikhName(request.sheikhId)}</span>
+                        <span>{t.ijazaSheikh}: {getSheikhName(request.sheikhId)}</span>
                       </div>
                       
                       {request.preferredTime && (
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-muted-foreground" />
-                          <span>Créneau: {request.preferredTime}</span>
+                          <span>{t.ijazaTimeSlot}: {request.preferredTime}</span>
                         </div>
                       )}
                       
@@ -97,14 +99,14 @@ export const MyIjazaRequests: React.FC<MyIjazaRequestsProps> = ({
                         <div className="flex items-center gap-2 text-primary font-medium">
                           <Calendar className="w-4 h-4" />
                           <span>
-                            Session prévue le {format(new Date(request.scheduledDate), 'dd MMMM yyyy à HH:mm', { locale: fr })}
+                            {t.ijazaScheduledSession} {format(new Date(request.scheduledDate), 'dd/MM/yyyy HH:mm')}
                           </span>
                         </div>
                       )}
                       
                       {request.rejectionReason && (
                         <div className="mt-2 p-2 bg-destructive/10 rounded text-destructive text-sm">
-                          Raison: {request.rejectionReason}
+                          {t.ijazaReason}: {request.rejectionReason}
                         </div>
                       )}
                     </div>
