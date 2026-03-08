@@ -12,9 +12,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import ProductPreviewModal from '@/components/shop/ProductPreviewModal';
 import { sheetPreviews, livret1Pages, livret2Pages } from '@/data/shopPreviews';
 
-const PAYPAL_EMAIL = 'YOUR_PAYPAL_EMAIL@example.com';
-const RETURN_URL = 'https://tajweedtutorai.com/shop/success';
-const CANCEL_URL = 'https://tajweedtutorai.com/shop';
+const PAYPAL_EMAIL = import.meta.env.VITE_PAYPAL_EMAIL || '';
+const RETURN_URL = `${window.location.origin}/shop/success`;
+const CANCEL_URL = `${window.location.origin}/shop`;
 
 interface CreditPack {
   id: string;
