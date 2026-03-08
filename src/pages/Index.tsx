@@ -382,7 +382,7 @@ const Index = () => {
       if (error) throw error;
       if (data?.error) throw new Error(String(data.error));
 
-      setAnalysisStep('complete');
+      setAnalysisStep('done');
 
       // Deduct 1 credit after successful analysis
       if (!devMode) {
