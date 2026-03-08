@@ -606,11 +606,7 @@ const Index = () => {
               </div>
             )}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
-              {t.heroTitle.split(t.heroRigor)[0]}
-              <span className="text-gradient-gold">{t.heroRigor}</span>
-              {' '}
-              {t.heroTitle.split(t.heroKindness)[0]?.split(t.heroRigor)[1] || ''}
-              <span className="text-primary">{t.heroKindness}</span>
+              {renderHeroTitle(t.heroTitle, t.heroRigor, t.heroKindness)}
             </h1>
             
             <Ornament className="mx-auto text-primary/40 my-8" />
