@@ -50,11 +50,15 @@ export const useUserProgress = () => {
 
     try {
       // Fetch profile
-      const { data: profileData } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
         .single();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('[useUserProgress] Profile fetch error:', profileError);
+      }
 
       if (profileData) {
         setProfile({
@@ -65,11 +69,15 @@ export const useUserProgress = () => {
       }
 
       // Fetch user progress
-      const { data: progressData } = await supabase
+      const { data: progressData, error: progressError } = await supabase
         .from('user_progress')
         .select('*')
         .eq('user_id', user.id)
         .single();
+
+      if (progressError && progressError.code !== 'PGRST116') {
+        console.error('[useUserProgress] Progress fetch error:', progressError);
+      }
 
       if (progressData) {
         setProgress({
@@ -80,11 +88,15 @@ export const useUserProgress = () => {
       }
 
       // Fetch surah progress
-      const { data: surahData } = await supabase
+      const { data: surahData, error: surahError } = await supabase
         .from('surah_progress')
         .select('*')
         .eq('user_id', user.id)
         .order('surah_number', { ascending: true });
+
+      if (surahError) {
+        console.error('[useUserProgress] Surah progress fetch error:', surahError);
+      }
 
       if (surahData) {
         setSurahProgress(
@@ -98,12 +110,16 @@ export const useUserProgress = () => {
       }
 
       // Fetch corrections
-      const { data: correctionsData } = await supabase
+      const { data: correctionsData, error: correctionsError } = await supabase
         .from('corrections')
         .select('*')
         .eq('user_id', user.id)
         .eq('is_resolved', false)
         .order('created_at', { ascending: false });
+
+      if (correctionsError) {
+        console.error('[useUserProgress] Corrections fetch error:', correctionsError);
+      }
 
       if (correctionsData) {
         setCorrections(

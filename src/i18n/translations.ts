@@ -249,6 +249,133 @@ export interface TranslationKeys {
   openAdminDashboard: string;
   offlinePractice: string;
   scoreSuffix: string;
+
+  // Gamification
+  gamificationTitle: string;
+  gamificationLevel: string;
+  gamificationBadges: string;
+  gamificationCurrentLevel: string;
+  gamificationExperience: string;
+  gamificationSessions: string;
+  gamificationPerfect: string;
+  gamificationMasteredVerses: string;
+  gamificationBadgesUnlocked: string;
+
+  // Streaks
+  streakCurrentSeries: string;
+  streakDays: string;
+  streakRecord: string;
+  streakNewRecord: string;
+  streakNextBadge: string;
+  streakStillXDays: string;
+  streakMaintain: string;
+  streakLastPractice: string;
+
+  // Leaderboard
+  leaderboardTitle: string;
+  leaderboardYourRank: string;
+  leaderboardNoReciters: string;
+  leaderboardBeFirst: string;
+  leaderboardYou: string;
+  leaderboardLevel: string;
+  leaderboardVerses: string;
+  leaderboardRecordStreak: string;
+
+  // Spaced Repetition
+  spacedRepTitle: string;
+  spacedRepToReview: string;
+  spacedRepNoReview: string;
+  spacedRepFutureQueue: string;
+  spacedRepAddedHere: string;
+  spacedRepReview: string;
+  spacedRepStartSession: string;
+  spacedRepMoreVerses: string;
+
+  // Certificate Modal
+  certCongrats: string;
+  certMasteredSurah: string;
+  certAverageScore: string;
+  certContinue: string;
+  certObtainedOn: string;
+
+  // Feedback Form
+  feedbackTitle: string;
+  feedbackRateExperience: string;
+  feedbackCategory: string;
+  feedbackGeneral: string;
+  feedbackTajweed: string;
+  feedbackExperience: string;
+  feedbackSuggestion: string;
+  feedbackMessage: string;
+  feedbackPlaceholder: string;
+  feedbackSend: string;
+  feedbackSending: string;
+  feedbackThankYou: string;
+  feedbackHelpImprove: string;
+  feedbackAddComment: string;
+
+  // Pricing
+  pricingChooseFormula: string;
+  pricingAccess: string;
+  pricingHourly: string;
+  pricingFlexible: string;
+  pricingPerHour: string;
+  pricingHourFeature1: string;
+  pricingHourFeature2: string;
+  pricingHourFeature3: string;
+  pricingHourFeature4: string;
+  pricingBuyHour: string;
+  pricingUnlimited: string;
+  pricingMonthly: string;
+  pricingPerMonth: string;
+  pricingUnlimitedFeature1: string;
+  pricingUnlimitedFeature2: string;
+  pricingUnlimitedFeature3: string;
+  pricingUnlimitedFeature4: string;
+  pricingUnlimitedFeature5: string;
+  pricingUnlimitedFeature6: string;
+  pricingSubscribe: string;
+  pricingRecommended: string;
+  pricingSecure: string;
+  pricingBack: string;
+
+  // Recordings Library
+  recordingsTitle: string;
+  recordingsEmpty: string;
+  recordingsEmptyHint: string;
+  recordingsDelete: string;
+  recordingsDownload: string;
+
+  // Ijaza Wrapper
+  ijazaLoginRequired: string;
+  ijazaLoginDesc: string;
+  ijazaCertification: string;
+  ijazaCertDesc: string;
+  ijazaYourProgress: string;
+  ijazaMasteredSurahs: string;
+  ijazaAvgScore: string;
+  ijazaTotalSurahs: string;
+  ijazaMyRequests: string;
+  ijazaAvailableSheikhs: string;
+  ijazaSelectSheikhDesc: string;
+  ijazaNoSheikh: string;
+  ijazaAvailable: string;
+  ijazaUnavailable: string;
+  ijazaSlots: string;
+  ijazaNoSlots: string;
+  ijazaRequestTitle: string;
+  ijazaRequestDesc: string;
+  ijazaFullName: string;
+  ijazaEmail: string;
+  ijazaPhone: string;
+  ijazaRecitationExp: string;
+  ijazaExpPlaceholder: string;
+  ijazaMotivation: string;
+  ijazaMotivationPlaceholder: string;
+  ijazaSlotSelected: string;
+  ijazaSending: string;
+  ijazaSendRequest: string;
+  ijazaEligibility: string;
 }
 
 const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: TranslationKeys } = {
@@ -449,6 +576,124 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
     openAdminDashboard: 'Ouvrir le dashboard admin',
     offlinePractice: 'Mode pratique sans analyse IA',
     scoreSuffix: '/100',
+    // Gamification
+    gamificationTitle: 'Progression & Badges',
+    gamificationLevel: 'Niveau',
+    gamificationBadges: 'Badges',
+    gamificationCurrentLevel: 'Niveau actuel',
+    gamificationExperience: 'Expérience',
+    gamificationSessions: 'Sessions',
+    gamificationPerfect: 'Parfaites',
+    gamificationMasteredVerses: 'Versets maîtrisés',
+    gamificationBadgesUnlocked: 'badges débloqués',
+    // Streaks
+    streakCurrentSeries: 'Série en cours',
+    streakDays: 'jours',
+    streakRecord: 'Record',
+    streakNewRecord: 'Nouveau record !',
+    streakNextBadge: 'Prochain badge',
+    streakStillXDays: 'Encore',
+    streakMaintain: 'À maintenir !',
+    streakLastPractice: 'Dernière pratique',
+    // Leaderboard
+    leaderboardTitle: 'Classement Communautaire',
+    leaderboardYourRank: 'Ton classement',
+    leaderboardNoReciters: 'Aucun récitateur classé',
+    leaderboardBeFirst: 'Sois le premier à rejoindre le classement !',
+    leaderboardYou: 'Toi',
+    leaderboardLevel: 'Niv.',
+    leaderboardVerses: 'versets',
+    leaderboardRecordStreak: 'Record',
+    // Spaced Repetition
+    spacedRepTitle: 'Révision espacée',
+    spacedRepToReview: 'à revoir',
+    spacedRepNoReview: 'Aucun verset à réviser !',
+    spacedRepFutureQueue: 'verset(s) en attente de révision future',
+    spacedRepAddedHere: 'Les versets avec erreurs seront ajoutés ici',
+    spacedRepReview: 'Réviser',
+    spacedRepStartSession: 'Commencer la session de révision',
+    spacedRepMoreVerses: 'autres versets à réviser',
+    // Certificate Modal
+    certCongrats: '🎉 Félicitations !',
+    certMasteredSurah: 'Tu as maîtrisé une nouvelle sourate !',
+    certAverageScore: 'Score moyen',
+    certContinue: 'Continuer',
+    certObtainedOn: 'Obtenu le',
+    // Feedback Form
+    feedbackTitle: 'Ton avis compte',
+    feedbackRateExperience: 'Note ton expérience',
+    feedbackCategory: 'Catégorie',
+    feedbackGeneral: 'Général',
+    feedbackTajweed: 'Tajwīd',
+    feedbackExperience: 'Expérience',
+    feedbackSuggestion: 'Suggestion',
+    feedbackMessage: 'Ton message (optionnel)',
+    feedbackPlaceholder: "Dis-nous ce que tu penses, tes suggestions d'amélioration...",
+    feedbackSend: 'Envoyer mon avis',
+    feedbackSending: 'Envoi...',
+    feedbackThankYou: 'Jazak Allah khayr !',
+    feedbackHelpImprove: "Ton avis nous aide à améliorer l'application.",
+    feedbackAddComment: 'Ajoute un commentaire ou une note',
+    // Pricing
+    pricingChooseFormula: 'Choisissez votre formule',
+    pricingAccess: 'Accédez à un apprentissage rigoureux du Coran avec correction IA',
+    pricingHourly: "À l'heure",
+    pricingFlexible: 'Paiement flexible',
+    pricingPerHour: '/heure',
+    pricingHourFeature1: '1 heure de récitation avec correction IA',
+    pricingHourFeature2: "Accès à toutes les 10 lectures (Qirā'āt)",
+    pricingHourFeature3: 'Analyse détaillée du tajwīd',
+    pricingHourFeature4: 'Suivi de progression',
+    pricingBuyHour: 'Acheter 1 heure',
+    pricingUnlimited: 'Illimité',
+    pricingMonthly: 'Abonnement mensuel',
+    pricingPerMonth: '/mois',
+    pricingUnlimitedFeature1: 'Récitations illimitées',
+    pricingUnlimitedFeature2: "Accès à toutes les 10 lectures (Qirā'āt)",
+    pricingUnlimitedFeature3: 'Analyse détaillée du tajwīd',
+    pricingUnlimitedFeature4: 'Suivi de progression complet',
+    pricingUnlimitedFeature5: 'Rapport de corrections imprimable',
+    pricingUnlimitedFeature6: 'Support prioritaire',
+    pricingSubscribe: "S'abonner",
+    pricingRecommended: 'Recommandé',
+    pricingSecure: 'Paiement sécurisé par Stripe. Annulation possible à tout moment.',
+    pricingBack: 'Retour',
+    // Recordings Library
+    recordingsTitle: 'Mes récitations',
+    recordingsEmpty: 'Aucune récitation sauvegardée.',
+    recordingsEmptyHint: 'Après chaque récitation, tu pourras choisir de la garder.',
+    recordingsDelete: 'Supprimer cette récitation ?',
+    recordingsDownload: 'Télécharger',
+    // Ijaza Wrapper
+    ijazaLoginRequired: 'Connexion requise',
+    ijazaLoginDesc: 'Connecte-toi pour accéder à la page Ijaza',
+    ijazaCertification: 'Certification Ijaza',
+    ijazaCertDesc: 'Obtiens ta certification officielle en récitation coranique auprès de nos cheikhs qualifiés',
+    ijazaYourProgress: 'Ta progression',
+    ijazaMasteredSurahs: 'Sourates maîtrisées',
+    ijazaAvgScore: 'Score moyen',
+    ijazaTotalSurahs: 'Sourates totales',
+    ijazaMyRequests: 'Mes demandes',
+    ijazaAvailableSheikhs: 'Cheikhs disponibles',
+    ijazaSelectSheikhDesc: "Sélectionne un cheikh et un créneau pour ta session d'évaluation",
+    ijazaNoSheikh: 'Aucun cheikh disponible pour le moment',
+    ijazaAvailable: 'Disponible',
+    ijazaUnavailable: 'Indisponible',
+    ijazaSlots: 'Créneaux disponibles',
+    ijazaNoSlots: 'Aucun créneau disponible actuellement',
+    ijazaRequestTitle: 'Demander une Ijaza',
+    ijazaRequestDesc: "Remplis ce formulaire pour planifier ta session d'évaluation",
+    ijazaFullName: 'Nom complet',
+    ijazaEmail: 'Email',
+    ijazaPhone: 'Téléphone',
+    ijazaRecitationExp: 'Expérience en récitation',
+    ijazaExpPlaceholder: "Décris ton parcours d'apprentissage du Coran...",
+    ijazaMotivation: 'Motivation',
+    ijazaMotivationPlaceholder: 'Pourquoi souhaites-tu obtenir une Ijaza ?',
+    ijazaSlotSelected: 'Créneau sélectionné avec',
+    ijazaSending: 'Envoi en cours...',
+    ijazaSendRequest: 'Envoyer ma demande',
+    ijazaEligibility: 'Tu dois maîtriser au moins 30 sourates avec un score moyen de 85% pour demander une Ijaza',
   },
   en: {
     appName: 'Quran Tajweed',
@@ -647,6 +892,115 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
     openAdminDashboard: 'Open admin dashboard',
     offlinePractice: 'Practice mode without AI analysis',
     scoreSuffix: '/100',
+    gamificationTitle: 'Progress & Badges',
+    gamificationLevel: 'Level',
+    gamificationBadges: 'Badges',
+    gamificationCurrentLevel: 'Current level',
+    gamificationExperience: 'Experience',
+    gamificationSessions: 'Sessions',
+    gamificationPerfect: 'Perfect',
+    gamificationMasteredVerses: 'Mastered verses',
+    gamificationBadgesUnlocked: 'badges unlocked',
+    streakCurrentSeries: 'Current streak',
+    streakDays: 'days',
+    streakRecord: 'Record',
+    streakNewRecord: 'New record!',
+    streakNextBadge: 'Next badge',
+    streakStillXDays: 'Still',
+    streakMaintain: 'Maintain!',
+    streakLastPractice: 'Last practice',
+    leaderboardTitle: 'Community Leaderboard',
+    leaderboardYourRank: 'Your rank',
+    leaderboardNoReciters: 'No ranked reciters',
+    leaderboardBeFirst: 'Be the first to join the leaderboard!',
+    leaderboardYou: 'You',
+    leaderboardLevel: 'Lv.',
+    leaderboardVerses: 'verses',
+    leaderboardRecordStreak: 'Record',
+    spacedRepTitle: 'Spaced repetition',
+    spacedRepToReview: 'to review',
+    spacedRepNoReview: 'No verses to review!',
+    spacedRepFutureQueue: 'verse(s) awaiting future review',
+    spacedRepAddedHere: 'Verses with errors will be added here',
+    spacedRepReview: 'Review',
+    spacedRepStartSession: 'Start review session',
+    spacedRepMoreVerses: 'more verses to review',
+    certCongrats: '🎉 Congratulations!',
+    certMasteredSurah: 'You mastered a new surah!',
+    certAverageScore: 'Average score',
+    certContinue: 'Continue',
+    certObtainedOn: 'Earned on',
+    feedbackTitle: 'Your feedback matters',
+    feedbackRateExperience: 'Rate your experience',
+    feedbackCategory: 'Category',
+    feedbackGeneral: 'General',
+    feedbackTajweed: 'Tajweed',
+    feedbackExperience: 'Experience',
+    feedbackSuggestion: 'Suggestion',
+    feedbackMessage: 'Your message (optional)',
+    feedbackPlaceholder: 'Tell us what you think, your improvement suggestions...',
+    feedbackSend: 'Send my feedback',
+    feedbackSending: 'Sending...',
+    feedbackThankYou: 'Jazak Allah khayr!',
+    feedbackHelpImprove: 'Your feedback helps us improve the app.',
+    feedbackAddComment: 'Add a comment or rating',
+    pricingChooseFormula: 'Choose your plan',
+    pricingAccess: 'Access rigorous Quran learning with AI correction',
+    pricingHourly: 'Hourly',
+    pricingFlexible: 'Flexible payment',
+    pricingPerHour: '/hour',
+    pricingHourFeature1: '1 hour of recitation with AI correction',
+    pricingHourFeature2: "Access to all 10 readings (Qira'at)",
+    pricingHourFeature3: 'Detailed tajweed analysis',
+    pricingHourFeature4: 'Progress tracking',
+    pricingBuyHour: 'Buy 1 hour',
+    pricingUnlimited: 'Unlimited',
+    pricingMonthly: 'Monthly subscription',
+    pricingPerMonth: '/month',
+    pricingUnlimitedFeature1: 'Unlimited recitations',
+    pricingUnlimitedFeature2: "Access to all 10 readings (Qira'at)",
+    pricingUnlimitedFeature3: 'Detailed tajweed analysis',
+    pricingUnlimitedFeature4: 'Complete progress tracking',
+    pricingUnlimitedFeature5: 'Printable correction report',
+    pricingUnlimitedFeature6: 'Priority support',
+    pricingSubscribe: 'Subscribe',
+    pricingRecommended: 'Recommended',
+    pricingSecure: 'Secure payment by Stripe. Cancel anytime.',
+    pricingBack: 'Back',
+    recordingsTitle: 'My recitations',
+    recordingsEmpty: 'No saved recitations.',
+    recordingsEmptyHint: 'After each recitation, you can choose to keep it.',
+    recordingsDelete: 'Delete this recitation?',
+    recordingsDownload: 'Download',
+    ijazaLoginRequired: 'Login required',
+    ijazaLoginDesc: 'Log in to access the Ijaza page',
+    ijazaCertification: 'Ijaza Certification',
+    ijazaCertDesc: 'Get your official certification in Quranic recitation from our qualified sheikhs',
+    ijazaYourProgress: 'Your progress',
+    ijazaMasteredSurahs: 'Mastered surahs',
+    ijazaAvgScore: 'Average score',
+    ijazaTotalSurahs: 'Total surahs',
+    ijazaMyRequests: 'My requests',
+    ijazaAvailableSheikhs: 'Available sheikhs',
+    ijazaSelectSheikhDesc: 'Select a sheikh and a time slot for your evaluation session',
+    ijazaNoSheikh: 'No sheikh available at the moment',
+    ijazaAvailable: 'Available',
+    ijazaUnavailable: 'Unavailable',
+    ijazaSlots: 'Available slots',
+    ijazaNoSlots: 'No slots currently available',
+    ijazaRequestTitle: 'Request an Ijaza',
+    ijazaRequestDesc: 'Fill out this form to schedule your evaluation session',
+    ijazaFullName: 'Full name',
+    ijazaEmail: 'Email',
+    ijazaPhone: 'Phone',
+    ijazaRecitationExp: 'Recitation experience',
+    ijazaExpPlaceholder: 'Describe your Quran learning journey...',
+    ijazaMotivation: 'Motivation',
+    ijazaMotivationPlaceholder: 'Why do you want to obtain an Ijaza?',
+    ijazaSlotSelected: 'Slot selected with',
+    ijazaSending: 'Sending...',
+    ijazaSendRequest: 'Send my request',
+    ijazaEligibility: 'You must master at least 30 surahs with an average score of 85% to request an Ijaza',
   },
   ar: {
     appName: 'تجويد القرآن',
@@ -845,6 +1199,115 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
     openAdminDashboard: 'فتح لوحة المسؤول',
     offlinePractice: 'وضع التدريب بدون تحليل ذكي',
     scoreSuffix: '/100',
+    gamificationTitle: 'التقدم والشارات',
+    gamificationLevel: 'المستوى',
+    gamificationBadges: 'الشارات',
+    gamificationCurrentLevel: 'المستوى الحالي',
+    gamificationExperience: 'الخبرة',
+    gamificationSessions: 'الجلسات',
+    gamificationPerfect: 'مثالية',
+    gamificationMasteredVerses: 'الآيات المتقنة',
+    gamificationBadgesUnlocked: 'شارات مفتوحة',
+    streakCurrentSeries: 'السلسلة الحالية',
+    streakDays: 'أيام',
+    streakRecord: 'الرقم القياسي',
+    streakNewRecord: 'رقم قياسي جديد!',
+    streakNextBadge: 'الشارة التالية',
+    streakStillXDays: 'لا يزال',
+    streakMaintain: 'حافظ عليها!',
+    streakLastPractice: 'آخر تدريب',
+    leaderboardTitle: 'الترتيب المجتمعي',
+    leaderboardYourRank: 'ترتيبك',
+    leaderboardNoReciters: 'لا يوجد قراء مصنفون',
+    leaderboardBeFirst: 'كن أول من ينضم إلى الترتيب!',
+    leaderboardYou: 'أنت',
+    leaderboardLevel: 'مست.',
+    leaderboardVerses: 'آيات',
+    leaderboardRecordStreak: 'الرقم القياسي',
+    spacedRepTitle: 'المراجعة المتباعدة',
+    spacedRepToReview: 'للمراجعة',
+    spacedRepNoReview: 'لا توجد آيات للمراجعة!',
+    spacedRepFutureQueue: 'آية في انتظار المراجعة المستقبلية',
+    spacedRepAddedHere: 'ستُضاف الآيات التي بها أخطاء هنا',
+    spacedRepReview: 'مراجعة',
+    spacedRepStartSession: 'بدء جلسة المراجعة',
+    spacedRepMoreVerses: 'آيات أخرى للمراجعة',
+    certCongrats: '🎉 مبروك!',
+    certMasteredSurah: 'لقد أتقنت سورة جديدة!',
+    certAverageScore: 'متوسط النتيجة',
+    certContinue: 'متابعة',
+    certObtainedOn: 'حصلت عليها في',
+    feedbackTitle: 'رأيك يهمنا',
+    feedbackRateExperience: 'قيّم تجربتك',
+    feedbackCategory: 'الفئة',
+    feedbackGeneral: 'عام',
+    feedbackTajweed: 'تجويد',
+    feedbackExperience: 'تجربة',
+    feedbackSuggestion: 'اقتراح',
+    feedbackMessage: 'رسالتك (اختياري)',
+    feedbackPlaceholder: 'أخبرنا برأيك واقتراحاتك للتحسين...',
+    feedbackSend: 'إرسال رأيي',
+    feedbackSending: 'جارٍ الإرسال...',
+    feedbackThankYou: 'جزاك الله خيراً!',
+    feedbackHelpImprove: 'رأيك يساعدنا على تحسين التطبيق.',
+    feedbackAddComment: 'أضف تعليقاً أو تقييماً',
+    pricingChooseFormula: 'اختر خطتك',
+    pricingAccess: 'ادخل إلى تعلم القرآن الدقيق مع تصحيح الذكاء الاصطناعي',
+    pricingHourly: 'بالساعة',
+    pricingFlexible: 'دفع مرن',
+    pricingPerHour: '/ساعة',
+    pricingHourFeature1: 'ساعة واحدة من التلاوة مع تصحيح ذكي',
+    pricingHourFeature2: 'الوصول إلى جميع القراءات العشر',
+    pricingHourFeature3: 'تحليل تفصيلي للتجويد',
+    pricingHourFeature4: 'متابعة التقدم',
+    pricingBuyHour: 'شراء ساعة واحدة',
+    pricingUnlimited: 'غير محدود',
+    pricingMonthly: 'اشتراك شهري',
+    pricingPerMonth: '/شهر',
+    pricingUnlimitedFeature1: 'تلاوات غير محدودة',
+    pricingUnlimitedFeature2: 'الوصول إلى جميع القراءات العشر',
+    pricingUnlimitedFeature3: 'تحليل تفصيلي للتجويد',
+    pricingUnlimitedFeature4: 'متابعة تقدم كاملة',
+    pricingUnlimitedFeature5: 'تقرير تصحيحات قابل للطباعة',
+    pricingUnlimitedFeature6: 'دعم أولوي',
+    pricingSubscribe: 'اشترك',
+    pricingRecommended: 'موصى به',
+    pricingSecure: 'دفع آمن عبر Stripe. إلغاء في أي وقت.',
+    pricingBack: 'رجوع',
+    recordingsTitle: 'تلاواتي',
+    recordingsEmpty: 'لا توجد تلاوات محفوظة.',
+    recordingsEmptyHint: 'بعد كل تلاوة، يمكنك اختيار الاحتفاظ بها.',
+    recordingsDelete: 'حذف هذه التلاوة؟',
+    recordingsDownload: 'تحميل',
+    ijazaLoginRequired: 'تسجيل الدخول مطلوب',
+    ijazaLoginDesc: 'سجل دخولك للوصول إلى صفحة الإجازة',
+    ijazaCertification: 'شهادة الإجازة',
+    ijazaCertDesc: 'احصل على شهادتك الرسمية في تلاوة القرآن من شيوخنا المؤهلين',
+    ijazaYourProgress: 'تقدمك',
+    ijazaMasteredSurahs: 'السور المتقنة',
+    ijazaAvgScore: 'متوسط النتيجة',
+    ijazaTotalSurahs: 'إجمالي السور',
+    ijazaMyRequests: 'طلباتي',
+    ijazaAvailableSheikhs: 'الشيوخ المتاحون',
+    ijazaSelectSheikhDesc: 'اختر شيخاً وموعداً لجلسة التقييم',
+    ijazaNoSheikh: 'لا يوجد شيوخ متاحون حالياً',
+    ijazaAvailable: 'متاح',
+    ijazaUnavailable: 'غير متاح',
+    ijazaSlots: 'المواعيد المتاحة',
+    ijazaNoSlots: 'لا توجد مواعيد متاحة حالياً',
+    ijazaRequestTitle: 'طلب إجازة',
+    ijazaRequestDesc: 'املأ هذا النموذج لجدولة جلسة التقييم',
+    ijazaFullName: 'الاسم الكامل',
+    ijazaEmail: 'البريد الإلكتروني',
+    ijazaPhone: 'الهاتف',
+    ijazaRecitationExp: 'خبرة التلاوة',
+    ijazaExpPlaceholder: 'صف مسيرتك في تعلم القرآن...',
+    ijazaMotivation: 'الدافع',
+    ijazaMotivationPlaceholder: 'لماذا تريد الحصول على إجازة؟',
+    ijazaSlotSelected: 'تم اختيار الموعد مع',
+    ijazaSending: 'جارٍ الإرسال...',
+    ijazaSendRequest: 'إرسال طلبي',
+    ijazaEligibility: 'يجب إتقان 30 سورة على الأقل بمتوسط 85% لطلب الإجازة',
   },
   de: {
     appName: 'Quran Tajweed',

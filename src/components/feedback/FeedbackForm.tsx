@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Star, Send, X, MessageSquareHeart, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface FeedbackFormProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface FeedbackFormProps {
 
 export const FeedbackForm: React.FC<FeedbackFormProps> = ({ isOpen, onClose }) => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [feedback, setFeedback] = useState('');
@@ -22,20 +24,18 @@ export const FeedbackForm: React.FC<FeedbackFormProps> = ({ isOpen, onClose }) =
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const categories = [
-    { id: 'general', label: 'Général', emoji: '💬' },
-    { id: 'tajweed', label: 'Tajwīd', emoji: '📖' },
-    { id: 'ux', label: 'Expérience', emoji: '✨' },
-    { id: 'feature', label: 'Suggestion', emoji: '💡' },
+    { id: 'general', label: t.feedbackGeneral, emoji: '💬' },
+    { id: 'tajweed', label: t.feedbackTajweed, emoji: '📖' },
+    { id: 'ux', label: t.feedbackExperience, emoji: '✨' },
+    { id: 'feature', label: t.feedbackSuggestion, emoji: '💡' },
   ];
 
   const handleSubmit = async () => {
     if (!feedback.trim() && rating === 0) {
-      toast.error('Ajoute un commentaire ou une note');
+      toast.error(t.feedbackAddComment);
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       const { error } = await supabase.from('user_feedback').insert({
         user_id: user?.id || null,
@@ -43,12 +43,9 @@ export const FeedbackForm: React.FC<FeedbackFormProps> = ({ isOpen, onClose }) =
         feedback: feedback.trim(),
         category,
       });
-
       if (error) throw error;
-
       setIsSubmitted(true);
-      toast.success('Merci pour ton retour ! Jazak Allah khayr');
-      
+      toast.success(t.feedbackThankYou);
       setTimeout(() => {
         onClose();
         setIsSubmitted(false);
@@ -58,7 +55,7 @@ export const FeedbackForm: React.FC<FeedbackFormProps> = ({ isOpen, onClose }) =
       }, 2000);
     } catch (error) {
       console.error('Error submitting feedback:', error);
-      toast.error('Erreur lors de l\'envoi. Réessaie.');
+      toast.error(t.error);
     } finally {
       setIsSubmitting(false);
     }
@@ -72,12 +69,8 @@ export const FeedbackForm: React.FC<FeedbackFormProps> = ({ isOpen, onClose }) =
         <Card className="w-full max-w-md animate-scale-in">
           <CardContent className="pt-8 pb-6 text-center">
             <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              Jazak Allah khayr !
-            </h3>
-            <p className="text-muted-foreground">
-              Ton avis nous aide à améliorer l'application.
-            </p>
+            <h3 className="text-xl font-semibold text-foreground mb-2">{t.feedbackThankYou}</h3>
+            <p className="text-muted-foreground">{t.feedbackHelpImprove}</p>
           </CardContent>
         </Card>
       </div>
@@ -91,89 +84,44 @@ export const FeedbackForm: React.FC<FeedbackFormProps> = ({ isOpen, onClose }) =
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <MessageSquareHeart className="w-5 h-5 text-primary" />
-              <CardTitle className="text-lg">Ton avis compte</CardTitle>
+              <CardTitle className="text-lg">{t.feedbackTitle}</CardTitle>
             </div>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="w-4 h-4" />
-            </Button>
+            <Button variant="ghost" size="icon" onClick={onClose}><X className="w-4 h-4" /></Button>
           </div>
         </CardHeader>
-
         <CardContent className="space-y-4">
-          {/* Rating */}
           <div>
-            <p className="text-sm text-muted-foreground mb-2">Note ton expérience</p>
+            <p className="text-sm text-muted-foreground mb-2">{t.feedbackRateExperience}</p>
             <div className="flex gap-1 justify-center">
               {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => setRating(star)}
-                  onMouseEnter={() => setHoveredRating(star)}
-                  onMouseLeave={() => setHoveredRating(0)}
-                  className="p-1 transition-transform hover:scale-110"
-                >
-                  <Star
-                    className={`w-8 h-8 transition-colors ${
-                      star <= (hoveredRating || rating)
-                        ? 'text-gold-warm fill-gold-warm'
-                        : 'text-muted-foreground/30'
-                    }`}
-                  />
+                <button key={star} type="button" onClick={() => setRating(star)} onMouseEnter={() => setHoveredRating(star)} onMouseLeave={() => setHoveredRating(0)} className="p-1 transition-transform hover:scale-110">
+                  <Star className={`w-8 h-8 transition-colors ${star <= (hoveredRating || rating) ? 'text-gold-warm fill-gold-warm' : 'text-muted-foreground/30'}`} />
                 </button>
               ))}
             </div>
           </div>
-
-          {/* Category */}
           <div>
-            <p className="text-sm text-muted-foreground mb-2">Catégorie</p>
+            <p className="text-sm text-muted-foreground mb-2">{t.feedbackCategory}</p>
             <div className="flex flex-wrap gap-2">
               {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => setCategory(cat.id as typeof category)}
-                  className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-                    category === cat.id
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }`}
-                >
+                <button key={cat.id} type="button" onClick={() => setCategory(cat.id as typeof category)} className={`px-3 py-1.5 rounded-full text-sm transition-colors ${category === cat.id ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>
                   {cat.emoji} {cat.label}
                 </button>
               ))}
             </div>
           </div>
-
-          {/* Feedback text */}
           <div>
-            <p className="text-sm text-muted-foreground mb-2">Ton message (optionnel)</p>
-            <Textarea
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              placeholder="Dis-nous ce que tu penses, tes suggestions d'amélioration..."
-              rows={4}
-              className="resize-none"
-            />
+            <p className="text-sm text-muted-foreground mb-2">{t.feedbackMessage}</p>
+            <Textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder={t.feedbackPlaceholder} rows={4} className="resize-none" />
           </div>
-
-          {/* Submit */}
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting || (!feedback.trim() && rating === 0)}
-            className="w-full"
-          >
+          <Button onClick={handleSubmit} disabled={isSubmitting || (!feedback.trim() && rating === 0)} className="w-full">
             {isSubmitting ? (
               <span className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                Envoi...
+                {t.feedbackSending}
               </span>
             ) : (
-              <span className="flex items-center gap-2">
-                <Send className="w-4 h-4" />
-                Envoyer mon avis
-              </span>
+              <span className="flex items-center gap-2"><Send className="w-4 h-4" />{t.feedbackSend}</span>
             )}
           </Button>
         </CardContent>

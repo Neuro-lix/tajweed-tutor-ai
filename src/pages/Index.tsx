@@ -61,6 +61,34 @@ import logoImage from '@/logo.png';
 
 type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections' | 'pricing' | 'recordings' | 'boutique' | 'ijaza' | 'admin';
 
+function renderHeroTitle(title: string, rigor: string, kindness: string) {
+  const rigorIdx = title.indexOf(rigor);
+  const kindnessIdx = title.indexOf(kindness);
+
+  if (rigorIdx === -1 || kindnessIdx === -1) {
+    return <>{title}</>;
+  }
+
+  const first = Math.min(rigorIdx, kindnessIdx);
+  const second = Math.max(rigorIdx, kindnessIdx);
+  const firstWord = first === rigorIdx ? rigor : kindness;
+  const secondWord = second === kindnessIdx ? kindness : rigor;
+
+  const before = title.slice(0, first);
+  const between = title.slice(first + firstWord.length, second);
+  const after = title.slice(second + secondWord.length);
+
+  return (
+    <>
+      {before}
+      <span className={first === rigorIdx ? 'text-gradient-gold' : 'text-primary'}>{firstWord}</span>
+      {between}
+      <span className={second === kindnessIdx ? 'text-primary' : 'text-gradient-gold'}>{secondWord}</span>
+      {after}
+    </>
+  );
+}
+
 interface AnalysisResult {
   isCorrect: boolean;
   overallScore: number;
@@ -102,7 +130,7 @@ const Index = () => {
     details: string;
   } | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
-  const [analysisStep, setAnalysisStep] = useState<'upload' | 'transcription' | 'analysis' | 'complete'>('upload');
+  const [analysisStep, setAnalysisStep] = useState<'idle' | 'uploading' | 'transcribing' | 'analyzing' | 'generating' | 'done' | 'error'>('idle');
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [showReport, setShowReport] = useState(false);
   const [devMode, setDevMode] = useState(() => localStorage.getItem('devMode') === 'true');
@@ -315,7 +343,7 @@ const Index = () => {
 
   const handleStopRecording = async () => {
     setAnalyzing(true);
-    setAnalysisStep('upload');
+    setAnalysisStep('uploading');
     sessionTimer.pause();
 
     const recording = await stopRecording();
@@ -336,7 +364,7 @@ const Index = () => {
     const recordedAudioMimeType = recording.mimeType;
 
     console.log('[Recitation] Audio base64 length:', recordedAudioBase64.length, 'mime:', recordedAudioMimeType);
-    setAnalysisStep('transcription');
+    setAnalysisStep('transcribing');
 
     // Ensure we have a real expectedText (not placeholder)
     let expectedText = currentVerseText;
@@ -366,7 +394,7 @@ const Index = () => {
     }
 
     try {
-      setAnalysisStep('analysis');
+      setAnalysisStep('analyzing');
 
       const { data, error } = await supabase.functions.invoke('analyze-recitation', {
         body: {
@@ -382,7 +410,7 @@ const Index = () => {
       if (error) throw error;
       if (data?.error) throw new Error(String(data.error));
 
-      setAnalysisStep('complete');
+      setAnalysisStep('done');
 
       // Deduct 1 credit after successful analysis
       if (!devMode) {
@@ -606,11 +634,7 @@ const Index = () => {
               </div>
             )}
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
-              {t.heroTitle.split(t.heroRigor)[0]}
-              <span className="text-gradient-gold">{t.heroRigor}</span>
-              {' '}
-              {t.heroTitle.split(t.heroKindness)[0]?.split(t.heroRigor)[1] || ''}
-              <span className="text-primary">{t.heroKindness}</span>
+              {renderHeroTitle(t.heroTitle, t.heroRigor, t.heroKindness)}
             </h1>
             
             <Ornament className="mx-auto text-primary/40 my-8" />
@@ -968,10 +992,7 @@ const Index = () => {
             showTranslation={showTranslation}
             isRecording={isRecording}
             isAnalyzing={analyzing}
-            analysisStep={analysisStep === 'upload' ? 'uploading' : 
-                         analysisStep === 'transcription' ? 'transcribing' : 
-                         analysisStep === 'analysis' ? 'analyzing' : 
-                         analysisStep === 'complete' ? 'done' : 'idle'}
+            analysisStep={analysisStep}
             transcriptionFailed={transcriptionFailed}
             userAudioBlob={userAudioBlob}
             mediaStream={mediaStream}

@@ -26,7 +26,6 @@ export const useCredits = () => {
       if (error) throw error;
 
       if (!data) {
-        // No credits row yet — create one with 5 free credits
         const { data: inserted, error: insertError } = await supabase
           .from('user_credits')
           .insert({ user_id: user.id, credits: 5 })
@@ -34,7 +33,6 @@ export const useCredits = () => {
           .single();
 
         if (insertError) {
-          // Might be a race condition with the trigger, retry fetch
           const { data: retryData } = await supabase
             .from('user_credits')
             .select('credits')
@@ -71,18 +69,16 @@ export const useCredits = () => {
 
       if (error) throw error;
 
-      // data is the remaining credits (0 means was already 0, couldn't deduct)
-      if (credits !== null && credits <= 0 && data === 0) {
-        return false;
+      if (typeof data === 'number') {
+        setCredits(data);
+        return data >= 0;
       }
-
-      setCredits(typeof data === 'number' ? data : 0);
-      return data !== null && (data >= 0 && credits !== null && credits > 0);
+      return false;
     } catch (error) {
       console.error('Error deducting credit:', error);
       return false;
     }
-  }, [user, credits]);
+  }, [user]);
 
   const hasCredits = credits !== null && credits > 0;
   const isLowCredits = credits !== null && credits > 0 && credits <= 2;
