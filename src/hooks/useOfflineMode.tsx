@@ -35,9 +35,8 @@ export const useOfflineMode = () => {
     const initDB = async () => {
       try {
         const db = await openDatabase();
-        setIsDbReady(true);
-        await updateCacheStats();
         db.close();
+        setIsDbReady(true);
       } catch (error) {
         console.error('Failed to initialize IndexedDB:', error);
       }

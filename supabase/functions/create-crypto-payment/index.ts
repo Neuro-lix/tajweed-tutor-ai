@@ -18,6 +18,8 @@ serve(async (req) => {
     if (!NOWPAYMENTS_API_KEY) throw new Error("NOWPAYMENTS_API_KEY not configured");
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    // Use origin from request or fallback
+    const origin = req.headers.get("origin") || "https://recite-perfectly-bot.lovable.app";
 
     const response = await fetch("https://api.nowpayments.io/v1/invoice", {
       method: "POST",
@@ -29,10 +31,11 @@ serve(async (req) => {
         price_amount: amount,
         price_currency: "eur",
         ipn_callback_url: `${SUPABASE_URL}/functions/v1/crypto-webhook`,
-        success_url: `https://tajweedtutorai.com/shop/success?pack=${productType || ""}&method=crypto`,
-        cancel_url: "https://tajweedtutorai.com/shop",
+        success_url: `${origin}/shop/success?method=crypto`,
+        cancel_url: `${origin}/shop`,
         order_description: productName,
-        order_id: `${userId}-${Date.now()}`,
+        // Use double underscore to preserve UUID integrity
+        order_id: `${userId}__${Date.now()}`,
       }),
     });
 

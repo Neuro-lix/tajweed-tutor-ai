@@ -15,20 +15,6 @@ export interface LeaderboardEntry {
   isCurrentUser: boolean;
 }
 
-interface LeaderboardRow {
-  id: string;
-  user_id: string;
-  display_name: string;
-  total_xp: number;
-  current_level: number;
-  total_verses_mastered: number;
-  perfect_recitations: number;
-  current_streak: number;
-  longest_streak: number;
-  rank_position: number | null;
-  updated_at: string;
-}
-
 const ANONYMOUS_NAMES = [
   'Récitateur Émérite',
   'Élève Assidu',
@@ -49,7 +35,6 @@ export const useLeaderboard = () => {
   const [loading, setLoading] = useState(true);
 
   const getAnonymousName = (userId: string): string => {
-    // Generate consistent anonymous name from user ID
     const hash = userId.split('').reduce((acc, char) => {
       return char.charCodeAt(0) + ((acc << 5) - acc);
     }, 0);
@@ -61,16 +46,14 @@ export const useLeaderboard = () => {
   const fetchLeaderboard = useCallback(async () => {
     try {
       const { data, error } = await supabase
-        .from('leaderboard' as any)
+        .from('leaderboard')
         .select('*')
         .order('total_xp', { ascending: false })
         .limit(100);
 
       if (error) throw error;
 
-      const rows = (data || []) as unknown as LeaderboardRow[];
-      
-      const entries: LeaderboardEntry[] = rows.map((entry, index) => ({
+      const entries: LeaderboardEntry[] = (data || []).map((entry, index) => ({
         id: entry.id,
         displayName: entry.display_name || getAnonymousName(entry.user_id),
         totalXp: entry.total_xp,
@@ -84,8 +67,6 @@ export const useLeaderboard = () => {
       }));
 
       setLeaderboard(entries);
-
-      // Find current user's rank
       const currentUserEntry = entries.find(e => e.isCurrentUser);
       setUserRank(currentUserEntry || null);
     } catch (error) {
@@ -110,10 +91,19 @@ export const useLeaderboard = () => {
     if (!user) return;
 
     try {
-      const displayName = getAnonymousName(user.id);
+      // Use profile name if available, fallback to anonymous
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user.id)
+        .single();
+
+      const displayName = profileData?.full_name
+        ? `${profileData.full_name.split(' ')[0]} ${profileData.full_name.split(' ')[1]?.[0] || ''}.`.trim()
+        : getAnonymousName(user.id);
 
       const { error } = await supabase
-        .from('leaderboard' as any)
+        .from('leaderboard')
         .upsert({
           user_id: user.id,
           display_name: displayName,
@@ -126,7 +116,6 @@ export const useLeaderboard = () => {
         }, { onConflict: 'user_id' });
 
       if (error) throw error;
-
       await fetchLeaderboard();
     } catch (error) {
       console.error('Error updating leaderboard:', error);
