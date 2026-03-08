@@ -35,6 +35,7 @@ interface PricingSectionProps {
 
 export const PricingSection = ({ onBack }: PricingSectionProps) => {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [loading, setLoading] = useState<string | null>(null);
   const [paddleReady, setPaddleReady] = useState(false);
 
