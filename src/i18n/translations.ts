@@ -965,7 +965,7 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
     pricingUnlimitedFeature6: 'Priority support',
     pricingSubscribe: 'Subscribe',
     pricingRecommended: 'Recommended',
-    pricingSecure: 'Secure payment by Stripe. Cancel anytime.',
+    pricingSecure: 'Secure payment by Paddle. Cancel anytime.',
     pricingBack: 'Back',
     recordingsTitle: 'My recitations',
     recordingsEmpty: 'No saved recitations.',
