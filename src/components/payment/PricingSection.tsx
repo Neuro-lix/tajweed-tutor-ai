@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, Infinity, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/hooks/useAuth";
 
 // Paddle product/price IDs — à configurer quand vous aurez votre compte Paddle
 const PADDLE_PRODUCTS = {
