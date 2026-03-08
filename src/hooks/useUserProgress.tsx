@@ -50,11 +50,15 @@ export const useUserProgress = () => {
 
     try {
       // Fetch profile
-      const { data: profileData } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
         .single();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('[useUserProgress] Profile fetch error:', profileError);
+      }
 
       if (profileData) {
         setProfile({
