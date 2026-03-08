@@ -17,7 +17,7 @@ import {
   Star
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { SURAHS } from '@/data/quranData';
+import { SURAHS, QIRAAT_NAMES } from '@/data/quranData';
 import { GeometricPattern, Star8Point } from '@/components/decorative/GeometricPattern';
 
 const QIRAAT_NAMES: Record<string, string> = {
