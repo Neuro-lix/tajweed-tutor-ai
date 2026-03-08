@@ -336,7 +336,7 @@ const Index = () => {
     const recordedAudioMimeType = recording.mimeType;
 
     console.log('[Recitation] Audio base64 length:', recordedAudioBase64.length, 'mime:', recordedAudioMimeType);
-    setAnalysisStep('transcription');
+    setAnalysisStep('transcribing');
 
     // Ensure we have a real expectedText (not placeholder)
     let expectedText = currentVerseText;
