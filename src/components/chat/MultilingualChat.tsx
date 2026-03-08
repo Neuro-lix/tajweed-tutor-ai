@@ -59,7 +59,7 @@ export const MultilingualChat: React.FC = () => {
     try {
       const { data, error } = await supabase.functions.invoke('chat-assistant', {
         body: {
-          messages: [...messages, userMessage].map(m => ({ role: m.role, content: m.content })),
+          messages: [...messages, userMessage].slice(-20).map(m => ({ role: m.role, content: m.content })),
           language,
         },
       });
