@@ -61,6 +61,34 @@ import logoImage from '@/logo.png';
 
 type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections' | 'pricing' | 'recordings' | 'boutique' | 'ijaza' | 'admin';
 
+function renderHeroTitle(title: string, rigor: string, kindness: string) {
+  const rigorIdx = title.indexOf(rigor);
+  const kindnessIdx = title.indexOf(kindness);
+
+  if (rigorIdx === -1 || kindnessIdx === -1) {
+    return <>{title}</>;
+  }
+
+  const first = Math.min(rigorIdx, kindnessIdx);
+  const second = Math.max(rigorIdx, kindnessIdx);
+  const firstWord = first === rigorIdx ? rigor : kindness;
+  const secondWord = second === kindnessIdx ? kindness : rigor;
+
+  const before = title.slice(0, first);
+  const between = title.slice(first + firstWord.length, second);
+  const after = title.slice(second + secondWord.length);
+
+  return (
+    <>
+      {before}
+      <span className={first === rigorIdx ? 'text-gradient-gold' : 'text-primary'}>{firstWord}</span>
+      {between}
+      <span className={second === kindnessIdx ? 'text-primary' : 'text-gradient-gold'}>{secondWord}</span>
+      {after}
+    </>
+  );
+}
+
 interface AnalysisResult {
   isCorrect: boolean;
   overallScore: number;
