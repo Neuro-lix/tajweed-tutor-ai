@@ -10,17 +10,6 @@ export interface StreakData {
   streakStartDate: string | null;
 }
 
-interface UserStreakRow {
-  id: string;
-  user_id: string;
-  current_streak: number;
-  longest_streak: number;
-  last_practice_date: string | null;
-  streak_start_date: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
 export const useStreaks = () => {
   const { user } = useAuth();
   const [streakData, setStreakData] = useState<StreakData>({
@@ -36,7 +25,7 @@ export const useStreaks = () => {
 
     try {
       const { data, error } = await supabase
-        .from('user_streaks' as any)
+        .from('user_streaks')
         .select('*')
         .eq('user_id', user.id)
         .single();
@@ -44,12 +33,11 @@ export const useStreaks = () => {
       if (error && error.code !== 'PGRST116') throw error;
 
       if (data) {
-        const row = data as unknown as UserStreakRow;
         setStreakData({
-          currentStreak: row.current_streak,
-          longestStreak: row.longest_streak,
-          lastPracticeDate: row.last_practice_date,
-          streakStartDate: row.streak_start_date,
+          currentStreak: data.current_streak,
+          longestStreak: data.longest_streak,
+          lastPracticeDate: data.last_practice_date,
+          streakStartDate: data.streak_start_date,
         });
       }
     } catch (error) {
@@ -80,25 +68,23 @@ export const useStreaks = () => {
     let streakBroken = false;
 
     if (!lastPractice) {
-      // First ever practice
       newStreak = 1;
       streakStartDate = today;
       isNewDay = true;
     } else if (lastPractice === today) {
-      // Already practiced today
       isNewDay = false;
     } else {
-      const lastDate = new Date(lastPractice + 'T00:00:00Z');
-      const todayDate = new Date(today + 'T00:00:00Z');
-      const diffTime = todayDate.getTime() - lastDate.getTime();
-      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+      // Use calendar date comparison in UTC to avoid timezone issues
+      const [ty, tm, td] = today.split('-').map(Number);
+      const [ly, lm, ld] = lastPractice.split('-').map(Number);
+      const todayDate = new Date(Date.UTC(ty, tm - 1, td));
+      const lastDate = new Date(Date.UTC(ly, lm - 1, ld));
+      const diffDays = Math.round((todayDate.getTime() - lastDate.getTime()) / 86400000);
 
       if (diffDays === 1) {
-        // Consecutive day
         newStreak = streakData.currentStreak + 1;
         isNewDay = true;
       } else {
-        // Streak broken
         newStreak = 1;
         streakStartDate = today;
         streakBroken = true;
@@ -106,14 +92,13 @@ export const useStreaks = () => {
       }
     }
 
-    // Update longest streak if needed
     if (newStreak > longestStreak) {
       longestStreak = newStreak;
     }
 
     try {
       const { error } = await supabase
-        .from('user_streaks' as any)
+        .from('user_streaks')
         .upsert({
           user_id: user.id,
           current_streak: newStreak,
@@ -131,7 +116,6 @@ export const useStreaks = () => {
         streakStartDate,
       });
 
-      // Show streak notifications
       if (isNewDay && newStreak > 1) {
         toast.success(`🔥 Série de ${newStreak} jours !`, {
           description: 'Continue comme ça !',
@@ -144,7 +128,6 @@ export const useStreaks = () => {
         });
       }
 
-      // Milestone celebrations
       if (newStreak === 7) {
         toast.success('🎉 7 jours consécutifs !', {
           description: 'Tu as débloqué le badge "Régularité" !',
@@ -170,7 +153,6 @@ export const useStreaks = () => {
     const diffTime = today.getTime() - lastPractice.getTime();
     const diffHours = diffTime / (1000 * 60 * 60);
     
-    // Streak at risk if last practice was more than 20 hours ago
     return diffHours > 20 && diffHours < 48;
   };
 

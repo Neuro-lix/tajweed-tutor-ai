@@ -35,9 +35,8 @@ export const useOfflineMode = () => {
     const initDB = async () => {
       try {
         const db = await openDatabase();
-        setIsDbReady(true);
-        await updateCacheStats();
         db.close();
+        setIsDbReady(true);
       } catch (error) {
         console.error('Failed to initialize IndexedDB:', error);
       }
@@ -57,6 +56,11 @@ export const useOfflineMode = () => {
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
+
+  // Update cache stats once DB is ready
+  useEffect(() => {
+    if (isDbReady) updateCacheStats();
+  }, [isDbReady]);
 
   const openDatabase = (): Promise<IDBDatabase> => {
     return new Promise((resolve, reject) => {
@@ -303,14 +307,14 @@ export const useOfflineMode = () => {
   const clearCache = useCallback(async () => {
     try {
       const db = await openDatabase();
+      const transaction = db.transaction([VERSE_STORE, AUDIO_STORE], 'readwrite');
+      transaction.objectStore(VERSE_STORE).clear();
+      transaction.objectStore(AUDIO_STORE).clear();
       
-      const verseTransaction = db.transaction(VERSE_STORE, 'readwrite');
-      verseTransaction.objectStore(VERSE_STORE).clear();
-      
-      const audioTransaction = db.transaction(AUDIO_STORE, 'readwrite');
-      audioTransaction.objectStore(AUDIO_STORE).clear();
-      
-      db.close();
+      await new Promise<void>((resolve, reject) => {
+        transaction.oncomplete = () => { db.close(); resolve(); };
+        transaction.onerror = () => { db.close(); reject(transaction.error); };
+      });
       
       setCachedVerses(new Map());
       setCacheStats({ verses: 0, audio: 0, size: 0 });

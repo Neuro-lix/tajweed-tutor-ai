@@ -17,21 +17,10 @@ import {
   Star
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { SURAHS } from '@/data/quranData';
+import { SURAHS, QIRAAT_NAMES } from '@/data/quranData';
 import { GeometricPattern, Star8Point } from '@/components/decorative/GeometricPattern';
 
-const QIRAAT_NAMES: Record<string, string> = {
-  hafs_asim: 'Ḥafṣ ʿan ʿĀṣim',
-  warsh_nafi: 'Warsh ʿan Nāfiʿ',
-  qalun_nafi: 'Qālūn ʿan Nāfiʿ',
-  duri_amr: 'Ad-Dūrī ʿan Abī ʿAmr',
-  susi_amr: 'As-Sūsī ʿan Abī ʿAmr',
-  ibn_kathir: 'Ibn Kathīr',
-  ibn_amir: 'Ibn ʿĀmir',
-  shuaba_asim: 'Shuʿba ʿan ʿĀṣim',
-  khalaf: 'Khalaf',
-  khallad: 'Khallād',
-};
+// QIRAAT_NAMES imported from quranData.ts
 
 interface CertificateData {
   id: string;
@@ -103,7 +92,7 @@ export default function VerifyCertificate() {
     ? `${certificate.userName} a maîtrisé la récitation de la Sourate ${surah?.transliteration || certificate.surahNumber} avec un score de ${certificate.averageScore.toFixed(0)}% en lecture ${QIRAAT_NAMES[certificate.qiraat || ''] || certificate.qiraat || 'Ḥafṣ ʿan ʿĀṣim'}.`
     : 'Vérifiez l\'authenticité d\'un certificat de maîtrise du Tajwīd délivré par Tajweed Tutor AI.';
 
-  const ogImage = 'https://storage.googleapis.com/gpt-engineer-file-uploads/K5B9XopSinZ3V0htRmjQEElgq9F2/social-images/social-1770296635561-Tajweed_tutor_ai.png';
+  const ogImage = `${typeof window !== 'undefined' ? window.location.origin : ''}/pwa-icon.png`;
   const pageUrl = typeof window !== 'undefined' ? window.location.href : '';
 
   return (

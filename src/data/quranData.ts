@@ -116,6 +116,20 @@ export const SURAHS = [
   { id: 114, name: "الناس", transliteration: "An-Nas", verses: 6, juz: 30 },
 ];
 
+// Centralized Qiraat display names — import this instead of duplicating
+export const QIRAAT_NAMES: Record<string, string> = {
+  hafs_asim: 'Ḥafṣ ʿan ʿĀṣim',
+  warsh_nafi: 'Warsh ʿan Nāfiʿ',
+  qalun_nafi: 'Qālūn ʿan Nāfiʿ',
+  duri_amr: 'Ad-Dūrī ʿan Abī ʿAmr',
+  susi_amr: 'As-Sūsī ʿan Abī ʿAmr',
+  ibn_kathir: 'Ibn Kathīr',
+  ibn_amir: 'Ibn ʿĀmir',
+  shuaba_asim: 'Shuʿba ʿan ʿĀṣim',
+  khalaf: 'Khalaf',
+  khallad: 'Khallād',
+};
+
 // 10 Canonical Readings (Qira'at)
 export const QIRAAT = [
   { id: "hafs", name: "حفص عن عاصم", transliteration: "Ḥafṣ 'an 'Āṣim", description: "La lecture la plus répandue dans le monde musulman" },
