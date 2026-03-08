@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import QRCode from 'qrcode';
-import { SURAHS } from '@/data/quranData';
+import { SURAHS, QIRAAT_NAMES } from '@/data/quranData';
 
 interface CertificateData {
   userName: string;
