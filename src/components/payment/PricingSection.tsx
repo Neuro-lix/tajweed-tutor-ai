@@ -82,7 +82,9 @@ export const PricingSection = ({ onBack }: PricingSectionProps) => {
       window.Paddle.Checkout.open({
         items: [{ priceId, quantity: 1 }],
         successUrl: `${window.location.origin}/?payment=success`,
-      });
+        ...(user?.email ? { customer: { email: user.email } } : {}),
+        customData: user ? { user_id: user.id } : undefined,
+      } as any);
     } catch (error) {
       console.error("Paddle checkout error:", error);
       toast.error(t.error);

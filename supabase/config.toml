@@ -15,3 +15,6 @@ verify_jwt = false
 
 [functions.crypto-webhook]
 verify_jwt = false
+
+[functions.paddle-webhook]
+verify_jwt = false
