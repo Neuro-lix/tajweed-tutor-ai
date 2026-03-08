@@ -315,7 +315,7 @@ const Index = () => {
 
   const handleStopRecording = async () => {
     setAnalyzing(true);
-    setAnalysisStep('upload');
+    setAnalysisStep('uploading');
     sessionTimer.pause();
 
     const recording = await stopRecording();
