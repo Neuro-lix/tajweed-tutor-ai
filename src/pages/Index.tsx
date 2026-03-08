@@ -102,7 +102,7 @@ const Index = () => {
     details: string;
   } | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
-  const [analysisStep, setAnalysisStep] = useState<'upload' | 'transcription' | 'analysis' | 'complete'>('upload');
+  const [analysisStep, setAnalysisStep] = useState<'idle' | 'uploading' | 'transcribing' | 'analyzing' | 'generating' | 'done' | 'error'>('idle');
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [showReport, setShowReport] = useState(false);
   const [devMode, setDevMode] = useState(() => localStorage.getItem('devMode') === 'true');
