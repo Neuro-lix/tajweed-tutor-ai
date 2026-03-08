@@ -57,6 +57,11 @@ export const useOfflineMode = () => {
     };
   }, []);
 
+  // Update cache stats once DB is ready
+  useEffect(() => {
+    if (isDbReady) updateCacheStats();
+  }, [isDbReady]);
+
   const openDatabase = (): Promise<IDBDatabase> => {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
