@@ -88,11 +88,15 @@ export const useUserProgress = () => {
       }
 
       // Fetch surah progress
-      const { data: surahData } = await supabase
+      const { data: surahData, error: surahError } = await supabase
         .from('surah_progress')
         .select('*')
         .eq('user_id', user.id)
         .order('surah_number', { ascending: true });
+
+      if (surahError) {
+        console.error('[useUserProgress] Surah progress fetch error:', surahError);
+      }
 
       if (surahData) {
         setSurahProgress(
