@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, Infinity, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/hooks/useAuth";
 
 // Paddle product/price IDs — à configurer quand vous aurez votre compte Paddle
 const PADDLE_PRODUCTS = {
@@ -34,6 +35,7 @@ interface PricingSectionProps {
 
 export const PricingSection = ({ onBack }: PricingSectionProps) => {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [loading, setLoading] = useState<string | null>(null);
   const [paddleReady, setPaddleReady] = useState(false);
 
@@ -80,7 +82,9 @@ export const PricingSection = ({ onBack }: PricingSectionProps) => {
       window.Paddle.Checkout.open({
         items: [{ priceId, quantity: 1 }],
         successUrl: `${window.location.origin}/?payment=success`,
-      });
+        ...(user?.email ? { customer: { email: user.email } } : {}),
+        customData: user ? { user_id: user.id } : undefined,
+      } as any);
     } catch (error) {
       console.error("Paddle checkout error:", error);
       toast.error(t.error);
