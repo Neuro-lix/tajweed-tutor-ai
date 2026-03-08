@@ -12,9 +12,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import ProductPreviewModal from '@/components/shop/ProductPreviewModal';
 import { sheetPreviews, livret1Pages, livret2Pages } from '@/data/shopPreviews';
 
-const PAYPAL_EMAIL = 'YOUR_PAYPAL_EMAIL@example.com';
-const RETURN_URL = 'https://tajweedtutorai.com/shop/success';
-const CANCEL_URL = 'https://tajweedtutorai.com/shop';
+const PAYPAL_EMAIL = import.meta.env.VITE_PAYPAL_EMAIL || '';
+const RETURN_URL = `${window.location.origin}/shop/success`;
+const CANCEL_URL = `${window.location.origin}/shop`;
 
 interface CreditPack {
   id: string;
@@ -51,11 +51,7 @@ const individualSheets: Product[] = [
   { id: 'duas', name: "Dou'as du Coran", description: 'Invocations coraniques essentielles', price: 0.99, icon: '🕌', pdfFile: 'duas-coran.pdf' },
 ];
 
-const handlePaypal = (itemName: string, price: number, packId?: string) => {
-  const returnUrl = packId ? `${RETURN_URL}?pack=${packId}` : RETURN_URL;
-  const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${PAYPAL_EMAIL}&item_name=${encodeURIComponent(itemName)}&amount=${price}&currency_code=EUR&return=${encodeURIComponent(returnUrl)}&cancel_return=${encodeURIComponent(CANCEL_URL)}`;
-  window.open(paypalUrl, '_blank');
-};
+// handlePaypal is defined inside the Shop component to access toast
 
 type PreviewData = {
   name: string;
@@ -77,6 +73,15 @@ const Shop: React.FC = () => {
   const [cryptoLoading, setCryptoLoading] = useState<string | null>(null);
   const [preview, setPreview] = useState<PreviewData | null>(null);
 
+  const handlePaypal = (itemName: string, price: number, packId?: string) => {
+    if (!PAYPAL_EMAIL || PAYPAL_EMAIL.includes('example.com')) {
+      toast({ title: 'PayPal non configuré', description: 'Utilisez le paiement crypto.', variant: 'destructive' });
+      return;
+    }
+    const returnUrl = packId ? `${RETURN_URL}?pack=${packId}` : RETURN_URL;
+    const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${PAYPAL_EMAIL}&item_name=${encodeURIComponent(itemName)}&amount=${price}&currency_code=EUR&return=${encodeURIComponent(returnUrl)}&cancel_return=${encodeURIComponent(CANCEL_URL)}`;
+    window.open(paypalUrl, '_blank');
+  };
   const handleCrypto = async (productName: string, price: number, productType?: string) => {
     const userId = user?.id || `guest-${Date.now()}`;
     const key = `${productName}-${price}`;

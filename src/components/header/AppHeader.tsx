@@ -4,6 +4,7 @@ import { LanguageSelector } from '@/components/settings/LanguageSelector';
 import { OfflineIndicator } from '@/components/offline/OfflineIndicator';
 import { LogOut, MessageSquareHeart, Award, Music, ShoppingBag, GraduationCap, Zap } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 import logoImage from '@/logo.png';
 
 interface AppHeaderProps {
@@ -30,6 +31,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onRecitationClick, onBoutiqueClick, onIjazaClick, onSignOut,
 }) => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
 
   return (
     <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
@@ -66,7 +68,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               <GraduationCap className="h-4 w-4 md:mr-1" />
               <span className="hidden md:inline">{t.ijaza}</span>
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => window.location.href = '/shop'} className="hidden sm:flex">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/shop')} className="hidden sm:flex">
               <ShoppingBag className="h-4 w-4 md:mr-1" />
               <span className="hidden md:inline">{t.boutiqueLabel}</span>
             </Button>

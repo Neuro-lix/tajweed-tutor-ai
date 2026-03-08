@@ -1,14 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IjazaPage } from './Ijaza';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { useIjaza } from '@/hooks/useIjaza';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { 
@@ -30,6 +29,7 @@ const IjazaWrapper: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { surahProgress } = useUserProgress();
+  const { t } = useLanguage();
   const { 
     sheikhs, 
     availability, 
@@ -54,17 +54,15 @@ const IjazaWrapper: React.FC = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Calculate progress
   const masteredSurahs = surahProgress.filter(s => s.status === 'mastered').length;
   const totalSurahs = 114;
   const averageScore = surahProgress.length > 0 
     ? Math.round(surahProgress.reduce((acc, s) => acc + (s.masteredVerses / s.totalVerses) * 100, 0) / surahProgress.length)
     : 0;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     if (!formData.fullName || !formData.email) {
-      toast.error('Veuillez remplir les champs obligatoires');
+      toast.error(t.emailRequired);
       return;
     }
 
@@ -95,11 +93,9 @@ const IjazaWrapper: React.FC = () => {
         <Card className="max-w-md">
           <CardContent className="py-8 text-center space-y-4">
             <GraduationCap className="w-12 h-12 mx-auto text-primary" />
-            <h2 className="text-xl font-semibold">Connexion requise</h2>
-            <p className="text-muted-foreground">
-              Connecte-toi pour accéder à la page Ijaza
-            </p>
-            <Button onClick={() => navigate('/auth')}>Se connecter</Button>
+            <h2 className="text-xl font-semibold">{t.ijazaLoginRequired}</h2>
+            <p className="text-muted-foreground">{t.ijazaLoginDesc}</p>
+            <Button onClick={() => navigate('/auth')}>{t.login}</Button>
           </CardContent>
         </Card>
       </div>
@@ -110,64 +106,58 @@ const IjazaWrapper: React.FC = () => {
     <div className="min-h-screen bg-background relative">
       <GeometricPattern className="text-primary" opacity={0.03} />
 
-      {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Button variant="ghost" onClick={() => navigate('/')}>
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Retour
+              {t.back}
             </Button>
             <div className="flex items-center gap-3">
               <Star8Point size={24} className="text-primary" />
-              <span className="font-semibold">Ijaza</span>
+              <span className="font-semibold">{t.ijaza}</span>
             </div>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-5xl space-y-8">
-        {/* Hero */}
         <div className="text-center space-y-4">
           <div className="flex justify-center">
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
               <GraduationCap className="w-10 h-10 text-primary" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-foreground">Certification Ijaza</h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Obtiens ta certification officielle en récitation coranique auprès de nos cheikhs qualifiés
-          </p>
+          <h1 className="text-3xl font-bold text-foreground">{t.ijazaCertification}</h1>
+          <p className="text-muted-foreground max-w-2xl mx-auto">{t.ijazaCertDesc}</p>
         </div>
 
-        {/* Progress */}
         <Card>
           <CardHeader>
-            <CardTitle>Ta progression</CardTitle>
+            <CardTitle>{t.ijazaYourProgress}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-3 gap-4 text-center">
             <div>
               <div className="text-3xl font-bold text-primary">{masteredSurahs}</div>
-              <p className="text-sm text-muted-foreground">Sourates maîtrisées</p>
+              <p className="text-sm text-muted-foreground">{t.ijazaMasteredSurahs}</p>
             </div>
             <div>
               <div className="text-3xl font-bold text-primary">{averageScore}%</div>
-              <p className="text-sm text-muted-foreground">Score moyen</p>
+              <p className="text-sm text-muted-foreground">{t.ijazaAvgScore}</p>
             </div>
             <div>
               <div className="text-3xl font-bold text-primary">{totalSurahs}</div>
-              <p className="text-sm text-muted-foreground">Sourates totales</p>
+              <p className="text-sm text-muted-foreground">{t.ijazaTotalSurahs}</p>
             </div>
           </CardContent>
         </Card>
 
-        {/* My Requests */}
         {myRequests.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CalendarIcon className="w-5 h-5" />
-                Mes demandes
+                {t.ijazaMyRequests}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -177,7 +167,7 @@ const IjazaWrapper: React.FC = () => {
                     <div>
                       <p className="font-medium">{request.fullName}</p>
                       <p className="text-sm text-muted-foreground">
-                        {new Date(request.createdAt).toLocaleDateString('fr-FR')}
+                        {new Date(request.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                     <Badge className={getStatusColor(request.status)}>
@@ -190,16 +180,13 @@ const IjazaWrapper: React.FC = () => {
           </Card>
         )}
 
-        {/* Available Sheikhs with Calendar */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="w-5 h-5 text-primary" />
-              Cheikhs disponibles
+              {t.ijazaAvailableSheikhs}
             </CardTitle>
-            <CardDescription>
-              Sélectionne un cheikh et un créneau pour ta session d'évaluation
-            </CardDescription>
+            <CardDescription>{t.ijazaSelectSheikhDesc}</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -207,9 +194,7 @@ const IjazaWrapper: React.FC = () => {
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
               </div>
             ) : sheikhs.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">
-                Aucun cheikh disponible pour le moment
-              </p>
+              <p className="text-muted-foreground text-center py-4">{t.ijazaNoSheikh}</p>
             ) : (
               <div className="grid md:grid-cols-2 gap-4">
                 {sheikhs.map((sheikh) => {
@@ -220,39 +205,32 @@ const IjazaWrapper: React.FC = () => {
                     <Card 
                       key={sheikh.id}
                       variant="outline"
-                      className={`cursor-pointer transition-all ${
-                        isSelected ? 'border-primary ring-2 ring-primary/20' : ''
-                      } ${!sheikh.isAvailable ? 'opacity-60' : ''}`}
+                      className={`cursor-pointer transition-all ${isSelected ? 'border-primary ring-2 ring-primary/20' : ''} ${!sheikh.isAvailable ? 'opacity-60' : ''}`}
                       onClick={() => sheikh.isAvailable && setSelectedSheikh(isSelected ? null : sheikh.id)}
                     >
                       <CardContent className="p-4 space-y-3">
                         <div className="flex items-start justify-between">
                           <div>
                             <h4 className="font-semibold">{sheikh.name}</h4>
-                            {sheikh.specialty && (
-                              <p className="text-sm text-muted-foreground">{sheikh.specialty}</p>
-                            )}
+                            {sheikh.specialty && <p className="text-sm text-muted-foreground">{sheikh.specialty}</p>}
                           </div>
                           <Badge variant={sheikh.isAvailable ? 'default' : 'secondary'}>
-                            {sheikh.isAvailable ? 'Disponible' : 'Indisponible'}
+                            {sheikh.isAvailable ? t.ijazaAvailable : t.ijazaUnavailable}
                           </Badge>
                         </div>
 
                         {sheikh.languages.length > 0 && (
                           <div className="flex items-center gap-2 text-sm">
                             <Globe className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">
-                              {sheikh.languages.join(', ')}
-                            </span>
+                            <span className="text-muted-foreground">{sheikh.languages.join(', ')}</span>
                           </div>
                         )}
 
-                        {/* Availability slots */}
                         {isSelected && slots.length > 0 && (
                           <div className="pt-3 border-t space-y-2">
                             <p className="text-sm font-medium flex items-center gap-2">
                               <Clock className="w-4 h-4" />
-                              Créneaux disponibles
+                              {t.ijazaSlots}
                             </p>
                             <ScrollArea className="h-32">
                               <div className="space-y-2">
@@ -276,9 +254,7 @@ const IjazaWrapper: React.FC = () => {
                         )}
 
                         {isSelected && slots.length === 0 && (
-                          <p className="text-sm text-muted-foreground pt-3 border-t">
-                            Aucun créneau disponible actuellement
-                          </p>
+                          <p className="text-sm text-muted-foreground pt-3 border-t">{t.ijazaNoSlots}</p>
                         )}
                       </CardContent>
                     </Card>
@@ -289,67 +265,61 @@ const IjazaWrapper: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Request Form */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Send className="w-5 h-5 text-primary" />
-              Demander une Ijaza
+              {t.ijazaRequestTitle}
             </CardTitle>
-            <CardDescription>
-              Remplis ce formulaire pour planifier ta session d'évaluation
-            </CardDescription>
+            <CardDescription>{t.ijazaRequestDesc}</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Nom complet *</label>
+                  <label className="text-sm font-medium">{t.ijazaFullName} *</label>
                   <Input
                     value={formData.fullName}
                     onChange={e => setFormData({ ...formData, fullName: e.target.value })}
-                    placeholder="Ton nom complet"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Email *</label>
+                  <label className="text-sm font-medium">{t.ijazaEmail} *</label>
                   <Input
                     type="email"
                     value={formData.email}
                     onChange={e => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="ton@email.com"
                     required
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Téléphone</label>
+                <label className="text-sm font-medium">{t.ijazaPhone}</label>
                 <Input
                   type="tel"
                   value={formData.phone}
                   onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="+33 6 12 34 56 78"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Expérience en récitation</label>
+                <label className="text-sm font-medium">{t.ijazaRecitationExp}</label>
                 <Textarea
                   value={formData.experience}
                   onChange={e => setFormData({ ...formData, experience: e.target.value })}
-                  placeholder="Décris ton parcours d'apprentissage du Coran..."
+                  placeholder={t.ijazaExpPlaceholder}
                   rows={3}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Motivation</label>
+                <label className="text-sm font-medium">{t.ijazaMotivation}</label>
                 <Textarea
                   value={formData.motivation}
                   onChange={e => setFormData({ ...formData, motivation: e.target.value })}
-                  placeholder="Pourquoi souhaites-tu obtenir une Ijaza ?"
+                  placeholder={t.ijazaMotivationPlaceholder}
                   rows={3}
                 />
               </div>
@@ -358,35 +328,27 @@ const IjazaWrapper: React.FC = () => {
                 <div className="p-3 bg-primary/5 rounded-lg flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-primary" />
                   <span className="text-sm">
-                    Créneau sélectionné avec {sheikhs.find(s => s.id === selectedSheikh)?.name}
+                    {t.ijazaSlotSelected} {sheikhs.find(s => s.id === selectedSheikh)?.name}
                   </span>
                 </div>
               )}
 
               <Button 
-                type="submit" 
+                onClick={handleSubmit}
                 className="w-full"
                 disabled={isSubmitting || !isEligible}
               >
                 {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Envoi en cours...
-                  </>
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t.ijazaSending}</>
                 ) : (
-                  <>
-                    <Send className="w-4 h-4 mr-2" />
-                    Envoyer ma demande
-                  </>
+                  <><Send className="w-4 h-4 mr-2" />{t.ijazaSendRequest}</>
                 )}
               </Button>
 
               {!isEligible && (
-                <p className="text-sm text-muted-foreground text-center">
-                  Tu dois maîtriser au moins 30 sourates avec un score moyen de 85% pour demander une Ijaza
-                </p>
+                <p className="text-sm text-muted-foreground text-center">{t.ijazaEligibility}</p>
               )}
-            </form>
+            </div>
           </CardContent>
         </Card>
       </main>

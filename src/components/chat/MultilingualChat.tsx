@@ -35,6 +35,7 @@ export const MultilingualChat: React.FC = () => {
   const [language, setLanguage] = useState('fr');
   const [isLoading, setIsLoading] = useState(false);
   const [autoSpeak, setAutoSpeak] = useState(true);
+  const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { speak, stop, isSpeaking, isLoading: ttsLoading } = useTextToSpeech();
 
@@ -58,7 +59,7 @@ export const MultilingualChat: React.FC = () => {
     try {
       const { data, error } = await supabase.functions.invoke('chat-assistant', {
         body: {
-          messages: [...messages, userMessage].map(m => ({ role: m.role, content: m.content })),
+          messages: [...messages, userMessage].slice(-20).map(m => ({ role: m.role, content: m.content })),
           language,
         },
       });
@@ -165,10 +166,18 @@ export const MultilingualChat: React.FC = () => {
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 shrink-0"
-                    onClick={() => isSpeaking ? stop() : speak(msg.content, language)}
+                    onClick={() => {
+                      if (speakingMessageId === msg.id) {
+                        stop();
+                        setSpeakingMessageId(null);
+                      } else {
+                        setSpeakingMessageId(msg.id);
+                        speak(msg.content, language).then(() => setSpeakingMessageId(null));
+                      }
+                    }}
                     disabled={ttsLoading}
                   >
-                    {isSpeaking ? (
+                    {speakingMessageId === msg.id && isSpeaking ? (
                       <VolumeX className="h-3 w-3" />
                     ) : (
                       <Volume2 className="h-3 w-3" />

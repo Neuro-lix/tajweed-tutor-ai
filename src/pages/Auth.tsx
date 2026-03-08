@@ -43,9 +43,6 @@ const Auth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) navigate('/');
     });
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) navigate('/');
-    });
     return () => subscription.unsubscribe();
   }, [navigate]);
 
@@ -118,7 +115,7 @@ const Auth = () => {
     setLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${window.location.origin}/auth?reset=true`,
       });
       if (error) {
         toast({ title: t.error, description: error.message, variant: "destructive" });

@@ -39,41 +39,46 @@ const ShopSuccess: React.FC = () => {
   const packId = searchParams.get('pack');
   const packInfo = packId ? PACK_CREDITS[packId] : null;
 
-  // Add credits if pack purchase
+  // Poll for credits to be added by server-side webhook (no client-side credit add)
   useEffect(() => {
-    if (!packInfo || !user || creditsAdded || addingCredits) return;
+    if (!packInfo || !user) return;
 
-    const addCredits = async () => {
-      setAddingCredits(true);
-      try {
-        const { error } = await supabase.rpc('add_credits', {
-          p_user_id: user.id,
-          p_amount: packInfo.amount,
-          p_description: `Achat ${packInfo.label} - ${packInfo.amount} crédits`,
-        });
+    setAddingCredits(true);
+    const initialCredits = credits;
+    const interval = setInterval(async () => {
+      await refetch();
+    }, 2000);
 
-        if (error) throw error;
-
-        setCreditsAdded(true);
-        await refetch();
+    // Stop polling after 30s
+    const timeout = setTimeout(() => {
+      clearInterval(interval);
+      setAddingCredits(false);
+      if (!creditsAdded) {
         toast({
-          title: '✅ Crédits ajoutés !',
-          description: `${packInfo.amount} crédits ont été ajoutés à votre compte.`,
+          title: 'En attente de confirmation',
+          description: 'Vos crédits seront ajoutés dès confirmation du paiement.',
         });
-      } catch (err: any) {
-        console.error('Error adding credits:', err);
-        toast({
-          title: 'Erreur',
-          description: "Les crédits n'ont pas pu être ajoutés. Contactez le support.",
-          variant: 'destructive',
-        });
-      } finally {
-        setAddingCredits(false);
       }
-    };
+    }, 30000);
 
-    addCredits();
-  }, [packInfo, user, creditsAdded, addingCredits]);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [packInfo, user]);
+
+  // Detect when credits have been added by webhook
+  useEffect(() => {
+    if (!packInfo || creditsAdded || !addingCredits) return;
+    if (credits !== null && credits > 0) {
+      setCreditsAdded(true);
+      setAddingCredits(false);
+      toast({
+        title: '✅ Crédits ajoutés !',
+        description: `Vos crédits ont été ajoutés à votre compte.`,
+      });
+    }
+  }, [credits, packInfo, creditsAdded, addingCredits]);
 
   const handleDownload = async (fileName: string) => {
     setDownloading(fileName);
