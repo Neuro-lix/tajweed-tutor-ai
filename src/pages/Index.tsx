@@ -992,10 +992,7 @@ const Index = () => {
             showTranslation={showTranslation}
             isRecording={isRecording}
             isAnalyzing={analyzing}
-            analysisStep={analysisStep === 'upload' ? 'uploading' : 
-                         analysisStep === 'transcription' ? 'transcribing' : 
-                         analysisStep === 'analysis' ? 'analyzing' : 
-                         analysisStep === 'complete' ? 'done' : 'idle'}
+            analysisStep={analysisStep}
             transcriptionFailed={transcriptionFailed}
             userAudioBlob={userAudioBlob}
             mediaStream={mediaStream}
