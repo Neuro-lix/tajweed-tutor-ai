@@ -656,7 +656,7 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
     pricingUnlimitedFeature6: 'Support prioritaire',
     pricingSubscribe: "S'abonner",
     pricingRecommended: 'Recommandé',
-    pricingSecure: 'Paiement sécurisé par Stripe. Annulation possible à tout moment.',
+    pricingSecure: 'Paiement sécurisé par Paddle. Annulation possible à tout moment.',
     pricingBack: 'Retour',
     // Recordings Library
     recordingsTitle: 'Mes récitations',
