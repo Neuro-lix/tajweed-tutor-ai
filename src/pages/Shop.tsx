@@ -82,7 +82,7 @@ const Shop: React.FC = () => {
     const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${PAYPAL_EMAIL}&item_name=${encodeURIComponent(itemName)}&amount=${price}&currency_code=EUR&return=${encodeURIComponent(returnUrl)}&cancel_return=${encodeURIComponent(CANCEL_URL)}`;
     window.open(paypalUrl, '_blank');
   };
-
+  const handleCrypto = async (productName: string, price: number, productType?: string) => {
     const userId = user?.id || `guest-${Date.now()}`;
     const key = `${productName}-${price}`;
     setCryptoLoading(key);
