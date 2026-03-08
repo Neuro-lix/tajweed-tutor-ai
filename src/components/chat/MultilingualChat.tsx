@@ -35,6 +35,7 @@ export const MultilingualChat: React.FC = () => {
   const [language, setLanguage] = useState('fr');
   const [isLoading, setIsLoading] = useState(false);
   const [autoSpeak, setAutoSpeak] = useState(true);
+  const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { speak, stop, isSpeaking, isLoading: ttsLoading } = useTextToSpeech();
 
