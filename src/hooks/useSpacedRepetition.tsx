@@ -90,8 +90,13 @@ export const useSpacedRepetition = () => {
     const item = reviewQueue.find(i => i.id === itemId);
     if (!item) return;
 
-    let newEaseFactor = item.easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
-    newEaseFactor = Math.max(MIN_EASE_FACTOR, newEaseFactor);
+    // SM-2: only update easeFactor on successful responses (quality >= 3)
+    let newEaseFactor = item.easeFactor;
+    if (quality >= 3) {
+      newEaseFactor = Math.max(MIN_EASE_FACTOR,
+        item.easeFactor + 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)
+      );
+    }
 
     let newRepetitions = item.repetitions;
     let newInterval = item.intervalDays;

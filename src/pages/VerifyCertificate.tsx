@@ -92,7 +92,7 @@ export default function VerifyCertificate() {
     ? `${certificate.userName} a maîtrisé la récitation de la Sourate ${surah?.transliteration || certificate.surahNumber} avec un score de ${certificate.averageScore.toFixed(0)}% en lecture ${QIRAAT_NAMES[certificate.qiraat || ''] || certificate.qiraat || 'Ḥafṣ ʿan ʿĀṣim'}.`
     : 'Vérifiez l\'authenticité d\'un certificat de maîtrise du Tajwīd délivré par Tajweed Tutor AI.';
 
-  const ogImage = 'https://storage.googleapis.com/gpt-engineer-file-uploads/K5B9XopSinZ3V0htRmjQEElgq9F2/social-images/social-1770296635561-Tajweed_tutor_ai.png';
+  const ogImage = `${typeof window !== 'undefined' ? window.location.origin : ''}/pwa-icon.png`;
   const pageUrl = typeof window !== 'undefined' ? window.location.href : '';
 
   return (

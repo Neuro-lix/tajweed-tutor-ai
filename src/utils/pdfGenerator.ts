@@ -136,10 +136,12 @@ export const generateCertificatePDF = async (data: CertificateData): Promise<voi
   doc.setFillColor(252, 251, 248);
   doc.rect(0, 0, pageWidth, pageHeight, 'F');
   
-  // Add subtle texture pattern
+  // Deterministic decorative circles instead of random
   for (let i = 0; i < 20; i++) {
     doc.setFillColor(248, 245, 240);
-    doc.circle(Math.random() * pageWidth, Math.random() * pageHeight, 15, 'F');
+    const x = ((i * 47 + 23) % (pageWidth - 30)) + 15;
+    const y = ((i * 31 + 17) % (pageHeight - 30)) + 15;
+    doc.circle(x, y, 15, 'F');
   }
 
   // Draw Islamic border
