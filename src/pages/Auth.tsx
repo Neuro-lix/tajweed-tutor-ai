@@ -43,9 +43,6 @@ const Auth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) navigate('/');
     });
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) navigate('/');
-    });
     return () => subscription.unsubscribe();
   }, [navigate]);
 
