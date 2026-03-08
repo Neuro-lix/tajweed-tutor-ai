@@ -69,11 +69,15 @@ export const useUserProgress = () => {
       }
 
       // Fetch user progress
-      const { data: progressData } = await supabase
+      const { data: progressData, error: progressError } = await supabase
         .from('user_progress')
         .select('*')
         .eq('user_id', user.id)
         .single();
+
+      if (progressError && progressError.code !== 'PGRST116') {
+        console.error('[useUserProgress] Progress fetch error:', progressError);
+      }
 
       if (progressData) {
         setProgress({
