@@ -366,7 +366,7 @@ const Index = () => {
     }
 
     try {
-      setAnalysisStep('analysis');
+      setAnalysisStep('analyzing');
 
       const { data, error } = await supabase.functions.invoke('analyze-recitation', {
         body: {
