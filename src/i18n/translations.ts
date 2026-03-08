@@ -1272,7 +1272,7 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
     pricingUnlimitedFeature6: 'دعم أولوي',
     pricingSubscribe: 'اشترك',
     pricingRecommended: 'موصى به',
-    pricingSecure: 'دفع آمن عبر Stripe. إلغاء في أي وقت.',
+    pricingSecure: 'دفع آمن عبر Paddle. إلغاء في أي وقت.',
     pricingBack: 'رجوع',
     recordingsTitle: 'تلاواتي',
     recordingsEmpty: 'لا توجد تلاوات محفوظة.',
