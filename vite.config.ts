@@ -35,6 +35,24 @@ export default defineConfig(({ mode }) => ({
             urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/.*/i,
             handler: "NetworkOnly",
           },
+          {
+            urlPattern: /^https:\/\/api\.alquran\.cloud\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "quran-api-cache",
+              expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/cdn\.islamic\.network\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "quran-audio-cache",
+              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
         ],
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api/, /^\/supabase/],

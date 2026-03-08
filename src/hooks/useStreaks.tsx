@@ -88,10 +88,10 @@ export const useStreaks = () => {
       // Already practiced today
       isNewDay = false;
     } else {
-      const lastDate = new Date(lastPractice);
-      const todayDate = new Date(today);
+      const lastDate = new Date(lastPractice + 'T00:00:00Z');
+      const todayDate = new Date(today + 'T00:00:00Z');
       const diffTime = todayDate.getTime() - lastDate.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
       if (diffDays === 1) {
         // Consecutive day

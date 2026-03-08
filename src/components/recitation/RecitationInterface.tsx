@@ -62,9 +62,14 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
   const { t } = useLanguage();
 
   const getAyahNumber = (surah: number, verse: number): number => {
-    if (surah <= 1) return verse;
-    if (surah > CUMULATIVE_VERSES.length) return verse;
-    return CUMULATIVE_VERSES[surah - 1] + verse;
+    if (surah < 1 || surah > 114) {
+      console.warn(`[getAyahNumber] Invalid surah: ${surah}`);
+      return verse;
+    }
+    if (surah === 1) return verse;
+    const offset = CUMULATIVE_VERSES[surah - 1];
+    if (offset === undefined) return verse;
+    return offset + verse;
   };
 
   const referenceAudioUrl = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${getAyahNumber(surahNumber, currentVerse)}.mp3`;

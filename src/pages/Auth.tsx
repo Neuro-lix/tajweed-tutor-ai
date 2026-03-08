@@ -115,7 +115,7 @@ const Auth = () => {
     setLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${window.location.origin}/auth?reset=true`,
       });
       if (error) {
         toast({ title: t.error, description: error.message, variant: "destructive" });
