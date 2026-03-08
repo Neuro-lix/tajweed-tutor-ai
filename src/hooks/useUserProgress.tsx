@@ -110,12 +110,16 @@ export const useUserProgress = () => {
       }
 
       // Fetch corrections
-      const { data: correctionsData } = await supabase
+      const { data: correctionsData, error: correctionsError } = await supabase
         .from('corrections')
         .select('*')
         .eq('user_id', user.id)
         .eq('is_resolved', false)
         .order('created_at', { ascending: false });
+
+      if (correctionsError) {
+        console.error('[useUserProgress] Corrections fetch error:', correctionsError);
+      }
 
       if (correctionsData) {
         setCorrections(
