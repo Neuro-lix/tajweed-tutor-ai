@@ -31,18 +31,7 @@ interface ReportData {
   date: Date;
 }
 
-const QIRAAT_NAMES: Record<string, string> = {
-  hafs_asim: 'Ḥafṣ ʿan ʿĀṣim',
-  warsh_nafi: 'Warsh ʿan Nāfiʿ',
-  qalun_nafi: 'Qālūn ʿan Nāfiʿ',
-  duri_amr: 'Ad-Dūrī ʿan Abī ʿAmr',
-  susi_amr: 'As-Sūsī ʿan Abī ʿAmr',
-  ibn_kathir: 'Ibn Kathīr',
-  ibn_amir: 'Ibn ʿĀmir',
-  shuaba_asim: 'Shuʿba ʿan ʿĀṣim',
-  khalaf: 'Khalaf',
-  khallad: 'Khallād',
-};
+// QIRAAT_NAMES imported from quranData.ts
 
 // Draw Islamic geometric border pattern
 const drawIslamicBorder = (doc: jsPDF, pageWidth: number, pageHeight: number) => {
