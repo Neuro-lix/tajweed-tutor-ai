@@ -249,6 +249,133 @@ export interface TranslationKeys {
   openAdminDashboard: string;
   offlinePractice: string;
   scoreSuffix: string;
+
+  // Gamification
+  gamificationTitle: string;
+  gamificationLevel: string;
+  gamificationBadges: string;
+  gamificationCurrentLevel: string;
+  gamificationExperience: string;
+  gamificationSessions: string;
+  gamificationPerfect: string;
+  gamificationMasteredVerses: string;
+  gamificationBadgesUnlocked: string;
+
+  // Streaks
+  streakCurrentSeries: string;
+  streakDays: string;
+  streakRecord: string;
+  streakNewRecord: string;
+  streakNextBadge: string;
+  streakStillXDays: string;
+  streakMaintain: string;
+  streakLastPractice: string;
+
+  // Leaderboard
+  leaderboardTitle: string;
+  leaderboardYourRank: string;
+  leaderboardNoReciters: string;
+  leaderboardBeFirst: string;
+  leaderboardYou: string;
+  leaderboardLevel: string;
+  leaderboardVerses: string;
+  leaderboardRecordStreak: string;
+
+  // Spaced Repetition
+  spacedRepTitle: string;
+  spacedRepToReview: string;
+  spacedRepNoReview: string;
+  spacedRepFutureQueue: string;
+  spacedRepAddedHere: string;
+  spacedRepReview: string;
+  spacedRepStartSession: string;
+  spacedRepMoreVerses: string;
+
+  // Certificate Modal
+  certCongrats: string;
+  certMasteredSurah: string;
+  certAverageScore: string;
+  certContinue: string;
+  certObtainedOn: string;
+
+  // Feedback Form
+  feedbackTitle: string;
+  feedbackRateExperience: string;
+  feedbackCategory: string;
+  feedbackGeneral: string;
+  feedbackTajweed: string;
+  feedbackExperience: string;
+  feedbackSuggestion: string;
+  feedbackMessage: string;
+  feedbackPlaceholder: string;
+  feedbackSend: string;
+  feedbackSending: string;
+  feedbackThankYou: string;
+  feedbackHelpImprove: string;
+  feedbackAddComment: string;
+
+  // Pricing
+  pricingChooseFormula: string;
+  pricingAccess: string;
+  pricingHourly: string;
+  pricingFlexible: string;
+  pricingPerHour: string;
+  pricingHourFeature1: string;
+  pricingHourFeature2: string;
+  pricingHourFeature3: string;
+  pricingHourFeature4: string;
+  pricingBuyHour: string;
+  pricingUnlimited: string;
+  pricingMonthly: string;
+  pricingPerMonth: string;
+  pricingUnlimitedFeature1: string;
+  pricingUnlimitedFeature2: string;
+  pricingUnlimitedFeature3: string;
+  pricingUnlimitedFeature4: string;
+  pricingUnlimitedFeature5: string;
+  pricingUnlimitedFeature6: string;
+  pricingSubscribe: string;
+  pricingRecommended: string;
+  pricingSecure: string;
+  pricingBack: string;
+
+  // Recordings Library
+  recordingsTitle: string;
+  recordingsEmpty: string;
+  recordingsEmptyHint: string;
+  recordingsDelete: string;
+  recordingsDownload: string;
+
+  // Ijaza Wrapper
+  ijazaLoginRequired: string;
+  ijazaLoginDesc: string;
+  ijazaCertification: string;
+  ijazaCertDesc: string;
+  ijazaYourProgress: string;
+  ijazaMasteredSurahs: string;
+  ijazaAvgScore: string;
+  ijazaTotalSurahs: string;
+  ijazaMyRequests: string;
+  ijazaAvailableSheikhs: string;
+  ijazaSelectSheikhDesc: string;
+  ijazaNoSheikh: string;
+  ijazaAvailable: string;
+  ijazaUnavailable: string;
+  ijazaSlots: string;
+  ijazaNoSlots: string;
+  ijazaRequestTitle: string;
+  ijazaRequestDesc: string;
+  ijazaFullName: string;
+  ijazaEmail: string;
+  ijazaPhone: string;
+  ijazaRecitationExp: string;
+  ijazaExpPlaceholder: string;
+  ijazaMotivation: string;
+  ijazaMotivationPlaceholder: string;
+  ijazaSlotSelected: string;
+  ijazaSending: string;
+  ijazaSendRequest: string;
+  ijazaEligibility: string;
 }
 
 const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: TranslationKeys } = {
