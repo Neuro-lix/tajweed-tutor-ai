@@ -51,6 +51,18 @@ const individualSheets: Product[] = [
   { id: 'duas', name: "Dou'as du Coran", description: 'Invocations coraniques essentielles', price: 0.99, icon: '🕌', pdfFile: 'duas-coran.pdf' },
 ];
 
+const advancedTajweedSheets: Product[] = [
+  { id: 'idgham', name: 'Idgham — Règles de Fusion', description: 'Les 6 lettres يرملون, Idgham avec/sans Ghunna, exemples coraniques', price: 0.99, icon: '🔀', pdfFile: 'tajweed-idgham.pdf' },
+  { id: 'ikhfa', name: 'Ikhfa — Dissimulation', description: 'Les 15 lettres de l\'Ikhfa, mémo mnémotechnique, exercice pratique', price: 0.99, icon: '🫧', pdfFile: 'tajweed-ikhfa.pdf' },
+  { id: 'qalqala', name: 'Qalqala — Vibration', description: 'Les 5 lettres قطبجد, 3 niveaux Sughra/Kubra/Akbar, exemples Sourate Al-Falaq', price: 0.99, icon: '🔔', pdfFile: 'tajweed-qalqala.pdf' },
+];
+
+const memorisationSheets: Product[] = [
+  { id: 'fatiha', name: 'Al-Fatiha — Fiche Complète', description: '7 versets avec traduction française, grille de suivi 7 répétitions', price: 0.99, icon: '🌟', pdfFile: 'memorisation-al-fatiha.pdf' },
+  { id: 'ikhlas', name: 'Al-Ikhlas — Fiche Complète', description: '4 versets + traduction, règles Tajweed intégrées, valeur spirituelle', price: 0.99, icon: '💎', pdfFile: 'memorisation-al-ikhlas.pdf' },
+  { id: 'falaq-nas', name: 'Al-Falaq & An-Nas — Les Deux Protections', description: 'Les 2 Mu\'awwidhatayn complètes, traductions, règles Tajweed communes', price: 0.99, icon: '🛡️', pdfFile: 'memorisation-al-falaq-an-nas.pdf' },
+];
+
 // handlePaypal is defined inside the Shop component to access toast
 
 type PreviewData = {

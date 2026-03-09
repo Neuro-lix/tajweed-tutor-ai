@@ -85,6 +85,66 @@ export const sheetPreviews: Record<string, SheetPreview> = {
     ],
     contents: 'Collectionnez et méditez sur les invocations les plus puissantes extraites directement du Coran.',
   },
+  idgham: {
+    id: 'idgham',
+    bullets: [
+      '📌 Les 6 lettres يرملون avec exemples',
+      '📌 Idgham avec Ghunna (ي و م ن) vs sans Ghunna (ل ر)',
+      '📌 2 exemples coraniques annotés',
+      '📌 Zone notes personnelles + erreurs fréquentes',
+    ],
+    contents: 'Maîtrisez les règles de fusion (Idgham) avec une fiche claire distinguant Ghunna et sans Ghunna, accompagnée d\'exemples coraniques.',
+  },
+  ikhfa: {
+    id: 'ikhfa',
+    bullets: [
+      '📌 Les 15 lettres complètes avec mémo mnémotechnique',
+      '📌 Définition et technique de prononciation',
+      '📌 Exemples du Coran annotés',
+      '📌 Exercice pratique avec verset réel',
+    ],
+    contents: 'Apprenez la dissimulation nasale (Ikhfa) avec les 15 lettres, un mémo mnémotechnique et des exercices pratiques.',
+  },
+  qalqala: {
+    id: 'qalqala',
+    bullets: [
+      '📌 Les 5 lettres قطبجد avec mémo قَطْبُ جَدٍّ',
+      '📌 3 niveaux : Sughra / Kubra / Akbar',
+      '📌 Exemples visuels pour chaque niveau',
+      '📌 Exercice sur Sourate Al-Falaq',
+    ],
+    contents: 'Comprenez la vibration (Qalqala) à travers les 3 niveaux avec des exemples visuels et un exercice sur Sourate Al-Falaq.',
+  },
+  fatiha: {
+    id: 'fatiha',
+    bullets: [
+      '📌 Texte arabe complet avec numéros de versets',
+      '📌 Traduction française verset par verset',
+      '📌 Grille de suivi 7 répétitions avec date',
+      '📌 Sourate Mecquoise — 7 versets',
+    ],
+    contents: 'Mémorisez Al-Fatiha avec une fiche structurée incluant traduction, grille de suivi et repères de progression.',
+  },
+  ikhlas: {
+    id: 'ikhlas',
+    bullets: [
+      '📌 Texte arabe + translittération + traduction',
+      '📌 Règles Tajweed intégrées (Qalqala, Ghunna, Madd)',
+      '📌 Hadith sur la valeur de la sourate',
+      '📌 Équivaut au tiers du Coran — Hadith Bukhari',
+    ],
+    contents: 'Mémorisez Al-Ikhlas avec ses règles Tajweed intégrées et découvrez sa valeur spirituelle immense.',
+  },
+  'falaq-nas': {
+    id: 'falaq-nas',
+    bullets: [
+      '📌 Les 2 Mu\'awwidhatayn en une seule fiche',
+      '📌 Traduction complète des 11 versets',
+      '📌 Règles Tajweed communes annotées',
+      '📌 Grille de suivi mémorisation intégrée',
+    ],
+    contents: 'Mémorisez les deux sourates de protection ensemble avec traductions, règles Tajweed et suivi de progression.',
+  },
 };
 
 export const livret1Pages = [
