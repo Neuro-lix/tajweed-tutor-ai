@@ -51,6 +51,18 @@ const individualSheets: Product[] = [
   { id: 'duas', name: "Dou'as du Coran", description: 'Invocations coraniques essentielles', price: 0.99, icon: '🕌', pdfFile: 'duas-coran.pdf' },
 ];
 
+const advancedTajweedSheets: Product[] = [
+  { id: 'idgham', name: 'Idgham — Règles de Fusion', description: 'Les 6 lettres يرملون, Idgham avec/sans Ghunna, exemples coraniques', price: 0.99, icon: '🔀', pdfFile: 'tajweed-idgham.pdf' },
+  { id: 'ikhfa', name: 'Ikhfa — Dissimulation', description: 'Les 15 lettres de l\'Ikhfa, mémo mnémotechnique, exercice pratique', price: 0.99, icon: '🫧', pdfFile: 'tajweed-ikhfa.pdf' },
+  { id: 'qalqala', name: 'Qalqala — Vibration', description: 'Les 5 lettres قطبجد, 3 niveaux Sughra/Kubra/Akbar, exemples Sourate Al-Falaq', price: 0.99, icon: '🔔', pdfFile: 'tajweed-qalqala.pdf' },
+];
+
+const memorisationSheets: Product[] = [
+  { id: 'fatiha', name: 'Al-Fatiha — Fiche Complète', description: '7 versets avec traduction française, grille de suivi 7 répétitions', price: 0.99, icon: '🌟', pdfFile: 'memorisation-al-fatiha.pdf' },
+  { id: 'ikhlas', name: 'Al-Ikhlas — Fiche Complète', description: '4 versets + traduction, règles Tajweed intégrées, valeur spirituelle', price: 0.99, icon: '💎', pdfFile: 'memorisation-al-ikhlas.pdf' },
+  { id: 'falaq-nas', name: 'Al-Falaq & An-Nas — Les Deux Protections', description: 'Les 2 Mu\'awwidhatayn complètes, traductions, règles Tajweed communes', price: 0.99, icon: '🛡️', pdfFile: 'memorisation-al-falaq-an-nas.pdf' },
+];
+
 // handlePaypal is defined inside the Shop component to access toast
 
 type PreviewData = {
@@ -308,6 +320,78 @@ const Shop: React.FC = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+            </section>
+
+            {/* Tajweed Avancé */}
+            <section>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-2">📖 Tajweed Avancé</h2>
+              <p className="text-muted-foreground mb-8">Maîtrisez les règles avancées du Tajweed</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                {advancedTajweedSheets.map((sheet) => {
+                  const colorMap: Record<string, string> = {
+                    idgham: 'border-purple-200 bg-purple-50 dark:bg-purple-950/20 dark:border-purple-800',
+                    ikhfa: 'border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800',
+                    qalqala: 'border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800',
+                  };
+                  const badgeColorMap: Record<string, string> = {
+                    idgham: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
+                    ikhfa: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300',
+                    qalqala: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
+                  };
+                  return (
+                    <div key={sheet.id} className={`group rounded-3xl border-2 p-5 md:p-6 flex flex-col items-center text-center shadow-soft hover:shadow-card transition-all duration-300 hover:-translate-y-1 ${colorMap[sheet.id] || ''}`}>
+                      <Badge className={`mb-3 text-[10px] font-bold ${badgeColorMap[sheet.id] || ''}`}>Avancé</Badge>
+                      <div className="text-4xl mb-3">{sheet.icon}</div>
+                      <h3 className="font-semibold text-foreground text-sm md:text-base mb-1 leading-tight">{sheet.name}</h3>
+                      <p className="text-xs text-muted-foreground mb-4 line-clamp-2">{sheet.description}</p>
+                      <div className="mt-auto w-full space-y-2">
+                        <div className="text-lg font-bold text-primary mb-2">0,99€</div>
+                        <Button size="sm" variant="outline" className="w-full rounded-2xl" onClick={() => openSheetPreview(sheet)}>
+                          <Eye className="h-3 w-3 mr-1" /> {t.previewLabel}
+                        </Button>
+                        <Button size="sm" className="w-full rounded-2xl" onClick={() => handlePaypal(sheet.name, sheet.price)}>PayPal</Button>
+                        <CryptoButton name={sheet.name} price={sheet.price} size="sm" />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Mémorisation Sourates Courtes */}
+            <section>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-2">🌙 Mémorisation Sourates Courtes</h2>
+              <p className="text-muted-foreground mb-8">Fiches complètes pour mémoriser les sourates essentielles</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                {memorisationSheets.map((sheet) => {
+                  const colorMap: Record<string, string> = {
+                    fatiha: 'border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800',
+                    ikhlas: 'border-violet-200 bg-violet-50 dark:bg-violet-950/20 dark:border-violet-800',
+                    'falaq-nas': 'border-cyan-200 bg-cyan-50 dark:bg-cyan-950/20 dark:border-cyan-800',
+                  };
+                  const badgeColorMap: Record<string, string> = {
+                    fatiha: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+                    ikhlas: 'bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-300',
+                    'falaq-nas': 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-300',
+                  };
+                  return (
+                    <div key={sheet.id} className={`group rounded-3xl border-2 p-5 md:p-6 flex flex-col items-center text-center shadow-soft hover:shadow-card transition-all duration-300 hover:-translate-y-1 ${colorMap[sheet.id] || ''}`}>
+                      <Badge className={`mb-3 text-[10px] font-bold ${badgeColorMap[sheet.id] || ''}`}>Débutant</Badge>
+                      <div className="text-4xl mb-3">{sheet.icon}</div>
+                      <h3 className="font-semibold text-foreground text-sm md:text-base mb-1 leading-tight">{sheet.name}</h3>
+                      <p className="text-xs text-muted-foreground mb-4 line-clamp-2">{sheet.description}</p>
+                      <div className="mt-auto w-full space-y-2">
+                        <div className="text-lg font-bold text-primary mb-2">0,99€</div>
+                        <Button size="sm" variant="outline" className="w-full rounded-2xl" onClick={() => openSheetPreview(sheet)}>
+                          <Eye className="h-3 w-3 mr-1" /> {t.previewLabel}
+                        </Button>
+                        <Button size="sm" className="w-full rounded-2xl" onClick={() => handlePaypal(sheet.name, sheet.price)}>PayPal</Button>
+                        <CryptoButton name={sheet.name} price={sheet.price} size="sm" />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </section>
 
