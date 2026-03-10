@@ -32,7 +32,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/ijaza" element={<Ijaza />} />
                 <Route path="/shop" element={<Shop />} />
-                <Route path="/shop/success" element={<ShopSuccess />} />
+                <Route path="/shop/success" element={<ProtectedRoute><ShopSuccess /></ProtectedRoute>} />
                 <Route path="/verify/:id" element={<VerifyCertificate />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

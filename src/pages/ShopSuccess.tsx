@@ -19,6 +19,12 @@ const PDF_FILES = [
   { name: "Dou'as du Coran", file: 'duas-coran.pdf' },
   { name: 'Livret 1 Complet', file: 'livret-1-complet.pdf' },
   { name: 'Livret 2 Complet', file: 'livret-2-complet.pdf' },
+  { name: 'Idgham — Règles de Fusion', file: 'tajweed-idgham.pdf' },
+  { name: 'Ikhfa — Dissimulation', file: 'tajweed-ikhfa.pdf' },
+  { name: 'Qalqala — Vibration', file: 'tajweed-qalqala.pdf' },
+  { name: 'Al-Fatiha — Fiche Complète', file: 'memorisation-al-fatiha.pdf' },
+  { name: 'Al-Ikhlas — Fiche Complète', file: 'memorisation-al-ikhlas.pdf' },
+  { name: 'Al-Falaq & An-Nas', file: 'memorisation-al-falaq-an-nas.pdf' },
 ];
 
 const PACK_CREDITS: Record<string, { amount: number; label: string }> = {

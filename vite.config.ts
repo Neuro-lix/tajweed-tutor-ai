@@ -15,7 +15,21 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "pwa-icon-192.png", "pwa-icon-512.png"],
-      manifest: false,
+      manifest: {
+        name: "Tajweed Tutor AI",
+        short_name: "Tajweed AI",
+        description: "Améliore ta récitation du Coran avec un coach IA de tajwīd.",
+        start_url: "/",
+        scope: "/",
+        display: "standalone",
+        theme_color: "#16a34a",
+        background_color: "#0d1117",
+        orientation: "portrait",
+        icons: [
+          { src: "/pwa-icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
+          { src: "/pwa-icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" }
+        ]
+      },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff,woff2}"],
         runtimeCaching: [

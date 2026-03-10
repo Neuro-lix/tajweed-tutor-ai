@@ -85,12 +85,14 @@ const Shop: React.FC = () => {
   const [cryptoLoading, setCryptoLoading] = useState<string | null>(null);
   const [preview, setPreview] = useState<PreviewData | null>(null);
 
-  const handlePaypal = (itemName: string, price: number, packId?: string) => {
+  const handlePaypal = (itemName: string, price: number, packId?: string, pdfFile?: string) => {
     if (!PAYPAL_EMAIL || PAYPAL_EMAIL.includes('example.com')) {
       toast({ title: 'PayPal non configuré', description: 'Utilisez le paiement crypto.', variant: 'destructive' });
       return;
     }
-    const returnUrl = packId ? `${RETURN_URL}?pack=${packId}` : RETURN_URL;
+    let returnUrl = RETURN_URL;
+    if (packId) returnUrl += `?pack=${packId}`;
+    else if (pdfFile) returnUrl += `?pdf=${pdfFile}`;
     const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${PAYPAL_EMAIL}&item_name=${encodeURIComponent(itemName)}&amount=${price}&currency_code=EUR&return=${encodeURIComponent(returnUrl)}&cancel_return=${encodeURIComponent(CANCEL_URL)}`;
     window.open(paypalUrl, '_blank');
   };
