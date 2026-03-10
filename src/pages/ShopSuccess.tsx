@@ -45,7 +45,11 @@ const ShopSuccess: React.FC = () => {
   const [addingCredits, setAddingCredits] = useState(false);
 
   const packId = searchParams.get('pack');
+  const pdfParam = searchParams.get('pdf');
   const packInfo = packId ? PACK_CREDITS[packId] : null;
+  const filesToShow = pdfParam
+    ? PDF_FILES.filter(f => f.file === pdfParam)
+    : (!packInfo ? PDF_FILES : []);
 
   useEffect(() => {
     if (!packInfo || !user) return;
