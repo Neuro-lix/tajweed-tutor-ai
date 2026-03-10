@@ -19,6 +19,12 @@ const PDF_FILES = [
   { name: "Dou'as du Coran", file: 'duas-coran.pdf' },
   { name: 'Livret 1 Complet', file: 'livret-1-complet.pdf' },
   { name: 'Livret 2 Complet', file: 'livret-2-complet.pdf' },
+  { name: 'Idgham — Règles de Fusion', file: 'tajweed-idgham.pdf' },
+  { name: 'Ikhfa — Dissimulation', file: 'tajweed-ikhfa.pdf' },
+  { name: 'Qalqala — Vibration', file: 'tajweed-qalqala.pdf' },
+  { name: 'Al-Fatiha — Fiche Complète', file: 'memorisation-al-fatiha.pdf' },
+  { name: 'Al-Ikhlas — Fiche Complète', file: 'memorisation-al-ikhlas.pdf' },
+  { name: 'Al-Falaq & An-Nas', file: 'memorisation-al-falaq-an-nas.pdf' },
 ];
 
 const PACK_CREDITS: Record<string, { amount: number; label: string }> = {
@@ -39,7 +45,11 @@ const ShopSuccess: React.FC = () => {
   const [addingCredits, setAddingCredits] = useState(false);
 
   const packId = searchParams.get('pack');
+  const pdfParam = searchParams.get('pdf');
   const packInfo = packId ? PACK_CREDITS[packId] : null;
+  const filesToShow = pdfParam
+    ? PDF_FILES.filter(f => f.file === pdfParam)
+    : (!packInfo ? PDF_FILES : []);
 
   useEffect(() => {
     if (!packInfo || !user) return;
@@ -139,13 +149,13 @@ const ShopSuccess: React.FC = () => {
           </div>
         )}
 
-        {!packInfo && (
+        {filesToShow.length > 0 && (
           <>
             <p className="text-muted-foreground text-lg">
               {t.shopSuccessDownloadDesc}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
-              {PDF_FILES.map((pdf) => (
+              {filesToShow.map((pdf) => (
                 <Button
                   key={pdf.file}
                   variant="outline"

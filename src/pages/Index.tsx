@@ -140,10 +140,15 @@ const Index = () => {
     setLogoClickCount(prev => {
       const next = prev + 1;
       if (next >= 5) {
-        const newMode = !devMode;
-        setDevMode(newMode);
-        localStorage.setItem('devMode', String(newMode));
-        alert(newMode ? '🛠️ Mode développeur activé — Tout est gratuit' : '🔒 Mode développeur désactivé');
+        const pwd = prompt('🔐 Mot de passe développeur :');
+        if (pwd === 'tajweed-dev-2026') {
+          const newMode = !devMode;
+          setDevMode(newMode);
+          localStorage.setItem('devMode', String(newMode));
+          alert(newMode ? '🛠️ Mode dev ON — Crédits gratuits' : '🔒 Mode dev OFF');
+        } else {
+          alert('❌ Mot de passe incorrect');
+        }
         return 0;
       }
       return next;
