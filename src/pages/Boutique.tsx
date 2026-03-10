@@ -51,6 +51,7 @@ const INITIAL_PRODUCTS: Product[] = [
 const AdminPanel = ({ products, setProducts, onClose }: { products: Product[]; setProducts: (p: Product[]) => void; onClose: () => void; }) => {
   const dragIndex = useRef<number | null>(null);
   const dragOverIndex = useRef<number | null>(null);
+  const [dragFile, setDragFile] = useState(false);
 
   const handleDragStart = (index: number) => { dragIndex.current = index; };
   const handleDragOver = (e: React.DragEvent, index: number) => { e.preventDefault(); dragOverIndex.current = index; };
@@ -64,6 +65,32 @@ const AdminPanel = ({ products, setProducts, onClose }: { products: Product[]; s
     dragOverIndex.current = null;
   };
   const toggleActive = (id: number) => { setProducts(products.map(p => p.id === id ? { ...p, active: !p.active } : p)); };
+
+  const handleFileDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragFile(false);
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.name.endsWith('.pdf')) return;
+    const newProduct: Product = {
+      id: Date.now(),
+      category: 'pdf',
+      title: file.name.replace('.pdf', '').replace(/-/g, ' '),
+      titleAr: '',
+      description: 'Nouveau produit — modifiez la description',
+      price: 0.99,
+      originalPrice: null,
+      iconName: 'FileText',
+      color: 'text-primary',
+      bg: 'bg-primary/10',
+      badge: 'Nouveau',
+      stars: 5,
+      active: true,
+      downloadUrl: '',
+      pdfFileName: file.name,
+    };
+    setProducts([...products, newProduct]);
+    alert(`✅ "${file.name}" ajouté à la liste. N'oubliez pas d'uploader ce fichier dans le storage bucket "pdfs".`);
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">

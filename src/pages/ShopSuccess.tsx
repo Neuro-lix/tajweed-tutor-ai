@@ -149,13 +149,13 @@ const ShopSuccess: React.FC = () => {
           </div>
         )}
 
-        {!packInfo && (
+        {filesToShow.length > 0 && (
           <>
             <p className="text-muted-foreground text-lg">
               {t.shopSuccessDownloadDesc}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
-              {PDF_FILES.map((pdf) => (
+              {filesToShow.map((pdf) => (
                 <Button
                   key={pdf.file}
                   variant="outline"
