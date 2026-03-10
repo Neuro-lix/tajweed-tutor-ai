@@ -24,6 +24,7 @@ interface Product {
   badge: string | null;
   stars: number;
   active: boolean;
+  pdfFileName?: string;
 }
 
 const ICON_MAP: Record<string, React.ElementType> = {
