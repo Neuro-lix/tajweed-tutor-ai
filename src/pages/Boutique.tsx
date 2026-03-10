@@ -101,6 +101,16 @@ const AdminPanel = ({ products, setProducts, onClose }: { products: Product[]; s
         </div>
         <div className="p-4 text-sm text-muted-foreground bg-muted/30">Glissez-deposez pour reorganiser · Cliquez sur le switch pour activer/desactiver</div>
         <div className="overflow-y-auto flex-1 p-4 space-y-2">
+          <div
+            onDragOver={(e) => { e.preventDefault(); setDragFile(true); }}
+            onDragLeave={() => setDragFile(false)}
+            onDrop={handleFileDrop}
+            className={`border-2 border-dashed rounded-xl p-6 text-center text-sm transition-colors mb-4 ${
+              dragFile ? 'border-primary bg-primary/10 text-primary' : 'border-border text-muted-foreground'
+            }`}
+          >
+            📂 Glissez un fichier PDF ici pour ajouter un nouveau produit
+          </div>
           {products.map((product, index) => {
             const IconComp = ICON_MAP[product.iconName] || FileText;
             return (
