@@ -1,6 +1,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Wifi, WifiOff, Download } from 'lucide-react';
+import { WifiOff, Download } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface OfflineIndicatorProps {
   isOnline: boolean;
@@ -19,30 +20,22 @@ export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
   cacheStats,
   formatCacheSize,
 }) => {
-  // Only show when offline - don't clutter header when online
-  if (isOnline) {
-    return null;
-  }
+  const { t } = useLanguage();
+
+  if (isOnline) return null;
 
   return (
     <div className="flex items-center gap-2">
-      {!isOnline ? (
-        <Badge variant="destructive" className="flex items-center gap-1">
-          <WifiOff className="h-3 w-3" />
-          <span className="text-xs">Hors ligne</span>
-        </Badge>
-      ) : (
-        <Badge variant="outline" className="flex items-center gap-1 text-primary">
-          <Wifi className="h-3 w-3" />
-          <span className="text-xs">En ligne</span>
-        </Badge>
-      )}
+      <Badge variant="destructive" className="flex items-center gap-1">
+        <WifiOff className="h-3 w-3" />
+        <span className="text-xs">{t.offline}</span>
+      </Badge>
       
       {isOfflineReady && (
         <Badge variant="secondary" className="flex items-center gap-1">
           <Download className="h-3 w-3" />
           <span className="text-xs">
-            {cacheStats.verses} versets ({formatCacheSize(cacheStats.size)})
+            {cacheStats.verses} {t.versesCount} ({formatCacheSize(cacheStats.size)})
           </span>
         </Badge>
       )}
