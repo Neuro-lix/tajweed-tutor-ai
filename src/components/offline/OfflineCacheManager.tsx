@@ -15,6 +15,7 @@ import {
 import { SURAHS } from '@/data/quranData';
 import { fetchSurah } from '@/lib/quranApi';
 import { DownloadAllQuran } from './DownloadAllQuran';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface OfflineCacheManagerProps {
   isOnline: boolean;
@@ -43,29 +44,24 @@ export const OfflineCacheManager: React.FC<OfflineCacheManagerProps> = ({
   isSurahCached,
   clearCache,
 }) => {
+  const { t } = useLanguage();
   const [downloading, setDownloading] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
   const [cachedSurahs, setCachedSurahs] = useState<Set<number>>(new Set());
   const [isClearing, setIsClearing] = useState(false);
 
-  // Quick download popular surahs
   const popularSurahs = [1, 112, 113, 114];
 
   const handleDownloadSurah = async (surahNumber: number) => {
     if (!isOnline) return;
-
     setDownloading(surahNumber);
     setProgress(0);
-
     try {
       const verses = await fetchSurah(surahNumber, { translationId: 'fr.hamidullah' });
-
-      // Simulate progressive download (only used for small "popular" surahs)
       for (let i = 0; i < verses.length; i++) {
         await new Promise((resolve) => setTimeout(resolve, 80));
         setProgress(((i + 1) / verses.length) * 100);
       }
-
       await cacheSurah(surahNumber, verses, 'fr.hamidullah');
       setCachedSurahs((prev) => new Set([...prev, surahNumber]));
     } catch (error) {
@@ -100,7 +96,7 @@ export const OfflineCacheManager: React.FC<OfflineCacheManagerProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <HardDrive className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg">Mode Hors-ligne</CardTitle>
+            <CardTitle className="text-lg">{t.offlineMode}</CardTitle>
           </div>
           <Badge 
             variant={isOnline ? "outline" : "destructive"} 
@@ -109,39 +105,37 @@ export const OfflineCacheManager: React.FC<OfflineCacheManagerProps> = ({
             {isOnline ? (
               <>
                 <Wifi className="h-3 w-3" />
-                En ligne
+                {t.online}
               </>
             ) : (
               <>
                 <WifiOff className="h-3 w-3" />
-                Hors ligne
+                {t.offline}
               </>
             )}
           </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Cache stats */}
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="p-2 bg-muted rounded-lg">
             <p className="text-2xl font-bold text-primary">{cacheStats.verses}</p>
-            <p className="text-xs text-muted-foreground">Versets</p>
+            <p className="text-xs text-muted-foreground">{t.versesCount}</p>
           </div>
           <div className="p-2 bg-muted rounded-lg">
             <p className="text-2xl font-bold text-primary">{cacheStats.audio}</p>
-            <p className="text-xs text-muted-foreground">Audios</p>
+            <p className="text-xs text-muted-foreground">{t.audiosLabel}</p>
           </div>
           <div className="p-2 bg-muted rounded-lg">
             <p className="text-2xl font-bold text-primary">
               {formatCacheSize(cacheStats.size)}
             </p>
-            <p className="text-xs text-muted-foreground">Taille</p>
+            <p className="text-xs text-muted-foreground">{t.sizeLabel}</p>
           </div>
         </div>
 
-        {/* Quick download section */}
         <div>
-          <p className="text-sm font-medium mb-2">Téléchargement rapide</p>
+          <p className="text-sm font-medium mb-2">{t.quickDownload}</p>
           <div className="grid grid-cols-2 gap-2">
             {popularSurahs.map((surahNumber) => {
               const surah = SURAHS.find(s => s.id === surahNumber);
@@ -175,21 +169,18 @@ export const OfflineCacheManager: React.FC<OfflineCacheManagerProps> = ({
             })}
           </div>
 
-          {/* Progress bar */}
           {downloading && (
             <div className="mt-3">
               <Progress value={progress} className="h-2" />
               <p className="text-xs text-muted-foreground mt-1 text-center">
-                Téléchargement... {Math.round(progress)}%
+                {t.downloading} {Math.round(progress)}%
               </p>
             </div>
           )}
         </div>
 
-        {/* Download all 114 Surahs */}
         <DownloadAllQuran cacheSurah={cacheSurah} isOnline={isOnline} />
 
-        {/* Quick download + clear */}
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -199,7 +190,7 @@ export const OfflineCacheManager: React.FC<OfflineCacheManagerProps> = ({
             onClick={handleDownloadAll}
           >
             <Download className="h-4 w-4 mr-2" />
-            Populaires (rapide)
+            {t.popularFast}
           </Button>
           <Button
             variant="destructive"
@@ -215,15 +206,13 @@ export const OfflineCacheManager: React.FC<OfflineCacheManagerProps> = ({
           </Button>
         </div>
 
-        {/* Offline mode info */}
         {!isOnline && isOfflineReady && (
           <div className="p-3 bg-primary/10 rounded-lg">
             <p className="text-sm text-primary font-medium">
-              ✓ Mode hors-ligne actif
+              {t.offlineModeActive}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Vous pouvez pratiquer avec les {cacheStats.verses} versets téléchargés.
-              L'analyse IA sera disponible quand vous serez à nouveau connecté.
+              {t.offlinePracticeAvailable} {t.offlineAiAvailableOnline}
             </p>
           </div>
         )}
@@ -231,10 +220,10 @@ export const OfflineCacheManager: React.FC<OfflineCacheManagerProps> = ({
         {!isOnline && !isOfflineReady && (
           <div className="p-3 bg-destructive/10 rounded-lg">
             <p className="text-sm text-destructive font-medium">
-              ⚠️ Aucun contenu hors-ligne
+              {t.noOfflineContent}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Connectez-vous pour télécharger des versets et pouvoir pratiquer hors-ligne.
+              {t.connectToDownload}
             </p>
           </div>
         )}
