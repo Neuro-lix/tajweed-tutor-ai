@@ -10,6 +10,7 @@ interface QiraatSelectorProps {
 }
 
 export const QiraatSelector: React.FC<QiraatSelectorProps> = ({ selectedQiraat, onSelect }) => {
+  const { t } = useLanguage();
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {QIRAAT.map((qiraat) => {
