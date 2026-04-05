@@ -37,7 +37,7 @@ export const QiraatSelector: React.FC<QiraatSelectorProps> = ({ selectedQiraat, 
               </div>
               <div className="flex flex-col items-end gap-2">
                 {isPopular && (
-                  <Badge variant="gold">Populaire</Badge>
+                  <Badge variant="gold">{t.popularLabel}</Badge>
                 )}
                 {isSelected && (
                   <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
