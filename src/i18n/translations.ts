@@ -421,6 +421,57 @@ export interface TranslationKeys {
   shopCryptoError: string;
   shopCryptoUnknown: string;
   shopNoCryptoUrl: string;
+
+  // Offline & Notifications
+  offlineMode: string;
+  online: string;
+  offline: string;
+  versesCount: string;
+  audiosLabel: string;
+  sizeLabel: string;
+  quickDownload: string;
+  downloading: string;
+  popularFast: string;
+  offlineModeActive: string;
+  offlinePracticeAvailable: string;
+  offlineAiAvailableOnline: string;
+  noOfflineContent: string;
+  noDownloadedVerses: string;
+  retryConnection: string;
+  practiceWithoutConnection: string;
+  aiAnalysisOnReconnect: string;
+  quranCoverage: string;
+  availableSurahs: string;
+  noSurahDownloaded: string;
+  complete: string;
+  checkConnection: string;
+  versesAvailable: string;
+  surahVerseAvailable: string;
+  verseNotCached: string;
+  aiNotAvailableOffline: string;
+  listenReference: string;
+  practiceAlone: string;
+  availableOffline: string;
+  listenRefRecitations: string;
+  readArabicVerses: string;
+  practiceWithoutAi: string;
+  connectForAiAndMore: string;
+  notificationsTitle: string;
+  notificationsNotSupported: string;
+  notificationsEnabled: string;
+  notificationsBlocked: string;
+  notificationsBlockedHint: string;
+  notificationsEnableHint: string;
+  notificationsActivating: string;
+  enableNotifications: string;
+  inAppNotifications: string;
+  alwaysActiveForReminders: string;
+  notificationsActivatedToast: string;
+  notificationsActivatedDesc: string;
+  notificationsRefusedToast: string;
+  notificationsRefusedDesc: string;
+  noCachedContent: string;
+  connectToDownload: string;
 }
 
 const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: TranslationKeys } = {
