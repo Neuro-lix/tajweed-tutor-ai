@@ -16,6 +16,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { SURAHS } from '@/data/quranData';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CachedSurahInfo {
   surahNumber: number;
@@ -47,6 +48,7 @@ export const OfflineScreen: React.FC<OfflineScreenProps> = ({
   onGoOnline,
   getCachedSurahInfo,
 }) => {
+  const { t } = useLanguage();
   const [cachedSurahs, setCachedSurahs] = useState<CachedSurahInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -62,7 +64,6 @@ export const OfflineScreen: React.FC<OfflineScreenProps> = ({
         setIsLoading(false);
       }
     };
-
     loadCachedInfo();
   }, [getCachedSurahInfo]);
 
@@ -70,13 +71,9 @@ export const OfflineScreen: React.FC<OfflineScreenProps> = ({
   const totalCachedVerses = cachedSurahs.reduce((acc, s) => acc + s.cachedVerses, 0);
   const coveragePercent = ((totalCachedVerses / 6236) * 100).toFixed(1);
 
-  if (isOnline && cacheStats.verses > 0) {
-    // Online with cache - show mini status
-    return null;
-  }
+  if (isOnline && cacheStats.verses > 0) return null;
 
   if (!isOnline && cacheStats.verses === 0) {
-    // Offline with no cache - critical warning
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="max-w-md w-full border-destructive">
@@ -84,20 +81,19 @@ export const OfflineScreen: React.FC<OfflineScreenProps> = ({
             <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
               <WifiOff className="h-8 w-8 text-destructive" />
             </div>
-            <CardTitle className="text-destructive">Mode Hors-ligne</CardTitle>
+            <CardTitle className="text-destructive">{t.offlineMode}</CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <div className="flex items-center justify-center gap-2 text-muted-foreground">
               <AlertTriangle className="h-4 w-4" />
-              <span>Aucun contenu en cache</span>
+              <span>{t.noCachedContent}</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Vous n'avez pas de versets téléchargés pour une utilisation hors-ligne.
-              Connectez-vous à Internet pour télécharger du contenu.
+              {t.noDownloadedVerses} {t.connectToDownload}
             </p>
             <Button onClick={onGoOnline} variant="outline" className="w-full">
               <RefreshCw className="h-4 w-4 mr-2" />
-              Réessayer la connexion
+              {t.retryConnection}
             </Button>
           </CardContent>
         </Card>
@@ -105,23 +101,20 @@ export const OfflineScreen: React.FC<OfflineScreenProps> = ({
     );
   }
 
-  // Offline with cache - show available content
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-2xl mx-auto space-y-6">
-        {/* Header */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-destructive/10 rounded-full">
             <WifiOff className="h-4 w-4 text-destructive" />
-            <span className="text-sm font-medium text-destructive">Mode Hors-ligne</span>
+            <span className="text-sm font-medium text-destructive">{t.offlineMode}</span>
           </div>
-          <h1 className="text-2xl font-bold">Pratiquez sans connexion</h1>
+          <h1 className="text-2xl font-bold">{t.practiceWithoutConnection}</h1>
           <p className="text-muted-foreground text-sm">
-            L'analyse IA sera disponible quand vous serez reconnecté
+            {t.aiAnalysisOnReconnect}
           </p>
         </div>
 
-        {/* Cache Stats */}
         <Card>
           <CardContent className="pt-6">
             <div className="grid grid-cols-3 gap-4 text-center">
@@ -130,27 +123,27 @@ export const OfflineScreen: React.FC<OfflineScreenProps> = ({
                   <BookOpen className="h-4 w-4 text-primary" />
                   <span className="text-2xl font-bold">{cacheStats.verses}</span>
                 </div>
-                <p className="text-xs text-muted-foreground">Versets</p>
+                <p className="text-xs text-muted-foreground">{t.versesCount}</p>
               </div>
               <div className="space-y-1">
                 <div className="flex items-center justify-center gap-1">
                   <Music className="h-4 w-4 text-primary" />
                   <span className="text-2xl font-bold">{cacheStats.audio}</span>
                 </div>
-                <p className="text-xs text-muted-foreground">Audios</p>
+                <p className="text-xs text-muted-foreground">{t.audiosLabel}</p>
               </div>
               <div className="space-y-1">
                 <div className="flex items-center justify-center gap-1">
                   <HardDrive className="h-4 w-4 text-primary" />
                   <span className="text-2xl font-bold">{formatCacheSize(cacheStats.size)}</span>
                 </div>
-                <p className="text-xs text-muted-foreground">Stockage</p>
+                <p className="text-xs text-muted-foreground">{t.sizeLabel}</p>
               </div>
             </div>
 
             <div className="mt-4 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Couverture du Coran</span>
+                <span className="text-muted-foreground">{t.quranCoverage}</span>
                 <span className="font-medium">{coveragePercent}%</span>
               </div>
               <Progress value={parseFloat(coveragePercent)} className="h-2" />
@@ -158,25 +151,24 @@ export const OfflineScreen: React.FC<OfflineScreenProps> = ({
           </CardContent>
         </Card>
 
-        {/* Available Surahs */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <Download className="h-5 w-5 text-primary" />
-              Sourates disponibles ({availableSurahs.length})
+              {t.availableSurahs} ({availableSurahs.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <div className="text-center py-8">
                 <RefreshCw className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
-                <p className="text-sm text-muted-foreground mt-2">Chargement...</p>
+                <p className="text-sm text-muted-foreground mt-2">{t.loading}</p>
               </div>
             ) : availableSurahs.length === 0 ? (
               <div className="text-center py-8">
                 <AlertTriangle className="h-8 w-8 mx-auto text-destructive mb-2" />
                 <p className="text-sm text-muted-foreground">
-                  Aucune sourate téléchargée
+                  {t.noSurahDownloaded}
                 </p>
               </div>
             ) : (
@@ -198,7 +190,7 @@ export const OfflineScreen: React.FC<OfflineScreenProps> = ({
                           <div>
                             <p className="font-medium text-foreground">{surahData?.name}</p>
                             <p className="text-xs text-muted-foreground">
-                              {surahData?.transliteration} • {surah.cachedVerses}/{surah.verseCount} versets
+                              {surahData?.transliteration} • {surah.cachedVerses}/{surah.verseCount} {t.versesCount}
                             </p>
                           </div>
                         </div>
@@ -206,7 +198,7 @@ export const OfflineScreen: React.FC<OfflineScreenProps> = ({
                           {isComplete && (
                             <Badge variant="outline" className="text-primary border-primary/50">
                               <CheckCircle2 className="h-3 w-3 mr-1" />
-                              Complet
+                              {t.complete}
                             </Badge>
                           )}
                           {surah.hasAudio && (
@@ -231,10 +223,9 @@ export const OfflineScreen: React.FC<OfflineScreenProps> = ({
           </CardContent>
         </Card>
 
-        {/* Reconnect Button */}
         <Button onClick={onGoOnline} variant="outline" className="w-full">
           <RefreshCw className="h-4 w-4 mr-2" />
-          Vérifier la connexion
+          {t.checkConnection}
         </Button>
       </div>
     </div>

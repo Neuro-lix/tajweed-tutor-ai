@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Bell, BellOff, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface NotificationSettingsProps {
   onRequestPermission: () => Promise<boolean>;
@@ -15,6 +16,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
   onRequestPermission,
   className,
 }) => {
+  const { t } = useLanguage();
   const [permission, setPermission] = useState<NotificationPermission>('default');
   const [requesting, setRequesting] = useState(false);
 
@@ -31,12 +33,12 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
     setRequesting(false);
 
     if (granted) {
-      toast.success('Notifications activées !', {
-        description: 'Tu recevras des rappels pour tes révisions',
+      toast.success(t.notificationsActivatedToast, {
+        description: t.notificationsActivatedDesc,
       });
     } else {
-      toast.error('Notifications refusées', {
-        description: 'Tu peux les activer dans les paramètres de ton navigateur',
+      toast.error(t.notificationsRefusedToast, {
+        description: t.notificationsRefusedDesc,
       });
     }
   };
@@ -48,34 +50,34 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Bell className="h-5 w-5 text-primary" />
-          Notifications
+          {t.notificationsTitle}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {!notificationsSupported ? (
           <div className="text-sm text-muted-foreground flex items-center gap-2">
             <BellOff className="h-4 w-4" />
-            Notifications non supportées par ce navigateur
+            {t.notificationsNotSupported}
           </div>
         ) : permission === 'granted' ? (
           <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
             <Check className="h-4 w-4" />
-            Notifications activées
+            {t.notificationsEnabled}
           </div>
         ) : permission === 'denied' ? (
           <div className="text-sm">
             <div className="flex items-center gap-2 text-red-600 dark:text-red-400 mb-2">
               <X className="h-4 w-4" />
-              Notifications bloquées
+              {t.notificationsBlocked}
             </div>
             <p className="text-muted-foreground text-xs">
-              Pour les activer, modifie les paramètres de ton navigateur pour ce site.
+              {t.notificationsBlockedHint}
             </p>
           </div>
         ) : (
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Active les notifications pour recevoir des rappels de révision.
+              {t.notificationsEnableHint}
             </p>
             <Button 
               onClick={handleEnableNotifications} 
@@ -85,7 +87,7 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
               className="w-full"
             >
               <Bell className="h-4 w-4 mr-2" />
-              {requesting ? 'Activation...' : 'Activer les notifications'}
+              {requesting ? t.notificationsActivating : t.enableNotifications}
             </Button>
           </div>
         )}
@@ -93,12 +95,12 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({
         <div className="pt-2 border-t">
           <div className="flex items-center justify-between">
             <Label htmlFor="toast-notifications" className="text-sm">
-              Notifications dans l'app
+              {t.inAppNotifications}
             </Label>
             <Switch id="toast-notifications" defaultChecked disabled />
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            Toujours activées pour les rappels importants
+            {t.alwaysActiveForReminders}
           </p>
         </div>
       </CardContent>

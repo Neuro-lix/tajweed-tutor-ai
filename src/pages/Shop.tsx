@@ -37,7 +37,7 @@ interface Product {
 const creditPacks: CreditPack[] = [
   { id: 'starter', name: 'Pack Starter', credits: 50, price: 1.99 },
   { id: 'standard', name: 'Pack Standard', credits: 150, price: 4.99, popular: true },
-  { id: 'premium', name: 'Pack Premium', credits: 400, price: 9.99, badge: 'Meilleur prix' },
+  { id: 'premium', name: 'Pack Premium', credits: 400, price: 9.99, badge: 'bestPrice' },
 ];
 
 const individualSheets: Product[] = [
@@ -248,10 +248,10 @@ const Shop: React.FC = () => {
                 {creditPacks.map((pack) => (
                   <div key={pack.id} className={`relative rounded-3xl border-2 p-8 flex flex-col items-center text-center shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-card ${pack.popular ? 'border-primary bg-gradient-to-b from-primary/10 to-card' : 'border-border bg-card'}`}>
                     {pack.badge && (
-                      <Badge className="absolute -top-3 bg-accent text-accent-foreground text-xs font-bold px-3 py-1"><Star className="h-3 w-3 mr-1" /> {pack.badge}</Badge>
+                      <Badge className="absolute -top-3 bg-accent text-accent-foreground text-xs font-bold px-3 py-1"><Star className="h-3 w-3 mr-1" /> {t.bestPriceLabel}</Badge>
                     )}
                     {pack.popular && !pack.badge && (
-                      <Badge className="absolute -top-3 bg-primary text-primary-foreground text-xs font-bold px-3 py-1">Populaire</Badge>
+                      <Badge className="absolute -top-3 bg-primary text-primary-foreground text-xs font-bold px-3 py-1">{t.popularLabel}</Badge>
                     )}
                     <Zap className="h-10 w-10 text-primary mb-4" />
                     <h3 className="font-serif text-xl font-bold text-foreground mb-1">{pack.name}</h3>

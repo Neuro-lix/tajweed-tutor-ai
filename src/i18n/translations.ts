@@ -421,6 +421,57 @@ export interface TranslationKeys {
   shopCryptoError: string;
   shopCryptoUnknown: string;
   shopNoCryptoUrl: string;
+
+  // Offline & Notifications
+  offlineMode: string;
+  online: string;
+  offline: string;
+  versesCount: string;
+  audiosLabel: string;
+  sizeLabel: string;
+  quickDownload: string;
+  downloading: string;
+  popularFast: string;
+  offlineModeActive: string;
+  offlinePracticeAvailable: string;
+  offlineAiAvailableOnline: string;
+  noOfflineContent: string;
+  noDownloadedVerses: string;
+  retryConnection: string;
+  practiceWithoutConnection: string;
+  aiAnalysisOnReconnect: string;
+  quranCoverage: string;
+  availableSurahs: string;
+  noSurahDownloaded: string;
+  complete: string;
+  checkConnection: string;
+  versesAvailable: string;
+  surahVerseAvailable: string;
+  verseNotCached: string;
+  aiNotAvailableOffline: string;
+  listenReference: string;
+  practiceAlone: string;
+  availableOffline: string;
+  listenRefRecitations: string;
+  readArabicVerses: string;
+  practiceWithoutAi: string;
+  connectForAiAndMore: string;
+  notificationsTitle: string;
+  notificationsNotSupported: string;
+  notificationsEnabled: string;
+  notificationsBlocked: string;
+  notificationsBlockedHint: string;
+  notificationsEnableHint: string;
+  notificationsActivating: string;
+  enableNotifications: string;
+  inAppNotifications: string;
+  alwaysActiveForReminders: string;
+  notificationsActivatedToast: string;
+  notificationsActivatedDesc: string;
+  notificationsRefusedToast: string;
+  notificationsRefusedDesc: string;
+  noCachedContent: string;
+  connectToDownload: string;
 }
 
 const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: TranslationKeys } = {
@@ -778,6 +829,55 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
     shopCryptoError: 'Erreur paiement crypto',
     shopCryptoUnknown: 'Erreur inconnue.',
     shopNoCryptoUrl: 'Aucune URL de paiement retournée',
+    offlineMode: 'Mode Hors-ligne',
+    online: 'En ligne',
+    offline: 'Hors ligne',
+    versesCount: 'Versets',
+    audiosLabel: 'Audios',
+    sizeLabel: 'Taille',
+    quickDownload: 'Téléchargement rapide',
+    downloading: 'Téléchargement...',
+    popularFast: 'Populaires (rapide)',
+    offlineModeActive: '✓ Mode hors-ligne actif',
+    offlinePracticeAvailable: 'Vous pouvez pratiquer avec les versets téléchargés.',
+    offlineAiAvailableOnline: "L'analyse IA sera disponible quand vous serez à nouveau connecté.",
+    noOfflineContent: '⚠️ Aucun contenu hors-ligne',
+    noDownloadedVerses: "Vous n'avez pas de versets téléchargés pour une utilisation hors-ligne.",
+    retryConnection: 'Réessayer la connexion',
+    practiceWithoutConnection: 'Pratiquez sans connexion',
+    aiAnalysisOnReconnect: "L'analyse IA sera disponible quand vous serez reconnecté",
+    quranCoverage: 'Couverture du Coran',
+    availableSurahs: 'Sourates disponibles',
+    noSurahDownloaded: 'Aucune sourate téléchargée',
+    complete: 'Complet',
+    checkConnection: 'Vérifier la connexion',
+    versesAvailable: 'versets disponibles',
+    surahVerseAvailable: 'disponible hors-ligne',
+    verseNotCached: "Ce verset n'est pas dans le cache",
+    aiNotAvailableOffline: "🔇 L'analyse IA n'est pas disponible hors-ligne.",
+    listenReference: 'Écouter référence',
+    practiceAlone: "S'entraîner seul",
+    availableOffline: 'Disponible hors-ligne :',
+    listenRefRecitations: 'Écouter les récitations de référence (si téléchargées)',
+    readArabicVerses: 'Lire les versets en arabe',
+    practiceWithoutAi: 'Pratiquer sans correction IA',
+    connectForAiAndMore: "💡 Connectez-vous pour accéder à l'analyse IA et télécharger plus de versets",
+    notificationsTitle: 'Notifications',
+    notificationsNotSupported: 'Notifications non supportées par ce navigateur',
+    notificationsEnabled: 'Notifications activées',
+    notificationsBlocked: 'Notifications bloquées',
+    notificationsBlockedHint: 'Pour les activer, modifie les paramètres de ton navigateur pour ce site.',
+    notificationsEnableHint: 'Active les notifications pour recevoir des rappels de révision.',
+    notificationsActivating: 'Activation...',
+    enableNotifications: 'Activer les notifications',
+    inAppNotifications: "Notifications dans l'app",
+    alwaysActiveForReminders: 'Toujours activées pour les rappels importants',
+    notificationsActivatedToast: 'Notifications activées !',
+    notificationsActivatedDesc: 'Tu recevras des rappels pour tes révisions',
+    notificationsRefusedToast: 'Notifications refusées',
+    notificationsRefusedDesc: 'Tu peux les activer dans les paramètres de ton navigateur',
+    noCachedContent: 'Aucun contenu en cache',
+    connectToDownload: 'Connectez-vous à Internet pour télécharger du contenu.',
   },
   en: {
     appName: 'Quran Tajweed',
@@ -1124,6 +1224,55 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
     shopCryptoError: 'Crypto payment error',
     shopCryptoUnknown: 'Unknown error.',
     shopNoCryptoUrl: 'No payment URL returned',
+    offlineMode: 'Offline Mode',
+    online: 'Online',
+    offline: 'Offline',
+    versesCount: 'Verses',
+    audiosLabel: 'Audios',
+    sizeLabel: 'Size',
+    quickDownload: 'Quick download',
+    downloading: 'Downloading...',
+    popularFast: 'Popular (quick)',
+    offlineModeActive: '✓ Offline mode active',
+    offlinePracticeAvailable: 'You can practice with downloaded verses.',
+    offlineAiAvailableOnline: 'AI analysis will be available when you reconnect.',
+    noOfflineContent: '⚠️ No offline content',
+    noDownloadedVerses: 'You have no downloaded verses for offline use.',
+    retryConnection: 'Retry connection',
+    practiceWithoutConnection: 'Practice without connection',
+    aiAnalysisOnReconnect: 'AI analysis will be available when you reconnect',
+    quranCoverage: 'Quran coverage',
+    availableSurahs: 'Available surahs',
+    noSurahDownloaded: 'No surah downloaded',
+    complete: 'Complete',
+    checkConnection: 'Check connection',
+    versesAvailable: 'verses available',
+    surahVerseAvailable: 'available offline',
+    verseNotCached: 'This verse is not cached',
+    aiNotAvailableOffline: '🔇 AI analysis is not available offline.',
+    listenReference: 'Listen reference',
+    practiceAlone: 'Practice alone',
+    availableOffline: 'Available offline:',
+    listenRefRecitations: 'Listen to reference recitations (if downloaded)',
+    readArabicVerses: 'Read Arabic verses',
+    practiceWithoutAi: 'Practice without AI correction',
+    connectForAiAndMore: '💡 Connect to access AI analysis and download more verses',
+    notificationsTitle: 'Notifications',
+    notificationsNotSupported: 'Notifications not supported by this browser',
+    notificationsEnabled: 'Notifications enabled',
+    notificationsBlocked: 'Notifications blocked',
+    notificationsBlockedHint: 'To enable them, change your browser settings for this site.',
+    notificationsEnableHint: 'Enable notifications to receive review reminders.',
+    notificationsActivating: 'Activating...',
+    enableNotifications: 'Enable notifications',
+    inAppNotifications: 'In-app notifications',
+    alwaysActiveForReminders: 'Always active for important reminders',
+    notificationsActivatedToast: 'Notifications enabled!',
+    notificationsActivatedDesc: 'You will receive review reminders',
+    notificationsRefusedToast: 'Notifications denied',
+    notificationsRefusedDesc: 'You can enable them in your browser settings',
+    noCachedContent: 'No cached content',
+    connectToDownload: 'Connect to the internet to download content.',
   },
   ar: {
     appName: 'تجويد القرآن',
@@ -1470,6 +1619,55 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
     shopCryptoError: 'خطأ في الدفع بالعملات الرقمية',
     shopCryptoUnknown: 'خطأ غير معروف.',
     shopNoCryptoUrl: 'لم يتم إرجاع رابط الدفع',
+    offlineMode: 'وضع عدم الاتصال',
+    online: 'متصل',
+    offline: 'غير متصل',
+    versesCount: 'آيات',
+    audiosLabel: 'صوتيات',
+    sizeLabel: 'الحجم',
+    quickDownload: 'تحميل سريع',
+    downloading: 'جارٍ التحميل...',
+    popularFast: 'الشائعة (سريع)',
+    offlineModeActive: '✓ وضع عدم الاتصال نشط',
+    offlinePracticeAvailable: 'يمكنك التدرب بالآيات المحملة.',
+    offlineAiAvailableOnline: 'سيتوفر تحليل الذكاء الاصطناعي عند إعادة الاتصال.',
+    noOfflineContent: '⚠️ لا يوجد محتوى بدون اتصال',
+    noDownloadedVerses: 'ليس لديك آيات محملة للاستخدام بدون اتصال.',
+    retryConnection: 'إعادة محاولة الاتصال',
+    practiceWithoutConnection: 'تدرب بدون اتصال',
+    aiAnalysisOnReconnect: 'سيتوفر تحليل الذكاء الاصطناعي عند إعادة الاتصال',
+    quranCoverage: 'تغطية القرآن',
+    availableSurahs: 'السور المتاحة',
+    noSurahDownloaded: 'لم يتم تحميل أي سورة',
+    complete: 'مكتمل',
+    checkConnection: 'فحص الاتصال',
+    versesAvailable: 'آيات متاحة',
+    surahVerseAvailable: 'متاح بدون اتصال',
+    verseNotCached: 'هذه الآية غير محفوظة في الذاكرة المؤقتة',
+    aiNotAvailableOffline: '🔇 تحليل الذكاء الاصطناعي غير متاح بدون اتصال.',
+    listenReference: 'استمع للمرجع',
+    practiceAlone: 'تدرب بمفردك',
+    availableOffline: 'متاح بدون اتصال:',
+    listenRefRecitations: 'الاستماع للتلاوات المرجعية (إذا تم تحميلها)',
+    readArabicVerses: 'قراءة الآيات بالعربية',
+    practiceWithoutAi: 'التدرب بدون تصحيح ذكي',
+    connectForAiAndMore: '💡 اتصل للوصول إلى تحليل الذكاء الاصطناعي وتحميل المزيد من الآيات',
+    notificationsTitle: 'الإشعارات',
+    notificationsNotSupported: 'الإشعارات غير مدعومة في هذا المتصفح',
+    notificationsEnabled: 'الإشعارات مفعلة',
+    notificationsBlocked: 'الإشعارات محظورة',
+    notificationsBlockedHint: 'لتفعيلها، عدّل إعدادات المتصفح لهذا الموقع.',
+    notificationsEnableHint: 'فعّل الإشعارات لتلقي تذكيرات المراجعة.',
+    notificationsActivating: 'جارٍ التفعيل...',
+    enableNotifications: 'تفعيل الإشعارات',
+    inAppNotifications: 'إشعارات داخل التطبيق',
+    alwaysActiveForReminders: 'مفعلة دائماً للتذكيرات المهمة',
+    notificationsActivatedToast: 'تم تفعيل الإشعارات!',
+    notificationsActivatedDesc: 'ستتلقى تذكيرات للمراجعة',
+    notificationsRefusedToast: 'تم رفض الإشعارات',
+    notificationsRefusedDesc: 'يمكنك تفعيلها من إعدادات المتصفح',
+    noCachedContent: 'لا يوجد محتوى مخزن',
+    connectToDownload: 'اتصل بالإنترنت لتحميل المحتوى.',
   },
   de: {
     appName: 'Quran Tajweed',
@@ -1815,6 +2013,55 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
     shopCryptoError: 'Krypto-Zahlungsfehler',
     shopCryptoUnknown: 'Unbekannter Fehler.',
     shopNoCryptoUrl: 'Keine Zahlungs-URL zurückgegeben',
+    offlineMode: 'Offline-Modus',
+    online: 'Online',
+    offline: 'Offline',
+    versesCount: 'Verse',
+    audiosLabel: 'Audios',
+    sizeLabel: 'Größe',
+    quickDownload: 'Schnell-Download',
+    downloading: 'Wird heruntergeladen...',
+    popularFast: 'Beliebte (schnell)',
+    offlineModeActive: '✓ Offline-Modus aktiv',
+    offlinePracticeAvailable: 'Sie können mit heruntergeladenen Versen üben.',
+    offlineAiAvailableOnline: 'KI-Analyse wird verfügbar sein, wenn Sie wieder verbunden sind.',
+    noOfflineContent: '⚠️ Kein Offline-Inhalt',
+    noDownloadedVerses: 'Sie haben keine heruntergeladenen Verse für die Offline-Nutzung.',
+    retryConnection: 'Verbindung erneut versuchen',
+    practiceWithoutConnection: 'Ohne Verbindung üben',
+    aiAnalysisOnReconnect: 'KI-Analyse wird bei erneuter Verbindung verfügbar sein',
+    quranCoverage: 'Quran-Abdeckung',
+    availableSurahs: 'Verfügbare Suren',
+    noSurahDownloaded: 'Keine Sure heruntergeladen',
+    complete: 'Vollständig',
+    checkConnection: 'Verbindung prüfen',
+    versesAvailable: 'Verse verfügbar',
+    surahVerseAvailable: 'offline verfügbar',
+    verseNotCached: 'Dieser Vers ist nicht im Cache',
+    aiNotAvailableOffline: '🔇 KI-Analyse ist offline nicht verfügbar.',
+    listenReference: 'Referenz anhören',
+    practiceAlone: 'Allein üben',
+    availableOffline: 'Offline verfügbar:',
+    listenRefRecitations: 'Referenzrezitationen anhören (falls heruntergeladen)',
+    readArabicVerses: 'Arabische Verse lesen',
+    practiceWithoutAi: 'Ohne KI-Korrektur üben',
+    connectForAiAndMore: '💡 Verbinden Sie sich für KI-Analyse und mehr Verse',
+    notificationsTitle: 'Benachrichtigungen',
+    notificationsNotSupported: 'Benachrichtigungen werden von diesem Browser nicht unterstützt',
+    notificationsEnabled: 'Benachrichtigungen aktiviert',
+    notificationsBlocked: 'Benachrichtigungen blockiert',
+    notificationsBlockedHint: 'Ändern Sie die Browsereinstellungen für diese Website.',
+    notificationsEnableHint: 'Aktivieren Sie Benachrichtigungen für Wiederholungserinnerungen.',
+    notificationsActivating: 'Wird aktiviert...',
+    enableNotifications: 'Benachrichtigungen aktivieren',
+    inAppNotifications: 'In-App-Benachrichtigungen',
+    alwaysActiveForReminders: 'Immer aktiv für wichtige Erinnerungen',
+    notificationsActivatedToast: 'Benachrichtigungen aktiviert!',
+    notificationsActivatedDesc: 'Sie erhalten Wiederholungserinnerungen',
+    notificationsRefusedToast: 'Benachrichtigungen abgelehnt',
+    notificationsRefusedDesc: 'Sie können sie in den Browsereinstellungen aktivieren',
+    noCachedContent: 'Kein gespeicherter Inhalt',
+    connectToDownload: 'Verbinden Sie sich mit dem Internet, um Inhalte herunterzuladen.',
   },
   es: {
     appName: 'Quran Tajweed',
@@ -2160,6 +2407,55 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
     shopCryptoError: 'Error de pago cripto',
     shopCryptoUnknown: 'Error desconocido.',
     shopNoCryptoUrl: 'No se devolvió URL de pago',
+    offlineMode: 'Modo sin conexión',
+    online: 'En línea',
+    offline: 'Sin conexión',
+    versesCount: 'Versículos',
+    audiosLabel: 'Audios',
+    sizeLabel: 'Tamaño',
+    quickDownload: 'Descarga rápida',
+    downloading: 'Descargando...',
+    popularFast: 'Populares (rápido)',
+    offlineModeActive: '✓ Modo sin conexión activo',
+    offlinePracticeAvailable: 'Puedes practicar con los versículos descargados.',
+    offlineAiAvailableOnline: 'El análisis IA estará disponible cuando te reconectes.',
+    noOfflineContent: '⚠️ Sin contenido sin conexión',
+    noDownloadedVerses: 'No tienes versículos descargados para uso sin conexión.',
+    retryConnection: 'Reintentar conexión',
+    practiceWithoutConnection: 'Practica sin conexión',
+    aiAnalysisOnReconnect: 'El análisis IA estará disponible al reconectarte',
+    quranCoverage: 'Cobertura del Corán',
+    availableSurahs: 'Suras disponibles',
+    noSurahDownloaded: 'Ninguna sura descargada',
+    complete: 'Completo',
+    checkConnection: 'Verificar conexión',
+    versesAvailable: 'versículos disponibles',
+    surahVerseAvailable: 'disponible sin conexión',
+    verseNotCached: 'Este versículo no está en caché',
+    aiNotAvailableOffline: '🔇 El análisis IA no está disponible sin conexión.',
+    listenReference: 'Escuchar referencia',
+    practiceAlone: 'Practicar solo',
+    availableOffline: 'Disponible sin conexión:',
+    listenRefRecitations: 'Escuchar recitaciones de referencia (si descargadas)',
+    readArabicVerses: 'Leer versículos en árabe',
+    practiceWithoutAi: 'Practicar sin corrección IA',
+    connectForAiAndMore: '💡 Conéctate para acceder al análisis IA y descargar más versículos',
+    notificationsTitle: 'Notificaciones',
+    notificationsNotSupported: 'Notificaciones no soportadas por este navegador',
+    notificationsEnabled: 'Notificaciones activadas',
+    notificationsBlocked: 'Notificaciones bloqueadas',
+    notificationsBlockedHint: 'Para activarlas, cambia la configuración de tu navegador para este sitio.',
+    notificationsEnableHint: 'Activa las notificaciones para recibir recordatorios de repaso.',
+    notificationsActivating: 'Activando...',
+    enableNotifications: 'Activar notificaciones',
+    inAppNotifications: 'Notificaciones en la app',
+    alwaysActiveForReminders: 'Siempre activas para recordatorios importantes',
+    notificationsActivatedToast: '¡Notificaciones activadas!',
+    notificationsActivatedDesc: 'Recibirás recordatorios de repaso',
+    notificationsRefusedToast: 'Notificaciones denegadas',
+    notificationsRefusedDesc: 'Puedes activarlas en la configuración de tu navegador',
+    noCachedContent: 'Sin contenido en caché',
+    connectToDownload: 'Conéctate a internet para descargar contenido.',
   },
   it: {
     appName: 'Quran Tajweed',

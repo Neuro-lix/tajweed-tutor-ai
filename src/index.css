@@ -199,3 +199,8 @@
     50% { opacity: 0.7; }
   }
 }
+
+/* Hide external platform badges */
+[id*="lovable"], [class*="lovable-badge"], [data-lovable] {
+  display: none !important;
+}

@@ -2,6 +2,7 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { QIRAAT } from '@/data/quranData';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface QiraatSelectorProps {
   selectedQiraat: string | null;
@@ -9,6 +10,7 @@ interface QiraatSelectorProps {
 }
 
 export const QiraatSelector: React.FC<QiraatSelectorProps> = ({ selectedQiraat, onSelect }) => {
+  const { t } = useLanguage();
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {QIRAAT.map((qiraat) => {
@@ -35,7 +37,7 @@ export const QiraatSelector: React.FC<QiraatSelectorProps> = ({ selectedQiraat, 
               </div>
               <div className="flex flex-col items-end gap-2">
                 {isPopular && (
-                  <Badge variant="gold">Populaire</Badge>
+                  <Badge variant="gold">{t.popularLabel}</Badge>
                 )}
                 {isSelected && (
                   <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
