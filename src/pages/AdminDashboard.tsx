@@ -76,10 +76,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         .select("user_id, full_name, created_at")
         .order("created_at", { ascending: false });
 
-      // Recitation sessions
+      // Recitation sessions (include surah_number for tajweed metrics)
       const { data: sessions } = await supabase
         .from("recitation_sessions")
-        .select("user_id, accuracy_score, duration_minutes, created_at");
+        .select("user_id, surah_number, accuracy_score, duration_minutes, created_at");
 
       // Ijaza requests
       const { data: ijaza } = await supabase
@@ -143,6 +143,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         };
       });
 
+      // Per-surah tajweed metrics (success rate = % sessions with score >= 85)
+      const surahMap = new Map<number, { scores: number[]; total: number }>();
+      (sessions || []).forEach((s: any) => {
+        if (!s.surah_number) return;
+        const entry = surahMap.get(s.surah_number) || { scores: [], total: 0 };
+        entry.total += 1;
+        if (s.accuracy_score != null) entry.scores.push(Number(s.accuracy_score));
+        surahMap.set(s.surah_number, entry);
+      });
+      const surahMetrics: SurahMetric[] = Array.from(surahMap.entries()).map(([num, data]) => {
+        const surah = SURAHS.find(s => s.id === num);
+        const avg = data.scores.length
+          ? Math.round(data.scores.reduce((a, b) => a + b, 0) / data.scores.length)
+          : 0;
+        const success = data.scores.length
+          ? Math.round((data.scores.filter(s => s >= 85).length / data.scores.length) * 100)
+          : 0;
+        return {
+          surahNumber: num,
+          name: surah?.transliteration || `Sourate ${num}`,
+          arabic: surah?.name || '',
+          totalSessions: data.total,
+          avgScore: avg,
+          successRate: success,
+          errorRate: 100 - success,
+        };
+      }).sort((a, b) => b.totalSessions - a.totalSessions);
+
       setStats({
         totalUsers: (profiles || []).length,
         activeToday: activeTodayIds.size,
@@ -153,6 +181,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         topCountries,
         registrationsByDay: regsByDay,
         users: userStats,
+        surahMetrics,
       });
     } catch (e) {
       console.error("Admin stats error:", e);
