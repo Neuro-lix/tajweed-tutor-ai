@@ -152,19 +152,32 @@ export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect
         </div>
       )}
 
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2">
-        {displayedSurahs.map((surah) => {
+      <div
+        ref={gridRef}
+        role="grid"
+        aria-label={t.quranMap}
+        onKeyDown={handleKeyNav}
+        className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2 outline-none"
+      >
+        {displayedSurahs.map((surah, idx) => {
           const status = getSurahStatus(surah.id);
           const colorClass = getStatusColor(status.status);
+          const isFocused = idx === focusedIdx;
 
           return (
             <Card
               key={surah.id}
               variant="outline"
+              data-surah-cell
+              role="gridcell"
+              tabIndex={isFocused ? 0 : -1}
+              aria-label={`${surah.transliteration}, sourate ${surah.id}, ${status.status}`}
               onClick={() => onSurahSelect(surah.id)}
+              onFocus={() => setFocusedIdx(idx)}
               className={`
                 p-2 cursor-pointer transition-all duration-200 hover:scale-105
                 border-2 ${colorClass}
+                focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background
               `}
             >
               <div className="text-center">
@@ -177,7 +190,7 @@ export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect
                 </p>
                 {status.progress > 0 && status.progress < 100 && (
                   <div className="mt-1 h-1 bg-border rounded-full overflow-hidden">
-                    <div 
+                    <div
                       className="h-full bg-current rounded-full transition-all"
                       style={{ width: `${status.progress}%` }}
                     />
@@ -188,6 +201,10 @@ export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect
           );
         })}
       </div>
+
+      <p className="text-xs text-muted-foreground text-center" aria-live="polite">
+        💡 Astuce : utilisez les flèches du clavier pour naviguer, Entrée pour sélectionner.
+      </p>
 
       <div className="text-center">
         <Button
