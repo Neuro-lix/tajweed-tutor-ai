@@ -357,6 +357,112 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
               </div>
             </Card>
           </div>
+        ) : tab === "tajweed" ? (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card>
+                <CardContent className="p-4 text-center space-y-1">
+                  <Target className="w-5 h-5 mx-auto text-primary" />
+                  <p className="text-2xl font-bold">{stats.surahMetrics.length}</p>
+                  <p className="text-xs text-muted-foreground">Sourates pratiquées</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center space-y-1">
+                  <TrendingUp className="w-5 h-5 mx-auto text-emerald-600" />
+                  <p className="text-2xl font-bold">
+                    {stats.surahMetrics.length
+                      ? Math.round(stats.surahMetrics.reduce((s, m) => s + m.successRate, 0) / stats.surahMetrics.length)
+                      : 0}%
+                  </p>
+                  <p className="text-xs text-muted-foreground">Taux de succès moyen</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center space-y-1">
+                  <AlertTriangle className="w-5 h-5 mx-auto text-amber-600" />
+                  <p className="text-2xl font-bold">
+                    {stats.surahMetrics.filter(m => m.successRate < 50 && m.totalSessions >= 3).length}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Sourates difficiles (succès &lt; 50%)</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Target className="w-4 h-4 text-primary" />
+                  Performance tajwīd par sourate
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Identifie les versets sur lesquels les élèves rencontrent le plus de difficultés.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border bg-muted/30">
+                        <th className="text-left p-3 font-medium">#</th>
+                        <th className="text-left p-3 font-medium">Sourate</th>
+                        <th className="text-right p-3 font-medium">Sessions</th>
+                        <th className="text-right p-3 font-medium">Score moyen</th>
+                        <th className="text-left p-3 font-medium w-1/3">Taux de succès</th>
+                        <th className="text-right p-3 font-medium">Difficulté</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {stats.surahMetrics.length === 0 && (
+                        <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">Pas encore de données de récitation</td></tr>
+                      )}
+                      {stats.surahMetrics.map(m => {
+                        const isDifficult = m.successRate < 50 && m.totalSessions >= 3;
+                        const isMastered = m.successRate >= 85 && m.totalSessions >= 3;
+                        return (
+                          <tr key={m.surahNumber} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+                            <td className="p-3 text-muted-foreground">{m.surahNumber}</td>
+                            <td className="p-3">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{m.name}</span>
+                                <span className="font-arabic text-base text-muted-foreground" dir="rtl">{m.arabic}</span>
+                              </div>
+                            </td>
+                            <td className="p-3 text-right font-medium">{m.totalSessions}</td>
+                            <td className="p-3 text-right">
+                              <span className={"font-medium " + (m.avgScore >= 85 ? "text-emerald-600" : m.avgScore >= 60 ? "text-amber-600" : "text-destructive")}>
+                                {m.avgScore}%
+                              </span>
+                            </td>
+                            <td className="p-3">
+                              <div className="flex items-center gap-2">
+                                <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
+                                  <div
+                                    className={"h-2 rounded-full transition-all " + (m.successRate >= 70 ? "bg-emerald-600" : m.successRate >= 40 ? "bg-amber-600" : "bg-destructive")}
+                                    style={{ width: m.successRate + "%" }}
+                                  />
+                                </div>
+                                <span className="text-xs text-muted-foreground w-10 text-right">{m.successRate}%</span>
+                              </div>
+                            </td>
+                            <td className="p-3 text-right">
+                              {isDifficult ? (
+                                <Badge variant="destructive" className="text-[10px]">Difficile</Badge>
+                              ) : isMastered ? (
+                                <Badge className="text-[10px] bg-emerald-600 hover:bg-emerald-700">Maîtrisée</Badge>
+                              ) : (
+                                <Badge variant="secondary" className="text-[10px]">Moyenne</Badge>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         ) : (
           <div className="space-y-6">
             <Card>
