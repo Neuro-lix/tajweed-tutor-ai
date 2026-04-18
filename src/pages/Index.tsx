@@ -913,7 +913,7 @@ const Index = () => {
 
             {/* Quran map */}
             <div className="lg:col-span-2">
-              <Suspense fallback={<div className="h-96 rounded-xl bg-muted/30 animate-pulse" />}>
+              <Suspense fallback={<QuranMapSkeleton />}>
               <QuranMap 
                 surahStatuses={surahStatuses.length > 0 ? surahStatuses : [
                   { id: 1, status: 'not_started', progress: 0 },
