@@ -1040,7 +1040,20 @@ const Index = () => {
             />
           </Suspense>
 
-          {/* Offline Practice Mode */}
+          {/* Listen & Recite (Talqīn) Mode */}
+          <ListenAndReciteMode
+            surahNumber={currentSurah}
+            verseNumber={currentVerse}
+            verseText={currentVerseText || ''}
+            referenceAudioUrl={`https://cdn.islamic.network/quran/audio/128/ar.alafasy/${currentSurah === 1 ? currentVerse : currentVerse}.mp3`}
+            onRecordFragment={() => {
+              if (!isRecording && !analyzing) {
+                handleStartRecording();
+              }
+            }}
+            isAnalyzing={analyzing}
+          />
+
           <OfflinePracticeMode
             isOnline={isOnline}
             cachedVerseCount={cacheStats.verses}
