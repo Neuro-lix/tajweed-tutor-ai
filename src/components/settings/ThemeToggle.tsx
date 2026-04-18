@@ -23,7 +23,7 @@ export const ThemeToggle: React.FC<{ className?: string }> = ({ className = '' }
           variant="ghost"
           size="sm"
           className={className}
-          aria-label={(t as any).themeToggle ?? 'Theme'}
+          aria-label={t.themeToggle ?? 'Theme'}
         >
           <Icon className="h-4 w-4" />
         </Button>
@@ -31,17 +31,17 @@ export const ThemeToggle: React.FC<{ className?: string }> = ({ className = '' }
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => setTheme('light')}>
           <Sun className="mr-2 h-4 w-4" />
-          <span>{(t as any).themeLight ?? 'Light'}</span>
+          <span>{t.themeLight ?? 'Light'}</span>
           {theme === 'light' && <span className="ml-auto">✓</span>}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('dark')}>
           <Moon className="mr-2 h-4 w-4" />
-          <span>{(t as any).themeDark ?? 'Dark'}</span>
+          <span>{t.themeDark ?? 'Dark'}</span>
           {theme === 'dark' && <span className="ml-auto">✓</span>}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('system')}>
           <Monitor className="mr-2 h-4 w-4" />
-          <span>{(t as any).themeSystem ?? 'System'}</span>
+          <span>{t.themeSystem ?? 'System'}</span>
           {theme === 'system' && <span className="ml-auto">✓</span>}
         </DropdownMenuItem>
       </DropdownMenuContent>
