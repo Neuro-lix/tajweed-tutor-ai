@@ -1090,18 +1090,20 @@ const Index = () => {
             <DialogContent className="w-[95vw] max-w-4xl">
               <ScrollArea className="max-h-[75vh] pr-4">
                 {analysisResult && (
-                  <RecitationReport
-                    surahNumber={currentSurah}
-                    verseNumber={currentVerse}
-                    score={analysisResult.overallScore || 0}
-                    isCorrect={analysisResult.isCorrect || false}
-                    feedback={analysisResult.feedback || ''}
-                    priorityFixes={analysisResult.priorityFixes || []}
-                    errors={analysisResult.errors || []}
-                    transcribedText={analysisResult.transcribedText}
-                    expectedText={analysisResult.expectedText || currentVerseText || `Sourate ${currentSurah}, verset ${currentVerse}`}
-                    textComparison={analysisResult.textComparison}
-                  />
+                  <Suspense fallback={<div className="h-64 rounded-xl bg-muted/30 animate-pulse" />}>
+                    <RecitationReport
+                      surahNumber={currentSurah}
+                      verseNumber={currentVerse}
+                      score={analysisResult.overallScore || 0}
+                      isCorrect={analysisResult.isCorrect || false}
+                      feedback={analysisResult.feedback || ''}
+                      priorityFixes={analysisResult.priorityFixes || []}
+                      errors={analysisResult.errors || []}
+                      transcribedText={analysisResult.transcribedText}
+                      expectedText={analysisResult.expectedText || currentVerseText || `Sourate ${currentSurah}, verset ${currentVerse}`}
+                      textComparison={analysisResult.textComparison}
+                    />
+                  </Suspense>
                 )}
               </ScrollArea>
             </DialogContent>
@@ -1158,10 +1160,12 @@ const Index = () => {
         </header>
 
         <main className="container mx-auto px-4 py-8 max-w-4xl">
-          <CorrectionReport
-            corrections={mockCorrections.length > 0 ? mockCorrections : []}
-            onPrint={() => window.print()}
-          />
+          <Suspense fallback={<div className="h-64 rounded-xl bg-muted/30 animate-pulse" />}>
+            <CorrectionReport
+              corrections={mockCorrections.length > 0 ? mockCorrections : []}
+              onPrint={() => window.print()}
+            />
+          </Suspense>
         </main>
       </div>
     );
@@ -1169,24 +1173,40 @@ const Index = () => {
 
   // Pricing
   if (currentView === 'pricing') {
-    return <PricingSection onBack={() => setCurrentView('dashboard')} />;
+    return (
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-12 w-12 rounded-full bg-muted/30 animate-pulse" /></div>}>
+        <PricingSection onBack={() => setCurrentView('dashboard')} />
+      </Suspense>
+    );
   }
 
   if (currentView === 'boutique') {
-    return <Boutique onBack={() => setCurrentView('dashboard')} />;
+    return (
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-12 w-12 rounded-full bg-muted/30 animate-pulse" /></div>}>
+        <Boutique onBack={() => setCurrentView('dashboard')} />
+      </Suspense>
+    );
   }
 
   if (currentView === 'ijaza') {
-    return <IjazaPage 
-      onBack={() => setCurrentView('dashboard')}
-      masteredSurahs={0}
-      totalSurahs={114}
-      averageScore={0}
-    />;
+    return (
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-12 w-12 rounded-full bg-muted/30 animate-pulse" /></div>}>
+        <IjazaPage 
+          onBack={() => setCurrentView('dashboard')}
+          masteredSurahs={0}
+          totalSurahs={114}
+          averageScore={0}
+        />
+      </Suspense>
+    );
   }
 
   if (currentView === 'admin') {
-    return <AdminDashboard onBack={() => setCurrentView('dashboard')} />;
+    return (
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-12 w-12 rounded-full bg-muted/30 animate-pulse" /></div>}>
+        <AdminDashboard onBack={() => setCurrentView('dashboard')} />
+      </Suspense>
+    );
   }
 
   // Recordings Library
@@ -1208,7 +1228,9 @@ const Index = () => {
         </header>
 
         <main className="container mx-auto px-4 py-8">
-          <RecordingsLibrary />
+          <Suspense fallback={<div className="h-64 rounded-xl bg-muted/30 animate-pulse" />}>
+            <RecordingsLibrary />
+          </Suspense>
         </main>
 
         {/* Save Recording Dialog */}
