@@ -23,6 +23,16 @@ interface UserStat {
   last_active: string | null;
 }
 
+interface SurahMetric {
+  surahNumber: number;
+  name: string;
+  arabic: string;
+  totalSessions: number;
+  avgScore: number;
+  successRate: number; // % of sessions with score >= 85
+  errorRate: number;   // 100 - successRate
+}
+
 interface DashStats {
   totalUsers: number;
   activeToday: number;
@@ -33,6 +43,7 @@ interface DashStats {
   topCountries: { name: string; code: string; count: number }[];
   registrationsByDay: { date: string; count: number }[];
   users: UserStat[];
+  surahMetrics: SurahMetric[];
 }
 
 const FLAG = (code: string) => {
