@@ -64,7 +64,7 @@ const fmtTime = (min: number) => {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
   const [stats, setStats] = useState<DashStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"overview" | "users" | "boutique">("overview");
+  const [tab, setTab] = useState<"overview" | "users" | "tajweed" | "boutique">("overview");
   const [refreshing, setRefreshing] = useState(false);
 
   const loadStats = async () => {
