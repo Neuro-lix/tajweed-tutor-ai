@@ -876,7 +876,7 @@ const Index = () => {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Progress sidebar */}
             <div className="lg:col-span-1 space-y-6">
-              <Suspense fallback={<div className="h-64 rounded-xl bg-muted/30 animate-pulse" />}>
+              <Suspense fallback={<DashboardSkeleton />}>
                 <ProgressDashboard data={progressData} />
               </Suspense>
               <StreakPanel />
