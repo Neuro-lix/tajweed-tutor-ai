@@ -991,44 +991,46 @@ const Index = () => {
           {/* Translation toggle */}
           <TranslationToggle />
 
-          <RecitationInterface
-            surahName={SURAHS.find(s => s.id === currentSurah)?.transliteration || 'Al-Fatiha'}
-            surahArabic={SURAHS.find(s => s.id === currentSurah)?.name || 'الفاتحة'}
-            surahNumber={currentSurah}
-            currentVerse={currentVerse}
-            totalVerses={SURAHS.find(s => s.id === currentSurah)?.verses || 7}
-            verseText={currentVerseText || `Sourate ${currentSurah}, verset ${currentVerse}`}
-            verseTranslation={currentVerseTranslation}
-            showTranslation={showTranslation}
-            isRecording={isRecording}
-            isAnalyzing={analyzing}
-            analysisStep={analysisStep}
-            transcriptionFailed={transcriptionFailed}
-            userAudioBlob={userAudioBlob}
-            mediaStream={mediaStream}
-            audioDebugStats={{
-              mimeType: audioMimeType,
-              chunks: recordingStats.chunks,
-              totalBytes: recordingStats.totalBytes,
-              blobSize: recordingStats.blobSize,
-              durationMs: recordingStats.durationMs,
-              base64Length: recordingStats.base64Length,
-              trackLabel: recordingStats.trackLabel,
-              trackSettings: recordingStats.trackSettings,
-              error: recordingError,
-            }}
-            onStartRecording={handleStartRecording}
-            onStopRecording={handleStopRecording}
-            onPreviousVerse={() => currentVerse > 1 && handleNavigate(currentSurah, currentVerse - 1)}
-            onNextVerse={() => {
-              const surah = SURAHS.find(s => s.id === currentSurah);
-              if (surah && currentVerse < surah.verses) {
-                handleNavigate(currentSurah, currentVerse + 1);
-              }
-            }}
-            recordingError={recordingError}
-            feedback={showFeedback && aiFeedback ? aiFeedback : undefined}
-          />
+          <Suspense fallback={<div className="h-96 rounded-xl bg-muted/30 animate-pulse" />}>
+            <RecitationInterface
+              surahName={SURAHS.find(s => s.id === currentSurah)?.transliteration || 'Al-Fatiha'}
+              surahArabic={SURAHS.find(s => s.id === currentSurah)?.name || 'الفاتحة'}
+              surahNumber={currentSurah}
+              currentVerse={currentVerse}
+              totalVerses={SURAHS.find(s => s.id === currentSurah)?.verses || 7}
+              verseText={currentVerseText || `Sourate ${currentSurah}, verset ${currentVerse}`}
+              verseTranslation={currentVerseTranslation}
+              showTranslation={showTranslation}
+              isRecording={isRecording}
+              isAnalyzing={analyzing}
+              analysisStep={analysisStep}
+              transcriptionFailed={transcriptionFailed}
+              userAudioBlob={userAudioBlob}
+              mediaStream={mediaStream}
+              audioDebugStats={{
+                mimeType: audioMimeType,
+                chunks: recordingStats.chunks,
+                totalBytes: recordingStats.totalBytes,
+                blobSize: recordingStats.blobSize,
+                durationMs: recordingStats.durationMs,
+                base64Length: recordingStats.base64Length,
+                trackLabel: recordingStats.trackLabel,
+                trackSettings: recordingStats.trackSettings,
+                error: recordingError,
+              }}
+              onStartRecording={handleStartRecording}
+              onStopRecording={handleStopRecording}
+              onPreviousVerse={() => currentVerse > 1 && handleNavigate(currentSurah, currentVerse - 1)}
+              onNextVerse={() => {
+                const surah = SURAHS.find(s => s.id === currentSurah);
+                if (surah && currentVerse < surah.verses) {
+                  handleNavigate(currentSurah, currentVerse + 1);
+                }
+              }}
+              recordingError={recordingError}
+              feedback={showFeedback && aiFeedback ? aiFeedback : undefined}
+            />
+          </Suspense>
 
           {/* Offline Practice Mode */}
           <OfflinePracticeMode
