@@ -1111,7 +1111,7 @@ const Index = () => {
             <DialogContent className="w-[95vw] max-w-4xl">
               <ScrollArea className="max-h-[75vh] pr-4">
                 {analysisResult && (
-                  <Suspense fallback={<div className="h-64 rounded-xl bg-muted/30 animate-pulse" />}>
+                  <Suspense fallback={<ReportSkeleton />}>
                     <RecitationReport
                       surahNumber={currentSurah}
                       verseNumber={currentVerse}
