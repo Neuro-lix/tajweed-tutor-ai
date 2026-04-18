@@ -5,6 +5,32 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// ─── Arabic text utilities ───────────────────────────────────────────
+// Strip Arabic diacritics (harakat) and tatweel for fair text comparison.
+// Whisper often returns un-vowelled (or partially vowelled) Arabic.
+const stripDiacritics = (s: string): string =>
+  (s || "")
+    .normalize("NFKC")
+    .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, "") // harakat + tatweel
+    .replace(/[ﺁﺂﺄﺆﺈﺊﺌﺎ]/g, "ا")
+    .replace(/[إأآا]/g, "ا")
+    .replace(/[ىي]/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/\s+/g, " ")
+    .trim();
+
+// Word-level similarity (0..1) — Jaccard on token sets after diacritic stripping
+const computeSimilarity = (expected: string, actual: string): number => {
+  const a = stripDiacritics(expected).split(" ").filter(Boolean);
+  const b = stripDiacritics(actual).split(" ").filter(Boolean);
+  if (a.length === 0 || b.length === 0) return 0;
+  const setA = new Set(a);
+  const setB = new Set(b);
+  const inter = [...setA].filter((w) => setB.has(w)).length;
+  const union = new Set([...a, ...b]).size;
+  return union === 0 ? 0 : inter / union;
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -44,7 +70,12 @@ serve(async (req) => {
         formData.append("file", new Blob([bytes], { type: rawMime }), `audio.${ext}`);
         formData.append("model", "whisper-1");
         formData.append("language", "ar");
-        formData.append("prompt", `بسم الله الرحمن الرحيم. سورة ${surahNumber} آية ${verseNumber}`);
+        // Stronger Quranic prompt → biases Whisper toward Quranic Arabic + diacritics
+        formData.append(
+          "prompt",
+          `بسم الله الرحمن الرحيم. هذه تلاوة قرآنية من سورة رقم ${surahNumber} الآية ${verseNumber} برواية ${qiraat || "حفص عن عاصم"}. النص متوقع: ${expectedText || ""}`
+        );
+        formData.append("temperature", "0");
 
         const whisperResponse = await fetch("https://api.openai.com/v1/audio/transcriptions", {
           method: "POST",
@@ -87,44 +118,96 @@ serve(async (req) => {
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    // Pre-compute textual similarity (helps Gemini calibrate scoring)
+    const similarity = transcribedText && expectedText ? computeSimilarity(expectedText, transcribedText) : 0;
+    const expectedNorm = stripDiacritics(expectedText || "");
+    const actualNorm = stripDiacritics(transcribedText || "");
+    console.log("[analyze-recitation] Similarity:", similarity.toFixed(2));
+
     // 3) Tajweed analysis via Gemini
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-    const systemPrompt = `Tu es Cheikh Al-Muqri', un maître de tajwīd extrêmement strict et expert en lecture ${qiraat}.
+    const systemPrompt = `أنت الشيخ المُقرئ، خبير محقّق في علم التجويد وفي القراءات العشر، تعلّم القرآن الكريم برواية ${qiraat || "حفص عن عاصم"}.
 
-## TON RÔLE
-Tu analyses la récitation coranique d'un étudiant en comparant la transcription de son audio au texte attendu du Coran.
+# مهمتك
+تقييم تلاوة طالب من خلال مقارنة النص المنطوق (Whisper transcription) بالنص القرآني المُتوقَّع، ثم إعطاء تشخيص دقيق لأخطاء التجويد.
 
-## RÈGLES DE TAJWĪD À VÉRIFIER (par ordre de priorité)
-### 1. MAKHĀRIJ (Points d'articulation) - CRITIQUE
-### 2. ṢIFĀT (Caractéristiques des lettres) - MAJEUR
-### 3. MADD (Prolongations) - MAJEUR
-### 4. RÈGLES DE NOUN SAAKIN ET TANWIN - MAJEUR
-### 5. AUTRES RÈGLES
+# قواعد التجويد التي يجب تقييمها (مرتّبة حسب الأولوية)
+1. **المخارج (Makhārij)** — مخرج كل حرف من حروف الحلق، اللسان، الشفتين، الجوف، الخيشوم. الخطأ في المخرج خطأ جسيم.
+2. **الصفات (Ṣifāt)** — الجهر/الهمس، الشدة/الرخاوة، الاستعلاء/الاستفال، الإطباق/الانفتاح، القلقلة، الصفير، التفخيم/الترقيق.
+3. **المدود (Mudūd)** — المد الطبيعي (حركتان)، المد المتصل (4-5 حركات)، المد المنفصل (4-5)، المد اللازم (6 حركات)، المد العارض للسكون.
+4. **النون الساكنة والتنوين** — الإظهار، الإدغام (بغنّة/بدون)، الإقلاب، الإخفاء.
+5. **الميم الساكنة** — الإخفاء الشفوي، الإدغام الشفوي، الإظهار الشفوي.
+6. **القلقلة** — صغرى (وسط الكلمة) وكبرى (آخر الكلمة) في حروف "قطب جد".
+7. **الوقف والابتداء** — تام، كافٍ، حسن، قبيح؛ صحة الابتداء بعد الوقف.
+8. **التفخيم والترقيق** — في حروف الاستعلاء وفي الراء واللام (في لفظ الجلالة).
 
-## BARÈME DE NOTATION (très strict)
-- 95-100: Parfait | 85-94: Très bien | 70-84: Bien | 50-69: Moyen | 30-49: Faible | 0-29: À revoir
+# قواعد المقارنة الذكيّة
+- نسخة Whisper قد لا تتضمّن التشكيل (الحركات) دائمًا. **لا تعاقب على غياب الحركات في النصّ المنطوق**؛ ركّز على بنية الحروف ومطابقة الكلمات.
+- التشابه الحرفي (Jaccard) المُحتسب مسبقًا = ${similarity.toFixed(2)} (1.0 = مطابقة تامة، 0.0 = لا تشابه).
+- إذا كان التشابه < 0.30 ⇒ التلاوة لا تطابق الآية (حدّد ذلك في feedback).
+- إذا كان التشابه > 0.85 ⇒ التلاوة قريبة من الصواب؛ ركّز على أخطاء التجويد الدقيقة (المدّ، الغنّة، القلقلة، التفخيم).
+- إذا كان بين 0.30 و 0.85 ⇒ هناك أخطاء في الكلمات + احتمال أخطاء تجويد.
 
-## FORMAT DE RÉPONSE (JSON strict)
+# سُلّم التقييم (صارم)
+- 95-100 : تلاوة متقنة، خطأ بسيط أو لا أخطاء
+- 85-94  : تلاوة جيّدة جدًا، خطأ أو خطأين بسيطين في التجويد
+- 70-84  : تلاوة جيّدة، 3-5 أخطاء صغيرة
+- 50-69  : تلاوة متوسطة، أخطاء واضحة في التجويد أو في كلمة واحدة
+- 30-49  : تلاوة ضعيفة، أخطاء جسيمة (مخرج، كلمات مفقودة)
+- 0-29   : تلاوة لا تطابق الآية أو غير مفهومة
+
+# تنسيق الجواب (JSON صارم بالفرنسية للحقول النصّية)
 {
-  "isCorrect": boolean,
-  "overallScore": number (0-100),
-  "feedback": string,
-  "encouragement": string,
-  "priorityFixes": [string, string, string],
-  "errors": [{"word":"","ruleType":"","ruleDescription":"","severity":"minor|major|critical","correction":""}],
-  "textComparison": "Analyse mot-à-mot"
+  "isCorrect": boolean,            // true إذا overallScore >= 85
+  "overallScore": number,          // 0-100
+  "feedback": string,              // ملاحظة عامة بالفرنسية (2-3 جمل)
+  "encouragement": string,         // تشجيع بالفرنسية
+  "priorityFixes": [string,string,string], // 3 نصائح ملموسة بالفرنسية
+  "errors": [
+    {
+      "word": "الكلمة العربية المعنيّة",
+      "ruleType": "makharij|sifat|madd|idgham|ikhfa|iqlab|izhar|qalqala|ghunna|tafkhim|tarqiq|waqf",
+      "ruleDescription": "وصف مختصر للقاعدة بالفرنسية",
+      "severity": "minor|major|critical",
+      "correction": "كيف يُنطق صحيحًا (بالفرنسية مع ذكر الحرف العربي)"
+    }
+  ],
+  "textComparison": "Comparaison mot-à-mot en français (1-2 phrases)"
 }`;
 
-    const userPrompt = `## Analyse de récitation
-**Sourate**: ${surahNumber} | **Verset**: ${verseNumber} | **Qiraat**: ${qiraat}
-**Texte attendu**: "${expectedText}"
-**Transcription**: "${transcribedText || "(VIDE)"}"
-${whisperError ? `**⚠️ Erreur**: ${whisperError}` : ""}
-${!transcribedText || transcribedText.trim().length < 5
-  ? `Score = 0, feedback = "Aucune récitation détectée."`
-  : `Compare chaque mot, identifie TOUTES les erreurs, sois TRÈS strict.`}
-Réponds UNIQUEMENT en JSON valide.`;
+    const userPrompt = `## Données de la session
+- **Sourate** : ${surahNumber}
+- **Verset** : ${verseNumber}
+- **Qiraat** : ${qiraat || "hafs_asim"}
+- **Similarité Jaccard pré-calculée** : ${similarity.toFixed(2)}
+
+## Texte attendu (avec diacritiques)
+"${expectedText}"
+
+## Texte attendu (normalisé, sans diacritiques)
+"${expectedNorm}"
+
+## Transcription Whisper (telle que reçue)
+"${transcribedText || "(VIDE)"}"
+
+## Transcription normalisée
+"${actualNorm}"
+
+${whisperError ? `## ⚠️ Avertissement Whisper\n${whisperError}\n` : ""}
+
+## Instructions
+${
+  !transcribedText || transcribedText.trim().length < 5
+    ? "Score = 0, feedback = \"Aucune récitation détectée.\""
+    : similarity < 0.30
+      ? "Le texte récité ne correspond PAS au verset attendu. Score ≤ 30. Indique clairement à l'élève qu'il a récité un autre verset ou que la prononciation est trop éloignée."
+      : similarity > 0.85
+        ? "Le texte est globalement correct. Concentre-toi sur les FINESSES de tajwīd : madd (longueur), ghunna (nasalisation), qalqala, tafkhīm/tarqīq, makhraj précis."
+        : "Identifie d'abord les mots manquants/erronés, puis les erreurs de tajwīd. Sois très précis."
+}
+
+Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
 
     console.log("[analyze-recitation] Sending to Gemini for tajweed analysis...");
 
@@ -133,7 +216,7 @@ Réponds UNIQUEMENT en JSON valide.`;
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ role: "user", parts: [{ text: systemPrompt + "\n\n" + userPrompt }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 2000, responseMimeType: "application/json" },
+        generationConfig: { temperature: 0.1, maxOutputTokens: 2500, responseMimeType: "application/json" },
       }),
     });
 
@@ -164,12 +247,19 @@ Réponds UNIQUEMENT en JSON valide.`;
       };
     }
 
+    // Safety: clamp score and fix isCorrect coherence
+    if (typeof analysis.overallScore === "number") {
+      analysis.overallScore = Math.max(0, Math.min(100, Math.round(analysis.overallScore)));
+      analysis.isCorrect = analysis.overallScore >= 85;
+    }
+
     analysis.audioAnalyzed = hasAudio;
     analysis.audioMimeType = hasAudio ? (audioMimeType ?? null) : null;
     analysis.transcribedText = transcriptionOk ? transcribedText : null;
     analysis.expectedText = expectedText;
     analysis.transcriptionImpossible = false;
     analysis.whisperError = whisperError;
+    analysis.similarity = similarity;
 
     return new Response(JSON.stringify(analysis), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

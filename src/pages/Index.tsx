@@ -1,17 +1,20 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { GeometricPattern, Ornament, Star8Point } from '@/components/decorative/GeometricPattern';
 import { SessionCard } from '@/components/onboarding/SessionCard';
 import { QiraatSelector } from '@/components/onboarding/QiraatSelector';
-import { ProgressDashboard } from '@/components/dashboard/ProgressDashboard';
-import { QuranMap } from '@/components/dashboard/QuranMap';
-import { RecitationInterface } from '@/components/recitation/RecitationInterface';
-import { CorrectionReport } from '@/components/dashboard/CorrectionReport';
-import { PricingSection } from '@/components/payment/PricingSection';
-import { Boutique } from '@/pages/Boutique';
-import { IjazaPage } from '@/pages/Ijaza';
-import { AdminDashboard } from '@/pages/AdminDashboard';
+// Heavy components — lazy-loaded for better initial bundle
+const ProgressDashboard = lazy(() => import('@/components/dashboard/ProgressDashboard').then(m => ({ default: m.ProgressDashboard })));
+const QuranMap = lazy(() => import('@/components/dashboard/QuranMap').then(m => ({ default: m.QuranMap })));
+const RecitationInterface = lazy(() => import('@/components/recitation/RecitationInterface').then(m => ({ default: m.RecitationInterface })));
+const CorrectionReport = lazy(() => import('@/components/dashboard/CorrectionReport').then(m => ({ default: m.CorrectionReport })));
+const PricingSection = lazy(() => import('@/components/payment/PricingSection').then(m => ({ default: m.PricingSection })));
+const Boutique = lazy(() => import('@/pages/Boutique').then(m => ({ default: m.Boutique })));
+const IjazaPage = lazy(() => import('@/pages/Ijaza').then(m => ({ default: m.IjazaPage })));
+const AdminDashboard = lazy(() => import('@/pages/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const RecitationReport = lazy(() => import('@/components/reports/RecitationReport').then(m => ({ default: m.RecitationReport })));
+const RecordingsLibrary = lazy(() => import('@/components/recitation/RecordingsLibrary').then(m => ({ default: m.RecordingsLibrary })));
 import { MultilingualChat } from '@/components/chat/MultilingualChat';
 import { FeedbackForm } from '@/components/feedback/FeedbackForm';
 import { SpacedRepetitionPanel } from '@/components/review/SpacedRepetitionPanel';
@@ -26,11 +29,9 @@ import { OfflinePracticeMode } from '@/components/offline/OfflinePracticeMode';
 import { LanguageSelector } from '@/components/settings/LanguageSelector';
 import { AnalysisProgress } from '@/components/recitation/AnalysisProgress';
 import { AudioComparison } from '@/components/recitation/AudioComparison';
-import { RecitationReport } from '@/components/reports/RecitationReport';
 import { RewardsPanel } from '@/components/rewards/RewardsPanel';
 import { CertificateModal } from '@/components/certificates/CertificateModal';
 import { SaveRecordingDialog } from '@/components/recitation/SaveRecordingDialog';
-import { RecordingsLibrary } from '@/components/recitation/RecordingsLibrary';
 import { AppHeader } from '@/components/header/AppHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -867,7 +868,9 @@ const Index = () => {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Progress sidebar */}
             <div className="lg:col-span-1 space-y-6">
-              <ProgressDashboard data={progressData} />
+              <Suspense fallback={<div className="h-64 rounded-xl bg-muted/30 animate-pulse" />}>
+                <ProgressDashboard data={progressData} />
+              </Suspense>
               <StreakPanel />
               <RewardsPanel 
                 certificates={certificates.map(c => ({
@@ -902,6 +905,7 @@ const Index = () => {
 
             {/* Quran map */}
             <div className="lg:col-span-2">
+              <Suspense fallback={<div className="h-96 rounded-xl bg-muted/30 animate-pulse" />}>
               <QuranMap 
                 surahStatuses={surahStatuses.length > 0 ? surahStatuses : [
                   { id: 1, status: 'not_started', progress: 0 },
@@ -915,6 +919,7 @@ const Index = () => {
                   setCurrentView('recitation');
                 }}
               />
+              </Suspense>
             </div>
           </div>
         </main>
@@ -986,44 +991,46 @@ const Index = () => {
           {/* Translation toggle */}
           <TranslationToggle />
 
-          <RecitationInterface
-            surahName={SURAHS.find(s => s.id === currentSurah)?.transliteration || 'Al-Fatiha'}
-            surahArabic={SURAHS.find(s => s.id === currentSurah)?.name || 'الفاتحة'}
-            surahNumber={currentSurah}
-            currentVerse={currentVerse}
-            totalVerses={SURAHS.find(s => s.id === currentSurah)?.verses || 7}
-            verseText={currentVerseText || `Sourate ${currentSurah}, verset ${currentVerse}`}
-            verseTranslation={currentVerseTranslation}
-            showTranslation={showTranslation}
-            isRecording={isRecording}
-            isAnalyzing={analyzing}
-            analysisStep={analysisStep}
-            transcriptionFailed={transcriptionFailed}
-            userAudioBlob={userAudioBlob}
-            mediaStream={mediaStream}
-            audioDebugStats={{
-              mimeType: audioMimeType,
-              chunks: recordingStats.chunks,
-              totalBytes: recordingStats.totalBytes,
-              blobSize: recordingStats.blobSize,
-              durationMs: recordingStats.durationMs,
-              base64Length: recordingStats.base64Length,
-              trackLabel: recordingStats.trackLabel,
-              trackSettings: recordingStats.trackSettings,
-              error: recordingError,
-            }}
-            onStartRecording={handleStartRecording}
-            onStopRecording={handleStopRecording}
-            onPreviousVerse={() => currentVerse > 1 && handleNavigate(currentSurah, currentVerse - 1)}
-            onNextVerse={() => {
-              const surah = SURAHS.find(s => s.id === currentSurah);
-              if (surah && currentVerse < surah.verses) {
-                handleNavigate(currentSurah, currentVerse + 1);
-              }
-            }}
-            recordingError={recordingError}
-            feedback={showFeedback && aiFeedback ? aiFeedback : undefined}
-          />
+          <Suspense fallback={<div className="h-96 rounded-xl bg-muted/30 animate-pulse" />}>
+            <RecitationInterface
+              surahName={SURAHS.find(s => s.id === currentSurah)?.transliteration || 'Al-Fatiha'}
+              surahArabic={SURAHS.find(s => s.id === currentSurah)?.name || 'الفاتحة'}
+              surahNumber={currentSurah}
+              currentVerse={currentVerse}
+              totalVerses={SURAHS.find(s => s.id === currentSurah)?.verses || 7}
+              verseText={currentVerseText || `Sourate ${currentSurah}, verset ${currentVerse}`}
+              verseTranslation={currentVerseTranslation}
+              showTranslation={showTranslation}
+              isRecording={isRecording}
+              isAnalyzing={analyzing}
+              analysisStep={analysisStep}
+              transcriptionFailed={transcriptionFailed}
+              userAudioBlob={userAudioBlob}
+              mediaStream={mediaStream}
+              audioDebugStats={{
+                mimeType: audioMimeType,
+                chunks: recordingStats.chunks,
+                totalBytes: recordingStats.totalBytes,
+                blobSize: recordingStats.blobSize,
+                durationMs: recordingStats.durationMs,
+                base64Length: recordingStats.base64Length,
+                trackLabel: recordingStats.trackLabel,
+                trackSettings: recordingStats.trackSettings,
+                error: recordingError,
+              }}
+              onStartRecording={handleStartRecording}
+              onStopRecording={handleStopRecording}
+              onPreviousVerse={() => currentVerse > 1 && handleNavigate(currentSurah, currentVerse - 1)}
+              onNextVerse={() => {
+                const surah = SURAHS.find(s => s.id === currentSurah);
+                if (surah && currentVerse < surah.verses) {
+                  handleNavigate(currentSurah, currentVerse + 1);
+                }
+              }}
+              recordingError={recordingError}
+              feedback={showFeedback && aiFeedback ? aiFeedback : undefined}
+            />
+          </Suspense>
 
           {/* Offline Practice Mode */}
           <OfflinePracticeMode
@@ -1083,18 +1090,20 @@ const Index = () => {
             <DialogContent className="w-[95vw] max-w-4xl">
               <ScrollArea className="max-h-[75vh] pr-4">
                 {analysisResult && (
-                  <RecitationReport
-                    surahNumber={currentSurah}
-                    verseNumber={currentVerse}
-                    score={analysisResult.overallScore || 0}
-                    isCorrect={analysisResult.isCorrect || false}
-                    feedback={analysisResult.feedback || ''}
-                    priorityFixes={analysisResult.priorityFixes || []}
-                    errors={analysisResult.errors || []}
-                    transcribedText={analysisResult.transcribedText}
-                    expectedText={analysisResult.expectedText || currentVerseText || `Sourate ${currentSurah}, verset ${currentVerse}`}
-                    textComparison={analysisResult.textComparison}
-                  />
+                  <Suspense fallback={<div className="h-64 rounded-xl bg-muted/30 animate-pulse" />}>
+                    <RecitationReport
+                      surahNumber={currentSurah}
+                      verseNumber={currentVerse}
+                      score={analysisResult.overallScore || 0}
+                      isCorrect={analysisResult.isCorrect || false}
+                      feedback={analysisResult.feedback || ''}
+                      priorityFixes={analysisResult.priorityFixes || []}
+                      errors={analysisResult.errors || []}
+                      transcribedText={analysisResult.transcribedText}
+                      expectedText={analysisResult.expectedText || currentVerseText || `Sourate ${currentSurah}, verset ${currentVerse}`}
+                      textComparison={analysisResult.textComparison}
+                    />
+                  </Suspense>
                 )}
               </ScrollArea>
             </DialogContent>
@@ -1151,10 +1160,12 @@ const Index = () => {
         </header>
 
         <main className="container mx-auto px-4 py-8 max-w-4xl">
-          <CorrectionReport
-            corrections={mockCorrections.length > 0 ? mockCorrections : []}
-            onPrint={() => window.print()}
-          />
+          <Suspense fallback={<div className="h-64 rounded-xl bg-muted/30 animate-pulse" />}>
+            <CorrectionReport
+              corrections={mockCorrections.length > 0 ? mockCorrections : []}
+              onPrint={() => window.print()}
+            />
+          </Suspense>
         </main>
       </div>
     );
@@ -1162,24 +1173,40 @@ const Index = () => {
 
   // Pricing
   if (currentView === 'pricing') {
-    return <PricingSection onBack={() => setCurrentView('dashboard')} />;
+    return (
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-12 w-12 rounded-full bg-muted/30 animate-pulse" /></div>}>
+        <PricingSection onBack={() => setCurrentView('dashboard')} />
+      </Suspense>
+    );
   }
 
   if (currentView === 'boutique') {
-    return <Boutique onBack={() => setCurrentView('dashboard')} />;
+    return (
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-12 w-12 rounded-full bg-muted/30 animate-pulse" /></div>}>
+        <Boutique onBack={() => setCurrentView('dashboard')} />
+      </Suspense>
+    );
   }
 
   if (currentView === 'ijaza') {
-    return <IjazaPage 
-      onBack={() => setCurrentView('dashboard')}
-      masteredSurahs={0}
-      totalSurahs={114}
-      averageScore={0}
-    />;
+    return (
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-12 w-12 rounded-full bg-muted/30 animate-pulse" /></div>}>
+        <IjazaPage 
+          onBack={() => setCurrentView('dashboard')}
+          masteredSurahs={0}
+          totalSurahs={114}
+          averageScore={0}
+        />
+      </Suspense>
+    );
   }
 
   if (currentView === 'admin') {
-    return <AdminDashboard onBack={() => setCurrentView('dashboard')} />;
+    return (
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-12 w-12 rounded-full bg-muted/30 animate-pulse" /></div>}>
+        <AdminDashboard onBack={() => setCurrentView('dashboard')} />
+      </Suspense>
+    );
   }
 
   // Recordings Library
@@ -1201,7 +1228,9 @@ const Index = () => {
         </header>
 
         <main className="container mx-auto px-4 py-8">
-          <RecordingsLibrary />
+          <Suspense fallback={<div className="h-64 rounded-xl bg-muted/30 animate-pulse" />}>
+            <RecordingsLibrary />
+          </Suspense>
         </main>
 
         {/* Save Recording Dialog */}
