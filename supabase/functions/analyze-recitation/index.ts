@@ -45,62 +45,131 @@ serve(async (req) => {
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
 
-    console.log("[analyze-recitation] Request:", { surahNumber, verseNumber, qiraat, hasAudio: !!audioBase64, mimeType: audioMimeType });
+    // Optional: Whisper-large-v3 via Replicate for better Arabic accuracy + diacritics
+    const REPLICATE_API_TOKEN = Deno.env.get("REPLICATE_API_TOKEN");
+    const useReplicate = !!REPLICATE_API_TOKEN;
+
+    console.log("[analyze-recitation] Request:", { surahNumber, verseNumber, qiraat, hasAudio: !!audioBase64, mimeType: audioMimeType, engine: useReplicate ? "replicate-large-v3" : "openai-whisper-1" });
 
     const hasAudio = typeof audioBase64 === "string" && audioBase64.trim().length > 100;
     let transcribedText = "";
     let transcriptionOk = false;
     let whisperError: string | null = null;
+    let transcriptionEngine: "whisper-1" | "whisper-large-v3" = "whisper-1";
 
-    // 1) Transcription via OpenAI Whisper
     if (hasAudio) {
-      console.log("[analyze-recitation] Starting Whisper transcription...");
-      try {
-        const base64Payload = audioBase64.includes(",") ? audioBase64.split(",")[1] : audioBase64;
-        const binaryString = atob(base64Payload);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
+      const base64Payload = audioBase64.includes(",") ? audioBase64.split(",")[1] : audioBase64;
 
-        const rawMime = (audioMimeType || "audio/wav").split(";")[0].trim();
-        const ext = rawMime.includes("webm") ? "webm" : rawMime.includes("mp4") ? "mp4" : "wav";
+      // ─── Path A: Replicate Whisper-large-v3 (vowelled Arabic, +30% precision) ───
+      if (useReplicate) {
+        console.log("[analyze-recitation] Trying Replicate Whisper-large-v3...");
+        try {
+          const dataUri = `data:${audioMimeType || "audio/wav"};base64,${base64Payload}`;
+          const startResp = await fetch("https://api.replicate.com/v1/predictions", {
+            method: "POST",
+            headers: {
+              "Authorization": `Token ${REPLICATE_API_TOKEN}`,
+              "Content-Type": "application/json",
+              "Prefer": "wait",
+            },
+            body: JSON.stringify({
+              // openai/whisper community model with large-v3 support
+              version: "8099696689d249cf8b122d833c36ac3f75505c666a395ca40ef26f68e7d3d16e",
+              input: {
+                audio: dataUri,
+                model: "large-v3",
+                language: "arabic",
+                translate: false,
+                temperature: 0,
+                initial_prompt: `بسم الله الرحمن الرحيم. تلاوة قرآنية برواية ${qiraat || "حفص عن عاصم"}. النص: ${expectedText || ""}`,
+              },
+            }),
+          });
 
-        const formData = new FormData();
-        formData.append("file", new Blob([bytes], { type: rawMime }), `audio.${ext}`);
-        formData.append("model", "whisper-1");
-        formData.append("language", "ar");
-        // Stronger Quranic prompt → biases Whisper toward Quranic Arabic + diacritics
-        formData.append(
-          "prompt",
-          `بسم الله الرحمن الرحيم. هذه تلاوة قرآنية من سورة رقم ${surahNumber} الآية ${verseNumber} برواية ${qiraat || "حفص عن عاصم"}. النص متوقع: ${expectedText || ""}`
-        );
-        formData.append("temperature", "0");
+          if (!startResp.ok) {
+            const errTxt = await startResp.text();
+            console.error("[analyze-recitation] Replicate start error:", startResp.status, errTxt);
+            whisperError = `Replicate ${startResp.status}, fallback Whisper-1`;
+          } else {
+            let prediction = await startResp.json();
+            const startedAt = Date.now();
+            while (prediction.status !== "succeeded" && prediction.status !== "failed" && prediction.status !== "canceled") {
+              if (Date.now() - startedAt > 60_000) {
+                whisperError = "Replicate timeout, fallback Whisper-1";
+                break;
+              }
+              await new Promise((r) => setTimeout(r, 1500));
+              const pollResp = await fetch(prediction.urls.get, {
+                headers: { "Authorization": `Token ${REPLICATE_API_TOKEN}` },
+              });
+              prediction = await pollResp.json();
+            }
 
-        const whisperResponse = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-          method: "POST",
-          headers: { "Authorization": `Bearer ${OPENAI_API_KEY}` },
-          body: formData,
-        });
-
-        console.log("[analyze-recitation] Whisper status:", whisperResponse.status);
-
-        if (!whisperResponse.ok) {
-          const errorText = await whisperResponse.text();
-          console.error("[analyze-recitation] Whisper error:", errorText);
-          whisperError = whisperResponse.status === 429 ? "Limite de requêtes Whisper" : `Whisper error: ${whisperResponse.status}`;
-        } else {
-          const result = await whisperResponse.json();
-          transcribedText = (result.text || "").trim();
-          transcriptionOk = transcribedText.length >= 3;
-          if (!transcriptionOk) {
-            whisperError = "Transcription vide";
+            if (prediction.status === "succeeded" && prediction.output) {
+              const out = prediction.output;
+              transcribedText = (typeof out === "string" ? out : (out.transcription || out.text || "")).trim();
+              transcriptionOk = transcribedText.length >= 3;
+              transcriptionEngine = "whisper-large-v3";
+              console.log("[analyze-recitation] Replicate result:", transcribedText.substring(0, 100));
+            } else if (!whisperError) {
+              whisperError = `Replicate ${prediction.status}, fallback Whisper-1`;
+            }
           }
-          console.log("[analyze-recitation] Whisper result:", transcribedText.substring(0, 100));
+        } catch (e) {
+          console.error("[analyze-recitation] Replicate exception:", e);
+          whisperError = `Replicate exception, fallback Whisper-1`;
         }
-      } catch (e) {
-        console.error("[analyze-recitation] Whisper exception:", e);
-        whisperError = e instanceof Error ? e.message : "Erreur de transcription";
+      }
+
+      // ─── Path B: OpenAI Whisper-1 (default / fallback) ───
+      if (!transcriptionOk) {
+        console.log("[analyze-recitation] Using OpenAI Whisper-1...");
+        try {
+          const binaryString = atob(base64Payload);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+
+          const rawMime = (audioMimeType || "audio/wav").split(";")[0].trim();
+          const ext = rawMime.includes("webm") ? "webm" : rawMime.includes("mp4") ? "mp4" : "wav";
+
+          const formData = new FormData();
+          formData.append("file", new Blob([bytes], { type: rawMime }), `audio.${ext}`);
+          formData.append("model", "whisper-1");
+          formData.append("language", "ar");
+          formData.append(
+            "prompt",
+            `بسم الله الرحمن الرحيم. هذه تلاوة قرآنية من سورة رقم ${surahNumber} الآية ${verseNumber} برواية ${qiraat || "حفص عن عاصم"}. النص متوقع: ${expectedText || ""}`
+          );
+          formData.append("temperature", "0");
+
+          const whisperResponse = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${OPENAI_API_KEY}` },
+            body: formData,
+          });
+
+          console.log("[analyze-recitation] Whisper-1 status:", whisperResponse.status);
+
+          if (!whisperResponse.ok) {
+            const errorText = await whisperResponse.text();
+            console.error("[analyze-recitation] Whisper-1 error:", errorText);
+            whisperError = whisperResponse.status === 429 ? "Limite de requêtes Whisper" : `Whisper error: ${whisperResponse.status}`;
+          } else {
+            const result = await whisperResponse.json();
+            transcribedText = (result.text || "").trim();
+            transcriptionOk = transcribedText.length >= 3;
+            if (!transcriptionOk) {
+              whisperError = "Transcription vide";
+            }
+            transcriptionEngine = "whisper-1";
+            console.log("[analyze-recitation] Whisper-1 result:", transcribedText.substring(0, 100));
+          }
+        } catch (e) {
+          console.error("[analyze-recitation] Whisper-1 exception:", e);
+          whisperError = e instanceof Error ? e.message : "Erreur de transcription";
+        }
       }
     }
 
@@ -260,6 +329,7 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
     analysis.transcriptionImpossible = false;
     analysis.whisperError = whisperError;
     analysis.similarity = similarity;
+    analysis.transcriptionEngine = transcriptionEngine;
 
     return new Response(JSON.stringify(analysis), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Users, Clock, Globe, TrendingUp, Award, BookOpen, ShoppingBag, GripVertical, Settings, Eye, EyeOff, BarChart2, Activity, RefreshCw } from "lucide-react";
+import { ArrowLeft, Users, Clock, Globe, TrendingUp, Award, BookOpen, ShoppingBag, GripVertical, Settings, Eye, EyeOff, BarChart2, Activity, RefreshCw, Target, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { SURAHS } from "@/data/quranData";
 
 interface AdminDashboardProps {
   onBack: () => void;
@@ -22,6 +23,16 @@ interface UserStat {
   last_active: string | null;
 }
 
+interface SurahMetric {
+  surahNumber: number;
+  name: string;
+  arabic: string;
+  totalSessions: number;
+  avgScore: number;
+  successRate: number; // % of sessions with score >= 85
+  errorRate: number;   // 100 - successRate
+}
+
 interface DashStats {
   totalUsers: number;
   activeToday: number;
@@ -32,6 +43,7 @@ interface DashStats {
   topCountries: { name: string; code: string; count: number }[];
   registrationsByDay: { date: string; count: number }[];
   users: UserStat[];
+  surahMetrics: SurahMetric[];
 }
 
 const FLAG = (code: string) => {
@@ -52,7 +64,7 @@ const fmtTime = (min: number) => {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
   const [stats, setStats] = useState<DashStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"overview" | "users" | "boutique">("overview");
+  const [tab, setTab] = useState<"overview" | "users" | "tajweed" | "boutique">("overview");
   const [refreshing, setRefreshing] = useState(false);
 
   const loadStats = async () => {
@@ -64,10 +76,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         .select("user_id, full_name, created_at")
         .order("created_at", { ascending: false });
 
-      // Recitation sessions
+      // Recitation sessions (include surah_number for tajweed metrics)
       const { data: sessions } = await supabase
         .from("recitation_sessions")
-        .select("user_id, accuracy_score, duration_minutes, created_at");
+        .select("user_id, surah_number, accuracy_score, duration_minutes, created_at");
 
       // Ijaza requests
       const { data: ijaza } = await supabase
@@ -131,6 +143,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         };
       });
 
+      // Per-surah tajweed metrics (success rate = % sessions with score >= 85)
+      const surahMap = new Map<number, { scores: number[]; total: number }>();
+      (sessions || []).forEach((s: any) => {
+        if (!s.surah_number) return;
+        const entry = surahMap.get(s.surah_number) || { scores: [], total: 0 };
+        entry.total += 1;
+        if (s.accuracy_score != null) entry.scores.push(Number(s.accuracy_score));
+        surahMap.set(s.surah_number, entry);
+      });
+      const surahMetrics: SurahMetric[] = Array.from(surahMap.entries()).map(([num, data]) => {
+        const surah = SURAHS.find(s => s.id === num);
+        const avg = data.scores.length
+          ? Math.round(data.scores.reduce((a, b) => a + b, 0) / data.scores.length)
+          : 0;
+        const success = data.scores.length
+          ? Math.round((data.scores.filter(s => s >= 85).length / data.scores.length) * 100)
+          : 0;
+        return {
+          surahNumber: num,
+          name: surah?.transliteration || `Sourate ${num}`,
+          arabic: surah?.name || '',
+          totalSessions: data.total,
+          avgScore: avg,
+          successRate: success,
+          errorRate: 100 - success,
+        };
+      }).sort((a, b) => b.totalSessions - a.totalSessions);
+
       setStats({
         totalUsers: (profiles || []).length,
         activeToday: activeTodayIds.size,
@@ -141,6 +181,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         topCountries,
         registrationsByDay: regsByDay,
         users: userStats,
+        surahMetrics,
       });
     } catch (e) {
       console.error("Admin stats error:", e);
@@ -176,6 +217,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
           {[
             { key: "overview", label: "Vue d'ensemble", icon: BarChart2 },
             { key: "users", label: "Utilisateurs", icon: Users },
+            { key: "tajweed", label: "Tajwīd par sourate", icon: Target },
             { key: "boutique", label: "Boutique", icon: ShoppingBag },
           ].map(t => (
             <button
@@ -313,6 +355,112 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
                   </tbody>
                 </table>
               </div>
+            </Card>
+          </div>
+        ) : tab === "tajweed" ? (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card>
+                <CardContent className="p-4 text-center space-y-1">
+                  <Target className="w-5 h-5 mx-auto text-primary" />
+                  <p className="text-2xl font-bold">{stats.surahMetrics.length}</p>
+                  <p className="text-xs text-muted-foreground">Sourates pratiquées</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center space-y-1">
+                  <TrendingUp className="w-5 h-5 mx-auto text-emerald-600" />
+                  <p className="text-2xl font-bold">
+                    {stats.surahMetrics.length
+                      ? Math.round(stats.surahMetrics.reduce((s, m) => s + m.successRate, 0) / stats.surahMetrics.length)
+                      : 0}%
+                  </p>
+                  <p className="text-xs text-muted-foreground">Taux de succès moyen</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center space-y-1">
+                  <AlertTriangle className="w-5 h-5 mx-auto text-amber-600" />
+                  <p className="text-2xl font-bold">
+                    {stats.surahMetrics.filter(m => m.successRate < 50 && m.totalSessions >= 3).length}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Sourates difficiles (succès &lt; 50%)</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Target className="w-4 h-4 text-primary" />
+                  Performance tajwīd par sourate
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Identifie les versets sur lesquels les élèves rencontrent le plus de difficultés.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border bg-muted/30">
+                        <th className="text-left p-3 font-medium">#</th>
+                        <th className="text-left p-3 font-medium">Sourate</th>
+                        <th className="text-right p-3 font-medium">Sessions</th>
+                        <th className="text-right p-3 font-medium">Score moyen</th>
+                        <th className="text-left p-3 font-medium w-1/3">Taux de succès</th>
+                        <th className="text-right p-3 font-medium">Difficulté</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {stats.surahMetrics.length === 0 && (
+                        <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">Pas encore de données de récitation</td></tr>
+                      )}
+                      {stats.surahMetrics.map(m => {
+                        const isDifficult = m.successRate < 50 && m.totalSessions >= 3;
+                        const isMastered = m.successRate >= 85 && m.totalSessions >= 3;
+                        return (
+                          <tr key={m.surahNumber} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+                            <td className="p-3 text-muted-foreground">{m.surahNumber}</td>
+                            <td className="p-3">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{m.name}</span>
+                                <span className="font-arabic text-base text-muted-foreground" dir="rtl">{m.arabic}</span>
+                              </div>
+                            </td>
+                            <td className="p-3 text-right font-medium">{m.totalSessions}</td>
+                            <td className="p-3 text-right">
+                              <span className={"font-medium " + (m.avgScore >= 85 ? "text-emerald-600" : m.avgScore >= 60 ? "text-amber-600" : "text-destructive")}>
+                                {m.avgScore}%
+                              </span>
+                            </td>
+                            <td className="p-3">
+                              <div className="flex items-center gap-2">
+                                <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
+                                  <div
+                                    className={"h-2 rounded-full transition-all " + (m.successRate >= 70 ? "bg-emerald-600" : m.successRate >= 40 ? "bg-amber-600" : "bg-destructive")}
+                                    style={{ width: m.successRate + "%" }}
+                                  />
+                                </div>
+                                <span className="text-xs text-muted-foreground w-10 text-right">{m.successRate}%</span>
+                              </div>
+                            </td>
+                            <td className="p-3 text-right">
+                              {isDifficult ? (
+                                <Badge variant="destructive" className="text-[10px]">Difficile</Badge>
+                              ) : isMastered ? (
+                                <Badge className="text-[10px] bg-emerald-600 hover:bg-emerald-700">Maîtrisée</Badge>
+                              ) : (
+                                <Badge variant="secondary" className="text-[10px]">Moyenne</Badge>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
             </Card>
           </div>
         ) : (

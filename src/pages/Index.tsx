@@ -36,6 +36,14 @@ import { AppHeader } from '@/components/header/AppHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  DashboardSkeleton,
+  QuranMapSkeleton,
+  RecitationSkeleton,
+  ReportSkeleton,
+  PageSkeleton,
+} from '@/components/ui/skeleton-card';
+import { ListenAndReciteMode } from '@/components/recitation/ListenAndReciteMode';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
@@ -868,7 +876,7 @@ const Index = () => {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Progress sidebar */}
             <div className="lg:col-span-1 space-y-6">
-              <Suspense fallback={<div className="h-64 rounded-xl bg-muted/30 animate-pulse" />}>
+              <Suspense fallback={<DashboardSkeleton />}>
                 <ProgressDashboard data={progressData} />
               </Suspense>
               <StreakPanel />
@@ -905,7 +913,7 @@ const Index = () => {
 
             {/* Quran map */}
             <div className="lg:col-span-2">
-              <Suspense fallback={<div className="h-96 rounded-xl bg-muted/30 animate-pulse" />}>
+              <Suspense fallback={<QuranMapSkeleton />}>
               <QuranMap 
                 surahStatuses={surahStatuses.length > 0 ? surahStatuses : [
                   { id: 1, status: 'not_started', progress: 0 },
@@ -991,7 +999,7 @@ const Index = () => {
           {/* Translation toggle */}
           <TranslationToggle />
 
-          <Suspense fallback={<div className="h-96 rounded-xl bg-muted/30 animate-pulse" />}>
+          <Suspense fallback={<RecitationSkeleton />}>
             <RecitationInterface
               surahName={SURAHS.find(s => s.id === currentSurah)?.transliteration || 'Al-Fatiha'}
               surahArabic={SURAHS.find(s => s.id === currentSurah)?.name || 'الفاتحة'}
@@ -1032,7 +1040,20 @@ const Index = () => {
             />
           </Suspense>
 
-          {/* Offline Practice Mode */}
+          {/* Listen & Recite (Talqīn) Mode */}
+          <ListenAndReciteMode
+            surahNumber={currentSurah}
+            verseNumber={currentVerse}
+            verseText={currentVerseText || ''}
+            referenceAudioUrl={`https://cdn.islamic.network/quran/audio/128/ar.alafasy/${currentSurah === 1 ? currentVerse : currentVerse}.mp3`}
+            onRecordFragment={() => {
+              if (!isRecording && !analyzing) {
+                handleStartRecording();
+              }
+            }}
+            isAnalyzing={analyzing}
+          />
+
           <OfflinePracticeMode
             isOnline={isOnline}
             cachedVerseCount={cacheStats.verses}
@@ -1090,7 +1111,7 @@ const Index = () => {
             <DialogContent className="w-[95vw] max-w-4xl">
               <ScrollArea className="max-h-[75vh] pr-4">
                 {analysisResult && (
-                  <Suspense fallback={<div className="h-64 rounded-xl bg-muted/30 animate-pulse" />}>
+                  <Suspense fallback={<ReportSkeleton />}>
                     <RecitationReport
                       surahNumber={currentSurah}
                       verseNumber={currentVerse}
@@ -1160,7 +1181,7 @@ const Index = () => {
         </header>
 
         <main className="container mx-auto px-4 py-8 max-w-4xl">
-          <Suspense fallback={<div className="h-64 rounded-xl bg-muted/30 animate-pulse" />}>
+          <Suspense fallback={<ReportSkeleton />}>
             <CorrectionReport
               corrections={mockCorrections.length > 0 ? mockCorrections : []}
               onPrint={() => window.print()}
@@ -1174,7 +1195,7 @@ const Index = () => {
   // Pricing
   if (currentView === 'pricing') {
     return (
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-12 w-12 rounded-full bg-muted/30 animate-pulse" /></div>}>
+      <Suspense fallback={<PageSkeleton label="Chargement des offres" />}>
         <PricingSection onBack={() => setCurrentView('dashboard')} />
       </Suspense>
     );
@@ -1182,7 +1203,7 @@ const Index = () => {
 
   if (currentView === 'boutique') {
     return (
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-12 w-12 rounded-full bg-muted/30 animate-pulse" /></div>}>
+      <Suspense fallback={<PageSkeleton label="Chargement de la boutique" />}>
         <Boutique onBack={() => setCurrentView('dashboard')} />
       </Suspense>
     );
@@ -1190,7 +1211,7 @@ const Index = () => {
 
   if (currentView === 'ijaza') {
     return (
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-12 w-12 rounded-full bg-muted/30 animate-pulse" /></div>}>
+      <Suspense fallback={<PageSkeleton label="Chargement Ijaza" />}>
         <IjazaPage 
           onBack={() => setCurrentView('dashboard')}
           masteredSurahs={0}
@@ -1203,7 +1224,7 @@ const Index = () => {
 
   if (currentView === 'admin') {
     return (
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-12 w-12 rounded-full bg-muted/30 animate-pulse" /></div>}>
+      <Suspense fallback={<PageSkeleton label="Chargement admin" />}>
         <AdminDashboard onBack={() => setCurrentView('dashboard')} />
       </Suspense>
     );
@@ -1228,7 +1249,7 @@ const Index = () => {
         </header>
 
         <main className="container mx-auto px-4 py-8">
-          <Suspense fallback={<div className="h-64 rounded-xl bg-muted/30 animate-pulse" />}>
+          <Suspense fallback={<ReportSkeleton />}>
             <RecordingsLibrary />
           </Suspense>
         </main>

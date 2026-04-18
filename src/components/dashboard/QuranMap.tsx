@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -35,6 +35,8 @@ export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect
   const { t } = useLanguage();
   const [showAll, setShowAll] = useState(false);
   const [selectedJuz, setSelectedJuz] = useState<number | null>(null);
+  const [focusedIdx, setFocusedIdx] = useState<number>(0);
+  const gridRef = useRef<HTMLDivElement | null>(null);
 
   const surahsByJuz: Record<number, typeof SURAHS> = {};
   SURAHS.forEach((surah) => {
@@ -50,11 +52,51 @@ export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect
     };
   };
 
-  const displayedSurahs = showAll 
+  const displayedSurahs = showAll
     ? (selectedJuz ? surahsByJuz[selectedJuz] || [] : SURAHS)
     : SURAHS.slice(0, 30);
 
   const juzNumbers = Array.from({ length: 30 }, (_, i) => i + 1);
+
+  // Compute columns from current breakpoint by querying actual DOM grid (simple heuristic).
+  const getColumns = useCallback((): number => {
+    const grid = gridRef.current;
+    if (!grid) return 3;
+    const style = window.getComputedStyle(grid);
+    const cols = style.gridTemplateColumns.split(' ').filter(Boolean).length;
+    return cols || 3;
+  }, []);
+
+  const handleKeyNav = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' ', 'Home', 'End'].includes(e.key)) return;
+    e.preventDefault();
+    const cols = getColumns();
+    const max = displayedSurahs.length - 1;
+    let next = focusedIdx;
+    if (e.key === 'ArrowRight') next = Math.min(focusedIdx + 1, max);
+    else if (e.key === 'ArrowLeft') next = Math.max(focusedIdx - 1, 0);
+    else if (e.key === 'ArrowDown') next = Math.min(focusedIdx + cols, max);
+    else if (e.key === 'ArrowUp') next = Math.max(focusedIdx - cols, 0);
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = max;
+    else if (e.key === 'Enter' || e.key === ' ') {
+      const surah = displayedSurahs[focusedIdx];
+      if (surah) onSurahSelect(surah.id);
+      return;
+    }
+    setFocusedIdx(next);
+    // Move actual focus
+    const grid = gridRef.current;
+    if (grid) {
+      const target = grid.querySelectorAll<HTMLElement>('[data-surah-cell]')[next];
+      target?.focus();
+    }
+  }, [displayedSurahs, focusedIdx, getColumns, onSurahSelect]);
+
+  // Reset focus when list changes
+  useEffect(() => {
+    setFocusedIdx(0);
+  }, [showAll, selectedJuz]);
 
   return (
     <div className="space-y-6">
@@ -110,19 +152,32 @@ export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect
         </div>
       )}
 
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2">
-        {displayedSurahs.map((surah) => {
+      <div
+        ref={gridRef}
+        role="grid"
+        aria-label={t.quranMap}
+        onKeyDown={handleKeyNav}
+        className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2 outline-none"
+      >
+        {displayedSurahs.map((surah, idx) => {
           const status = getSurahStatus(surah.id);
           const colorClass = getStatusColor(status.status);
+          const isFocused = idx === focusedIdx;
 
           return (
             <Card
               key={surah.id}
               variant="outline"
+              data-surah-cell
+              role="gridcell"
+              tabIndex={isFocused ? 0 : -1}
+              aria-label={`${surah.transliteration}, sourate ${surah.id}, ${status.status}`}
               onClick={() => onSurahSelect(surah.id)}
+              onFocus={() => setFocusedIdx(idx)}
               className={`
                 p-2 cursor-pointer transition-all duration-200 hover:scale-105
                 border-2 ${colorClass}
+                focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background
               `}
             >
               <div className="text-center">
@@ -135,7 +190,7 @@ export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect
                 </p>
                 {status.progress > 0 && status.progress < 100 && (
                   <div className="mt-1 h-1 bg-border rounded-full overflow-hidden">
-                    <div 
+                    <div
                       className="h-full bg-current rounded-full transition-all"
                       style={{ width: `${status.progress}%` }}
                     />
@@ -146,6 +201,10 @@ export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect
           );
         })}
       </div>
+
+      <p className="text-xs text-muted-foreground text-center" aria-live="polite">
+        💡 Astuce : utilisez les flèches du clavier pour naviguer, Entrée pour sélectionner.
+      </p>
 
       <div className="text-center">
         <Button
