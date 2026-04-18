@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { LanguageSelector } from '@/components/settings/LanguageSelector';
+import { ThemeToggle } from '@/components/settings/ThemeToggle';
 import { OfflineIndicator } from '@/components/offline/OfflineIndicator';
 import { LogOut, MessageSquareHeart, Award, Music, ShoppingBag, GraduationCap, Zap } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -61,6 +62,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               </div>
             )}
             <LanguageSelector />
+            <ThemeToggle />
             <Button variant="ghost" size="sm" onClick={onFeedbackClick} className="hidden sm:flex">
               <MessageSquareHeart className="h-4 w-4" />
             </Button>
