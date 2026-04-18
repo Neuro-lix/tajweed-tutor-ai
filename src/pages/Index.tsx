@@ -868,7 +868,9 @@ const Index = () => {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Progress sidebar */}
             <div className="lg:col-span-1 space-y-6">
-              <ProgressDashboard data={progressData} />
+              <Suspense fallback={<div className="h-64 rounded-xl bg-muted/30 animate-pulse" />}>
+                <ProgressDashboard data={progressData} />
+              </Suspense>
               <StreakPanel />
               <RewardsPanel 
                 certificates={certificates.map(c => ({
@@ -903,6 +905,7 @@ const Index = () => {
 
             {/* Quran map */}
             <div className="lg:col-span-2">
+              <Suspense fallback={<div className="h-96 rounded-xl bg-muted/30 animate-pulse" />}>
               <QuranMap 
                 surahStatuses={surahStatuses.length > 0 ? surahStatuses : [
                   { id: 1, status: 'not_started', progress: 0 },
