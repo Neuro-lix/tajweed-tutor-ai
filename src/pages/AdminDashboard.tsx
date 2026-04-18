@@ -217,6 +217,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
           {[
             { key: "overview", label: "Vue d'ensemble", icon: BarChart2 },
             { key: "users", label: "Utilisateurs", icon: Users },
+            { key: "tajweed", label: "Tajwīd par sourate", icon: Target },
             { key: "boutique", label: "Boutique", icon: ShoppingBag },
           ].map(t => (
             <button
