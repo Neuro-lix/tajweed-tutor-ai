@@ -1181,7 +1181,7 @@ const Index = () => {
         </header>
 
         <main className="container mx-auto px-4 py-8 max-w-4xl">
-          <Suspense fallback={<div className="h-64 rounded-xl bg-muted/30 animate-pulse" />}>
+          <Suspense fallback={<ReportSkeleton />}>
             <CorrectionReport
               corrections={mockCorrections.length > 0 ? mockCorrections : []}
               onPrint={() => window.print()}
@@ -1195,7 +1195,7 @@ const Index = () => {
   // Pricing
   if (currentView === 'pricing') {
     return (
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-12 w-12 rounded-full bg-muted/30 animate-pulse" /></div>}>
+      <Suspense fallback={<PageSkeleton label="Chargement des offres" />}>
         <PricingSection onBack={() => setCurrentView('dashboard')} />
       </Suspense>
     );
@@ -1203,7 +1203,7 @@ const Index = () => {
 
   if (currentView === 'boutique') {
     return (
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-12 w-12 rounded-full bg-muted/30 animate-pulse" /></div>}>
+      <Suspense fallback={<PageSkeleton label="Chargement de la boutique" />}>
         <Boutique onBack={() => setCurrentView('dashboard')} />
       </Suspense>
     );
@@ -1211,7 +1211,7 @@ const Index = () => {
 
   if (currentView === 'ijaza') {
     return (
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-12 w-12 rounded-full bg-muted/30 animate-pulse" /></div>}>
+      <Suspense fallback={<PageSkeleton label="Chargement Ijaza" />}>
         <IjazaPage 
           onBack={() => setCurrentView('dashboard')}
           masteredSurahs={0}
@@ -1224,7 +1224,7 @@ const Index = () => {
 
   if (currentView === 'admin') {
     return (
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="h-12 w-12 rounded-full bg-muted/30 animate-pulse" /></div>}>
+      <Suspense fallback={<PageSkeleton label="Chargement admin" />}>
         <AdminDashboard onBack={() => setCurrentView('dashboard')} />
       </Suspense>
     );
@@ -1249,7 +1249,7 @@ const Index = () => {
         </header>
 
         <main className="container mx-auto px-4 py-8">
-          <Suspense fallback={<div className="h-64 rounded-xl bg-muted/30 animate-pulse" />}>
+          <Suspense fallback={<ReportSkeleton />}>
             <RecordingsLibrary />
           </Suspense>
         </main>
