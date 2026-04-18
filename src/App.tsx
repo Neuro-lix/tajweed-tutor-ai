@@ -3,46 +3,73 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { Loader2 } from "lucide-react";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { TranslationProvider } from "@/contexts/TranslationContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { PwaInstallDialog } from "@/components/pwa/PwaInstallDialog";
-import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import Ijaza from "./pages/IjazaWrapper";
-import VerifyCertificate from "./pages/VerifyCertificate";
-import NotFound from "./pages/NotFound";
-import Shop from "./pages/Shop";
-import ShopSuccess from "./pages/ShopSuccess";
 
-const queryClient = new QueryClient();
+// Lazy-load all routes for code-splitting
+const Index = lazy(() => import("./pages/Index"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Ijaza = lazy(() => import("./pages/IjazaWrapper"));
+const VerifyCertificate = lazy(() => import("./pages/VerifyCertificate"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Shop = lazy(() => import("./pages/Shop"));
+const ShopSuccess = lazy(() => import("./pages/ShopSuccess"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      gcTime: 5 * 60_000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
+const RouteFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="flex flex-col items-center gap-3">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <p className="text-sm text-muted-foreground">Chargement...</p>
+    </div>
+  </div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <TranslationProvider>
-        <BrowserRouter>
-          <AuthProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <PwaInstallDialog />
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/ijaza" element={<Ijaza />} />
-                <Route path="/shop" element={<Shop />} />
-                <Route path="/shop/success" element={<ProtectedRoute><ShopSuccess /></ProtectedRoute>} />
-                <Route path="/verify/:id" element={<VerifyCertificate />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </TooltipProvider>
-          </AuthProvider>
-        </BrowserRouter>
-      </TranslationProvider>
-    </LanguageProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <TranslationProvider>
+          <BrowserRouter>
+            <AuthProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <PwaInstallDialog />
+                <Suspense fallback={<RouteFallback />}>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/ijaza" element={<Ijaza />} />
+                    <Route path="/shop" element={<Shop />} />
+                    <Route path="/shop/success" element={<ProtectedRoute><ShopSuccess /></ProtectedRoute>} />
+                    <Route path="/verify/:id" element={<VerifyCertificate />} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </TooltipProvider>
+            </AuthProvider>
+          </BrowserRouter>
+        </TranslationProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
