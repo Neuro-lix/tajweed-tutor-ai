@@ -919,6 +919,7 @@ const Index = () => {
                   setCurrentView('recitation');
                 }}
               />
+              </Suspense>
             </div>
           </div>
         </main>
