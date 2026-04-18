@@ -33,10 +33,17 @@ const queryClient = new QueryClient({
 });
 
 const RouteFallback = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="flex flex-col items-center gap-3">
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      <p className="text-sm text-muted-foreground">Chargement...</p>
+  <div className="min-h-screen bg-background">
+    <div className="border-b border-border bg-card/50 h-16" />
+    <div className="container mx-auto px-4 py-8 space-y-4 max-w-4xl animate-pulse">
+      <div className="h-8 w-1/3 bg-muted rounded" />
+      <div className="h-4 w-2/3 bg-muted rounded" />
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-4">
+        <div className="h-24 bg-muted rounded-xl" />
+        <div className="h-24 bg-muted rounded-xl" />
+        <div className="h-24 bg-muted rounded-xl" />
+      </div>
+      <div className="h-64 bg-muted rounded-xl" />
     </div>
   </div>
 );
