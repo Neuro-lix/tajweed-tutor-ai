@@ -329,6 +329,7 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
     analysis.transcriptionImpossible = false;
     analysis.whisperError = whisperError;
     analysis.similarity = similarity;
+    analysis.transcriptionEngine = transcriptionEngine;
 
     return new Response(JSON.stringify(analysis), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
