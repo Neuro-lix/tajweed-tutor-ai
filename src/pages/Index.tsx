@@ -999,7 +999,7 @@ const Index = () => {
           {/* Translation toggle */}
           <TranslationToggle />
 
-          <Suspense fallback={<div className="h-96 rounded-xl bg-muted/30 animate-pulse" />}>
+          <Suspense fallback={<RecitationSkeleton />}>
             <RecitationInterface
               surahName={SURAHS.find(s => s.id === currentSurah)?.transliteration || 'Al-Fatiha'}
               surahArabic={SURAHS.find(s => s.id === currentSurah)?.name || 'الفاتحة'}
