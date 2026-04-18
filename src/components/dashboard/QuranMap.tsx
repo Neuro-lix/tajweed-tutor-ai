@@ -35,6 +35,8 @@ export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect
   const { t } = useLanguage();
   const [showAll, setShowAll] = useState(false);
   const [selectedJuz, setSelectedJuz] = useState<number | null>(null);
+  const [focusedIdx, setFocusedIdx] = useState<number>(0);
+  const gridRef = useRef<HTMLDivElement | null>(null);
 
   const surahsByJuz: Record<number, typeof SURAHS> = {};
   SURAHS.forEach((surah) => {
@@ -50,11 +52,51 @@ export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect
     };
   };
 
-  const displayedSurahs = showAll 
+  const displayedSurahs = showAll
     ? (selectedJuz ? surahsByJuz[selectedJuz] || [] : SURAHS)
     : SURAHS.slice(0, 30);
 
   const juzNumbers = Array.from({ length: 30 }, (_, i) => i + 1);
+
+  // Compute columns from current breakpoint by querying actual DOM grid (simple heuristic).
+  const getColumns = useCallback((): number => {
+    const grid = gridRef.current;
+    if (!grid) return 3;
+    const style = window.getComputedStyle(grid);
+    const cols = style.gridTemplateColumns.split(' ').filter(Boolean).length;
+    return cols || 3;
+  }, []);
+
+  const handleKeyNav = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' ', 'Home', 'End'].includes(e.key)) return;
+    e.preventDefault();
+    const cols = getColumns();
+    const max = displayedSurahs.length - 1;
+    let next = focusedIdx;
+    if (e.key === 'ArrowRight') next = Math.min(focusedIdx + 1, max);
+    else if (e.key === 'ArrowLeft') next = Math.max(focusedIdx - 1, 0);
+    else if (e.key === 'ArrowDown') next = Math.min(focusedIdx + cols, max);
+    else if (e.key === 'ArrowUp') next = Math.max(focusedIdx - cols, 0);
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = max;
+    else if (e.key === 'Enter' || e.key === ' ') {
+      const surah = displayedSurahs[focusedIdx];
+      if (surah) onSurahSelect(surah.id);
+      return;
+    }
+    setFocusedIdx(next);
+    // Move actual focus
+    const grid = gridRef.current;
+    if (grid) {
+      const target = grid.querySelectorAll<HTMLElement>('[data-surah-cell]')[next];
+      target?.focus();
+    }
+  }, [displayedSurahs, focusedIdx, getColumns, onSurahSelect]);
+
+  // Reset focus when list changes
+  useEffect(() => {
+    setFocusedIdx(0);
+  }, [showAll, selectedJuz]);
 
   return (
     <div className="space-y-6">
