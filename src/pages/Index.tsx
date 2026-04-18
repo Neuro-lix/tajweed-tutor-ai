@@ -36,6 +36,14 @@ import { AppHeader } from '@/components/header/AppHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  DashboardSkeleton,
+  QuranMapSkeleton,
+  RecitationSkeleton,
+  ReportSkeleton,
+  PageSkeleton,
+} from '@/components/ui/skeleton-card';
+import { ListenAndReciteMode } from '@/components/recitation/ListenAndReciteMode';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserProgress } from '@/hooks/useUserProgress';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
