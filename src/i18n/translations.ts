@@ -472,6 +472,12 @@ export interface TranslationKeys {
   notificationsRefusedDesc: string;
   noCachedContent: string;
   connectToDownload: string;
+
+  // Theme
+  themeToggle?: string;
+  themeLight?: string;
+  themeDark?: string;
+  themeSystem?: string;
 }
 
 const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: TranslationKeys } = {
