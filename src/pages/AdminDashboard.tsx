@@ -69,6 +69,7 @@ interface DashStats {
   registrationsByDay: { date: string; count: number }[];
   users: UserStat[];
   surahMetrics: SurahMetric[];
+  tajweedErrorBuckets: TajweedErrorBucket[];
 }
 
 const FLAG = (code: string) => {
