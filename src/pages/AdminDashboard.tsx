@@ -450,15 +450,73 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
               </Card>
             </div>
 
+            {/* Radar chart - tajweed error types */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Target className="w-4 h-4 text-primary" />
-                  Performance tajwīd par sourate
+                  <RadarIcon className="w-4 h-4 text-primary" />
+                  Répartition des types d'erreurs tajwīd
                 </CardTitle>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Identifie les versets sur lesquels les élèves rencontrent le plus de difficultés.
+                  Catégorisation automatique des corrections détectées par l'IA sur l'ensemble des sessions.
                 </p>
+              </CardHeader>
+              <CardContent>
+                {stats.tajweedErrorBuckets.every(b => b.count === 0) ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    Pas encore de corrections tajwīd enregistrées.
+                  </p>
+                ) : (
+                  <div className="w-full h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart data={stats.tajweedErrorBuckets}>
+                        <PolarGrid stroke="hsl(var(--border))" />
+                        <PolarAngleAxis dataKey="category" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} />
+                        <PolarRadiusAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
+                        <Radar
+                          name="Erreurs"
+                          dataKey="count"
+                          stroke="hsl(var(--primary))"
+                          fill="hsl(var(--primary))"
+                          fillOpacity={0.4}
+                        />
+                        <ReTooltip
+                          contentStyle={{
+                            backgroundColor: "hsl(var(--card))",
+                            border: "1px solid hsl(var(--border))",
+                            borderRadius: "8px",
+                            color: "hsl(var(--foreground))",
+                          }}
+                        />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Target className="w-4 h-4 text-primary" />
+                      Performance tajwīd par sourate
+                    </CardTitle>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Identifie les versets sur lesquels les élèves rencontrent le plus de difficultés.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={exportSurahMetricsCSV}
+                    disabled={!stats.surahMetrics.length}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Exporter CSV
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
