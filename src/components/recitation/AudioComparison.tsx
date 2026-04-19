@@ -10,9 +10,11 @@ import {
   Repeat, 
   GitCompare,
   Volume2,
-  Loader2
+  Loader2,
+  Activity
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { WaveformOverlay } from './WaveformOverlay';
 
 interface AudioComparisonProps {
   userAudioBlob: Blob | null;
@@ -37,6 +39,7 @@ export const AudioComparison: React.FC<AudioComparisonProps> = ({
   const [duration, setDuration] = useState(0);
   const [isLooping, setIsLooping] = useState(false);
   const [abProgress, setAbProgress] = useState<'A' | 'B'>('A');
+  const [showFineCompare, setShowFineCompare] = useState(false);
   
   const userAudioRef = useRef<HTMLAudioElement | null>(null);
   const refAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -341,6 +344,28 @@ export const AudioComparison: React.FC<AudioComparisonProps> = ({
         <p className="text-xs text-muted-foreground text-center">
           💡 Compare ta récitation avec celle du récitateur sélectionné
         </p>
+
+        {/* Fine waveform comparison toggle */}
+        <div className="pt-2 border-t border-border">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowFineCompare((v) => !v)}
+            className="w-full text-xs"
+          >
+            <Activity className="w-3 h-3 mr-1" />
+            {showFineCompare ? 'Masquer la comparaison fine' : 'Comparaison fine (waveforms)'}
+          </Button>
+
+          {showFineCompare && (
+            <div className="mt-3">
+              <WaveformOverlay
+                userAudioBlob={userAudioBlob}
+                referenceAudioUrl={referenceAudioUrl}
+              />
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
