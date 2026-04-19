@@ -2,9 +2,34 @@ import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Users, Clock, Globe, TrendingUp, Award, BookOpen, ShoppingBag, GripVertical, Settings, Eye, EyeOff, BarChart2, Activity, RefreshCw, Target, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Users, Clock, Globe, TrendingUp, Award, BookOpen, ShoppingBag, GripVertical, Settings, Eye, EyeOff, BarChart2, Activity, RefreshCw, Target, AlertTriangle, Download, Radar as RadarIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SURAHS } from "@/data/quranData";
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip as ReTooltip } from "recharts";
+
+interface TajweedErrorBucket {
+  category: string;
+  count: number;
+}
+
+const TAJWEED_KEYWORDS: Record<string, string[]> = {
+  Makhārij: ["makhrej", "makhraj", "makharij", "point d'articulation", "articulation", "prononciation", "lettre"],
+  Ṣifāt: ["sifat", "sifa", "caractéristique", "qualité", "tafkhim", "tarqiq", "emphatique"],
+  Mudūd: ["madd", "mad", "allongement", "prolongation", "voyelle longue"],
+  Ghunna: ["ghunna", "nasalisation", "nasal"],
+  Qalqala: ["qalqala", "qalqalah", "vibration", "écho"],
+  Idghām: ["idgham", "idghām", "fusion", "assimilation"],
+  Ikhfā: ["ikhfa", "ikhfā", "dissimulation", "occultation"],
+  Iqlāb: ["iqlab", "iqlāb", "transformation"],
+};
+
+const classifyTajweedError = (text: string): string | null => {
+  const lower = text.toLowerCase();
+  for (const [cat, keywords] of Object.entries(TAJWEED_KEYWORDS)) {
+    if (keywords.some(k => lower.includes(k))) return cat;
+  }
+  return null;
+};
 
 interface AdminDashboardProps {
   onBack: () => void;
