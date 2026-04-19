@@ -44,7 +44,18 @@ export const ListenAndReciteMode: React.FC<ListenAndReciteModeProps> = ({
   const [activeIdx, setActiveIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [completedFragments, setCompletedFragments] = useState<Set<number>>(new Set());
+  const [autoLoop, setAutoLoop] = useState(false);
+  const [repsTarget, setRepsTarget] = useState(3);
+  const [repsByFragment, setRepsByFragment] = useState<Record<number, number>>({});
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const autoLoopRef = useRef(false);
+  const repsTargetRef = useRef(3);
+  const activeIdxRef = useRef(0);
+
+  // keep refs in sync (used inside audio.onended which captures stale state)
+  useEffect(() => { autoLoopRef.current = autoLoop; }, [autoLoop]);
+  useEffect(() => { repsTargetRef.current = repsTarget; }, [repsTarget]);
+  useEffect(() => { activeIdxRef.current = activeIdx; }, [activeIdx]);
 
   // Build fragments from verse text
   useEffect(() => {
@@ -60,15 +71,16 @@ export const ListenAndReciteMode: React.FC<ListenAndReciteModeProps> = ({
       groups.push({
         index: groups.length,
         text: slice,
-        audioUrl: referenceAudioUrl, // reuse same ayah audio (cannot slice cleanly without timestamps)
+        audioUrl: referenceAudioUrl,
       });
     }
     setFragments(groups);
     setActiveIdx(0);
     setCompletedFragments(new Set());
+    setRepsByFragment({});
   }, [verseText, referenceAudioUrl, surahNumber, verseNumber]);
 
-  // Cleanup audio on unmount / disable
+  // Cleanup audio on unmount
   useEffect(() => {
     return () => {
       if (audioRef.current) {
@@ -86,7 +98,20 @@ export const ListenAndReciteMode: React.FC<ListenAndReciteModeProps> = ({
     }
     const audio = new Audio(fragment.audioUrl);
     audioRef.current = audio;
-    audio.onended = () => setIsPlaying(false);
+    audio.onended = () => {
+      // increment reps counter
+      setRepsByFragment((prev) => {
+        const idxNow = activeIdxRef.current;
+        const next = { ...prev, [idxNow]: (prev[idxNow] || 0) + 1 };
+        // auto-loop: replay until target reached
+        if (autoLoopRef.current && (next[idxNow] || 0) < repsTargetRef.current) {
+          setTimeout(() => playFragment(idxNow), 600);
+        } else {
+          setIsPlaying(false);
+        }
+        return next;
+      });
+    };
     audio.onerror = () => setIsPlaying(false);
     setIsPlaying(true);
     try {
@@ -104,6 +129,7 @@ export const ListenAndReciteMode: React.FC<ListenAndReciteModeProps> = ({
   const handleNext = () => {
     setCompletedFragments((prev) => new Set(prev).add(activeIdx));
     if (activeIdx < fragments.length - 1) {
+      stopAudio();
       setActiveIdx(activeIdx + 1);
     }
   };
@@ -112,6 +138,7 @@ export const ListenAndReciteMode: React.FC<ListenAndReciteModeProps> = ({
     stopAudio();
     setActiveIdx(0);
     setCompletedFragments(new Set());
+    setRepsByFragment({});
   };
 
   if (!enabled) {
