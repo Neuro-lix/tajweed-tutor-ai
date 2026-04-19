@@ -202,6 +202,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         };
       }).sort((a, b) => b.totalSessions - a.totalSessions);
 
+      // Tajweed error buckets (radar chart)
+      const bucketMap = new Map<string, number>();
+      Object.keys(TAJWEED_KEYWORDS).forEach(k => bucketMap.set(k, 0));
+      (corrections || []).forEach((c: any) => {
+        const cat = classifyTajweedError(`${c.rule_type || ''} ${c.rule_description || ''}`);
+        if (cat) bucketMap.set(cat, (bucketMap.get(cat) || 0) + 1);
+      });
+      const tajweedErrorBuckets: TajweedErrorBucket[] = Array.from(bucketMap.entries())
+        .map(([category, count]) => ({ category, count }));
+
       setStats({
         totalUsers: (profiles || []).length,
         activeToday: activeTodayIds.size,
@@ -213,6 +223,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         registrationsByDay: regsByDay,
         users: userStats,
         surahMetrics,
+        tajweedErrorBuckets,
       });
     } catch (e) {
       console.error("Admin stats error:", e);
