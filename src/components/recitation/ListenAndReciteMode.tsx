@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Headphones, Play, Pause, Mic, RotateCcw, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Headphones, Play, Pause, Mic, RotateCcw, ChevronRight, CheckCircle2, Repeat } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Fragment {
