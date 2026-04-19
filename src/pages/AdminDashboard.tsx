@@ -234,6 +234,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
 
   useEffect(() => { loadStats(); }, []);
 
+  const exportSurahMetricsCSV = () => {
+    if (!stats?.surahMetrics?.length) return;
+    const header = ["Sourate #", "Nom", "Arabe", "Sessions", "Score moyen (%)", "Taux de succes (%)", "Difficulte"];
+    const rows = stats.surahMetrics.map(m => {
+      const diff = m.successRate < 50 && m.totalSessions >= 3 ? "Difficile"
+        : m.successRate >= 85 && m.totalSessions >= 3 ? "Maitrisee" : "Moyenne";
+      return [m.surahNumber, `"${m.name}"`, `"${m.arabic}"`, m.totalSessions, m.avgScore, m.successRate, diff];
+    });
+    const csv = [header.join(","), ...rows.map(r => r.join(","))].join("\n");
+    // BOM for Excel UTF-8
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `tajweed-metriques-sourates-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const maxReg = stats?.registrationsByDay ? Math.max(...stats.registrationsByDay.map(d => d.count), 1) : 1;
 
   return (
