@@ -2,9 +2,34 @@ import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Users, Clock, Globe, TrendingUp, Award, BookOpen, ShoppingBag, GripVertical, Settings, Eye, EyeOff, BarChart2, Activity, RefreshCw, Target, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Users, Clock, Globe, TrendingUp, Award, BookOpen, ShoppingBag, GripVertical, Settings, Eye, EyeOff, BarChart2, Activity, RefreshCw, Target, AlertTriangle, Download, Radar as RadarIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SURAHS } from "@/data/quranData";
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip as ReTooltip } from "recharts";
+
+interface TajweedErrorBucket {
+  category: string;
+  count: number;
+}
+
+const TAJWEED_KEYWORDS: Record<string, string[]> = {
+  Makhārij: ["makhrej", "makhraj", "makharij", "point d'articulation", "articulation", "prononciation", "lettre"],
+  Ṣifāt: ["sifat", "sifa", "caractéristique", "qualité", "tafkhim", "tarqiq", "emphatique"],
+  Mudūd: ["madd", "mad", "allongement", "prolongation", "voyelle longue"],
+  Ghunna: ["ghunna", "nasalisation", "nasal"],
+  Qalqala: ["qalqala", "qalqalah", "vibration", "écho"],
+  Idghām: ["idgham", "idghām", "fusion", "assimilation"],
+  Ikhfā: ["ikhfa", "ikhfā", "dissimulation", "occultation"],
+  Iqlāb: ["iqlab", "iqlāb", "transformation"],
+};
+
+const classifyTajweedError = (text: string): string | null => {
+  const lower = text.toLowerCase();
+  for (const [cat, keywords] of Object.entries(TAJWEED_KEYWORDS)) {
+    if (keywords.some(k => lower.includes(k))) return cat;
+  }
+  return null;
+};
 
 interface AdminDashboardProps {
   onBack: () => void;
@@ -44,6 +69,7 @@ interface DashStats {
   registrationsByDay: { date: string; count: number }[];
   users: UserStat[];
   surahMetrics: SurahMetric[];
+  tajweedErrorBuckets: TajweedErrorBucket[];
 }
 
 const FLAG = (code: string) => {
@@ -85,6 +111,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
       const { data: ijaza } = await supabase
         .from("ijaza_requests")
         .select("id, created_at");
+
+      // Corrections (for tajweed error type radar)
+      const { data: corrections } = await supabase
+        .from("corrections")
+        .select("rule_type, rule_description");
 
       const now = new Date();
       const todayStr = now.toISOString().split("T")[0];
@@ -171,6 +202,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         };
       }).sort((a, b) => b.totalSessions - a.totalSessions);
 
+      // Tajweed error buckets (radar chart)
+      const bucketMap = new Map<string, number>();
+      Object.keys(TAJWEED_KEYWORDS).forEach(k => bucketMap.set(k, 0));
+      (corrections || []).forEach((c: any) => {
+        const cat = classifyTajweedError(`${c.rule_type || ''} ${c.rule_description || ''}`);
+        if (cat) bucketMap.set(cat, (bucketMap.get(cat) || 0) + 1);
+      });
+      const tajweedErrorBuckets: TajweedErrorBucket[] = Array.from(bucketMap.entries())
+        .map(([category, count]) => ({ category, count }));
+
       setStats({
         totalUsers: (profiles || []).length,
         activeToday: activeTodayIds.size,
@@ -182,6 +223,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         registrationsByDay: regsByDay,
         users: userStats,
         surahMetrics,
+        tajweedErrorBuckets,
       });
     } catch (e) {
       console.error("Admin stats error:", e);
@@ -191,6 +233,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
   };
 
   useEffect(() => { loadStats(); }, []);
+
+  const exportSurahMetricsCSV = () => {
+    if (!stats?.surahMetrics?.length) return;
+    const header = ["Sourate #", "Nom", "Arabe", "Sessions", "Score moyen (%)", "Taux de succes (%)", "Difficulte"];
+    const rows = stats.surahMetrics.map(m => {
+      const diff = m.successRate < 50 && m.totalSessions >= 3 ? "Difficile"
+        : m.successRate >= 85 && m.totalSessions >= 3 ? "Maitrisee" : "Moyenne";
+      return [m.surahNumber, `"${m.name}"`, `"${m.arabic}"`, m.totalSessions, m.avgScore, m.successRate, diff];
+    });
+    const csv = [header.join(","), ...rows.map(r => r.join(","))].join("\n");
+    // BOM for Excel UTF-8
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `tajweed-metriques-sourates-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const maxReg = stats?.registrationsByDay ? Math.max(...stats.registrationsByDay.map(d => d.count), 1) : 1;
 
@@ -389,15 +450,73 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
               </Card>
             </div>
 
+            {/* Radar chart - tajweed error types */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
-                  <Target className="w-4 h-4 text-primary" />
-                  Performance tajwīd par sourate
+                  <RadarIcon className="w-4 h-4 text-primary" />
+                  Répartition des types d'erreurs tajwīd
                 </CardTitle>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Identifie les versets sur lesquels les élèves rencontrent le plus de difficultés.
+                  Catégorisation automatique des corrections détectées par l'IA sur l'ensemble des sessions.
                 </p>
+              </CardHeader>
+              <CardContent>
+                {stats.tajweedErrorBuckets.every(b => b.count === 0) ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    Pas encore de corrections tajwīd enregistrées.
+                  </p>
+                ) : (
+                  <div className="w-full h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart data={stats.tajweedErrorBuckets}>
+                        <PolarGrid stroke="hsl(var(--border))" />
+                        <PolarAngleAxis dataKey="category" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} />
+                        <PolarRadiusAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
+                        <Radar
+                          name="Erreurs"
+                          dataKey="count"
+                          stroke="hsl(var(--primary))"
+                          fill="hsl(var(--primary))"
+                          fillOpacity={0.4}
+                        />
+                        <ReTooltip
+                          contentStyle={{
+                            backgroundColor: "hsl(var(--card))",
+                            border: "1px solid hsl(var(--border))",
+                            borderRadius: "8px",
+                            color: "hsl(var(--foreground))",
+                          }}
+                        />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Target className="w-4 h-4 text-primary" />
+                      Performance tajwīd par sourate
+                    </CardTitle>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Identifie les versets sur lesquels les élèves rencontrent le plus de difficultés.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={exportSurahMetricsCSV}
+                    disabled={!stats.surahMetrics.length}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Exporter CSV
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
