@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import React, { lazy, Suspense } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { GeometricPattern, Ornament, Star8Point } from '@/components/decorative/GeometricPattern';
 import { SessionCard } from '@/components/onboarding/SessionCard';
@@ -24,11 +24,7 @@ import { NotificationSettings } from '@/components/notifications/NotificationSet
 import { LeaderboardPanel } from '@/components/leaderboard/LeaderboardPanel';
 import { StreakPanel } from '@/components/streaks/StreakPanel';
 import { OfflineCacheManager } from '@/components/offline/OfflineCacheManager';
-import { OfflineIndicator } from '@/components/offline/OfflineIndicator';
 import { OfflinePracticeMode } from '@/components/offline/OfflinePracticeMode';
-import { LanguageSelector } from '@/components/settings/LanguageSelector';
-import { AnalysisProgress } from '@/components/recitation/AnalysisProgress';
-import { AudioComparison } from '@/components/recitation/AudioComparison';
 import { RewardsPanel } from '@/components/rewards/RewardsPanel';
 import { CertificateModal } from '@/components/certificates/CertificateModal';
 import { SaveRecordingDialog } from '@/components/recitation/SaveRecordingDialog';
@@ -44,551 +40,19 @@ import {
   PageSkeleton,
 } from '@/components/ui/skeleton-card';
 import { ListenAndReciteMode } from '@/components/recitation/ListenAndReciteMode';
-import { useAuth } from '@/hooks/useAuth';
-import { useUserProgress } from '@/hooks/useUserProgress';
-import { useAudioRecorder } from '@/hooks/useAudioRecorder';
-import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
-import { useGamification } from '@/hooks/useGamification';
-import { useStreaks } from '@/hooks/useStreaks';
-import { useLeaderboard } from '@/hooks/useLeaderboard';
-import { useReviewNotifications } from '@/hooks/useReviewNotifications';
-import { useStreakNotifications } from '@/hooks/useStreakNotifications';
-import { useOfflineMode } from '@/hooks/useOfflineMode';
-import { useCertificates } from '@/hooks/useCertificates';
-import { useRecitationStorage } from '@/hooks/useRecitationStorage';
-import { useCredits } from '@/hooks/useCredits';
-import { useSessionTimer } from '@/hooks/useSessionTimer';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useTranslationSettings } from '@/contexts/TranslationContext';
-import { supabase } from '@/integrations/supabase/client';
-import { SURAHS } from '@/data/quranData';
-import { Loader2, LogOut, MessageSquareHeart, Award, Globe, Trophy, Music, FileText, Zap } from 'lucide-react';
-import { toast } from 'sonner';
-import { fetchAyah } from '@/lib/quranApi';
 import { TranslationToggle } from '@/components/recitation/TranslationToggle';
+import { SURAHS } from '@/data/quranData';
+import { Loader2, LogOut, FileText, Zap } from 'lucide-react';
+import { toast } from 'sonner';
 import logoImage from '@/logo.png';
-
-type AppView = 'landing' | 'session-select' | 'qiraat-select' | 'dashboard' | 'recitation' | 'corrections' | 'pricing' | 'recordings' | 'boutique' | 'ijaza' | 'admin';
-
-function renderHeroTitle(title: string, rigor: string, kindness: string) {
-  const rigorIdx = title.indexOf(rigor);
-  const kindnessIdx = title.indexOf(kindness);
-
-  if (rigorIdx === -1 || kindnessIdx === -1) {
-    return <>{title}</>;
-  }
-
-  const first = Math.min(rigorIdx, kindnessIdx);
-  const second = Math.max(rigorIdx, kindnessIdx);
-  const firstWord = first === rigorIdx ? rigor : kindness;
-  const secondWord = second === kindnessIdx ? kindness : rigor;
-
-  const before = title.slice(0, first);
-  const between = title.slice(first + firstWord.length, second);
-  const after = title.slice(second + secondWord.length);
-
-  return (
-    <>
-      {before}
-      <span className={first === rigorIdx ? 'text-gradient-gold' : 'text-primary'}>{firstWord}</span>
-      {between}
-      <span className={second === kindnessIdx ? 'text-primary' : 'text-gradient-gold'}>{secondWord}</span>
-      {after}
-    </>
-  );
-}
-
-interface AnalysisResult {
-  isCorrect: boolean;
-  overallScore: number;
-  feedback: string;
-  encouragement?: string;
-  priorityFixes?: string[];
-  errors?: Array<{
-    word: string;
-    ruleType: string;
-    ruleDescription: string;
-    severity: 'minor' | 'major' | 'critical';
-    correction: string;
-  }>;
-  textComparison?: string;
-  transcribedText?: string | null;
-  expectedText?: string;
-  whisperError?: string | null;
-  transcriptionImpossible?: boolean;
-}
+import { useIndexState } from './index/useIndexState';
+import { renderHeroTitle } from './index/indexHelpers';
 
 const Index = () => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { user, loading: authLoading, signOut } = useAuth();
-  const { profile, progress, corrections, surahProgress, updateProfile, addCorrection, loading: dataLoading } = useUserProgress();
-  const { t } = useLanguage();
-  const { showTranslation, currentTranslationId } = useTranslationSettings();
-  
-  const [currentView, setCurrentView] = useState<AppView>('landing');
-  const [selectedSession, setSelectedSession] = useState<'homme' | 'femme' | null>(null);
-  const [selectedQiraat, setSelectedQiraat] = useState<string | null>(null);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
-  const [currentSurah, setCurrentSurah] = useState(1);
-  const [currentVerse, setCurrentVerse] = useState(1);
-  const [aiFeedback, setAiFeedback] = useState<{
-    status: 'correct' | 'review';
-    message: string;
-    details: string;
-  } | null>(null);
-  const [analyzing, setAnalyzing] = useState(false);
-  const [analysisStep, setAnalysisStep] = useState<'idle' | 'uploading' | 'transcribing' | 'analyzing' | 'generating' | 'done' | 'error'>('idle');
-  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
-  const [showReport, setShowReport] = useState(false);
-  const [devMode, setDevMode] = useState(() => localStorage.getItem('devMode') === 'true');
-  const [logoClickCount, setLogoClickCount] = useState(0);
+  const s = useIndexState();
+  const { t } = s;
 
-  const handleLogoClick = () => {
-    setLogoClickCount(prev => {
-      const next = prev + 1;
-      if (next >= 5) {
-        const pwd = prompt('🔐 Mot de passe développeur :');
-        if (pwd === 'tajweed-dev-2026') {
-          const newMode = !devMode;
-          setDevMode(newMode);
-          localStorage.setItem('devMode', String(newMode));
-          alert(newMode ? '🛠️ Mode dev ON — Crédits gratuits' : '🔒 Mode dev OFF');
-        } else {
-          alert('❌ Mot de passe incorrect');
-        }
-        return 0;
-      }
-      return next;
-    });
-  };
-  const [transcriptionFailed, setTranscriptionFailed] = useState(false);
-  const [userAudioBlob, setUserAudioBlob] = useState<Blob | null>(null);
-  const [isCurrentVerseCached, setIsCurrentVerseCached] = useState(false);
-  const [showSaveDialog, setShowSaveDialog] = useState(false);
-  const [pendingSaveBlob, setPendingSaveBlob] = useState<Blob | null>(null);
-  const [pendingSaveScore, setPendingSaveScore] = useState<number | null>(null);
-  const [showNoCredits, setShowNoCredits] = useState(false);
-  
-  const {
-    isRecording,
-    audioBlob,
-    audioBase64,
-    audioMimeType,
-    mediaStream,
-    recordingStats,
-    startRecording,
-    stopRecording,
-    error: recordingError,
-  } = useAudioRecorder();
-
-  const { saveRecording } = useRecitationStorage();
-  const { credits, hasCredits, isLowCredits, deductCredit, refetch: refetchCredits } = useCredits();
-  const sessionTimer = useSessionTimer();
-
-  const [currentVerseText, setCurrentVerseText] = useState<string>('');
-  const [currentVerseTranslation, setCurrentVerseTranslation] = useState<string | null>(null);
-  const [isVerseTextLoading, setIsVerseTextLoading] = useState(false);
-
-  const { 
-    dueReviews, 
-    reviewQueue, 
-    addToReviewQueue, 
-    processReview 
-  } = useSpacedRepetition();
-
-  const { recordSession, userLevel } = useGamification();
-  const { recordPractice, streakData } = useStreaks();
-  const { updateLeaderboardEntry } = useLeaderboard();
-  
-  // Certificates
-  const { certificates, loading: certificatesLoading, newCertificate, dismissNewCertificate } = useCertificates();
-  
-  // Offline mode
-  const {
-    isOnline,
-    isOfflineReady,
-    cacheStats,
-    formatCacheSize,
-    cacheSurah,
-    isSurahCached,
-    clearCache,
-    getCachedVerse,
-    cacheVerse,
-  } = useOfflineMode();
-
-  // Handle payment redirect
-  useEffect(() => {
-    const paymentStatus = searchParams.get('payment');
-    if (paymentStatus === 'success') {
-      toast.success('Paiement réussi ! Merci pour votre confiance.');
-    } else if (paymentStatus === 'canceled') {
-      toast.info('Paiement annulé.');
-    }
-  }, [searchParams]);
-
-  // Redirect to appropriate view based on auth and profile
-  useEffect(() => {
-    if (!authLoading && user && !dataLoading) {
-      if (profile?.sessionType && profile?.selectedQiraat) {
-        setCurrentView('dashboard');
-        setSelectedSession(profile.sessionType === 'male' ? 'homme' : 'femme');
-        setSelectedQiraat(profile.selectedQiraat);
-      } else if (profile?.sessionType) {
-        setCurrentView('qiraat-select');
-        setSelectedSession(profile.sessionType === 'male' ? 'homme' : 'femme');
-      }
-    }
-  }, [user, authLoading, profile, dataLoading]);
-
-  const loadVerse = useCallback(async (surah: number, verse: number, translationId: string) => {
-    setIsVerseTextLoading(true);
-
-    try {
-      // 1) If offline, prefer cached immediately
-      const cached = await getCachedVerse(surah, verse, translationId);
-      if (cached) {
-        setCurrentVerseText(cached.text);
-        setCurrentVerseTranslation(cached.translation ?? null);
-        setIsCurrentVerseCached(true);
-      } else {
-        setIsCurrentVerseCached(false);
-        if (!isOnline) {
-          setCurrentVerseText(`Sourate ${surah}, verset ${verse} (non disponible hors-ligne)`);
-          setCurrentVerseTranslation(null);
-          return;
-        }
-      }
-
-      // 2) If online, fetch fresh (and cache)
-      if (isOnline) {
-        const { text, translation } = await fetchAyah(surah, verse, { translationId });
-        if (text) {
-          setCurrentVerseText(text);
-          setCurrentVerseTranslation(translation ?? null);
-          await cacheVerse(surah, verse, text, translation, translationId);
-          setIsCurrentVerseCached(true);
-        }
-      }
-    } catch (e) {
-      console.error('[Verse] Failed to load verse', { surah, verse, e });
-      // keep whatever we have
-    } finally {
-      setIsVerseTextLoading(false);
-    }
-  }, [getCachedVerse, cacheVerse, isOnline]);
-
-  // Load verse text when verse/translation changes
-  useEffect(() => {
-    loadVerse(currentSurah, currentVerse, currentTranslationId);
-  }, [currentSurah, currentVerse, currentTranslationId, loadVerse]);
-
-  const progressData = {
-    totalSurahs: 114,
-    completedSurahs: surahProgress.filter(s => s.status === 'mastered').length || 0,
-    totalVerses: 6236,
-    masteredVerses: surahProgress.reduce((acc, s) => acc + s.masteredVerses, 0) || 0,
-    reviewNeeded: corrections.length || 0,
-    totalHours: progress?.totalHours || 0,
-    currentStreak: progress?.currentStreak || 0,
-  };
-
-  // Normalize AI ruleType strings (e.g. "Makhārij", "Idghām") to TAJWEED_RULES keys (e.g. "makharij", "idgham")
-  const normalizeRuleType = (ruleType: string): 'madd' | 'ghunna' | 'qalqala' | 'idgham' | 'ikhfa' | 'makharij' | 'sifat' | 'iqlab' | 'izhar' | 'waqf' => {
-    const lower = ruleType
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // strip diacritics
-      .replace(/[^a-z]/g, '');        // keep only a-z
-    if (lower.includes('makh')) return 'makharij';
-    if (lower.includes('sif')) return 'sifat';
-    if (lower.includes('madd') || lower.includes('mad')) return 'madd';
-    if (lower.includes('idgh') || lower.includes('idgm')) return 'idgham';
-    if (lower.includes('ikh')) return 'ikhfa';
-    if (lower.includes('iql') || lower.includes('iqlab')) return 'iqlab';
-    if (lower.includes('izh') || lower.includes('izhar')) return 'izhar';
-    if (lower.includes('waq')) return 'waqf';
-    if (lower.includes('ghun') || lower.includes('ghn')) return 'ghunna';
-    if (lower.includes('qal')) return 'qalqala';
-    return 'madd'; // fallback
-  };
-
-  const mockCorrections = corrections.map(c => ({
-    id: c.id,
-    surah: `Sourate ${c.surahNumber}`,
-    verse: c.verseNumber,
-    word: c.word,
-    wordArabic: c.word,
-    rule: normalizeRuleType(c.ruleType),
-    description: c.ruleDescription,
-    timestamp: new Date(c.createdAt),
-  }));
-
-  const surahStatuses = surahProgress.map(s => ({
-    id: s.surahNumber,
-    status: s.status === 'mastered' ? 'completed' as const : 
-            s.status === 'in_progress' ? 'in_progress' as const : 
-            'not_started' as const,
-    progress: s.totalVerses > 0 ? (s.masteredVerses / s.totalVerses) * 100 : 0,
-  }));
-
-  // Keep userAudioBlob in sync reliably (state updates in hook are async)
-  useEffect(() => {
-    if (audioBlob && !isRecording) {
-      setUserAudioBlob(audioBlob);
-    }
-  }, [audioBlob, isRecording]);
-
-  const handleStartRecording = async () => {
-    // Check credits before allowing recording
-    if (!devMode && !hasCredits) {
-      setShowNoCredits(true);
-      return;
-    }
-    setShowFeedback(false);
-    setAiFeedback(null);
-    setAnalysisResult(null);
-    setShowReport(false);
-    setTranscriptionFailed(false);
-    sessionTimer.start();
-    await startRecording();
-  };
-
-  const handleStopRecording = async () => {
-    setAnalyzing(true);
-    setAnalysisStep('uploading');
-    sessionTimer.pause();
-
-    const recording = await stopRecording();
-
-    if (!recording) {
-      console.error('No audio recorded');
-      setAiFeedback({
-        status: 'review',
-        message: "Erreur d'enregistrement",
-        details: "Aucun audio n'a été capturé. Vérifie les permissions du microphone.",
-      });
-      setShowFeedback(true);
-      setAnalyzing(false);
-      return;
-    }
-
-    const recordedAudioBase64 = recording.base64;
-    const recordedAudioMimeType = recording.mimeType;
-
-    console.log('[Recitation] Audio base64 length:', recordedAudioBase64.length, 'mime:', recordedAudioMimeType);
-    setAnalysisStep('transcribing');
-
-    // Ensure we have a real expectedText (not placeholder)
-    let expectedText = currentVerseText;
-    if (!expectedText || expectedText.startsWith('Sourate') || expectedText.startsWith('Verset')) {
-      if (!isOnline) {
-        setAiFeedback({
-          status: 'review',
-          message: "Texte du verset indisponible",
-          details: "Ce verset n'est pas en cache hors-ligne. Reconnecte-toi pour lancer l'analyse.",
-        });
-        setShowFeedback(true);
-        setAnalyzing(false);
-        return;
-      }
-
-      try {
-        const fetched = await fetchAyah(currentSurah, currentVerse, { translationId: currentTranslationId });
-        expectedText = fetched.text;
-        if (expectedText) {
-          setCurrentVerseText(expectedText);
-          setCurrentVerseTranslation(fetched.translation ?? null);
-          await cacheVerse(currentSurah, currentVerse, expectedText, fetched.translation, currentTranslationId);
-        }
-      } catch (e) {
-        console.error('[Recitation] Failed to fetch expectedText before analysis', e);
-      }
-    }
-
-    try {
-      setAnalysisStep('analyzing');
-
-      const { data, error } = await supabase.functions.invoke('analyze-recitation', {
-        body: {
-          audioBase64: recordedAudioBase64,
-          audioMimeType: recordedAudioMimeType,
-          surahNumber: currentSurah,
-          verseNumber: currentVerse,
-          expectedText,
-          qiraat: selectedQiraat || 'hafs_asim',
-        },
-      });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(String(data.error));
-
-      setAnalysisStep('done');
-
-      // Deduct 1 credit after successful analysis
-      if (!devMode) {
-        await deductCredit();
-        refetchCredits();
-      }
-
-      const transcriptionImpossible = data?.transcriptionImpossible === true;
-      setTranscriptionFailed(transcriptionImpossible);
-      const isCorrect = !transcriptionImpossible && data?.isCorrect === true;
-
-      // Store full analysis result
-      setAnalysisResult(data);
-
-      // Don't open the report automatically — user clicks "Voir le rapport"
-      // setShowReport(true);  ← removed to not block UX
-
-      setAiFeedback({
-        status: isCorrect ? 'correct' : 'review',
-        message: transcriptionImpossible ? 'Transcription échouée' : isCorrect ? t.excellent : t.needsReview,
-        details: transcriptionImpossible
-          ? `${data.feedback || "La transcription est vide. Veuillez réenregistrer."}${data.whisperError ? ` (${data.whisperError})` : ''}`
-          : (data.feedback || data.encouragement || ''),
-      });
-
-      // Record session for gamification and streaks
-      await recordSession(isCorrect);
-      await recordPractice();
-
-      // Update leaderboard
-      await updateLeaderboardEntry({
-        totalXp: userLevel.experiencePoints,
-        currentLevel: userLevel.currentLevel,
-        totalVersesMastered: userLevel.totalVersesMastered,
-        perfectRecitations: userLevel.perfectRecitations,
-        currentStreak: streakData.currentStreak,
-        longestStreak: streakData.longestStreak,
-      });
-
-      // Add to spaced repetition if errors found
-      if (data.errors && data.errors.length > 0) {
-        await addToReviewQueue(currentSurah, currentVerse);
-
-        for (const err of data.errors) {
-          await addCorrection({
-            surahNumber: currentSurah,
-            verseNumber: currentVerse,
-            word: err.word,
-            ruleType: normalizeRuleType(err.ruleType),
-            ruleDescription: err.ruleDescription,
-          });
-        }
-      }
-
-      setShowFeedback(true);
-
-      // Prompt user to save recording (if logged in)
-      if (user && audioBlob) {
-        setPendingSaveBlob(audioBlob);
-        setPendingSaveScore(data.overallScore ?? null);
-        setShowSaveDialog(true);
-      }
-    } catch (error) {
-      console.error('Error analyzing recitation:', error);
-      setAiFeedback({
-        status: 'review',
-        message: "Erreur d'analyse",
-        details: "Une erreur s'est produite. Réessaye.",
-      });
-      setShowFeedback(true);
-    } finally {
-      setAnalyzing(false);
-    }
-  };
-
-  const handleNavigate = async (surah: number, verse: number) => {
-    setCurrentSurah(surah);
-    setCurrentVerse(verse);
-    setShowFeedback(false);
-    setAiFeedback(null);
-    setAnalysisResult(null);
-    setShowReport(false);
-    setTranscriptionFailed(false);
-    setUserAudioBlob(null);
-
-    await loadVerse(surah, verse, currentTranslationId);
-  };
-
-
-  const handleStartReview = (surahNumber: number, verseNumber: number) => {
-    setCurrentSurah(surahNumber);
-    setCurrentVerse(verseNumber);
-    setCurrentView('recitation');
-  };
-
-  const { requestPermission } = useReviewNotifications(
-    dueReviews,
-    handleStartReview
-  );
-
-  // Streak notifications for daily practice reminders
-  const handleStartPractice = () => {
-    setCurrentView('recitation');
-  };
-
-  const { 
-    requestPermission: requestStreakPermission,
-    hasPracticedToday 
-  } = useStreakNotifications(
-    {
-      currentStreak: streakData.currentStreak,
-      longestStreak: streakData.longestStreak,
-      lastPracticeDate: streakData.lastPracticeDate ? new Date(streakData.lastPracticeDate) : null,
-    },
-    handleStartPractice
-  );
-
-  const handleSessionSelect = async (session: 'homme' | 'femme') => {
-    setSelectedSession(session);
-    if (user) {
-      await updateProfile({ 
-        sessionType: session === 'homme' ? 'male' : 'female' 
-      });
-    }
-  };
-
-  const handleQiraatSelect = async (qiraat: string) => {
-    setSelectedQiraat(qiraat);
-    if (user) {
-      await updateProfile({ selectedQiraat: qiraat });
-    }
-  };
-
-  const handleSignOut = async () => {
-    await signOut();
-    setCurrentView('landing');
-    setSelectedSession(null);
-    setSelectedQiraat(null);
-  };
-
-  const handleSaveRecording = async () => {
-    if (!pendingSaveBlob) return;
-    await saveRecording({
-      audioBlob: pendingSaveBlob,
-      surahNumber: currentSurah,
-      verseNumber: currentVerse,
-      durationSeconds: recordingStats.durationMs ? recordingStats.durationMs / 1000 : undefined,
-      analysisScore: pendingSaveScore ?? undefined,
-      qiraat: selectedQiraat ?? 'hafs_asim',
-    });
-    setPendingSaveBlob(null);
-    setPendingSaveScore(null);
-    setShowSaveDialog(false);
-  };
-
-  const handleDiscardRecording = () => {
-    setPendingSaveBlob(null);
-    setPendingSaveScore(null);
-    setShowSaveDialog(false);
-    // If user chooses not to keep, clear local audio to avoid retaining data
-    setUserAudioBlob(null);
-  };
-
-  if (authLoading || (user && dataLoading)) {
+  if (s.authLoading || (s.user && s.dataLoading)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -600,20 +64,20 @@ const Index = () => {
   }
 
   // Landing Page
-  if (currentView === 'landing') {
+  if (s.currentView === 'landing') {
     return (
       <div className="min-h-screen bg-background relative overflow-hidden">
         <GeometricPattern className="text-primary" opacity={0.04} />
-        
+
         <div className="relative z-10 container mx-auto px-4 py-12 md:py-20">
           {/* Auth buttons */}
           <div className="absolute top-4 right-4 flex gap-2">
-            {user ? (
+            {s.user ? (
               <>
-              <Button variant="ghost" size="sm" onClick={() => setCurrentView('dashboard')}>
+                <Button variant="ghost" size="sm" onClick={() => s.setCurrentView('dashboard')}>
                   {t.myDashboard}
                 </Button>
-                <Button variant="outline" size="sm" onClick={handleSignOut}>
+                <Button variant="outline" size="sm" onClick={s.handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
                   {t.logout}
                 </Button>
@@ -630,19 +94,19 @@ const Index = () => {
           {/* Hero Section */}
           <div className="text-center max-w-4xl mx-auto mb-16 animate-fade-in">
             <div className="flex justify-center mb-8">
-              <img 
-                src={logoImage} 
-                alt="Tajweed Tutor AI" 
+              <img
+                src={logoImage}
+                alt="Tajweed Tutor AI"
                 className="h-24 w-24 object-contain cursor-pointer rounded-2xl shadow-lg"
-                onClick={handleLogoClick}
+                onClick={s.handleLogoClick}
               />
             </div>
-            {devMode && (
+            {s.devMode && (
               <div className="flex flex-col items-center gap-2 mb-4">
                 <div className="inline-flex items-center gap-1 px-3 py-1 bg-amber-500/20 border border-amber-500/40 rounded-full text-xs text-amber-600 font-medium">
                   🛠️ {t.devModeActive}
                 </div>
-                <button onClick={() => setCurrentView('admin')} className="text-xs text-muted-foreground underline hover:text-primary transition-colors">
+                <button onClick={() => s.setCurrentView('admin')} className="text-xs text-muted-foreground underline hover:text-primary transition-colors">
                   ⚙️ {t.openAdminDashboard}
                 </button>
               </div>
@@ -650,31 +114,31 @@ const Index = () => {
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
               {renderHeroTitle(t.heroTitle, t.heroRigor, t.heroKindness)}
             </h1>
-            
+
             <Ornament className="mx-auto text-primary/40 my-8" />
-            
+
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
               {t.heroDescription}
             </p>
 
-            <Button 
-              variant="hero" 
+            <Button
+              variant="hero"
               size="xl"
               onClick={() => {
-                if (user) {
-                  if (profile?.sessionType && profile?.selectedQiraat) {
-                    setCurrentView('dashboard');
+                if (s.user) {
+                  if (s.profile?.sessionType && s.profile?.selectedQiraat) {
+                    s.setCurrentView('dashboard');
                   } else {
-                    setCurrentView('session-select');
+                    s.setCurrentView('session-select');
                   }
                 } else {
-                  navigate('/auth');
+                  s.navigate('/auth');
                 }
               }}
               className="animate-scale-in"
               style={{ animationDelay: '0.3s' }}
             >
-              {user ? t.continueLearning : t.startLearning}
+              {s.user ? t.continueLearning : t.startLearning}
               <svg className="w-5 h-5 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
@@ -715,9 +179,9 @@ const Index = () => {
                 description: t.fullTrackingDesc,
               },
             ].map((feature, i) => (
-              <Card 
-                key={i} 
-                variant="elevated" 
+              <Card
+                key={i}
+                variant="elevated"
                 className="animate-slide-up"
                 style={{ animationDelay: `${0.4 + i * 0.1}s` }}
               >
@@ -734,10 +198,10 @@ const Index = () => {
 
           {/* Pricing note */}
           <div className="text-center mt-16 animate-fade-in" style={{ animationDelay: '0.7s' }}>
-            <Card 
-              variant="outline" 
+            <Card
+              variant="outline"
               className="inline-block px-8 py-4 cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => user ? setCurrentView('pricing') : navigate('/auth')}
+              onClick={() => s.user ? s.setCurrentView('pricing') : s.navigate('/auth')}
             >
               <p className="text-foreground">
                 <span className="text-2xl font-bold text-primary">3€</span>
@@ -756,11 +220,11 @@ const Index = () => {
   }
 
   // Session Selection
-  if (currentView === 'session-select') {
+  if (s.currentView === 'session-select') {
     return (
       <div className="min-h-screen bg-background relative">
         <GeometricPattern className="text-primary" opacity={0.03} />
-        
+
         <div className="relative z-10 container mx-auto px-4 py-12 md:py-20">
           <div className="text-center mb-12">
             <Star8Point size={32} className="mx-auto text-primary mb-6" />
@@ -775,24 +239,24 @@ const Index = () => {
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto mb-12">
             <SessionCard
               type="homme"
-              isSelected={selectedSession === 'homme'}
-              onClick={() => handleSessionSelect('homme')}
+              isSelected={s.selectedSession === 'homme'}
+              onClick={() => s.handleSessionSelect('homme')}
             />
             <SessionCard
               type="femme"
-              isSelected={selectedSession === 'femme'}
-              onClick={() => handleSessionSelect('femme')}
+              isSelected={s.selectedSession === 'femme'}
+              onClick={() => s.handleSessionSelect('femme')}
             />
           </div>
 
           <div className="flex justify-center gap-4">
-            <Button variant="ghost" onClick={() => setCurrentView('landing')}>
+            <Button variant="ghost" onClick={() => s.setCurrentView('landing')}>
               {t.backLabel}
             </Button>
-            <Button 
-              variant="hero" 
-              disabled={!selectedSession}
-              onClick={() => setCurrentView('qiraat-select')}
+            <Button
+              variant="hero"
+              disabled={!s.selectedSession}
+              onClick={() => s.setCurrentView('qiraat-select')}
             >
               {t.continueLabel}
               <svg className="w-4 h-4 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -806,11 +270,11 @@ const Index = () => {
   }
 
   // Qiraat Selection
-  if (currentView === 'qiraat-select') {
+  if (s.currentView === 'qiraat-select') {
     return (
       <div className="min-h-screen bg-background relative">
         <GeometricPattern className="text-primary" opacity={0.03} />
-        
+
         <div className="relative z-10 container mx-auto px-4 py-12">
           <div className="text-center mb-10">
             <Star8Point size={32} className="mx-auto text-primary mb-6" />
@@ -824,19 +288,19 @@ const Index = () => {
 
           <div className="max-w-4xl mx-auto mb-12">
             <QiraatSelector
-              selectedQiraat={selectedQiraat}
-              onSelect={handleQiraatSelect}
+              selectedQiraat={s.selectedQiraat}
+              onSelect={s.handleQiraatSelect}
             />
           </div>
 
           <div className="flex justify-center gap-4">
-            <Button variant="ghost" onClick={() => setCurrentView('session-select')}>
+            <Button variant="ghost" onClick={() => s.setCurrentView('session-select')}>
               {t.backLabel}
             </Button>
-            <Button 
-              variant="hero" 
-              disabled={!selectedQiraat}
-              onClick={() => setCurrentView('dashboard')}
+            <Button
+              variant="hero"
+              disabled={!s.selectedQiraat}
+              onClick={() => s.setCurrentView('dashboard')}
             >
               {t.startLabel}
               <svg className="w-4 h-4 ml-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -850,38 +314,36 @@ const Index = () => {
   }
 
   // Dashboard
-  if (currentView === 'dashboard') {
+  if (s.currentView === 'dashboard') {
     return (
       <div className="min-h-screen bg-background">
-        {/* Header */}
         <AppHeader
-          fullName={profile?.fullName}
-          isOnline={isOnline}
-          isOfflineReady={isOfflineReady}
-          cacheStats={cacheStats}
-          formatCacheSize={formatCacheSize}
-          correctionsCount={corrections.length}
-          credits={credits}
-          isLowCredits={isLowCredits}
-          onFeedbackClick={() => setShowFeedbackForm(true)}
-          onRecordingsClick={() => setCurrentView('recordings')}
-          onCorrectionsClick={() => setCurrentView('corrections')}
-          onRecitationClick={() => setCurrentView('recitation')}
-          onBoutiqueClick={() => setCurrentView('boutique')}
-          onIjazaClick={() => setCurrentView('ijaza')}
-          onSignOut={handleSignOut}
+          fullName={s.profile?.fullName}
+          isOnline={s.isOnline}
+          isOfflineReady={s.isOfflineReady}
+          cacheStats={s.cacheStats}
+          formatCacheSize={s.formatCacheSize}
+          correctionsCount={s.corrections.length}
+          credits={s.credits}
+          isLowCredits={s.isLowCredits}
+          onFeedbackClick={() => s.setShowFeedbackForm(true)}
+          onRecordingsClick={() => s.setCurrentView('recordings')}
+          onCorrectionsClick={() => s.setCurrentView('corrections')}
+          onRecitationClick={() => s.setCurrentView('recitation')}
+          onBoutiqueClick={() => s.setCurrentView('boutique')}
+          onIjazaClick={() => s.setCurrentView('ijaza')}
+          onSignOut={s.handleSignOut}
         />
 
         <main className="container mx-auto px-4 py-8">
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Progress sidebar */}
             <div className="lg:col-span-1 space-y-6">
               <Suspense fallback={<DashboardSkeleton />}>
-                <ProgressDashboard data={progressData} />
+                <ProgressDashboard data={s.progressData} />
               </Suspense>
               <StreakPanel />
-              <RewardsPanel 
-                certificates={certificates.map(c => ({
+              <RewardsPanel
+                certificates={s.certificates.map(c => ({
                   id: c.id,
                   surahNumber: c.surahNumber,
                   certificateType: c.certificateType,
@@ -890,96 +352,90 @@ const Index = () => {
                   averageScore: c.averageScore,
                   completedAt: c.completedAt,
                 }))}
-                loading={certificatesLoading}
+                loading={s.certificatesLoading}
               />
               <GamificationPanel />
               <SpacedRepetitionPanel
-                dueReviews={dueReviews}
-                totalInQueue={reviewQueue.length}
-                onStartReview={handleStartReview}
+                dueReviews={s.dueReviews}
+                totalInQueue={s.reviewQueue.length}
+                onStartReview={s.handleStartReview}
               />
               <LeaderboardPanel />
               <OfflineCacheManager
-                isOnline={isOnline}
-                isOfflineReady={isOfflineReady}
-                cacheStats={cacheStats}
-                formatCacheSize={formatCacheSize}
-                cacheSurah={cacheSurah}
-                isSurahCached={isSurahCached}
-                clearCache={clearCache}
+                isOnline={s.isOnline}
+                isOfflineReady={s.isOfflineReady}
+                cacheStats={s.cacheStats}
+                formatCacheSize={s.formatCacheSize}
+                cacheSurah={s.cacheSurah}
+                isSurahCached={s.isSurahCached}
+                clearCache={s.clearCache}
               />
-              <NotificationSettings onRequestPermission={requestPermission} />
+              <NotificationSettings onRequestPermission={s.requestPermission} />
             </div>
 
-            {/* Quran map */}
             <div className="lg:col-span-2">
               <Suspense fallback={<QuranMapSkeleton />}>
-              <QuranMap 
-                surahStatuses={surahStatuses.length > 0 ? surahStatuses : [
-                  { id: 1, status: 'not_started', progress: 0 },
-                  { id: 2, status: 'not_started', progress: 0 },
-                  { id: 3, status: 'not_started', progress: 0 },
-                  { id: 4, status: 'not_started', progress: 0 },
-                ]}
-                onSurahSelect={(surahId) => {
-                  setCurrentSurah(surahId);
-                  setCurrentVerse(1);
-                  setCurrentView('recitation');
-                }}
-              />
+                <QuranMap
+                  surahStatuses={s.surahStatuses.length > 0 ? s.surahStatuses : [
+                    { id: 1, status: 'not_started', progress: 0 },
+                    { id: 2, status: 'not_started', progress: 0 },
+                    { id: 3, status: 'not_started', progress: 0 },
+                    { id: 4, status: 'not_started', progress: 0 },
+                  ]}
+                  onSurahSelect={(surahId) => {
+                    s.setCurrentSurah(surahId);
+                    s.setCurrentVerse(1);
+                    s.setCurrentView('recitation');
+                  }}
+                />
               </Suspense>
             </div>
           </div>
         </main>
-        
-        {/* Chat and Feedback */}
+
         <MultilingualChat />
-        <FeedbackForm isOpen={showFeedbackForm} onClose={() => setShowFeedbackForm(false)} />
-        
-        {/* Certificate Modal */}
+        <FeedbackForm isOpen={s.showFeedbackForm} onClose={() => s.setShowFeedbackForm(false)} />
+
         <CertificateModal
-          certificate={newCertificate ? {
-            id: newCertificate.id,
-            surahNumber: newCertificate.surahNumber,
-            certificateType: newCertificate.certificateType,
-            userName: newCertificate.userName,
-            qiraat: newCertificate.qiraat,
-            averageScore: newCertificate.averageScore,
-            completedAt: newCertificate.completedAt,
+          certificate={s.newCertificate ? {
+            id: s.newCertificate.id,
+            surahNumber: s.newCertificate.surahNumber,
+            certificateType: s.newCertificate.certificateType,
+            userName: s.newCertificate.userName,
+            qiraat: s.newCertificate.qiraat,
+            averageScore: s.newCertificate.averageScore,
+            completedAt: s.newCertificate.completedAt,
           } : null}
-          isOpen={!!newCertificate}
-          onClose={dismissNewCertificate}
+          isOpen={!!s.newCertificate}
+          onClose={s.dismissNewCertificate}
         />
       </div>
     );
   }
 
   // Recitation
-  if (currentView === 'recitation') {
+  if (s.currentView === 'recitation') {
     return (
       <div className="min-h-screen bg-background">
-        {/* Header */}
         <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <Button variant="ghost" onClick={() => { sessionTimer.reset(); setCurrentView('dashboard'); }}>
+              <Button variant="ghost" onClick={() => { s.sessionTimer.reset(); s.setCurrentView('dashboard'); }}>
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
                 {t.backLabel}
               </Button>
               <div className="flex items-center gap-3">
-                {/* Session timer */}
-                <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-mono ${sessionTimer.isRunning ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'}`}>
-                  ⏱ {sessionTimer.formatted}
+                <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-mono ${s.sessionTimer.isRunning ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                  ⏱ {s.sessionTimer.formatted}
                 </div>
-                {/* Credits badge */}
-                {credits !== null && (
+                {s.credits !== null && (
                   <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                    credits === 0 ? 'bg-destructive/15 text-destructive' : isLowCredits ? 'bg-amber-500/15 text-amber-600' : 'bg-primary/15 text-primary'
+                    s.credits === 0 ? 'bg-destructive/15 text-destructive' : s.isLowCredits ? 'bg-amber-500/15 text-amber-600' : 'bg-primary/15 text-primary'
                   }`}>
                     <Zap className="h-3.5 w-3.5" />
-                    <span>{credits}</span>
+                    <span>{s.credits}</span>
                   </div>
                 )}
                 <Star8Point size={24} className="text-primary" />
@@ -989,117 +445,111 @@ const Index = () => {
         </header>
 
         <main className="container mx-auto px-4 py-8 max-w-3xl space-y-6">
-          {/* Verse Navigator */}
           <VerseNavigator
-            currentSurah={currentSurah}
-            currentVerse={currentVerse}
-            onNavigate={handleNavigate}
+            currentSurah={s.currentSurah}
+            currentVerse={s.currentVerse}
+            onNavigate={s.handleNavigate}
           />
 
-          {/* Translation toggle */}
           <TranslationToggle />
 
           <Suspense fallback={<RecitationSkeleton />}>
             <RecitationInterface
-              surahName={SURAHS.find(s => s.id === currentSurah)?.transliteration || 'Al-Fatiha'}
-              surahArabic={SURAHS.find(s => s.id === currentSurah)?.name || 'الفاتحة'}
-              surahNumber={currentSurah}
-              currentVerse={currentVerse}
-              totalVerses={SURAHS.find(s => s.id === currentSurah)?.verses || 7}
-              verseText={currentVerseText || `Sourate ${currentSurah}, verset ${currentVerse}`}
-              verseTranslation={currentVerseTranslation}
-              showTranslation={showTranslation}
-              isRecording={isRecording}
-              isAnalyzing={analyzing}
-              analysisStep={analysisStep}
-              transcriptionFailed={transcriptionFailed}
-              userAudioBlob={userAudioBlob}
-              mediaStream={mediaStream}
+              surahName={SURAHS.find(sur => sur.id === s.currentSurah)?.transliteration || 'Al-Fatiha'}
+              surahArabic={SURAHS.find(sur => sur.id === s.currentSurah)?.name || 'الفاتحة'}
+              surahNumber={s.currentSurah}
+              currentVerse={s.currentVerse}
+              totalVerses={SURAHS.find(sur => sur.id === s.currentSurah)?.verses || 7}
+              verseText={s.currentVerseText || `Sourate ${s.currentSurah}, verset ${s.currentVerse}`}
+              verseTranslation={s.currentVerseTranslation}
+              showTranslation={s.showTranslation}
+              isRecording={s.isRecording}
+              isAnalyzing={s.analyzing}
+              analysisStep={s.analysisStep}
+              transcriptionFailed={s.transcriptionFailed}
+              userAudioBlob={s.userAudioBlob}
+              mediaStream={s.mediaStream}
               audioDebugStats={{
-                mimeType: audioMimeType,
-                chunks: recordingStats.chunks,
-                totalBytes: recordingStats.totalBytes,
-                blobSize: recordingStats.blobSize,
-                durationMs: recordingStats.durationMs,
-                base64Length: recordingStats.base64Length,
-                trackLabel: recordingStats.trackLabel,
-                trackSettings: recordingStats.trackSettings,
-                error: recordingError,
+                mimeType: s.audioMimeType,
+                chunks: s.recordingStats.chunks,
+                totalBytes: s.recordingStats.totalBytes,
+                blobSize: s.recordingStats.blobSize,
+                durationMs: s.recordingStats.durationMs,
+                base64Length: s.recordingStats.base64Length,
+                trackLabel: s.recordingStats.trackLabel,
+                trackSettings: s.recordingStats.trackSettings,
+                error: s.recordingError,
               }}
-              onStartRecording={handleStartRecording}
-              onStopRecording={handleStopRecording}
-              onPreviousVerse={() => currentVerse > 1 && handleNavigate(currentSurah, currentVerse - 1)}
+              onStartRecording={s.handleStartRecording}
+              onStopRecording={s.handleStopRecording}
+              onPreviousVerse={() => s.currentVerse > 1 && s.handleNavigate(s.currentSurah, s.currentVerse - 1)}
               onNextVerse={() => {
-                const surah = SURAHS.find(s => s.id === currentSurah);
-                if (surah && currentVerse < surah.verses) {
-                  handleNavigate(currentSurah, currentVerse + 1);
+                const surah = SURAHS.find(sur => sur.id === s.currentSurah);
+                if (surah && s.currentVerse < surah.verses) {
+                  s.handleNavigate(s.currentSurah, s.currentVerse + 1);
                 }
               }}
-              recordingError={recordingError}
-              feedback={showFeedback && aiFeedback ? aiFeedback : undefined}
+              recordingError={s.recordingError}
+              feedback={s.showFeedback && s.aiFeedback ? s.aiFeedback : undefined}
             />
           </Suspense>
 
-          {/* Listen & Recite (Talqīn) Mode */}
           <ListenAndReciteMode
-            surahNumber={currentSurah}
-            verseNumber={currentVerse}
-            verseText={currentVerseText || ''}
-            referenceAudioUrl={`https://cdn.islamic.network/quran/audio/128/ar.alafasy/${currentSurah === 1 ? currentVerse : currentVerse}.mp3`}
+            surahNumber={s.currentSurah}
+            verseNumber={s.currentVerse}
+            verseText={s.currentVerseText || ''}
+            referenceAudioUrl={`https://cdn.islamic.network/quran/audio/128/ar.alafasy/${s.currentSurah === 1 ? s.currentVerse : s.currentVerse}.mp3`}
             onRecordFragment={() => {
-              if (!isRecording && !analyzing) {
-                handleStartRecording();
+              if (!s.isRecording && !s.analyzing) {
+                s.handleStartRecording();
               }
             }}
-            isAnalyzing={analyzing}
+            isAnalyzing={s.analyzing}
           />
 
           <OfflinePracticeMode
-            isOnline={isOnline}
-            cachedVerseCount={cacheStats.verses}
-            currentSurah={currentSurah}
-            currentVerse={currentVerse}
-            isVerseCached={isCurrentVerseCached}
+            isOnline={s.isOnline}
+            cachedVerseCount={s.cacheStats.verses}
+            currentSurah={s.currentSurah}
+            currentVerse={s.currentVerse}
+            isVerseCached={s.isCurrentVerseCached}
             onStartPractice={() => {
-              // Practice without analysis in offline mode
               toast.info('Mode pratique sans analyse IA');
             }}
             onListenReference={() => {
-              // Scroll to reference recitations
               const element = document.querySelector('[data-reference-recitations]');
               if (element) element.scrollIntoView({ behavior: 'smooth' });
             }}
           />
 
-          {/* Recitation Report */}
-          {showFeedback && analysisResult && (
+          {s.showFeedback && s.analysisResult && (
             <Card>
               <CardContent className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{t.score} :</span>
                     <span className="font-semibold text-foreground">
-                      {typeof analysisResult.overallScore === 'number' ? analysisResult.overallScore : Number(analysisResult.overallScore ?? 0)}
+                      {typeof s.analysisResult.overallScore === 'number' ? s.analysisResult.overallScore : Number(s.analysisResult.overallScore ?? 0)}
                       /100
                     </span>
-                    {Array.isArray(analysisResult.errors) && analysisResult.errors.length > 0 && (
+                    {Array.isArray(s.analysisResult.errors) && s.analysisResult.errors.length > 0 && (
                       <span className="text-sm text-muted-foreground">
-                        • {analysisResult.errors.length} {t.errorsCount}
+                        • {s.analysisResult.errors.length} {t.errorsCount}
                       </span>
                     )}
                   </div>
-                  {analysisResult.transcriptionImpossible && (
+                  {s.analysisResult.transcriptionImpossible && (
                     <p className="text-sm text-destructive">
-                      {t.transcriptionImpossibleMsg}{analysisResult.whisperError ? ` : ${analysisResult.whisperError}` : ''}.
+                      {t.transcriptionImpossibleMsg}{s.analysisResult.whisperError ? ` : ${s.analysisResult.whisperError}` : ''}.
                     </p>
                   )}
-                  {!analysisResult.transcriptionImpossible && (!analysisResult.errors || analysisResult.errors.length === 0) && !analysisResult.isCorrect && (
+                  {!s.analysisResult.transcriptionImpossible && (!s.analysisResult.errors || s.analysisResult.errors.length === 0) && !s.analysisResult.isCorrect && (
                     <p className="text-sm text-muted-foreground">
-                      Aucun détail d’erreur n’a été renvoyé — clique sur « Voir le rapport » puis réessaie.
+                      Aucun détail d'erreur n'a été renvoyé — clique sur « Voir le rapport » puis réessaie.
                     </p>
                   )}
                 </div>
-                <Button variant="outline" onClick={() => setShowReport(true)} className="gap-2">
+                <Button variant="outline" onClick={() => s.setShowReport(true)} className="gap-2">
                   <FileText className="h-4 w-4" />
                   {t.viewReport}
                 </Button>
@@ -1107,22 +557,22 @@ const Index = () => {
             </Card>
           )}
 
-          <Dialog open={showReport} onOpenChange={setShowReport}>
+          <Dialog open={s.showReport} onOpenChange={s.setShowReport}>
             <DialogContent className="w-[95vw] max-w-4xl">
               <ScrollArea className="max-h-[75vh] pr-4">
-                {analysisResult && (
+                {s.analysisResult && (
                   <Suspense fallback={<ReportSkeleton />}>
                     <RecitationReport
-                      surahNumber={currentSurah}
-                      verseNumber={currentVerse}
-                      score={analysisResult.overallScore || 0}
-                      isCorrect={analysisResult.isCorrect || false}
-                      feedback={analysisResult.feedback || ''}
-                      priorityFixes={analysisResult.priorityFixes || []}
-                      errors={analysisResult.errors || []}
-                      transcribedText={analysisResult.transcribedText}
-                      expectedText={analysisResult.expectedText || currentVerseText || `Sourate ${currentSurah}, verset ${currentVerse}`}
-                      textComparison={analysisResult.textComparison}
+                      surahNumber={s.currentSurah}
+                      verseNumber={s.currentVerse}
+                      score={s.analysisResult.overallScore || 0}
+                      isCorrect={s.analysisResult.isCorrect || false}
+                      feedback={s.analysisResult.feedback || ''}
+                      priorityFixes={s.analysisResult.priorityFixes || []}
+                      errors={s.analysisResult.errors || []}
+                      transcribedText={s.analysisResult.transcribedText}
+                      expectedText={s.analysisResult.expectedText || s.currentVerseText || `Sourate ${s.currentSurah}, verset ${s.currentVerse}`}
+                      textComparison={s.analysisResult.textComparison}
                     />
                   </Suspense>
                 )}
@@ -1130,17 +580,16 @@ const Index = () => {
             </DialogContent>
           </Dialog>
 
-          {/* Save Recording Dialog */}
           <SaveRecordingDialog
-            open={showSaveDialog}
-            onOpenChange={setShowSaveDialog}
-            onSave={handleSaveRecording}
-            onDiscard={handleDiscardRecording}
-            surahName={SURAHS.find((s) => s.id === currentSurah)?.name}
-            verseNumber={currentVerse}
+            open={s.showSaveDialog}
+            onOpenChange={s.setShowSaveDialog}
+            onSave={s.handleSaveRecording}
+            onDiscard={s.handleDiscardRecording}
+            surahName={SURAHS.find(sur => sur.id === s.currentSurah)?.name}
+            verseNumber={s.currentVerse}
           />
-          {/* No Credits Dialog */}
-          <Dialog open={showNoCredits} onOpenChange={setShowNoCredits}>
+
+          <Dialog open={s.showNoCredits} onOpenChange={s.setShowNoCredits}>
             <DialogContent className="text-center max-w-sm">
               <div className="flex flex-col items-center gap-4 py-4">
                 <div className="w-16 h-16 rounded-full bg-destructive/15 flex items-center justify-center">
@@ -1150,7 +599,7 @@ const Index = () => {
                 <p className="text-muted-foreground text-sm">
                   {t.noCreditsDesc}
                 </p>
-                <Button variant="default" onClick={() => { setShowNoCredits(false); navigate('/shop'); }}>
+                <Button variant="default" onClick={() => { s.setShowNoCredits(false); s.navigate('/shop'); }}>
                   {t.rechargeCredits}
                 </Button>
               </div>
@@ -1162,14 +611,13 @@ const Index = () => {
   }
 
   // Corrections
-  if (currentView === 'corrections') {
+  if (s.currentView === 'corrections') {
     return (
       <div className="min-h-screen bg-background">
-        {/* Header */}
         <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <Button variant="ghost" onClick={() => setCurrentView('dashboard')}>
+              <Button variant="ghost" onClick={() => s.setCurrentView('dashboard')}>
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
@@ -1183,7 +631,7 @@ const Index = () => {
         <main className="container mx-auto px-4 py-8 max-w-4xl">
           <Suspense fallback={<ReportSkeleton />}>
             <CorrectionReport
-              corrections={mockCorrections.length > 0 ? mockCorrections : []}
+              corrections={s.mockCorrections.length > 0 ? s.mockCorrections : []}
               onPrint={() => window.print()}
             />
           </Suspense>
@@ -1193,27 +641,27 @@ const Index = () => {
   }
 
   // Pricing
-  if (currentView === 'pricing') {
+  if (s.currentView === 'pricing') {
     return (
       <Suspense fallback={<PageSkeleton label="Chargement des offres" />}>
-        <PricingSection onBack={() => setCurrentView('dashboard')} />
+        <PricingSection onBack={() => s.setCurrentView('dashboard')} />
       </Suspense>
     );
   }
 
-  if (currentView === 'boutique') {
+  if (s.currentView === 'boutique') {
     return (
       <Suspense fallback={<PageSkeleton label="Chargement de la boutique" />}>
-        <Boutique onBack={() => setCurrentView('dashboard')} />
+        <Boutique onBack={() => s.setCurrentView('dashboard')} />
       </Suspense>
     );
   }
 
-  if (currentView === 'ijaza') {
+  if (s.currentView === 'ijaza') {
     return (
       <Suspense fallback={<PageSkeleton label="Chargement Ijaza" />}>
-        <IjazaPage 
-          onBack={() => setCurrentView('dashboard')}
+        <IjazaPage
+          onBack={() => s.setCurrentView('dashboard')}
           masteredSurahs={0}
           totalSurahs={114}
           averageScore={0}
@@ -1222,22 +670,22 @@ const Index = () => {
     );
   }
 
-  if (currentView === 'admin') {
+  if (s.currentView === 'admin') {
     return (
       <Suspense fallback={<PageSkeleton label="Chargement admin" />}>
-        <AdminDashboard onBack={() => setCurrentView('dashboard')} />
+        <AdminDashboard onBack={() => s.setCurrentView('dashboard')} />
       </Suspense>
     );
   }
 
   // Recordings Library
-  if (currentView === 'recordings') {
+  if (s.currentView === 'recordings') {
     return (
       <div className="min-h-screen bg-background">
         <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <Button variant="ghost" onClick={() => setCurrentView('dashboard')}>
+              <Button variant="ghost" onClick={() => s.setCurrentView('dashboard')}>
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
@@ -1254,14 +702,13 @@ const Index = () => {
           </Suspense>
         </main>
 
-        {/* Save Recording Dialog */}
         <SaveRecordingDialog
-          open={showSaveDialog}
-          onOpenChange={setShowSaveDialog}
-          onSave={handleSaveRecording}
-          onDiscard={handleDiscardRecording}
-          surahName={SURAHS.find((s) => s.id === currentSurah)?.name}
-          verseNumber={currentVerse}
+          open={s.showSaveDialog}
+          onOpenChange={s.setShowSaveDialog}
+          onSave={s.handleSaveRecording}
+          onDiscard={s.handleDiscardRecording}
+          surahName={SURAHS.find(sur => sur.id === s.currentSurah)?.name}
+          verseNumber={s.currentVerse}
         />
       </div>
     );

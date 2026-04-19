@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Maximize2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface WaveformOverlayProps {
   userAudioBlob: Blob | null;
@@ -13,20 +15,12 @@ interface WaveformOverlayProps {
 type Peaks = number[];
 
 /**
- * Decode an audio source into a normalized peaks array (0..1).
- * Uses an offline AudioContext to extract envelope without playing audio.
+ * Decode an audio source into a normalized peaks array (0..1) AND return its duration.
  */
 async function decodeToPeaks(
   source: Blob | string,
   samples: number,
-): Promise<Peaks> {
-  const AudioCtor =
-    (window as any).OfflineAudioContext ||
-    (window as any).webkitOfflineAudioContext ||
-    (window as any).AudioContext ||
-    (window as any).webkitAudioContext;
-  if (!AudioCtor) throw new Error('AudioContext unsupported');
-
+): Promise<{ peaks: Peaks; duration: number }> {
   let arrayBuffer: ArrayBuffer;
   if (typeof source === 'string') {
     const resp = await fetch(source);
@@ -36,9 +30,8 @@ async function decodeToPeaks(
     arrayBuffer = await source.arrayBuffer();
   }
 
-  // Use a regular AudioContext just for decoding
-  const Ctx =
-    (window as any).AudioContext || (window as any).webkitAudioContext;
+  const Ctx = (window as any).AudioContext || (window as any).webkitAudioContext;
+  if (!Ctx) throw new Error('AudioContext unsupported');
   const ctx: AudioContext = new Ctx();
   let buffer: AudioBuffer;
   try {
@@ -47,7 +40,6 @@ async function decodeToPeaks(
     ctx.close().catch(() => null);
   }
 
-  // Mix down to mono
   const ch0 = buffer.getChannelData(0);
   const ch1 = buffer.numberOfChannels > 1 ? buffer.getChannelData(1) : null;
   const length = ch0.length;
@@ -66,21 +58,15 @@ async function decodeToPeaks(
       sum += v * v;
       count++;
     }
-    const rms = count > 0 ? Math.sqrt(sum / count) : 0;
-    peaks[i] = rms;
+    peaks[i] = count > 0 ? Math.sqrt(sum / count) : 0;
   }
 
-  // Normalize to 0..1
   let max = 0;
   for (const p of peaks) if (p > max) max = p;
   if (max > 0) for (let i = 0; i < samples; i++) peaks[i] = peaks[i] / max;
-  return peaks;
+  return { peaks, duration: buffer.duration };
 }
 
-/**
- * Resample peaks to a target length using simple linear interpolation.
- * This lets us align two recordings of slightly different durations.
- */
 function resample(peaks: Peaks, target: number): Peaks {
   if (peaks.length === target) return peaks.slice();
   const out = new Array(target).fill(0);
@@ -94,6 +80,162 @@ function resample(peaks: Peaks, target: number): Peaks {
   return out;
 }
 
+/** Pearson correlation between two equal-length arrays. Returns r ∈ [-1, 1]. */
+function pearsonCorrelation(a: number[], b: number[]): number {
+  const n = Math.min(a.length, b.length);
+  if (n === 0) return 0;
+  let meanA = 0;
+  let meanB = 0;
+  for (let i = 0; i < n; i++) {
+    meanA += a[i];
+    meanB += b[i];
+  }
+  meanA /= n;
+  meanB /= n;
+  let num = 0;
+  let denA = 0;
+  let denB = 0;
+  for (let i = 0; i < n; i++) {
+    const da = a[i] - meanA;
+    const db = b[i] - meanB;
+    num += da * db;
+    denA += da * da;
+    denB += db * db;
+  }
+  const den = Math.sqrt(denA * denB);
+  return den === 0 ? 0 : num / den;
+}
+
+interface WaveformChartProps {
+  userPeaks: Peaks;
+  refPeaks: Peaks;
+  zones: { start: number; end: number; severity: number }[];
+  samples: number;
+  duration: number;
+  showTimeline?: boolean;
+  height?: number;
+  className?: string;
+}
+
+const WaveformChart: React.FC<WaveformChartProps> = ({
+  userPeaks,
+  refPeaks,
+  zones,
+  samples,
+  duration,
+  showTimeline,
+  height = 100,
+  className,
+}) => {
+  const width = 600;
+  const mid = height / 2;
+
+  const buildPath = (peaks: Peaks): string => {
+    if (peaks.length === 0) return '';
+    const stepX = width / (peaks.length - 1);
+    let top = `M 0 ${mid - peaks[0] * mid}`;
+    let bottom = '';
+    for (let i = 1; i < peaks.length; i++) {
+      const x = i * stepX;
+      top += ` L ${x} ${mid - peaks[i] * mid}`;
+    }
+    for (let i = peaks.length - 1; i >= 0; i--) {
+      const x = i * stepX;
+      bottom += ` L ${x} ${mid + peaks[i] * mid}`;
+    }
+    return `${top} ${bottom} Z`;
+  };
+
+  // Build timeline ticks — aim for ~6-8 labels
+  const ticks = useMemo(() => {
+    if (!duration || duration <= 0) return [];
+    const target = 6;
+    const rawStep = duration / target;
+    // round to a "nice" step: 0.5, 1, 2, 5
+    const niceSteps = [0.5, 1, 2, 5, 10];
+    const step = niceSteps.find((s) => s >= rawStep) ?? Math.ceil(rawStep);
+    const out: { t: number; x: number }[] = [];
+    for (let t = 0; t <= duration + 1e-3; t += step) {
+      out.push({ t, x: (t / duration) * width });
+    }
+    return out;
+  }, [duration]);
+
+  const timelineHeight = showTimeline ? 16 : 0;
+  const totalHeight = height + timelineHeight;
+
+  return (
+    <div className={`relative rounded-lg bg-muted/30 border border-border overflow-hidden ${className ?? ''}`}>
+      <svg
+        viewBox={`0 0 ${width} ${totalHeight}`}
+        preserveAspectRatio="none"
+        className="w-full"
+        style={{ height: '100%' }}
+      >
+        <g transform={`translate(0, ${timelineHeight})`}>
+          {/* Divergence highlight zones */}
+          {zones.map((z, i) => {
+            const stepX = width / (samples - 1);
+            const x = z.start * stepX;
+            const w = Math.max(2, (z.end - z.start + 1) * stepX);
+            const opacity = 0.18 + Math.min(0.32, z.severity * 0.4);
+            return (
+              <rect
+                key={i}
+                x={x}
+                y={0}
+                width={w}
+                height={height}
+                fill="hsl(var(--destructive))"
+                opacity={opacity}
+              />
+            );
+          })}
+
+          {/* Reference waveform (gold) */}
+          <path d={buildPath(refPeaks)} fill="hsl(var(--gold-warm, 38 92% 50%))" opacity={0.45} />
+
+          {/* User waveform (primary) */}
+          <path d={buildPath(userPeaks)} fill="hsl(var(--primary))" opacity={0.55} />
+
+          {/* Center axis */}
+          <line x1={0} y1={mid} x2={width} y2={mid} stroke="hsl(var(--border))" strokeWidth={0.5} />
+
+          {/* Divergence markers */}
+          {zones.map((z, i) => {
+            const stepX = width / (samples - 1);
+            const cx = ((z.start + z.end) / 2) * stepX;
+            return (
+              <circle key={`m-${i}`} cx={cx} cy={6} r={3} fill="hsl(var(--destructive))" />
+            );
+          })}
+        </g>
+
+        {/* Timeline (top) */}
+        {showTimeline && ticks.length > 0 && (
+          <g>
+            <line x1={0} y1={timelineHeight - 0.5} x2={width} y2={timelineHeight - 0.5} stroke="hsl(var(--border))" strokeWidth={0.5} />
+            {ticks.map((tk, i) => (
+              <g key={i}>
+                <line x1={tk.x} y1={timelineHeight - 4} x2={tk.x} y2={timelineHeight} stroke="hsl(var(--muted-foreground))" strokeWidth={0.5} />
+                <text
+                  x={Math.min(width - 14, Math.max(2, tk.x + 2))}
+                  y={timelineHeight - 6}
+                  fontSize={9}
+                  fill="hsl(var(--muted-foreground))"
+                  fontFamily="monospace"
+                >
+                  {tk.t.toFixed(1)}s
+                </text>
+              </g>
+            ))}
+          </g>
+        )}
+      </svg>
+    </div>
+  );
+};
+
 export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
   userAudioBlob,
   referenceAudioUrl,
@@ -102,8 +244,11 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
 }) => {
   const [userPeaks, setUserPeaks] = useState<Peaks | null>(null);
   const [refPeaks, setRefPeaks] = useState<Peaks | null>(null);
+  const [userDuration, setUserDuration] = useState(0);
+  const [refDuration, setRefDuration] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [zoomOpen, setZoomOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -121,8 +266,10 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
     ])
       .then(([u, r]) => {
         if (cancelled) return;
-        setUserPeaks(u);
-        setRefPeaks(r);
+        setUserPeaks(u.peaks);
+        setUserDuration(u.duration);
+        setRefPeaks(r.peaks);
+        setRefDuration(r.duration);
       })
       .catch((e) => {
         if (cancelled) return;
@@ -139,7 +286,6 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
 
   const divergencePoints = useMemo(() => {
     if (!userPeaks || !refPeaks) return [];
-    // Align by resampling both to same length (already same `samples`)
     const a = resample(userPeaks, samples);
     const b = resample(refPeaks, samples);
     const points: { idx: number; delta: number }[] = [];
@@ -152,7 +298,6 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
     return points;
   }, [userPeaks, refPeaks, samples, divergenceThreshold]);
 
-  // Group consecutive divergent samples into highlight zones
   const zones = useMemo(() => {
     if (divergencePoints.length === 0) return [];
     const out: { start: number; end: number; severity: number }[] = [];
@@ -175,25 +320,34 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
     return out;
   }, [divergencePoints]);
 
-  const width = 600;
-  const height = 100;
-  const mid = height / 2;
+  // Similarity score — Pearson correlation mapped to 0..100
+  const similarityScore = useMemo(() => {
+    if (!userPeaks || !refPeaks) return null;
+    const a = resample(userPeaks, samples);
+    const b = resample(refPeaks, samples);
+    const r = pearsonCorrelation(a, b);
+    // Map [-1..1] to [0..100], clamped at 0
+    const score = Math.max(0, Math.round(r * 100));
+    return score;
+  }, [userPeaks, refPeaks, samples]);
 
-  const buildPath = (peaks: Peaks): string => {
-    if (peaks.length === 0) return '';
-    const stepX = width / (peaks.length - 1);
-    let top = `M 0 ${mid - peaks[0] * mid}`;
-    let bottom = '';
-    for (let i = 1; i < peaks.length; i++) {
-      const x = i * stepX;
-      top += ` L ${x} ${mid - peaks[i] * mid}`;
-    }
-    for (let i = peaks.length - 1; i >= 0; i--) {
-      const x = i * stepX;
-      bottom += ` L ${x} ${mid + peaks[i] * mid}`;
-    }
-    return `${top} ${bottom} Z`;
-  };
+  const scoreColor =
+    similarityScore === null
+      ? 'text-muted-foreground'
+      : similarityScore >= 80
+        ? 'text-primary'
+        : similarityScore >= 60
+          ? 'text-gold-warm'
+          : 'text-destructive';
+
+  const scoreLabel =
+    similarityScore === null
+      ? ''
+      : similarityScore >= 80
+        ? 'Excellente fidélité'
+        : similarityScore >= 60
+          ? 'Fidélité correcte'
+          : 'Fidélité faible';
 
   if (loading) {
     return (
@@ -210,9 +364,12 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
     ) : null;
   }
 
+  // Use the longer duration as reference for the timeline (both waveforms are stretched to fit the SVG width)
+  const displayDuration = Math.max(userDuration, refDuration);
+
   return (
     <div ref={containerRef} className="space-y-2">
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
+      <div className="flex items-center justify-between text-xs text-muted-foreground flex-wrap gap-2">
         <span className="flex items-center gap-2">
           <span className="inline-block w-3 h-3 rounded-sm bg-primary/70" />
           Vous
@@ -227,71 +384,36 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
         </span>
       </div>
 
-      <div className="relative rounded-lg bg-muted/30 border border-border overflow-hidden">
-        <svg
-          viewBox={`0 0 ${width} ${height}`}
-          preserveAspectRatio="none"
-          className="w-full h-24"
+      <div className="h-24">
+        <WaveformChart
+          userPeaks={userPeaks}
+          refPeaks={refPeaks}
+          zones={zones}
+          samples={samples}
+          duration={displayDuration}
+          height={100}
+        />
+      </div>
+
+      {/* Score + zoom row */}
+      <div className="flex items-center justify-between gap-3 pt-1">
+        <div className="flex items-baseline gap-2">
+          <span className="text-xs text-muted-foreground">Similarité d'enveloppe</span>
+          <span className={`text-2xl font-bold tabular-nums ${scoreColor}`}>
+            {similarityScore}
+            <span className="text-sm font-normal">%</span>
+          </span>
+          <span className={`text-xs ${scoreColor}`}>· {scoreLabel}</span>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setZoomOpen(true)}
+          className="text-xs h-8"
         >
-          {/* Divergence highlight zones */}
-          {zones.map((z, i) => {
-            const stepX = width / (samples - 1);
-            const x = z.start * stepX;
-            const w = Math.max(2, (z.end - z.start + 1) * stepX);
-            const opacity = 0.18 + Math.min(0.32, z.severity * 0.4);
-            return (
-              <rect
-                key={i}
-                x={x}
-                y={0}
-                width={w}
-                height={height}
-                fill="hsl(var(--destructive))"
-                opacity={opacity}
-              />
-            );
-          })}
-
-          {/* Reference waveform (gold) */}
-          <path
-            d={buildPath(refPeaks)}
-            fill="hsl(var(--gold-warm, 38 92% 50%))"
-            opacity={0.45}
-          />
-
-          {/* User waveform (primary) */}
-          <path
-            d={buildPath(userPeaks)}
-            fill="hsl(var(--primary))"
-            opacity={0.55}
-          />
-
-          {/* Center axis */}
-          <line
-            x1={0}
-            y1={mid}
-            x2={width}
-            y2={mid}
-            stroke="hsl(var(--border))"
-            strokeWidth={0.5}
-          />
-
-          {/* Divergence markers (top labels) */}
-          {zones.map((z, i) => {
-            const stepX = width / (samples - 1);
-            const cx = ((z.start + z.end) / 2) * stepX;
-            return (
-              <g key={`m-${i}`}>
-                <circle
-                  cx={cx}
-                  cy={6}
-                  r={3}
-                  fill="hsl(var(--destructive))"
-                />
-              </g>
-            );
-          })}
-        </svg>
+          <Maximize2 className="w-3 h-3 mr-1" />
+          Zoom
+        </Button>
       </div>
 
       <p className="text-xs text-muted-foreground text-center">
@@ -299,6 +421,58 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
           ? '✓ Aucune divergence majeure détectée — articulation fidèle'
           : `${zones.length} zone${zones.length > 1 ? 's' : ''} de divergence — vérifie les makhārij sur les segments surlignés`}
       </p>
+
+      {/* Zoom dialog */}
+      <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
+        <DialogContent className="max-w-5xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 flex-wrap">
+              <span>Comparaison fine — analyse détaillée</span>
+              <span className={`text-base font-bold tabular-nums ${scoreColor}`}>
+                {similarityScore}% · {scoreLabel}
+              </span>
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center justify-between text-xs text-muted-foreground flex-wrap gap-3">
+              <span className="flex items-center gap-2">
+                <span className="inline-block w-3 h-3 rounded-sm bg-primary/70" />
+                Vous · {userDuration.toFixed(2)}s
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="inline-block w-3 h-3 rounded-sm bg-gold-warm/70" />
+                Référence · {refDuration.toFixed(2)}s
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="inline-block w-3 h-3 rounded-sm bg-destructive/60" />
+                {zones.length} zone{zones.length > 1 ? 's' : ''} de divergence
+              </span>
+            </div>
+
+            <div className="h-72">
+              <WaveformChart
+                userPeaks={userPeaks}
+                refPeaks={refPeaks}
+                zones={zones}
+                samples={samples}
+                duration={displayDuration}
+                height={260}
+                showTimeline
+              />
+            </div>
+
+            <div className="rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground space-y-1">
+              <p>
+                <strong className="text-foreground">Lecture :</strong> chaque zone rouge marque un segment où l'amplitude de votre récitation diverge significativement de la référence — souvent symptôme d'un makhraj imprécis, d'un madd manquant ou d'une ghunna incomplète.
+              </p>
+              <p>
+                <strong className="text-foreground">Score de similarité :</strong> corrélation de Pearson entre les enveloppes (0% = aucune corrélation, 100% = parfaitement corrélée). C'est un indicateur prosodique, complémentaire au score tajwid IA.
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
