@@ -112,6 +112,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         .from("ijaza_requests")
         .select("id, created_at");
 
+      // Corrections (for tajweed error type radar)
+      const { data: corrections } = await supabase
+        .from("corrections")
+        .select("rule_type, rule_description");
+
       const now = new Date();
       const todayStr = now.toISOString().split("T")[0];
 
