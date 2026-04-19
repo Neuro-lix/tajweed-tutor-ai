@@ -206,14 +206,54 @@ export const ListenAndReciteMode: React.FC<ListenAndReciteModeProps> = ({
           ))}
         </div>
 
-        {/* Current fragment text */}
+        {/* Current fragment text + reps counter */}
         {current && (
-          <div className="rounded-lg bg-muted/40 p-4 text-center">
+          <div className="rounded-lg bg-muted/40 p-4 text-center space-y-2">
             <p className="font-arabic text-2xl md:text-3xl leading-loose text-foreground" dir="rtl">
               {current.text}
             </p>
+            <div className="flex items-center justify-center gap-2">
+              <Repeat className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Répétitions :</span>
+              <Badge variant="secondary" className="text-xs">
+                {(repsByFragment[activeIdx] || 0)} / {autoLoop ? repsTarget : '∞'}
+              </Badge>
+            </div>
           </div>
         )}
+
+        {/* Auto-loop control */}
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/20 px-3 py-2">
+          <div className="flex items-center gap-2">
+            <Repeat className="w-4 h-4 text-primary" />
+            <div>
+              <p className="text-sm font-medium">Auto-loop</p>
+              <p className="text-[11px] text-muted-foreground">Rejoue le fragment automatiquement</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+              {[2, 3, 5].map(n => (
+                <button
+                  key={n}
+                  onClick={() => setRepsTarget(n)}
+                  disabled={!autoLoop}
+                  className={cn(
+                    'text-xs px-2 py-1 rounded transition-colors',
+                    repsTarget === n && autoLoop
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/70',
+                    !autoLoop && 'opacity-50 cursor-not-allowed'
+                  )}
+                  aria-label={`${n} répétitions`}
+                >
+                  ×{n}
+                </button>
+              ))}
+            </div>
+            <Switch checked={autoLoop} onCheckedChange={setAutoLoop} aria-label="Activer l'auto-loop" />
+          </div>
+        </div>
 
         {/* Controls */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
