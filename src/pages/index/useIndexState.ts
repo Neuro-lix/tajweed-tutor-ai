@@ -20,6 +20,7 @@ import { useTranslationSettings } from '@/contexts/TranslationContext';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchAyah } from '@/lib/quranApi';
 import { AnalysisResult, AppView, normalizeRuleType } from './indexHelpers';
+import { calculateEnvelopeSimilarityScore } from '@/components/recitation/WaveformOverlay';
 
 /**
  * Centralized state hook for the Index page.
@@ -88,6 +89,7 @@ export function useIndexState() {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [pendingSaveBlob, setPendingSaveBlob] = useState<Blob | null>(null);
   const [pendingSaveScore, setPendingSaveScore] = useState<number | null>(null);
+  const [pendingEnvelopeScore, setPendingEnvelopeScore] = useState<number | null>(null);
   const [showNoCredits, setShowNoCredits] = useState(false);
 
   // ── Audio + storage + credits ──────────────────────────────────────
