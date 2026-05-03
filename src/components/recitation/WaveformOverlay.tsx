@@ -367,7 +367,7 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
       const scale = 2;
       const canvas = document.createElement('canvas');
       canvas.width = 1200;
-      canvas.height = 620;
+      canvas.height = 940;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
       const styles = getComputedStyle(document.documentElement);
@@ -386,10 +386,10 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
       ctx.fillStyle = muted;
       ctx.font = '13px serif';
       ctx.fillText(`Vous ${userDuration.toFixed(2)}s · Référence ${refDuration.toFixed(2)}s · ${zones.length} zone${zones.length > 1 ? 's' : ''} de divergence`, 24, 88);
-      ctx.drawImage(image, 24, 112, 552, 330);
+      ctx.drawImage(image, 24, 112, 552, 280);
       ctx.fillStyle = muted;
       ctx.font = '12px serif';
-      ctx.fillText('Bleu : élève · Or : référence · Rouge : divergence makhārij', 24, 470);
+      ctx.fillText('Bleu : élève · Or : référence · Rouge : divergence makhārij', 24, 420);
 
       const link = document.createElement('a');
       link.download = `comparaison-waveform-${Date.now()}.png`;
