@@ -66,6 +66,7 @@ const Index = () => {
     );
   }
 
+  if (s.currentView === 'landing') {
     return <LandingView state={s} />;
   }
 
@@ -163,9 +164,11 @@ const Index = () => {
     );
   }
 
+  if (s.currentView === 'dashboard') {
     return <DashboardView state={s} />;
   }
 
+  if (s.currentView === 'recitation') {
     return <RecitationView state={s} />;
   }
 
