@@ -44,6 +44,7 @@ interface RecitationInterfaceProps {
   onStopRecording: () => void;
   onPreviousVerse?: () => void;
   onNextVerse?: () => void;
+  onEnvelopeSimilarityScore?: (score: number) => void;
   recordingError?: string | null;
   feedback?: {
     status: 'correct' | 'success' | 'review';
@@ -57,7 +58,7 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
   verseTranslation, isRecording, isAnalyzing, analysisStep = 'idle',
   transcriptionFailed, userAudioBlob, mediaStream, audioDebugStats,
   showTranslation, onStartRecording, onStopRecording, onPreviousVerse,
-  onNextVerse, recordingError, feedback,
+  onNextVerse, onEnvelopeSimilarityScore, recordingError, feedback,
 }) => {
   const { t } = useLanguage();
 
@@ -174,6 +175,7 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
           referenceAudioUrl={referenceAudioUrl}
           surahNumber={surahNumber}
           verseNumber={currentVerse}
+          onSimilarityScore={onEnvelopeSimilarityScore}
         />
       )}
 
