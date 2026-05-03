@@ -520,6 +520,8 @@ export function useIndexState() {
     isCurrentVerseCached,
     showSaveDialog,
     setShowSaveDialog,
+    pendingEnvelopeScore,
+    setPendingEnvelopeScore,
     showNoCredits,
     setShowNoCredits,
 
