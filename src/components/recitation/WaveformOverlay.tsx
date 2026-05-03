@@ -359,7 +359,20 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
     if (!svg || similarityScore === null) return;
 
     const serializer = new XMLSerializer();
-    const svgText = serializer.serializeToString(svg);
+    const styles = getComputedStyle(document.documentElement);
+    const embeddedVars = `
+      <style>
+        :root {
+          --background: ${styles.getPropertyValue('--background').trim()};
+          --foreground: ${styles.getPropertyValue('--foreground').trim()};
+          --primary: ${styles.getPropertyValue('--primary').trim()};
+          --gold-warm: ${styles.getPropertyValue('--gold-warm').trim()};
+          --destructive: ${styles.getPropertyValue('--destructive').trim()};
+          --border: ${styles.getPropertyValue('--border').trim()};
+          --muted-foreground: ${styles.getPropertyValue('--muted-foreground').trim()};
+        }
+      </style>`;
+    const svgText = serializer.serializeToString(svg).replace('>', `>${embeddedVars}`);
     const svgBlob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(svgBlob);
     const image = new Image();
@@ -370,7 +383,6 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
       canvas.height = 940;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-      const styles = getComputedStyle(document.documentElement);
       const background = `hsl(${styles.getPropertyValue('--background').trim()})`;
       const foreground = `hsl(${styles.getPropertyValue('--foreground').trim()})`;
       const muted = `hsl(${styles.getPropertyValue('--muted-foreground').trim()})`;
