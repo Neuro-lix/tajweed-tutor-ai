@@ -317,7 +317,7 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
 
   const zones = useMemo(() => {
     if (divergencePoints.length === 0) return [];
-    const out: { start: number; end: number; severity: number }[] = [];
+    const out: DivergenceZone[] = [];
     let start = divergencePoints[0].idx;
     let prev = start;
     let maxDelta = divergencePoints[0].delta;
@@ -347,6 +347,58 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
     const score = Math.max(0, Math.round(r * 100));
     return score;
   }, [userPeaks, refPeaks, samples]);
+
+  useEffect(() => {
+    if (similarityScore !== null) {
+      onSimilarityScore?.(similarityScore);
+    }
+  }, [onSimilarityScore, similarityScore]);
+
+  const exportZoomPng = async () => {
+    const svg = exportRef.current?.querySelector('svg');
+    if (!svg || similarityScore === null) return;
+
+    const serializer = new XMLSerializer();
+    const svgText = serializer.serializeToString(svg);
+    const svgBlob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+    const image = new Image();
+    image.onload = () => {
+      const scale = 2;
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200;
+      canvas.height = 620;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      const styles = getComputedStyle(document.documentElement);
+      const background = `hsl(${styles.getPropertyValue('--background').trim()})`;
+      const foreground = `hsl(${styles.getPropertyValue('--foreground').trim()})`;
+      const muted = `hsl(${styles.getPropertyValue('--muted-foreground').trim()})`;
+
+      ctx.scale(scale, scale);
+      ctx.fillStyle = background;
+      ctx.fillRect(0, 0, canvas.width / scale, canvas.height / scale);
+      ctx.fillStyle = foreground;
+      ctx.font = '700 24px serif';
+      ctx.fillText('Comparaison fine — waveform tajwīd', 24, 40);
+      ctx.font = '600 16px serif';
+      ctx.fillText(`Similarité d'enveloppe : ${similarityScore}% · ${scoreLabel}`, 24, 66);
+      ctx.fillStyle = muted;
+      ctx.font = '13px serif';
+      ctx.fillText(`Vous ${userDuration.toFixed(2)}s · Référence ${refDuration.toFixed(2)}s · ${zones.length} zone${zones.length > 1 ? 's' : ''} de divergence`, 24, 88);
+      ctx.drawImage(image, 24, 112, 552, 330);
+      ctx.fillStyle = muted;
+      ctx.font = '12px serif';
+      ctx.fillText('Bleu : élève · Or : référence · Rouge : divergence makhārij', 24, 470);
+
+      const link = document.createElement('a');
+      link.download = `comparaison-waveform-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      URL.revokeObjectURL(url);
+    };
+    image.src = url;
+  };
 
   const scoreColor =
     similarityScore === null
