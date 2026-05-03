@@ -495,12 +495,18 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
         <DialogContent className="max-w-5xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-3 flex-wrap">
-              <span>Comparaison fine — analyse détaillée</span>
-              <span className={`text-base font-bold tabular-nums ${scoreColor}`}>
-                {similarityScore}% · {scoreLabel}
-              </span>
-            </DialogTitle>
+            <div className="flex items-start justify-between gap-3">
+              <DialogTitle className="flex items-center gap-3 flex-wrap">
+                <span>Comparaison fine — analyse détaillée</span>
+                <span className={`text-base font-bold tabular-nums ${scoreColor}`}>
+                  {similarityScore}% · {scoreLabel}
+                </span>
+              </DialogTitle>
+              <Button variant="outline" size="sm" onClick={exportZoomPng} className="text-xs shrink-0">
+                <Download className="w-3 h-3 mr-1" />
+                Exporter PNG
+              </Button>
+            </div>
           </DialogHeader>
 
           <div className="space-y-4 pt-2">
@@ -519,7 +525,7 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
               </span>
             </div>
 
-            <div className="h-72">
+            <div ref={exportRef} className="h-72">
               <WaveformChart
                 userPeaks={userPeaks}
                 refPeaks={refPeaks}
