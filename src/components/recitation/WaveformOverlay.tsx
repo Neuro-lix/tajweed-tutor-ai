@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Loader2, Maximize2 } from 'lucide-react';
+import { Download, Loader2, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface WaveformOverlayProps {
   userAudioBlob: Blob | null;
   referenceAudioUrl: string;
+  onSimilarityScore?: (score: number) => void;
   /** Sample resolution along x-axis */
   samples?: number;
   /** Threshold (0..1) above which the divergence is highlighted */
@@ -13,6 +14,7 @@ interface WaveformOverlayProps {
 }
 
 type Peaks = number[];
+type DivergenceZone = { start: number; end: number; severity: number };
 
 /**
  * Decode an audio source into a normalized peaks array (0..1) AND return its duration.
@@ -106,10 +108,23 @@ function pearsonCorrelation(a: number[], b: number[]): number {
   return den === 0 ? 0 : num / den;
 }
 
+export async function calculateEnvelopeSimilarityScore(
+  userAudioBlob: Blob,
+  referenceAudioUrl: string,
+  samples = 160,
+): Promise<number> {
+  const [user, reference] = await Promise.all([
+    decodeToPeaks(userAudioBlob, samples),
+    decodeToPeaks(referenceAudioUrl, samples),
+  ]);
+  const r = pearsonCorrelation(resample(user.peaks, samples), resample(reference.peaks, samples));
+  return Math.max(0, Math.round(r * 100));
+}
+
 interface WaveformChartProps {
   userPeaks: Peaks;
   refPeaks: Peaks;
-  zones: { start: number; end: number; severity: number }[];
+  zones: DivergenceZone[];
   samples: number;
   duration: number;
   showTimeline?: boolean;
@@ -239,6 +254,7 @@ const WaveformChart: React.FC<WaveformChartProps> = ({
 export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
   userAudioBlob,
   referenceAudioUrl,
+  onSimilarityScore,
   samples = 160,
   divergenceThreshold = 0.28,
 }) => {
@@ -250,6 +266,7 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [zoomOpen, setZoomOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const exportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
