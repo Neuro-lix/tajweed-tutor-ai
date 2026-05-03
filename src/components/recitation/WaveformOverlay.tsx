@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Loader2, Maximize2 } from 'lucide-react';
+import { Download, Loader2, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface WaveformOverlayProps {
   userAudioBlob: Blob | null;
   referenceAudioUrl: string;
+  onSimilarityScore?: (score: number) => void;
   /** Sample resolution along x-axis */
   samples?: number;
   /** Threshold (0..1) above which the divergence is highlighted */
@@ -13,6 +14,7 @@ interface WaveformOverlayProps {
 }
 
 type Peaks = number[];
+type DivergenceZone = { start: number; end: number; severity: number };
 
 /**
  * Decode an audio source into a normalized peaks array (0..1) AND return its duration.
@@ -106,10 +108,23 @@ function pearsonCorrelation(a: number[], b: number[]): number {
   return den === 0 ? 0 : num / den;
 }
 
+export async function calculateEnvelopeSimilarityScore(
+  userAudioBlob: Blob,
+  referenceAudioUrl: string,
+  samples = 160,
+): Promise<number> {
+  const [user, reference] = await Promise.all([
+    decodeToPeaks(userAudioBlob, samples),
+    decodeToPeaks(referenceAudioUrl, samples),
+  ]);
+  const r = pearsonCorrelation(resample(user.peaks, samples), resample(reference.peaks, samples));
+  return Math.max(0, Math.round(r * 100));
+}
+
 interface WaveformChartProps {
   userPeaks: Peaks;
   refPeaks: Peaks;
-  zones: { start: number; end: number; severity: number }[];
+  zones: DivergenceZone[];
   samples: number;
   duration: number;
   showTimeline?: boolean;
@@ -239,6 +254,7 @@ const WaveformChart: React.FC<WaveformChartProps> = ({
 export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
   userAudioBlob,
   referenceAudioUrl,
+  onSimilarityScore,
   samples = 160,
   divergenceThreshold = 0.28,
 }) => {
@@ -250,6 +266,7 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [zoomOpen, setZoomOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const exportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -300,7 +317,7 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
 
   const zones = useMemo(() => {
     if (divergencePoints.length === 0) return [];
-    const out: { start: number; end: number; severity: number }[] = [];
+    const out: DivergenceZone[] = [];
     let start = divergencePoints[0].idx;
     let prev = start;
     let maxDelta = divergencePoints[0].delta;
@@ -330,6 +347,70 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
     const score = Math.max(0, Math.round(r * 100));
     return score;
   }, [userPeaks, refPeaks, samples]);
+
+  useEffect(() => {
+    if (similarityScore !== null) {
+      onSimilarityScore?.(similarityScore);
+    }
+  }, [onSimilarityScore, similarityScore]);
+
+  const exportZoomPng = async () => {
+    const svg = exportRef.current?.querySelector('svg');
+    if (!svg || similarityScore === null) return;
+
+    const serializer = new XMLSerializer();
+    const styles = getComputedStyle(document.documentElement);
+    const embeddedVars = `
+      <style>
+        :root {
+          --background: ${styles.getPropertyValue('--background').trim()};
+          --foreground: ${styles.getPropertyValue('--foreground').trim()};
+          --primary: ${styles.getPropertyValue('--primary').trim()};
+          --gold-warm: ${styles.getPropertyValue('--gold-warm').trim()};
+          --destructive: ${styles.getPropertyValue('--destructive').trim()};
+          --border: ${styles.getPropertyValue('--border').trim()};
+          --muted-foreground: ${styles.getPropertyValue('--muted-foreground').trim()};
+        }
+      </style>`;
+    const svgText = serializer.serializeToString(svg).replace('>', `>${embeddedVars}`);
+    const svgBlob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+    const image = new Image();
+    image.onload = () => {
+      const scale = 2;
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200;
+      canvas.height = 940;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      const background = `hsl(${styles.getPropertyValue('--background').trim()})`;
+      const foreground = `hsl(${styles.getPropertyValue('--foreground').trim()})`;
+      const muted = `hsl(${styles.getPropertyValue('--muted-foreground').trim()})`;
+
+      ctx.scale(scale, scale);
+      ctx.fillStyle = background;
+      ctx.fillRect(0, 0, canvas.width / scale, canvas.height / scale);
+      ctx.fillStyle = foreground;
+      ctx.font = '700 24px serif';
+      ctx.fillText('Comparaison fine — waveform tajwīd', 24, 40);
+      ctx.font = '600 16px serif';
+      ctx.fillText(`Similarité d'enveloppe : ${similarityScore}% · ${scoreLabel}`, 24, 66);
+      ctx.fillStyle = muted;
+      ctx.font = '13px serif';
+      ctx.fillText(`Vous ${userDuration.toFixed(2)}s · Référence ${refDuration.toFixed(2)}s · ${zones.length} zone${zones.length > 1 ? 's' : ''} de divergence`, 24, 88);
+      ctx.drawImage(image, 24, 112, 552, 280);
+      ctx.fillStyle = muted;
+      ctx.font = '12px serif';
+      ctx.fillText('Bleu : élève · Or : référence · Rouge : divergence makhārij', 24, 420);
+
+      const link = document.createElement('a');
+      link.download = `comparaison-waveform-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      URL.revokeObjectURL(url);
+    };
+    image.src = url;
+  };
 
   const scoreColor =
     similarityScore === null
@@ -426,12 +507,18 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
         <DialogContent className="max-w-5xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-3 flex-wrap">
-              <span>Comparaison fine — analyse détaillée</span>
-              <span className={`text-base font-bold tabular-nums ${scoreColor}`}>
-                {similarityScore}% · {scoreLabel}
-              </span>
-            </DialogTitle>
+            <div className="flex items-start justify-between gap-3">
+              <DialogTitle className="flex items-center gap-3 flex-wrap">
+                <span>Comparaison fine — analyse détaillée</span>
+                <span className={`text-base font-bold tabular-nums ${scoreColor}`}>
+                  {similarityScore}% · {scoreLabel}
+                </span>
+              </DialogTitle>
+              <Button variant="outline" size="sm" onClick={exportZoomPng} className="text-xs shrink-0">
+                <Download className="w-3 h-3 mr-1" />
+                Exporter PNG
+              </Button>
+            </div>
           </DialogHeader>
 
           <div className="space-y-4 pt-2">
@@ -450,7 +537,7 @@ export const WaveformOverlay: React.FC<WaveformOverlayProps> = ({
               </span>
             </div>
 
-            <div className="h-72">
+            <div ref={exportRef} className="h-72">
               <WaveformChart
                 userPeaks={userPeaks}
                 refPeaks={refPeaks}

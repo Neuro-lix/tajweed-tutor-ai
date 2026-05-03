@@ -19,7 +19,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslationSettings } from '@/contexts/TranslationContext';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchAyah } from '@/lib/quranApi';
-import { AnalysisResult, AppView, normalizeRuleType } from './indexHelpers';
+import { AnalysisResult, AppView, getGlobalAyahNumber, normalizeRuleType } from './indexHelpers';
+import { calculateEnvelopeSimilarityScore } from '@/components/recitation/WaveformOverlay';
 
 /**
  * Centralized state hook for the Index page.
@@ -88,6 +89,7 @@ export function useIndexState() {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [pendingSaveBlob, setPendingSaveBlob] = useState<Blob | null>(null);
   const [pendingSaveScore, setPendingSaveScore] = useState<number | null>(null);
+  const [pendingEnvelopeScore, setPendingEnvelopeScore] = useState<number | null>(null);
   const [showNoCredits, setShowNoCredits] = useState(false);
 
   // ── Audio + storage + credits ──────────────────────────────────────
@@ -374,9 +376,17 @@ export function useIndexState() {
 
       setShowFeedback(true);
 
-      if (user && audioBlob) {
-        setPendingSaveBlob(audioBlob);
+      if (user && recording.blob) {
+        const referenceAudioUrl = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${getGlobalAyahNumber(currentSurah, currentVerse)}.mp3`;
+        let envelopeScore: number | null = null;
+        try {
+          envelopeScore = await calculateEnvelopeSimilarityScore(recording.blob, referenceAudioUrl);
+        } catch (e) {
+          console.warn('[Recitation] Envelope similarity score unavailable', e);
+        }
+        setPendingSaveBlob(recording.blob);
         setPendingSaveScore(data.overallScore ?? null);
+        setPendingEnvelopeScore(envelopeScore);
         setShowSaveDialog(true);
       }
     } catch (error) {
@@ -454,16 +464,19 @@ export function useIndexState() {
       verseNumber: currentVerse,
       durationSeconds: recordingStats.durationMs ? recordingStats.durationMs / 1000 : undefined,
       analysisScore: pendingSaveScore ?? undefined,
+      envelopeSimilarityScore: pendingEnvelopeScore ?? undefined,
       qiraat: selectedQiraat ?? 'hafs_asim',
     });
     setPendingSaveBlob(null);
     setPendingSaveScore(null);
+    setPendingEnvelopeScore(null);
     setShowSaveDialog(false);
   };
 
   const handleDiscardRecording = () => {
     setPendingSaveBlob(null);
     setPendingSaveScore(null);
+    setPendingEnvelopeScore(null);
     setShowSaveDialog(false);
     setUserAudioBlob(null);
   };
@@ -507,6 +520,8 @@ export function useIndexState() {
     isCurrentVerseCached,
     showSaveDialog,
     setShowSaveDialog,
+    pendingEnvelopeScore,
+    setPendingEnvelopeScore,
     showNoCredits,
     setShowNoCredits,
 

@@ -579,6 +579,7 @@ export type Database = {
           analysis_score: number | null
           created_at: string
           duration_seconds: number | null
+          envelope_similarity_score: number | null
           id: string
           keep_recording: boolean | null
           qiraat: string | null
@@ -591,6 +592,7 @@ export type Database = {
           analysis_score?: number | null
           created_at?: string
           duration_seconds?: number | null
+          envelope_similarity_score?: number | null
           id?: string
           keep_recording?: boolean | null
           qiraat?: string | null
@@ -603,6 +605,7 @@ export type Database = {
           analysis_score?: number | null
           created_at?: string
           duration_seconds?: number | null
+          envelope_similarity_score?: number | null
           id?: string
           keep_recording?: boolean | null
           qiraat?: string | null

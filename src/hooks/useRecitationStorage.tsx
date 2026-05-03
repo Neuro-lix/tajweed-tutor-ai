@@ -10,6 +10,7 @@ export interface StoredRecitation {
   storagePath: string;
   durationSeconds: number | null;
   analysisScore: number | null;
+  envelopeSimilarityScore: number | null;
   qiraat: string;
   createdAt: string;
 }
@@ -23,6 +24,7 @@ interface UseRecitationStorageReturn {
     verseNumber: number;
     durationSeconds?: number;
     analysisScore?: number;
+    envelopeSimilarityScore?: number;
     qiraat?: string;
   }) => Promise<string | null>;
   deleteRecording: (id: string, storagePath: string) => Promise<boolean>;
@@ -55,6 +57,7 @@ export const useRecitationStorage = (): UseRecitationStorageReturn => {
           storagePath: r.storage_path,
           durationSeconds: r.duration_seconds,
           analysisScore: r.analysis_score,
+          envelopeSimilarityScore: r.envelope_similarity_score,
           qiraat: r.qiraat,
           createdAt: r.created_at,
         }))
@@ -73,6 +76,7 @@ export const useRecitationStorage = (): UseRecitationStorageReturn => {
       verseNumber: number;
       durationSeconds?: number;
       analysisScore?: number;
+      envelopeSimilarityScore?: number;
       qiraat?: string;
     }): Promise<string | null> => {
       if (!user) {
@@ -80,7 +84,7 @@ export const useRecitationStorage = (): UseRecitationStorageReturn => {
         return null;
       }
 
-      const { audioBlob, surahNumber, verseNumber, durationSeconds, analysisScore, qiraat } = params;
+      const { audioBlob, surahNumber, verseNumber, durationSeconds, analysisScore, qiraat, envelopeSimilarityScore } = params;
 
       const ext = audioBlob.type.includes('wav') ? 'wav' : audioBlob.type.includes('mp4') ? 'mp4' : 'webm';
       const timestamp = Date.now();
@@ -107,6 +111,7 @@ export const useRecitationStorage = (): UseRecitationStorageReturn => {
             storage_path: storagePath,
             duration_seconds: durationSeconds ?? null,
             analysis_score: analysisScore ?? null,
+            envelope_similarity_score: envelopeSimilarityScore ?? null,
             qiraat: qiraat ?? 'hafs_asim',
           })
           .select('id')

@@ -21,6 +21,7 @@ interface AudioComparisonProps {
   referenceAudioUrl: string;
   surahNumber: number;
   verseNumber: number;
+  onSimilarityScore?: (score: number) => void;
 }
 
 type PlayMode = 'user' | 'reference' | 'ab';
@@ -30,6 +31,7 @@ export const AudioComparison: React.FC<AudioComparisonProps> = ({
   referenceAudioUrl,
   surahNumber,
   verseNumber,
+  onSimilarityScore,
 }) => {
   const { t } = useLanguage();
   const [playMode, setPlayMode] = useState<PlayMode>('user');
@@ -362,6 +364,7 @@ export const AudioComparison: React.FC<AudioComparisonProps> = ({
               <WaveformOverlay
                 userAudioBlob={userAudioBlob}
                 referenceAudioUrl={referenceAudioUrl}
+                onSimilarityScore={onSimilarityScore}
               />
             </div>
           )}
