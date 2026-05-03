@@ -19,7 +19,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslationSettings } from '@/contexts/TranslationContext';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchAyah } from '@/lib/quranApi';
-import { AnalysisResult, AppView, normalizeRuleType } from './indexHelpers';
+import { AnalysisResult, AppView, getGlobalAyahNumber, normalizeRuleType } from './indexHelpers';
 import { calculateEnvelopeSimilarityScore } from '@/components/recitation/WaveformOverlay';
 
 /**
@@ -377,7 +377,7 @@ export function useIndexState() {
       setShowFeedback(true);
 
       if (user && recording.blob) {
-        const referenceAudioUrl = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${currentSurah === 1 ? currentVerse : currentVerse}.mp3`;
+        const referenceAudioUrl = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${getGlobalAyahNumber(currentSurah, currentVerse)}.mp3`;
         let envelopeScore: number | null = null;
         try {
           envelopeScore = await calculateEnvelopeSimilarityScore(recording.blob, referenceAudioUrl);
