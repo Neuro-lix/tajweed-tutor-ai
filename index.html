@@ -36,5 +36,17 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Unregister stale/multiple service workers that can serve broken cached bundles
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+          if (regs.length > 1) {
+            Promise.all(regs.map(function (r) { return r.unregister(); })).then(function () {
+              window.location.reload();
+            });
+          }
+        }).catch(function () {});
+      }
+    </script>
   </body>
 </html>
