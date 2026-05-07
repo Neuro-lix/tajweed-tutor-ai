@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { encode as base64Encode } from 'https://deno.land/std@0.168.0/encoding/base64.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,15 +13,45 @@ serve(async (req) => {
   }
 
   try {
+    // ── AuthN: require a valid Supabase JWT
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+    );
+    const { data: claims, error: authErr } = await supabase.auth.getClaims(
+      authHeader.replace('Bearer ', '')
+    );
+    if (authErr || !claims?.claims?.sub) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const { text, language = 'fr' } = await req.json();
 
-    if (!text || text.trim().length === 0) {
-      throw new Error('Text is required');
+    if (!text || typeof text !== 'string' || text.trim().length === 0) {
+      return new Response(JSON.stringify({ error: 'Text is required' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    if (text.length > 2000) {
+      return new Response(JSON.stringify({ error: 'Text too long' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+      console.error('[text-to-speech] Missing LOVABLE_API_KEY');
+      return new Response(JSON.stringify({ error: 'Service temporarily unavailable' }), {
+        status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Use OpenAI TTS via Lovable AI Gateway
@@ -41,8 +72,11 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('TTS API error:', errorText);
-      throw new Error(`TTS API error: ${response.status}`);
+      console.error('[text-to-speech] Upstream error:', response.status, errorText);
+      const status = response.status === 429 ? 429 : 502;
+      return new Response(JSON.stringify({ error: status === 429 ? 'Rate limit exceeded' : 'Speech service error' }), {
+        status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const audioBuffer = await response.arrayBuffer();
@@ -55,14 +89,10 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('TTS Error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[text-to-speech] Fatal:', error);
     return new Response(
-      JSON.stringify({ error: errorMessage }),
-      {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      JSON.stringify({ error: 'An unexpected error occurred' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
