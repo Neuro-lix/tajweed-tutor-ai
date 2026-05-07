@@ -687,6 +687,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      verify_certificate: {
+        Args: { p_id: string }
+        Returns: {
+          average_score: number
+          certificate_type: string
+          completed_at: string
+          id: string
+          qiraat: string
+          surah_number: number
+          user_name: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
