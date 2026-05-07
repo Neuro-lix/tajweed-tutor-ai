@@ -26,23 +26,19 @@ export const useCredits = () => {
       if (error) throw error;
 
       if (!data) {
-        const { data: inserted, error: insertError } = await supabase
+        // The signup trigger creates the credits row server-side. If it's not
+        // there yet (race), retry once after a short delay; never insert from the client.
+        await new Promise((r) => setTimeout(r, 500));
+        const { data: retryData } = await supabase
           .from('user_credits')
-          .insert({ user_id: user.id, credits: 5 })
           .select('credits')
-          .single();
-
-        if (insertError) {
-          const { data: retryData } = await supabase
-            .from('user_credits')
-            .select('credits')
-            .eq('user_id', user.id)
-            .single();
-          setCredits(retryData?.credits ?? 0);
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (retryData) {
+          setCredits(retryData.credits);
+          if (retryData.credits === 5) setIsFirstLogin(true);
         } else {
-          setCredits(inserted.credits);
-          setIsFirstLogin(true);
-          toast.success('🎉 5 crédits offerts pour démarrer !');
+          setCredits(0);
         }
       } else {
         setCredits(data.credits);

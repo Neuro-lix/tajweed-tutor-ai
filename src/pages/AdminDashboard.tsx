@@ -6,6 +6,7 @@ import { ArrowLeft, Users, Clock, Globe, TrendingUp, Award, BookOpen, ShoppingBa
 import { supabase } from "@/integrations/supabase/client";
 import { SURAHS } from "@/data/quranData";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip as ReTooltip } from "recharts";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 interface TajweedErrorBucket {
   category: string;
@@ -88,6 +89,7 @@ const fmtTime = (min: number) => {
 };
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
+  const { isAdmin, loading: roleLoading } = useIsAdmin();
   const [stats, setStats] = useState<DashStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"overview" | "users" | "tajweed" | "boutique">("overview");
@@ -232,7 +234,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
     setLoading(false);
   };
 
-  useEffect(() => { loadStats(); }, []);
+  useEffect(() => {
+    if (isAdmin) loadStats();
+    else if (isAdmin === false) setLoading(false);
+  }, [isAdmin]);
+
+  if (roleLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground">Vérification des droits…</p>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4 p-8 text-center">
+        <h1 className="text-2xl font-bold">Accès refusé</h1>
+        <p className="text-muted-foreground max-w-md">
+          Cette page est réservée aux administrateurs. Si tu penses que c'est une erreur, contacte le support.
+        </p>
+        <Button onClick={onBack} variant="outline">
+          <ArrowLeft className="w-4 h-4 mr-2" /> Retour
+        </Button>
+      </div>
+    );
+  }
 
   const exportSurahMetricsCSV = () => {
     if (!stats?.surahMetrics?.length) return;
