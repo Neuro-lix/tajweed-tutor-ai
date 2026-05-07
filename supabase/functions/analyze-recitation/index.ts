@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -37,13 +38,36 @@ serve(async (req) => {
   }
 
   try {
+    // ── AuthN: require valid Supabase JWT to prevent abuse of expensive AI ops
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const sb = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+    );
+    const { data: claims, error: authErr } = await sb.auth.getClaims(
+      authHeader.replace("Bearer ", "")
+    );
+    if (authErr || !claims?.claims?.sub) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { audioBase64, audioMimeType, surahNumber, verseNumber, expectedText, qiraat } = await req.json();
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
-
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
+    if (!OPENAI_API_KEY || !GEMINI_API_KEY) {
+      console.error("[analyze-recitation] Missing API keys");
+      return new Response(JSON.stringify({ error: "Service temporarily unavailable" }), {
+        status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Optional: Whisper-large-v3 via Replicate for better Arabic accuracy + diacritics
     const REPLICATE_API_TOKEN = Deno.env.get("REPLICATE_API_TOKEN");
@@ -298,7 +322,8 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
         return new Response(JSON.stringify({ error: "Limite de requêtes atteinte." }),
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
-      throw new Error(`Gemini error: ${response.status}`);
+      return new Response(JSON.stringify({ error: "Analysis service error. Please try again." }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const aiResponse = await response.json();
@@ -337,7 +362,7 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
   } catch (error) {
     console.error("[analyze-recitation] Fatal error:", error);
     return new Response(JSON.stringify({
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: "An unexpected error occurred",
       isCorrect: false, overallScore: 0,
       feedback: "Une erreur s'est produite lors de l'analyse.",
       encouragement: "Veuillez réessayer.",
