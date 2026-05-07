@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,10 +23,40 @@ serve(async (req) => {
   }
 
   try {
+    // ── AuthN: require a valid Supabase JWT
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const sb = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+    );
+    const { data: claims, error: authErr } = await sb.auth.getClaims(
+      authHeader.replace("Bearer ", "")
+    );
+    if (authErr || !claims?.claims?.sub) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { messages, language = "fr" } = await req.json();
+    if (!Array.isArray(messages) || messages.length === 0 || messages.length > 50) {
+      return new Response(JSON.stringify({ error: "Invalid messages" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
+    if (!GEMINI_API_KEY) {
+      console.error("[chat-assistant] Missing GEMINI_API_KEY");
+      return new Response(JSON.stringify({ response: "Service temporairement indisponible." }), {
+        status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const languageInstruction = LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS["en"];
 
@@ -75,13 +106,15 @@ Sois concis mais informatif.`;
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error("Gemini chat error:", response.status, errText);
+      console.error("[chat-assistant] Upstream error:", response.status, errText);
       if (response.status === 429) {
         return new Response(JSON.stringify({ response: "Trop de demandes. Reessaie dans un instant." }), {
           status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      throw new Error(`Gemini error: ${response.status}`);
+      return new Response(JSON.stringify({ response: "Une erreur est survenue, réessaie." }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const data = await response.json();
@@ -92,10 +125,9 @@ Sois concis mais informatif.`;
     });
 
   } catch (error) {
-    console.error("Chat assistant error:", error);
+    console.error("[chat-assistant] Fatal:", error);
     return new Response(JSON.stringify({
       response: "Desole, une erreur est survenue. Reessaie dans un instant.",
-      error: error instanceof Error ? error.message : "Unknown error",
     }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
