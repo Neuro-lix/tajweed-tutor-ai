@@ -47,19 +47,16 @@ export default function VerifyCertificate() {
       }
 
       try {
-        const { data, error: fetchError } = await supabase
-          .from('user_certificates')
-          .select('*')
-          .eq('id', id)
-          .single();
+        // Public verification via SECURITY DEFINER RPC — table SELECT is now restricted.
+        const { data: rows, error: fetchError } = await supabase
+          .rpc('verify_certificate', { p_id: id });
+        const data = Array.isArray(rows) ? rows[0] : null;
 
         if (fetchError) {
-          if (fetchError.code === 'PGRST116') {
-            setError('Certificat introuvable');
-          } else {
-            throw fetchError;
-          }
-        } else if (data) {
+          throw fetchError;
+        } else if (!data) {
+          setError('Certificat introuvable');
+        } else {
           setCertificate({
             id: data.id,
             userName: data.user_name,
