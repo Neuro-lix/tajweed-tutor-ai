@@ -37,16 +37,39 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      // Unregister stale/multiple service workers that can serve broken cached bundles
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function (regs) {
-          if (regs.length > 1) {
-            Promise.all(regs.map(function (r) { return r.unregister(); })).then(function () {
-              window.location.reload();
-            });
+      // Force-clean stale Service Workers + caches on each new deploy.
+      // Fixes blank-screen caused by old SW intercepting requests with a broken bundle.
+      (function () {
+        try {
+          var BUILD_KEY = 'app_build_marker';
+          // The bundle filename is hashed by Vite, so we use the first <script type=module> src as marker.
+          var marker = (document.querySelector('script[type=module][src*="/assets/"]') || {}).src || '';
+          var prev = localStorage.getItem(BUILD_KEY);
+          var changed = marker && marker !== prev;
+          if (changed) localStorage.setItem(BUILD_KEY, marker);
+
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function (regs) {
+              if (!regs.length) return;
+              // If multiple SWs, or build changed -> nuke everything and reload once.
+              var shouldClean = regs.length > 1 || changed;
+              if (!shouldClean) return;
+              Promise.all(regs.map(function (r) { return r.unregister(); }))
+                .then(function () {
+                  if (window.caches && caches.keys) {
+                    return caches.keys().then(function (names) {
+                      return Promise.all(names.map(function (n) { return caches.delete(n); }));
+                    });
+                  }
+                })
+                .then(function () {
+                  if (changed) window.location.reload();
+                })
+                .catch(function () {});
+            }).catch(function () {});
           }
-        }).catch(function () {});
-      }
+        } catch (e) { /* ignore */ }
+      })();
     </script>
   </body>
 </html>
