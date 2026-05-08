@@ -209,6 +209,30 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limits: {
+        Row: {
+          action: string
+          count: number
+          id: string
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          action: string
+          count?: number
+          id?: string
+          user_id: string
+          window_start?: string
+        }
+        Update: {
+          action?: string
+          count?: number
+          id?: string
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       recitation_sessions: {
         Row: {
           accuracy_score: number | null
@@ -678,6 +702,15 @@ export type Database = {
       add_credits: {
         Args: { p_amount: number; p_description: string; p_user_id: string }
         Returns: number
+      }
+      check_and_increment_rate_limit: {
+        Args: {
+          p_action: string
+          p_max: number
+          p_user_id: string
+          p_window_seconds: number
+        }
+        Returns: Json
       }
       deduct_credit: { Args: { p_user_id: string }; Returns: number }
       has_role: {
