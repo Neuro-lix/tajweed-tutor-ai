@@ -57,6 +57,24 @@ serve(async (req) => {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const userId = claims.claims.sub as string;
+
+    // ── Per-user rate limit (20 analyses / hour)
+    const sbAdmin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    const { data: rl } = await sbAdmin.rpc("check_and_increment_rate_limit", {
+      p_user_id: userId, p_action: "analyze-recitation", p_max: 20, p_window_seconds: 3600,
+    });
+    if (rl && (rl as any).allowed === false) {
+      const resetAt = (rl as any).reset_at;
+      const retryAfter = Math.max(1, Math.ceil((new Date(resetAt).getTime() - Date.now()) / 1000));
+      return new Response(JSON.stringify({ error: "Rate limit exceeded", retry_after: retryAfter }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": String(retryAfter) },
+      });
+    }
 
     const { audioBase64, audioMimeType, surahNumber, verseNumber, expectedText, qiraat } = await req.json();
 
