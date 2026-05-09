@@ -11,6 +11,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { TranslationProvider } from "@/contexts/TranslationContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { PwaInstallDialog } from "@/components/pwa/PwaInstallDialog";
+import { SwUpdateBanner } from "@/components/pwa/SwUpdateBanner";
 
 // Lazy-load all routes for code-splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -59,6 +60,7 @@ const App = () => (
                 <Toaster />
                 <Sonner />
                 <PwaInstallDialog />
+                <SwUpdateBanner />
                 <Suspense fallback={<RouteFallback />}>
                   <Routes>
                     <Route path="/" element={<Index />} />

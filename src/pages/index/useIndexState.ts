@@ -165,6 +165,13 @@ export function useIndexState() {
     }
   }, [user, authLoading, profile, dataLoading]);
 
+  // Fallback: ensure logged-in users are never stuck on landing
+  useEffect(() => {
+    if (!authLoading && user && currentView === 'landing') {
+      setCurrentView('dashboard');
+    }
+  }, [authLoading, user, currentView]);
+
   // ── Verse loading (offline-aware) ─────────────────────────────────
   const loadVerse = useCallback(
     async (surah: number, verse: number, translationId: string) => {

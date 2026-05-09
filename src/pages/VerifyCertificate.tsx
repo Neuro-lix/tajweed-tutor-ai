@@ -37,11 +37,38 @@ export default function VerifyCertificate() {
   const [certificate, setCertificate] = useState<CertificateData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+  const [rateBlocked, setRateBlocked] = useState(false);
+
+  const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const idIsValid = !!id && UUID_REGEX.test(id);
+
+  // Constant-time minimum render delay (anti-timing-attack)
+  useEffect(() => {
+    const t = setTimeout(() => setReady(true), 300);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Client-side rate limit: max 5 verifications per minute
+  useEffect(() => {
+    const RATE_KEY = 'verify_rate';
+    const now = Date.now();
+    try {
+      const raw = JSON.parse(localStorage.getItem(RATE_KEY) || '{"count":0,"reset":0}');
+      if (now > raw.reset) {
+        localStorage.setItem(RATE_KEY, JSON.stringify({ count: 1, reset: now + 60000 }));
+      } else if (raw.count >= 5) {
+        setRateBlocked(true);
+      } else {
+        localStorage.setItem(RATE_KEY, JSON.stringify({ count: raw.count + 1, reset: raw.reset }));
+      }
+    } catch {}
+  }, []);
 
   useEffect(() => {
     async function fetchCertificate() {
-      if (!id) {
-        setError('ID de certificat manquant');
+      if (!id || !idIsValid) {
+        setError('Identifiant de certificat invalide');
         setLoading(false);
         return;
       }
@@ -75,8 +102,40 @@ export default function VerifyCertificate() {
       }
     }
 
-    fetchCertificate();
-  }, [id]);
+    if (idIsValid && !rateBlocked) {
+      fetchCertificate();
+    } else {
+      setLoading(false);
+    }
+  }, [id, idIsValid, rateBlocked]);
+
+  if (!ready) return null;
+
+  if (rateBlocked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="max-w-md">
+          <CardContent className="py-8 text-center space-y-2">
+            <h2 className="text-lg font-semibold">⛔ Trop de requêtes</h2>
+            <p className="text-sm text-muted-foreground">Veuillez patienter avant de réessayer.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!idIsValid) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="max-w-md">
+          <CardContent className="py-8 text-center space-y-2">
+            <h2 className="text-lg font-semibold">❌ Identifiant invalide</h2>
+            <p className="text-sm text-muted-foreground">Ce lien de vérification n'est pas valide.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const surah = certificate ? SURAHS.find(s => s.id === certificate.surahNumber) : null;
 

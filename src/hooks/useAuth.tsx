@@ -18,7 +18,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // Safety timeout — never block rendering more than 5s
-    const timeout = setTimeout(() => setLoading(false), 5000);
+    const timeout = setTimeout(() => {
+      console.warn('[Auth] ⚠️ Timeout 5s — Supabase did not respond. Rendering app without auth.');
+      try {
+        const errors = JSON.parse(localStorage.getItem('healthcheck_errors') || '[]');
+        errors.unshift({
+          message: 'Auth timeout: Supabase did not respond within 5s',
+          time: new Date().toISOString(),
+          context: 'useAuth',
+        });
+        localStorage.setItem('healthcheck_errors', JSON.stringify(errors.slice(0, 10)));
+      } catch {}
+      setLoading(false);
+    }, 5000);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {

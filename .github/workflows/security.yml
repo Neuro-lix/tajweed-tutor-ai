@@ -1,0 +1,30 @@
+name: Security Scan
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: NPM Audit (high/critical only)
+        run: npm audit --audit-level=high
+      - name: Build check
+        run: npm run build
+      - name: Check bundle size
+        run: |
+          MAX=700
+          for f in dist/assets/*.js; do
+            size=$(du -k "$f" | cut -f1)
+            if [ "$size" -gt "$MAX" ]; then
+              echo "❌ Bundle too large: $f ($size KB > $MAX KB)"
+              exit 1
+            fi
+          done
+          echo "✅ All bundles within size limit"
