@@ -39,6 +39,7 @@ export default function VerifyCertificate() {
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [rateBlocked, setRateBlocked] = useState(false);
+  const [requestId, setRequestId] = useState<string | null>(null);
 
   const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const idIsValid = !!id && UUID_REGEX.test(id);
@@ -88,9 +89,10 @@ export default function VerifyCertificate() {
           }
           throw fnError;
         }
+        if (resp?.request_id) setRequestId(resp.request_id);
         const data = resp?.certificate ?? null;
         if (!data) {
-          setError('Certificat introuvable');
+          setError(resp?.request_id ? `Certificat introuvable (req ${resp.request_id})` : 'Certificat introuvable');
         } else {
           setCertificate({
             id: data.id,

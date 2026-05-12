@@ -21,6 +21,7 @@ const VerifyCertificate = lazy(() => import("./pages/VerifyCertificate"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Shop = lazy(() => import("./pages/Shop"));
 const ShopSuccess = lazy(() => import("./pages/ShopSuccess"));
+const Diagnostics = lazy(() => import("./pages/Diagnostics"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -69,6 +70,7 @@ const App = () => (
                     <Route path="/shop" element={<Shop />} />
                     <Route path="/shop/success" element={<ProtectedRoute><ShopSuccess /></ProtectedRoute>} />
                     <Route path="/verify/:id" element={<VerifyCertificate />} />
+                    <Route path="/diagnostics" element={<Diagnostics />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
