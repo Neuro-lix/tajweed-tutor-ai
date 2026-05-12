@@ -1,0 +1,21 @@
+name: CI Build & Lint
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+jobs:
+  build-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Lint (block on warnings)
+        run: npx eslint . --max-warnings=0
+      - name: TypeScript check
+        run: npx tsc --noEmit
+      - name: Build
+        run: npm run build

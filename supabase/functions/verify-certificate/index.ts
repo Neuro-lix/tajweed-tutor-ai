@@ -16,6 +16,10 @@ Deno.serve(async (req) => {
     req.headers.get('cf-connecting-ip') ||
     'unknown';
 
+  // Correlation id surfaced to client + included in every log line for this request.
+  const requestId = crypto.randomUUID();
+  const baseHeaders = { ...corsHeaders, 'Content-Type': 'application/json', 'X-Request-Id': requestId };
+
   try {
     const { id } = await req.json().catch(() => ({ id: null }));
     const authHeader = req.headers.get('Authorization') || '';
@@ -42,45 +46,45 @@ Deno.serve(async (req) => {
     });
     if (rlErr) console.error('[verify-certificate] rate-limit RPC error', rlErr);
     if (rl && rl.allowed === false) {
-      console.warn(`[verify-certificate] BLOCKED rate-limit ip=${ip} user=${userId ?? 'anon'} id=${id}`);
+      console.warn(`[verify-certificate] req=${requestId} BLOCKED rate-limit ip=${ip} user=${userId ?? 'anon'} id=${id}`);
       return new Response(
-        JSON.stringify({ error: 'rate_limited', retry_after: 60 }),
-        { status: 429, headers: { ...corsHeaders, 'Retry-After': '60', 'Content-Type': 'application/json' } },
+        JSON.stringify({ error: 'rate_limited', retry_after: 60, request_id: requestId }),
+        { status: 429, headers: { ...baseHeaders, 'Retry-After': '60' } },
       );
     }
 
     if (!id || typeof id !== 'string' || !UUID_REGEX.test(id)) {
-      console.warn(`[verify-certificate] REJECTED invalid-uuid ip=${ip} user=${userId ?? 'anon'} id=${String(id)}`);
-      return new Response(JSON.stringify({ error: 'invalid_id' }), {
+      console.warn(`[verify-certificate] req=${requestId} REJECTED invalid-uuid ip=${ip} user=${userId ?? 'anon'} id=${String(id)}`);
+      return new Response(JSON.stringify({ error: 'invalid_id', request_id: requestId }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: baseHeaders,
       });
     }
 
     const { data: rows, error } = await supabase.rpc('verify_certificate', { p_id: id });
     if (error) {
-      console.error('[verify-certificate] RPC error', error);
-      return new Response(JSON.stringify({ error: 'lookup_failed' }), {
+      console.error(`[verify-certificate] req=${requestId} RPC error`, error);
+      return new Response(JSON.stringify({ error: 'lookup_failed', request_id: requestId }), {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: baseHeaders,
       });
     }
     const cert = Array.isArray(rows) ? rows[0] : null;
     if (!cert) {
-      return new Response(JSON.stringify({ certificate: null }), {
+      return new Response(JSON.stringify({ certificate: null, request_id: requestId }), {
         status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: baseHeaders,
       });
     }
-    return new Response(JSON.stringify({ certificate: cert }), {
+    return new Response(JSON.stringify({ certificate: cert, request_id: requestId }), {
       status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: baseHeaders,
     });
   } catch (e) {
-    console.error('[verify-certificate] unexpected', e);
-    return new Response(JSON.stringify({ error: 'internal' }), {
+    console.error(`[verify-certificate] req=${requestId} unexpected`, e);
+    return new Response(JSON.stringify({ error: 'internal', request_id: requestId }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: baseHeaders,
     });
   }
 });

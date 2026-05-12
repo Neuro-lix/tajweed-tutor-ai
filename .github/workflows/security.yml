@@ -15,6 +15,10 @@ jobs:
       - run: npm ci
       - name: NPM Audit (high/critical only)
         run: npm audit --audit-level=high
+      - name: Lint (fail on warnings)
+        run: npx eslint . --max-warnings=0
+      - name: TypeScript check
+        run: npx tsc --noEmit
       - name: Build check
         run: npm run build
       - name: Check bundle size
