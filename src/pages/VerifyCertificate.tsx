@@ -74,14 +74,22 @@ export default function VerifyCertificate() {
       }
 
       try {
-        // Public verification via SECURITY DEFINER RPC — table SELECT is now restricted.
-        const { data: rows, error: fetchError } = await supabase
-          .rpc('verify_certificate', { p_id: id });
-        const data = Array.isArray(rows) ? rows[0] : null;
-
-        if (fetchError) {
-          throw fetchError;
-        } else if (!data) {
+        // Server-side verification: rate-limited + logged for abuse diagnostics.
+        const { data: resp, error: fnError } = await supabase.functions.invoke(
+          'verify-certificate',
+          { body: { id } },
+        );
+        if (fnError) {
+          // 429 from edge function surfaces here as a non-2xx
+          const msg = String(fnError.message || '');
+          if (msg.includes('429') || msg.toLowerCase().includes('rate')) {
+            setRateBlocked(true);
+            return;
+          }
+          throw fnError;
+        }
+        const data = resp?.certificate ?? null;
+        if (!data) {
           setError('Certificat introuvable');
         } else {
           setCertificate({
