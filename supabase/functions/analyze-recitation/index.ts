@@ -49,15 +49,15 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
     );
-    const { data: claims, error: authErr } = await sb.auth.getClaims(
+    const { data: { user }, error: authErr } = await sb.auth.getUser(
       authHeader.replace("Bearer ", "")
     );
-    if (authErr || !claims?.claims?.sub) {
+    if (authErr || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const userId = claims.claims.sub as string;
+    const userId = user.id;
 
     // ── Per-user rate limit (20 analyses / hour)
     const sbAdmin = createClient(
@@ -77,6 +77,14 @@ serve(async (req) => {
     }
 
     const { audioBase64, audioMimeType, surahNumber, verseNumber, expectedText, qiraat } = await req.json();
+
+    // ── Payload size guard (~5 MB base64 ≈ 3.75 MB binary)
+    if (typeof audioBase64 === "string" && audioBase64.length > 5_000_000) {
+      return new Response(JSON.stringify({
+        error: "audio_too_large",
+        message: "Fichier audio trop volumineux (max ~3.75 MB).",
+      }), { status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
@@ -215,9 +223,11 @@ serve(async (req) => {
       }
     }
 
-    // 2) Early return if transcription failed
+    // 2) Early return if transcription failed (status 422 so the client can branch)
     if (hasAudio && !transcriptionOk) {
       return new Response(JSON.stringify({
+        error: "transcription_empty",
+        message: "La récitation n'a pas été capturée. Vérifiez votre microphone.",
         isCorrect: false, overallScore: 0,
         feedback: whisperError || "La transcription est vide. Veuillez réenregistrer.",
         encouragement: "Réessaie en te rapprochant du micro et en parlant clairement.",
@@ -226,7 +236,7 @@ serve(async (req) => {
         audioAnalyzed: true, audioMimeType: audioMimeType ?? null,
         transcribedText: null, expectedText,
         transcriptionImpossible: true, whisperError,
-      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }), { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     // Pre-compute textual similarity (helps Gemini calibrate scoring)

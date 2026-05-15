@@ -77,25 +77,19 @@ serve(async (req) => {
     const paddleSignature = req.headers.get("paddle-signature");
     const PADDLE_WEBHOOK_SECRET = Deno.env.get("PADDLE_WEBHOOK_SECRET");
 
-    // Verify signature if secret is configured
-    if (PADDLE_WEBHOOK_SECRET) {
-      if (!paddleSignature) {
-        console.error("[paddle-webhook] Missing Paddle-Signature header");
-        return new Response("Unauthorized", { status: 401, headers: corsHeaders });
-      }
-
-      const isValid = await verifyPaddleSignature(
-        paddleSignature,
-        rawBody,
-        PADDLE_WEBHOOK_SECRET
-      );
-
-      if (!isValid) {
-        console.error("[paddle-webhook] Invalid signature");
-        return new Response("Invalid signature", { status: 401, headers: corsHeaders });
-      }
-    } else {
-      console.warn("[paddle-webhook] PADDLE_WEBHOOK_SECRET not set, skipping signature verification");
+    // Secret is MANDATORY — refuse the request rather than silently accepting unsigned webhooks
+    if (!PADDLE_WEBHOOK_SECRET) {
+      console.error("[paddle-webhook] FATAL: PADDLE_WEBHOOK_SECRET not set");
+      return new Response("Service misconfigured", { status: 503, headers: corsHeaders });
+    }
+    if (!paddleSignature) {
+      console.error("[paddle-webhook] Missing Paddle-Signature header");
+      return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+    }
+    const isValid = await verifyPaddleSignature(paddleSignature, rawBody, PADDLE_WEBHOOK_SECRET);
+    if (!isValid) {
+      console.error("[paddle-webhook] Invalid signature");
+      return new Response("Invalid signature", { status: 401, headers: corsHeaders });
     }
 
     const event = JSON.parse(rawBody);

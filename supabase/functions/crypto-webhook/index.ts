@@ -9,16 +9,20 @@ serve(async (req) => {
   try {
     const bodyText = await req.text();
 
-    // Verify HMAC signature from NOWPayments
+    // Verify HMAC signature from NOWPayments — secret is MANDATORY
     const signature = req.headers.get("x-nowpayments-sig");
     const IPN_SECRET = Deno.env.get("NOWPAYMENTS_IPN_SECRET");
 
-    if (IPN_SECRET) {
-      if (!signature) {
-        console.error("[crypto-webhook] Missing signature header");
-        return new Response("Unauthorized", { status: 401 });
-      }
+    if (!IPN_SECRET) {
+      console.error("[crypto-webhook] FATAL: NOWPAYMENTS_IPN_SECRET not set");
+      return new Response("Service misconfigured", { status: 503 });
+    }
+    if (!signature) {
+      console.error("[crypto-webhook] Missing signature header");
+      return new Response("Unauthorized", { status: 401 });
+    }
 
+    {
       const parsed = JSON.parse(bodyText);
       const sortedBody = JSON.stringify(parsed, Object.keys(parsed).sort());
       const encoder = new TextEncoder();
@@ -38,8 +42,6 @@ serve(async (req) => {
         console.error("[crypto-webhook] Invalid signature");
         return new Response("Invalid signature", { status: 401 });
       }
-    } else {
-      console.warn("[crypto-webhook] NOWPAYMENTS_IPN_SECRET not set, skipping signature verification");
     }
 
     const payload = JSON.parse(bodyText);

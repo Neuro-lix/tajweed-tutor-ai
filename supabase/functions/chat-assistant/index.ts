@@ -34,15 +34,15 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
     );
-    const { data: claims, error: authErr } = await sb.auth.getClaims(
+    const { data: { user }, error: authErr } = await sb.auth.getUser(
       authHeader.replace("Bearer ", "")
     );
-    if (authErr || !claims?.claims?.sub) {
+    if (authErr || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const userId = claims.claims.sub as string;
+    const userId = user.id;
 
     // Per-user rate limit: 60 messages / hour
     const sbAdmin = createClient(
@@ -63,6 +63,18 @@ serve(async (req) => {
 
     const { messages, language = "fr" } = await req.json();
     if (!Array.isArray(messages) || messages.length === 0 || messages.length > 50) {
+      return new Response(JSON.stringify({ error: "Invalid messages" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    // Sanitize: force role/string shape and clamp content length to mitigate prompt injection / oversized payloads
+    const sanitized = (messages as any[])
+      .filter((m) => m && typeof m.content === "string")
+      .map((m) => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: String(m.content).slice(0, 2000),
+      }));
+    if (sanitized.length === 0) {
       return new Response(JSON.stringify({ error: "Invalid messages" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -96,8 +108,8 @@ Tu ne dois JAMAIS :
 
 Sois concis mais informatif.`;
 
-    // Build Gemini conversation from messages array
-    const geminiContents = messages.map((m: any) => ({
+    // Build Gemini conversation from sanitized messages
+    const geminiContents = sanitized.map((m) => ({
       role: m.role === "assistant" ? "model" : "user",
       parts: [{ text: m.content }],
     }));
