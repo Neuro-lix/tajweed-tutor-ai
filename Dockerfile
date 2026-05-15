@@ -12,5 +12,12 @@ RUN npm run build
 FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
+# Run nginx as a non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup \
+    && chown -R appuser:appgroup /usr/share/nginx/html /var/cache/nginx /var/log/nginx /etc/nginx/conf.d \
+    && touch /var/run/nginx.pid && chown appuser:appgroup /var/run/nginx.pid \
+    && sed -i 's/listen       80;/listen       8080;/g' /etc/nginx/conf.d/default.conf || true \
+    && sed -i 's/listen 80;/listen 8080;/g' /etc/nginx/conf.d/default.conf || true
+USER appuser
+EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
