@@ -24,12 +24,13 @@ interface AppHeaderProps {
   onBoutiqueClick?: () => void;
   onIjazaClick?: () => void;
   onSignOut: () => void;
+  onLogoClick?: () => void;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
   fullName, isOnline, isOfflineReady, cacheStats, formatCacheSize,
   correctionsCount, credits, isLowCredits, onFeedbackClick, onRecordingsClick, onCorrectionsClick,
-  onRecitationClick, onBoutiqueClick, onIjazaClick, onSignOut,
+  onRecitationClick, onBoutiqueClick, onIjazaClick, onSignOut, onLogoClick,
 }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -39,7 +40,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={logoImage} alt="Tajweed Tutor AI" className="h-10 w-10 object-contain rounded-xl" />
+            <img
+              src={logoImage}
+              alt="Tajweed Tutor AI"
+              onClick={onLogoClick}
+              className={`h-10 w-10 object-contain rounded-xl ${onLogoClick ? 'cursor-pointer select-none' : ''}`}
+            />
             <div className="flex flex-col">
               <span className="font-semibold text-lg text-foreground leading-tight">Tajweed Tutor AI</span>
               {fullName && <span className="text-xs text-muted-foreground">{fullName}</span>}

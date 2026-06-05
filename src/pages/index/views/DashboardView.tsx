@@ -38,6 +38,7 @@ export const DashboardView = ({ state: s }: DashboardViewProps) => (
       onBoutiqueClick={() => s.setCurrentView('boutique')}
       onIjazaClick={() => s.setCurrentView('ijaza')}
       onSignOut={s.handleSignOut}
+      onLogoClick={s.handleLogoClick}
     />
 
     <main className="container mx-auto px-4 py-8">
