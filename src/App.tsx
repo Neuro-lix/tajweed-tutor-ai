@@ -22,6 +22,8 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Shop = lazy(() => import("./pages/Shop"));
 const ShopSuccess = lazy(() => import("./pages/ShopSuccess"));
 const Diagnostics = lazy(() => import("./pages/Diagnostics"));
+const Health = lazy(() => import("./pages/Health"));
+const AdminRoute = lazy(() => import("./pages/AdminRoute"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -66,11 +68,14 @@ const App = () => (
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/auth" element={<Auth />} />
+                    <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                    <Route path="/admin" element={<ProtectedRoute><AdminRoute /></ProtectedRoute>} />
                     <Route path="/ijaza" element={<Ijaza />} />
                     <Route path="/shop" element={<Shop />} />
                     <Route path="/shop/success" element={<ProtectedRoute><ShopSuccess /></ProtectedRoute>} />
                     <Route path="/verify/:id" element={<VerifyCertificate />} />
                     <Route path="/diagnostics" element={<Diagnostics />} />
+                    <Route path="/health" element={<Health />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
