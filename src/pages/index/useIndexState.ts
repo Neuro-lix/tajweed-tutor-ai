@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -63,11 +63,16 @@ export function useIndexState() {
   const [showReport, setShowReport] = useState(false);
   const [devMode, setDevMode] = useState(() => localStorage.getItem('devMode') === 'true');
   const [logoClickCount, setLogoClickCount] = useState(0);
+  const logoResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleLogoClick = () => {
+    // Reset the counter if clicks slow down (3s window)
+    if (logoResetTimer.current) clearTimeout(logoResetTimer.current);
+    logoResetTimer.current = setTimeout(() => setLogoClickCount(0), 3000);
     setLogoClickCount(prev => {
       const next = prev + 1;
       if (next >= 5) {
+        if (logoResetTimer.current) clearTimeout(logoResetTimer.current);
         const pwd = prompt('🔐 Mot de passe développeur :');
         if (pwd === 'tajweed-dev-2026') {
           const newMode = !devMode;
@@ -328,8 +333,30 @@ export function useIndexState() {
         },
       });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(String(data.error));
+      if (error) {
+        // Surface a friendly toast when the server reports empty transcription (422)
+        let serverCode = '';
+        try {
+          const body = await (error as { context?: { json?: () => Promise<{ error?: string }> } }).context?.json?.();
+          serverCode = body?.error ?? '';
+        } catch {
+          /* ignore parse errors */
+        }
+        if (serverCode === 'transcription_empty') {
+          toast.error(t.transcriptionImpossibleMsg, {
+            description: 'Aucune voix captée. Réenregistre dans un endroit plus calme.',
+          });
+        }
+        throw error;
+      }
+      if (data?.error) {
+        if (data.error === 'transcription_empty') {
+          toast.error(t.transcriptionImpossibleMsg, {
+            description: 'Aucune voix captée. Réenregistre dans un endroit plus calme.',
+          });
+        }
+        throw new Error(String(data.error));
+      }
 
       setAnalysisStep('done');
 
