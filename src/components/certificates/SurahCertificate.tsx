@@ -193,7 +193,7 @@ export const SurahCertificate: React.FC<SurahCertificateProps> = ({
         </div>
 
         {/* Title */}
-        <h2 className="text-2xl font-bold text-primary mb-2 tracking-wide uppercase">
+        <h2 data-testid="certificate-title" className="text-2xl font-bold text-primary mb-2 tracking-wide uppercase">
           {t.certificateTitle}
         </h2>
         <div className="flex justify-center items-center gap-2 text-gold-warm mb-6">

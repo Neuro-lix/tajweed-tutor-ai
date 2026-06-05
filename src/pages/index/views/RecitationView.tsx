@@ -136,7 +136,7 @@ export const RecitationView = ({ state: s }: RecitationViewProps) => {
         />
 
         {s.showFeedback && s.analysisResult && (
-          <Card>
+          <Card data-testid="recitation-error-card">
             <CardContent className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">

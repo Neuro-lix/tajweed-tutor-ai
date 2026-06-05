@@ -333,8 +333,30 @@ export function useIndexState() {
         },
       });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(String(data.error));
+      if (error) {
+        // Surface a friendly toast when the server reports empty transcription (422)
+        let serverCode = '';
+        try {
+          const body = await (error as { context?: { json?: () => Promise<{ error?: string }> } }).context?.json?.();
+          serverCode = body?.error ?? '';
+        } catch {
+          /* ignore parse errors */
+        }
+        if (serverCode === 'transcription_empty') {
+          toast.error(t.transcriptionImpossibleMsg, {
+            description: 'Aucune voix captée. Réenregistre dans un endroit plus calme.',
+          });
+        }
+        throw error;
+      }
+      if (data?.error) {
+        if (data.error === 'transcription_empty') {
+          toast.error(t.transcriptionImpossibleMsg, {
+            description: 'Aucune voix captée. Réenregistre dans un endroit plus calme.',
+          });
+        }
+        throw new Error(String(data.error));
+      }
 
       setAnalysisStep('done');
 
