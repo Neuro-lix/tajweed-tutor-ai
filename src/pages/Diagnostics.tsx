@@ -64,30 +64,18 @@ export default function Diagnostics() {
         healthcheckErrors = [];
       }
 
-      let corrections: unknown[] = [];
-      let certificates: unknown[] = [];
+      // Server-side diagnostics (certificate/recitation errors) come from the
+      // diagnostics-export endpoint, which returns a stable JSON schema.
+      let server: unknown = null;
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const [corrRes, certRes] = await Promise.all([
-            supabase
-              .from('corrections')
-              .select('id, surah_number, verse_number, word, rule_type, rule_description, created_at')
-              .eq('user_id', user.id)
-              .order('created_at', { ascending: false })
-              .limit(200),
-            supabase
-              .from('user_certificates')
-              .select('id, surah_number, qiraat, average_score, certificate_type, completed_at')
-              .eq('user_id', user.id)
-              .order('completed_at', { ascending: false })
-              .limit(200),
-          ]);
-          corrections = corrRes.data ?? [];
-          certificates = certRes.data ?? [];
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { data, error } = await supabase.functions.invoke('diagnostics-export');
+          if (error) throw error;
+          server = data;
         }
       } catch (e) {
-        console.warn('[Diagnostics] Could not load certificate/recitation errors', e);
+        console.warn('[Diagnostics] Could not load server diagnostics', e);
       }
 
       const payload = {
@@ -98,8 +86,7 @@ export default function Diagnostics() {
         caches: cacheNames,
         serviceWorkerRegistrations: registrations,
         healthcheckErrors,
-        recitationErrors: corrections,
-        certificates,
+        server,
       };
 
       const blob = new Blob([JSON.stringify(payload, null, 2)], {
