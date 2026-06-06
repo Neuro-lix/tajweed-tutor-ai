@@ -21,3 +21,6 @@ verify_jwt = false
 
 [functions.verify-certificate]
 verify_jwt = false
+
+[functions.diagnostics-export]
+verify_jwt = false
