@@ -87,8 +87,8 @@ serve(async (req) => {
     }
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!OPENAI_API_KEY || !GEMINI_API_KEY) {
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!OPENAI_API_KEY || !LOVABLE_API_KEY) {
       console.error("[analyze-recitation] Missing API keys");
       return new Response(JSON.stringify({ error: "Service temporarily unavailable" }), {
         status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -245,8 +245,8 @@ serve(async (req) => {
     const actualNorm = stripDiacritics(transcribedText || "");
     console.log("[analyze-recitation] Similarity:", similarity.toFixed(2));
 
-    // 3) Tajweed analysis via Gemini
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+    // 3) Tajweed analysis via Lovable AI Gateway (Gemini model, no external key needed)
+    const gatewayUrl = `https://ai.gateway.lovable.dev/v1/chat/completions`;
 
     const systemPrompt = `أنت الشيخ المُقرئ، خبير محقّق في علم التجويد وفي القراءات العشر، تعلّم القرآن الكريم برواية ${qiraat || "حفص عن عاصم"}.
 
@@ -330,32 +330,45 @@ ${
 
 Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
 
-    console.log("[analyze-recitation] Sending to Gemini for tajweed analysis...");
+    console.log("[analyze-recitation] Sending to Lovable AI for tajweed analysis...");
 
-    const response = await fetch(geminiUrl, {
+    const response = await fetch(gatewayUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+      },
       body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: systemPrompt + "\n\n" + userPrompt }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 2500, responseMimeType: "application/json" },
+        model: "google/gemini-2.5-flash",
+        temperature: 0.1,
+        max_tokens: 2500,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
       }),
     });
 
-    console.log("[analyze-recitation] Gemini status:", response.status);
+    console.log("[analyze-recitation] Lovable AI status:", response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("[analyze-recitation] Gemini error:", response.status, errorText);
+      console.error("[analyze-recitation] Lovable AI error:", response.status, errorText);
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Limite de requêtes atteinte." }),
+        return new Response(JSON.stringify({ error: "Limite de requêtes atteinte. Réessayez dans un instant." }),
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "Crédits IA épuisés. Veuillez recharger pour continuer." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
       return new Response(JSON.stringify({ error: "Analysis service error. Please try again." }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const aiResponse = await response.json();
-    const content = aiResponse?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const content = aiResponse?.choices?.[0]?.message?.content;
 
     let analysis: any;
     try {
