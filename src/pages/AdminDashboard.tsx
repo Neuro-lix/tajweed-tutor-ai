@@ -249,7 +249,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4 p-8 text-center">
+      <div
+        data-testid="admin-access-denied"
+        role="alert"
+        className="min-h-screen flex flex-col items-center justify-center bg-background gap-4 p-8 text-center"
+      >
         <h1 className="text-2xl font-bold">Accès refusé</h1>
         <p className="text-muted-foreground max-w-md">
           Cette page est réservée aux administrateurs. Si tu penses que c'est une erreur, contacte le support.
