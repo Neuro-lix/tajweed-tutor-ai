@@ -80,9 +80,9 @@ serve(async (req) => {
       });
     }
 
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) {
-      console.error("[chat-assistant] Missing GEMINI_API_KEY");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      console.error("[chat-assistant] Missing LOVABLE_API_KEY");
       return new Response(JSON.stringify({ response: "Service temporairement indisponible." }), {
         status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -108,28 +108,28 @@ Tu ne dois JAMAIS :
 
 Sois concis mais informatif.`;
 
-    // Build Gemini conversation from sanitized messages
-    const geminiContents = sanitized.map((m) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.content }],
-    }));
-
-    // Add system as first user turn if needed
-    const contents = [
-      { role: "user", parts: [{ text: systemPrompt + "\n\nDis bonjour et presente-toi brievement." }] },
-      { role: "model", parts: [{ text: "Assalamu alaykoum ! Je suis ton assistant Tajweed Tutor AI. Comment puis-je t'aider ?" }] },
-      ...geminiContents,
+    // Build conversation for Lovable AI Gateway (OpenAI-compatible)
+    const messages = [
+      { role: "system", content: systemPrompt },
+      ...sanitized.map((m) => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: m.content,
+      })),
     ];
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+      "https://ai.gateway.lovable.dev/v1/chat/completions",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+        },
         body: JSON.stringify({
-          contents,
-          generationConfig: { temperature: 0.7, maxOutputTokens: 1000 },
-          systemInstruction: { parts: [{ text: systemPrompt }] },
+          model: "google/gemini-2.5-flash",
+          temperature: 0.7,
+          max_tokens: 1000,
+          messages,
         }),
       }
     );
@@ -148,7 +148,7 @@ Sois concis mais informatif.`;
     }
 
     const data = await response.json();
-    const content = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "Desole, je n'ai pas pu repondre.";
+    const content = data?.choices?.[0]?.message?.content ?? "Desole, je n'ai pas pu repondre.";
 
     return new Response(JSON.stringify({ response: content }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
