@@ -179,6 +179,48 @@ export type Database = {
         }
         Relationships: []
       }
+      llm_usage: {
+        Row: {
+          completion_tokens: number
+          created_at: string
+          credits_charged: number
+          function_name: string
+          id: string
+          model: string | null
+          operation: string
+          prompt_tokens: number
+          status: string
+          total_tokens: number
+          user_id: string
+        }
+        Insert: {
+          completion_tokens?: number
+          created_at?: string
+          credits_charged?: number
+          function_name: string
+          id?: string
+          model?: string | null
+          operation?: string
+          prompt_tokens?: number
+          status?: string
+          total_tokens?: number
+          user_id: string
+        }
+        Update: {
+          completion_tokens?: number
+          created_at?: string
+          credits_charged?: number
+          function_name?: string
+          id?: string
+          model?: string | null
+          operation?: string
+          prompt_tokens?: number
+          status?: string
+          total_tokens?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
