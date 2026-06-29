@@ -1,14 +1,33 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+// ─── CORS: env-driven allowlist (no wildcard) ───────────────────────────
+const DEFAULT_ALLOWED_ORIGINS = [
+  'https://recite-perfectly-bot.lovable.app',
+  'https://id-preview--dd06a156-64f5-407d-bf79-94ef3c169108.lovable.app',
+  'http://localhost:8080',
+  'http://localhost:5173',
+];
+const ENV_ALLOWED = (Deno.env.get('ALLOWED_ORIGINS') ?? '')
+  .split(',').map((s) => s.trim()).filter(Boolean);
+const ALLOWLIST = ENV_ALLOWED.length ? ENV_ALLOWED : DEFAULT_ALLOWED_ORIGINS;
+
+function buildCors(req: Request): Record<string, string> {
+  const origin = req.headers.get('Origin') ?? '';
+  const ok = ALLOWLIST.includes(origin)
+    || /^https:\/\/[a-z0-9-]+\.lovable\.app$/i.test(origin)
+    || /^https:\/\/[a-z0-9-]+\.lovableproject\.com$/i.test(origin);
+  return {
+    'Access-Control-Allow-Origin': ok ? origin : ALLOWLIST[0],
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Vary': 'Origin',
+  };
+}
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 Deno.serve(async (req) => {
+  const corsHeaders = buildCors(req);
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   const ip =
