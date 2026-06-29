@@ -86,6 +86,7 @@ const PRICE_TO_CREDITS: Record<string, { credits: number; label: string }> = {
 };
 
 serve(async (req) => {
+  const corsHeaders = buildCors(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
