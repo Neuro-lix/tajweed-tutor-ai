@@ -615,7 +615,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
               </CardContent>
             </Card>
           </div>
-        ) : (
+        ) : tab === "boutique" ? (
           <div className="space-y-6">
             <Card>
               <CardHeader><CardTitle className="text-base">Ventes boutique</CardTitle></CardHeader>
@@ -632,6 +632,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
               </CardContent>
             </Card>
           </div>
+        ) : (
+          <LlmCreditsTab />
         )}
       </main>
     </div>
