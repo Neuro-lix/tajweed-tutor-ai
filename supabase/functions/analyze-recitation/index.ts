@@ -382,11 +382,26 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
       };
     }
 
-    // Safety: clamp score and fix isCorrect coherence
-    if (typeof analysis.overallScore === "number") {
-      analysis.overallScore = Math.max(0, Math.min(100, Math.round(analysis.overallScore)));
-      analysis.isCorrect = analysis.overallScore >= 85;
+    // Validate the structure — if the model returned a malformed object, fall
+    // back to a safe shape so the client never crashes on missing fields.
+    const required = ["isCorrect", "overallScore", "feedback", "encouragement", "priorityFixes", "errors"];
+    const missing = required.filter((k) => !(k in (analysis ?? {})));
+    if (!analysis || typeof analysis !== "object" || missing.length > 0) {
+      console.error("[analyze-recitation] Malformed AI response, missing:", missing);
+      analysis = {
+        isCorrect: false, overallScore: 0,
+        feedback: "Erreur d'analyse. Veuillez réessayer.",
+        encouragement: "Ne vous découragez pas, réessayez!",
+        priorityFixes: ["Réenregistrez votre récitation", "Vérifiez le microphone", "Réessayez"],
+        errors: [], textComparison: "",
+      };
     }
+
+    // Safety: clamp score, coerce types, and fix isCorrect coherence
+    analysis.overallScore = Math.max(0, Math.min(100, Math.round(Number(analysis.overallScore) || 0)));
+    analysis.isCorrect = analysis.overallScore >= 85;
+    if (!Array.isArray(analysis.errors)) analysis.errors = [];
+    if (!Array.isArray(analysis.priorityFixes)) analysis.priorityFixes = [];
 
     analysis.audioAnalyzed = hasAudio;
     analysis.audioMimeType = hasAudio ? (audioMimeType ?? null) : null;
