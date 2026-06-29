@@ -109,7 +109,9 @@ Tu ne dois JAMAIS :
 Sois concis mais informatif.`;
 
     // Build conversation for Lovable AI Gateway (OpenAI-compatible)
-    const messages = [
+    // NOTE: named `chatMessages` to avoid shadowing the `messages` destructured
+    // from req.json() above (a duplicate `const messages` is a compile error).
+    const chatMessages = [
       { role: "system", content: systemPrompt },
       ...sanitized.map((m) => ({
         role: m.role === "assistant" ? "assistant" : "user",
@@ -129,7 +131,7 @@ Sois concis mais informatif.`;
           model: "google/gemini-2.5-flash",
           temperature: 0.7,
           max_tokens: 1000,
-          messages,
+          messages: chatMessages,
         }),
       }
     );
