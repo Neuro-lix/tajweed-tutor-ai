@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Users, Clock, Globe, TrendingUp, Award, BookOpen, ShoppingBag, GripVertical, Settings, Eye, EyeOff, BarChart2, Activity, RefreshCw, Target, AlertTriangle, Download, Radar as RadarIcon } from "lucide-react";
+import { ArrowLeft, Users, Clock, Globe, TrendingUp, Award, BookOpen, ShoppingBag, GripVertical, Settings, Eye, EyeOff, BarChart2, Activity, RefreshCw, Target, AlertTriangle, Download, Radar as RadarIcon, CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SURAHS } from "@/data/quranData";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip as ReTooltip } from "recharts";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { LlmCreditsTab } from "@/components/admin/LlmCreditsTab";
 
 interface TajweedErrorBucket {
   category: string;
@@ -92,7 +93,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
   const { isAdmin, loading: roleLoading } = useIsAdmin();
   const [stats, setStats] = useState<DashStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"overview" | "users" | "tajweed" | "boutique">("overview");
+  const [tab, setTab] = useState<"overview" | "users" | "tajweed" | "boutique" | "credits">("overview");
   const [refreshing, setRefreshing] = useState(false);
 
   const loadStats = async () => {
@@ -311,6 +312,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
             { key: "users", label: "Utilisateurs", icon: Users },
             { key: "tajweed", label: "Tajwīd par sourate", icon: Target },
             { key: "boutique", label: "Boutique", icon: ShoppingBag },
+            { key: "credits", label: "💳 Crédits LLM", icon: CreditCard },
           ].map(t => (
             <button
               key={t.key}
