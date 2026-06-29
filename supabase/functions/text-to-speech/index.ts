@@ -2,12 +2,31 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { encode as base64Encode } from 'https://deno.land/std@0.168.0/encoding/base64.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+// ─── CORS: env-driven allowlist (no wildcard) ───────────────────────────
+const DEFAULT_ALLOWED_ORIGINS = [
+  'https://recite-perfectly-bot.lovable.app',
+  'https://id-preview--dd06a156-64f5-407d-bf79-94ef3c169108.lovable.app',
+  'http://localhost:8080',
+  'http://localhost:5173',
+];
+const ENV_ALLOWED = (Deno.env.get('ALLOWED_ORIGINS') ?? '')
+  .split(',').map((s) => s.trim()).filter(Boolean);
+const ALLOWLIST = ENV_ALLOWED.length ? ENV_ALLOWED : DEFAULT_ALLOWED_ORIGINS;
+
+function buildCors(req: Request): Record<string, string> {
+  const origin = req.headers.get('Origin') ?? '';
+  const ok = ALLOWLIST.includes(origin)
+    || /^https:\/\/[a-z0-9-]+\.lovable\.app$/i.test(origin)
+    || /^https:\/\/[a-z0-9-]+\.lovableproject\.com$/i.test(origin);
+  return {
+    'Access-Control-Allow-Origin': ok ? origin : ALLOWLIST[0],
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Vary': 'Origin',
+  };
+}
 
 serve(async (req) => {
+  const corsHeaders = buildCors(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -99,6 +118,23 @@ serve(async (req) => {
 
     const audioBuffer = await response.arrayBuffer();
     const base64Audio = base64Encode(audioBuffer);
+
+    // ── Log LLM usage (best-effort; TTS has no token counts) ──
+    try {
+      await sbAdmin.from('llm_usage').insert({
+        user_id: userId,
+        function_name: 'text-to-speech',
+        model: 'tts-1',
+        operation: 'tts',
+        prompt_tokens: 0,
+        completion_tokens: 0,
+        total_tokens: 0,
+        credits_charged: 0,
+        status: 'success',
+      });
+    } catch (logErr) {
+      console.error('[text-to-speech] llm_usage log failed:', logErr);
+    }
 
     return new Response(
       JSON.stringify({ audioContent: base64Audio }),
