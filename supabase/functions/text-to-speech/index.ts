@@ -43,15 +43,15 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_ANON_KEY')!,
     );
-    const { data: claims, error: authErr } = await supabase.auth.getClaims(
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(
       authHeader.replace('Bearer ', '')
     );
-    if (authErr || !claims?.claims?.sub) {
+    if (authErr || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    const userId = claims.claims.sub as string;
+    const userId = user.id;
 
     // Per-user rate limit: 30 TTS requests / hour
     const sbAdmin = createClient(
