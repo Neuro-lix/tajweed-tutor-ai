@@ -99,11 +99,10 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'tts-1',
+        model: 'openai/gpt-4o-mini-tts',
         input: text,
         voice: language === 'ar' ? 'nova' : 'alloy', // nova for Arabic-friendly, alloy for others
         response_format: 'mp3',
-        speed: 0.9, // Slightly slower for clarity
       }),
     });
 
