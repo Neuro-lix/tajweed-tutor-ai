@@ -24,6 +24,7 @@ const ShopSuccess = lazy(() => import("./pages/ShopSuccess"));
 const Diagnostics = lazy(() => import("./pages/Diagnostics"));
 const Health = lazy(() => import("./pages/Health"));
 const AdminRoute = lazy(() => import("./pages/AdminRoute"));
+const MyLlmUsage = lazy(() => import("./pages/MyLlmUsage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -70,6 +71,7 @@ const App = () => (
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                     <Route path="/admin" element={<ProtectedRoute><AdminRoute /></ProtectedRoute>} />
+                    <Route path="/my-usage" element={<ProtectedRoute><MyLlmUsage /></ProtectedRoute>} />
                     <Route path="/ijaza" element={<Ijaza />} />
                     <Route path="/shop" element={<Shop />} />
                     <Route path="/shop/success" element={<ProtectedRoute><ShopSuccess /></ProtectedRoute>} />

@@ -1,9 +1,10 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CreditCard, Zap, Activity, Cpu, RefreshCw } from 'lucide-react';
+import { CreditCard, Zap, Activity, Cpu, RefreshCw, Download } from 'lucide-react';
 import { useLlmCredits } from '@/hooks/useLlmCredits';
 import { useCredits } from '@/hooks/useCredits';
+import { downloadLlmUsageCsv } from '@/lib/llmUsageCsv';
 
 const FN_LABELS: Record<string, string> = {
   'analyze-recitation': 'Analyse récitation',
@@ -44,7 +45,16 @@ export const LlmCreditsTab: React.FC = () => {
         ))}
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => downloadLlmUsageCsv(rows)}
+          disabled={loading || rows.length === 0}
+        >
+          <Download className="w-4 h-4 mr-2" />
+          Exporter CSV
+        </Button>
         <Button variant="outline" size="sm" onClick={refetch} disabled={loading}>
           <RefreshCw className={'w-4 h-4 mr-2 ' + (loading ? 'animate-spin' : '')} />
           Actualiser

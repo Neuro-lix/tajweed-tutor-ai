@@ -54,8 +54,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           </div>
           <nav className="flex items-center gap-1 md:gap-2">
             {credits !== null && credits !== undefined && (
-              <div
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
+              <button
+                type="button"
+                onClick={() => navigate('/my-usage')}
+                title="Voir ma consommation IA"
+                aria-label="Voir ma consommation IA"
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-opacity hover:opacity-80 ${
                   credits === 0
                     ? 'bg-destructive/15 text-destructive'
                     : isLowCredits
@@ -65,7 +69,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               >
                 <Zap className="h-3.5 w-3.5" />
                 <span>{credits}</span>
-              </div>
+              </button>
             )}
             <LanguageSelector />
             <ThemeToggle />
