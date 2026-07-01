@@ -108,8 +108,8 @@ serve(async (req) => {
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!OPENAI_API_KEY || !LOVABLE_API_KEY) {
-      console.error("[analyze-recitation] Missing API keys");
+    if (!LOVABLE_API_KEY) {
+      console.error("[analyze-recitation] Missing LOVABLE_API_KEY");
       return new Response(JSON.stringify({ error: "Service temporarily unavailable" }), {
         status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -125,7 +125,7 @@ serve(async (req) => {
     let transcribedText = "";
     let transcriptionOk = false;
     let whisperError: string | null = null;
-    let transcriptionEngine: "whisper-1" | "whisper-large-v3" = "whisper-1";
+    let transcriptionEngine: "gpt-4o-mini-transcribe" | "whisper-1" | "whisper-large-v3" = "gpt-4o-mini-transcribe";
 
     if (hasAudio) {
       const base64Payload = audioBase64.includes(",") ? audioBase64.split(",")[1] : audioBase64;
@@ -191,9 +191,9 @@ serve(async (req) => {
         }
       }
 
-      // ─── Path B: OpenAI Whisper-1 (default / fallback) ───
+      // ─── Path B: Lovable AI Gateway transcription (default) ───
       if (!transcriptionOk) {
-        console.log("[analyze-recitation] Using OpenAI Whisper-1...");
+        console.log("[analyze-recitation] Using Lovable AI transcription (gpt-4o-mini-transcribe)...");
         try {
           const binaryString = atob(base64Payload);
           const bytes = new Uint8Array(binaryString.length);
@@ -202,30 +202,28 @@ serve(async (req) => {
           }
 
           const rawMime = (audioMimeType || "audio/wav").split(";")[0].trim();
-          const ext = rawMime.includes("webm") ? "webm" : rawMime.includes("mp4") ? "mp4" : "wav";
+          const ext = rawMime.includes("webm") ? "webm" : rawMime.includes("mp4") ? "mp4" : rawMime.includes("mpeg") || rawMime.includes("mp3") ? "mp3" : "wav";
 
           const formData = new FormData();
           formData.append("file", new Blob([bytes], { type: rawMime }), `audio.${ext}`);
-          formData.append("model", "whisper-1");
+          formData.append("model", "openai/gpt-4o-mini-transcribe");
           formData.append("language", "ar");
-          formData.append(
-            "prompt",
-            `بسم الله الرحمن الرحيم. هذه تلاوة قرآنية من سورة رقم ${surahNumber} الآية ${verseNumber} برواية ${qiraat || "حفص عن عاصم"}. النص متوقع: ${expectedText || ""}`
-          );
-          formData.append("temperature", "0");
 
-          const whisperResponse = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+          const whisperResponse = await fetch("https://ai.gateway.lovable.dev/v1/audio/transcriptions", {
             method: "POST",
-            headers: { "Authorization": `Bearer ${OPENAI_API_KEY}` },
+            headers: { "Authorization": `Bearer ${LOVABLE_API_KEY}` },
             body: formData,
           });
 
-          console.log("[analyze-recitation] Whisper-1 status:", whisperResponse.status);
+          console.log("[analyze-recitation] Transcription status:", whisperResponse.status);
 
           if (!whisperResponse.ok) {
             const errorText = await whisperResponse.text();
-            console.error("[analyze-recitation] Whisper-1 error:", errorText);
-            whisperError = whisperResponse.status === 429 ? "Limite de requêtes Whisper" : `Whisper error: ${whisperResponse.status}`;
+            console.error("[analyze-recitation] Transcription error:", whisperResponse.status, errorText);
+            whisperError =
+              whisperResponse.status === 429 ? "Limite de requêtes atteinte"
+              : whisperResponse.status === 402 ? "Crédits IA épuisés"
+              : `Transcription error: ${whisperResponse.status}`;
           } else {
             const result = await whisperResponse.json();
             transcribedText = (result.text || "").trim();
@@ -233,11 +231,11 @@ serve(async (req) => {
             if (!transcriptionOk) {
               whisperError = "Transcription vide";
             }
-            transcriptionEngine = "whisper-1";
-            console.log("[analyze-recitation] Whisper-1 result:", transcribedText.substring(0, 100));
+            transcriptionEngine = "gpt-4o-mini-transcribe";
+            console.log("[analyze-recitation] Transcription result:", transcribedText.substring(0, 100));
           }
         } catch (e) {
-          console.error("[analyze-recitation] Whisper-1 exception:", e);
+          console.error("[analyze-recitation] Transcription exception:", e);
           whisperError = e instanceof Error ? e.message : "Erreur de transcription";
         }
       }
