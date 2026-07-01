@@ -123,7 +123,7 @@ serve(async (req) => {
       await sbAdmin.from('llm_usage').insert({
         user_id: userId,
         function_name: 'text-to-speech',
-        model: 'tts-1',
+        model: 'openai/gpt-4o-mini-tts',
         operation: 'tts',
         prompt_tokens: 0,
         completion_tokens: 0,
