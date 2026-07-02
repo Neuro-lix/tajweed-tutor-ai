@@ -174,6 +174,14 @@ const Index = () => {
     return <RecitationView state={s} />;
   }
 
+  if (s.currentView === 'guided-review') {
+    return <GuidedReviewView state={s} />;
+  }
+
+  if (s.currentView === 'tajweed-errors') {
+    return <TajweedErrorsView state={s} />;
+  }
+
   // Corrections
   if (s.currentView === 'corrections') {
     return (
