@@ -50,6 +50,8 @@ import { renderHeroTitle } from './index/indexHelpers';
 import { LandingView } from './index/views/LandingView';
 import { DashboardView } from './index/views/DashboardView';
 import { RecitationView } from './index/views/RecitationView';
+import { GuidedReviewView } from './index/views/GuidedReviewView';
+import { TajweedErrorsView } from './index/views/TajweedErrorsView';
 
 const Index = () => {
   const s = useIndexState();
