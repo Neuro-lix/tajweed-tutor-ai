@@ -50,6 +50,8 @@ import { renderHeroTitle } from './index/indexHelpers';
 import { LandingView } from './index/views/LandingView';
 import { DashboardView } from './index/views/DashboardView';
 import { RecitationView } from './index/views/RecitationView';
+import { GuidedReviewView } from './index/views/GuidedReviewView';
+import { TajweedErrorsView } from './index/views/TajweedErrorsView';
 
 const Index = () => {
   const s = useIndexState();
@@ -172,6 +174,14 @@ const Index = () => {
     return <RecitationView state={s} />;
   }
 
+  if (s.currentView === 'guided-review') {
+    return <GuidedReviewView state={s} />;
+  }
+
+  if (s.currentView === 'tajweed-errors') {
+    return <TajweedErrorsView state={s} />;
+  }
+
   // Corrections
   if (s.currentView === 'corrections') {
     return (
@@ -260,7 +270,7 @@ const Index = () => {
 
         <main className="container mx-auto px-4 py-8">
           <Suspense fallback={<ReportSkeleton />}>
-            <RecordingsLibrary />
+            <RecordingsLibrary userName={s.profile?.fullName} qiraat={s.selectedQiraat ?? undefined} />
           </Suspense>
         </main>
 

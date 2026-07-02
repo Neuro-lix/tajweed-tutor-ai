@@ -10,6 +10,7 @@ import { StreakPanel } from '@/components/streaks/StreakPanel';
 import { OfflineCacheManager } from '@/components/offline/OfflineCacheManager';
 import { RewardsPanel } from '@/components/rewards/RewardsPanel';
 import { CertificateModal } from '@/components/certificates/CertificateModal';
+import { ProgressInsightsCard } from '@/components/dashboard/ProgressInsightsCard';
 import { DashboardSkeleton, QuranMapSkeleton } from '@/components/ui/skeleton-card';
 import type { IndexState } from '../useIndexState';
 
@@ -47,6 +48,17 @@ export const DashboardView = ({ state: s }: DashboardViewProps) => (
           <Suspense fallback={<DashboardSkeleton />}>
             <ProgressDashboard data={s.progressData} />
           </Suspense>
+          <ProgressInsightsCard
+            levels={s.surahLevels}
+            recommended={s.recommendedReview}
+            onOpenGuidedReview={() => s.setCurrentView('guided-review')}
+            onOpenTajweedErrors={() => s.setCurrentView('tajweed-errors')}
+            onStartSurah={(surahId) => {
+              s.setCurrentSurah(surahId);
+              s.setCurrentVerse(1);
+              s.setCurrentView('recitation');
+            }}
+          />
           <StreakPanel />
           <RewardsPanel
             certificates={s.certificates.map(c => ({

@@ -16,36 +16,42 @@ export type Database = {
     Tables: {
       corrections: {
         Row: {
+          correction_example: string | null
           created_at: string
           id: string
           is_resolved: boolean | null
           resolved_at: string | null
           rule_description: string
           rule_type: string
+          severity: string | null
           surah_number: number
           user_id: string
           verse_number: number
           word: string
         }
         Insert: {
+          correction_example?: string | null
           created_at?: string
           id?: string
           is_resolved?: boolean | null
           resolved_at?: string | null
           rule_description: string
           rule_type: string
+          severity?: string | null
           surah_number: number
           user_id: string
           verse_number: number
           word: string
         }
         Update: {
+          correction_example?: string | null
           created_at?: string
           id?: string
           is_resolved?: boolean | null
           resolved_at?: string | null
           rule_description?: string
           rule_type?: string
+          severity?: string | null
           surah_number?: number
           user_id?: string
           verse_number?: number
@@ -646,11 +652,13 @@ export type Database = {
           created_at: string
           duration_seconds: number | null
           envelope_similarity_score: number | null
+          error_count: number | null
           id: string
           keep_recording: boolean | null
           qiraat: string | null
           storage_path: string
           surah_number: number
+          transcription: string | null
           user_id: string
           verse_number: number
         }
@@ -659,11 +667,13 @@ export type Database = {
           created_at?: string
           duration_seconds?: number | null
           envelope_similarity_score?: number | null
+          error_count?: number | null
           id?: string
           keep_recording?: boolean | null
           qiraat?: string | null
           storage_path: string
           surah_number: number
+          transcription?: string | null
           user_id: string
           verse_number: number
         }
@@ -672,11 +682,13 @@ export type Database = {
           created_at?: string
           duration_seconds?: number | null
           envelope_similarity_score?: number | null
+          error_count?: number | null
           id?: string
           keep_recording?: boolean | null
           qiraat?: string | null
           storage_path?: string
           surah_number?: number
+          transcription?: string | null
           user_id?: string
           verse_number?: number
         }

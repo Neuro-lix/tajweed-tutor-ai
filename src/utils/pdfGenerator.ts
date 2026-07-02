@@ -460,3 +460,217 @@ export const generateReportPDF = (data: ReportData): void => {
   // Save
   doc.save(`rapport-${surah?.transliteration || surah?.id}-v${data.verseNumber}.pdf`);
 };
+
+// ─────────────────────────────────────────────────────────────
+// History & corrections summary exports
+// ─────────────────────────────────────────────────────────────
+
+interface HistoryRecording {
+  surahNumber: number;
+  verseNumber: number;
+  createdAt: string;
+  analysisScore: number | null;
+  envelopeSimilarityScore: number | null;
+  errorCount: number | null;
+  durationSeconds: number | null;
+  transcription: string | null;
+}
+
+interface HistoryPdfData {
+  userName?: string;
+  qiraat?: string;
+  recordings: HistoryRecording[];
+}
+
+const fmtDate = (iso: string) =>
+  new Date(iso).toLocaleDateString('fr-FR', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+/** Printable PDF of the user's recitation history (journal). */
+export const generateHistoryPDF = (data: HistoryPdfData): void => {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  let yPos = 20;
+
+  doc.setFillColor(34, 139, 34);
+  doc.rect(0, 0, pageWidth, 34, 'F');
+  doc.setFontSize(18);
+  doc.setTextColor(255, 255, 255);
+  doc.text('Journal de mes récitations', pageWidth / 2, 16, { align: 'center' });
+  doc.setFontSize(10);
+  const sub = [data.userName, data.qiraat ? QIRAAT_NAMES[data.qiraat] || data.qiraat : null]
+    .filter(Boolean)
+    .join('  •  ');
+  if (sub) doc.text(sub, pageWidth / 2, 25, { align: 'center' });
+
+  yPos = 44;
+  doc.setFontSize(9);
+  doc.setTextColor(120, 120, 120);
+  doc.text(`${data.recordings.length} enregistrement(s) — généré le ${fmtDate(new Date().toISOString())}`, 15, yPos);
+  yPos += 8;
+
+  // Table header
+  doc.setFillColor(240, 253, 244);
+  doc.rect(10, yPos - 4, pageWidth - 20, 8, 'F');
+  doc.setFontSize(9);
+  doc.setTextColor(34, 139, 34);
+  doc.text('Sourate/Verset', 14, yPos + 1);
+  doc.text('Date', 70, yPos + 1);
+  doc.text('Tajwīd', 130, yPos + 1);
+  doc.text('Prosodie', 152, yPos + 1);
+  doc.text('Erreurs', 176, yPos + 1);
+  yPos += 10;
+
+  doc.setTextColor(40, 40, 40);
+  data.recordings.forEach((r) => {
+    if (yPos > 280) {
+      doc.addPage();
+      yPos = 20;
+    }
+    const surah = SURAHS.find((s) => s.id === r.surahNumber);
+    doc.setFontSize(9);
+    doc.setTextColor(40, 40, 40);
+    doc.text(`${surah?.transliteration || r.surahNumber} v${r.verseNumber}`, 14, yPos);
+    doc.setTextColor(90, 90, 90);
+    doc.text(fmtDate(r.createdAt), 70, yPos);
+    doc.setTextColor(40, 40, 40);
+    doc.text(r.analysisScore != null ? `${r.analysisScore}%` : '—', 130, yPos);
+    doc.text(r.envelopeSimilarityScore != null ? `${r.envelopeSimilarityScore}%` : '—', 152, yPos);
+    doc.text(r.errorCount != null ? String(r.errorCount) : '—', 178, yPos);
+    yPos += 7;
+  });
+
+  doc.setFontSize(8);
+  doc.setTextColor(150, 150, 150);
+  doc.text('Nassihah — Journal généré automatiquement', pageWidth / 2, 292, { align: 'center' });
+  doc.save(`journal-recitations-${new Date().toISOString().slice(0, 10)}.pdf`);
+};
+
+interface SummaryCorrection {
+  surahNumber: number;
+  verseNumber: number;
+  word: string;
+  ruleType: string;
+  ruleDescription: string;
+  correctionExample: string | null;
+  severity: string | null;
+}
+
+interface SummarySession {
+  surahNumber: number;
+  verseNumber: number;
+  createdAt: string;
+  analysisScore: number | null;
+}
+
+interface CorrectionsSummaryData {
+  userName?: string;
+  qiraat?: string;
+  corrections: SummaryCorrection[];
+  sessions: SummarySession[];
+}
+
+/** Printable PDF: what the student needs to consolidate (reading + scores + points). */
+export const generateCorrectionsSummaryPDF = (data: CorrectionsSummaryData): void => {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  let yPos = 20;
+
+  doc.setFillColor(34, 139, 34);
+  doc.rect(0, 0, pageWidth, 34, 'F');
+  doc.setFontSize(18);
+  doc.setTextColor(255, 255, 255);
+  doc.text('Plan de consolidation Tajwīd', pageWidth / 2, 16, { align: 'center' });
+  doc.setFontSize(10);
+  const sub = [data.userName, data.qiraat ? QIRAAT_NAMES[data.qiraat] || data.qiraat : null]
+    .filter(Boolean)
+    .join('  •  ');
+  if (sub) doc.text(sub, pageWidth / 2, 25, { align: 'center' });
+
+  yPos = 46;
+
+  // Recent sessions / scores
+  doc.setFontSize(12);
+  doc.setTextColor(34, 139, 34);
+  doc.text('Mes derniers scores par session', 15, yPos);
+  yPos += 8;
+  doc.setFontSize(9);
+  if (data.sessions.length === 0) {
+    doc.setTextColor(120, 120, 120);
+    doc.text('Aucune session enregistrée pour le moment.', 15, yPos);
+    yPos += 8;
+  } else {
+    data.sessions.slice(0, 12).forEach((s) => {
+      if (yPos > 275) {
+        doc.addPage();
+        yPos = 20;
+      }
+      const surah = SURAHS.find((x) => x.id === s.surahNumber);
+      doc.setTextColor(60, 60, 60);
+      doc.text(
+        `• ${surah?.transliteration || s.surahNumber} v${s.verseNumber} — ${fmtDate(s.createdAt)} — ${
+          s.analysisScore != null ? s.analysisScore + '%' : 'n/a'
+        }`,
+        18,
+        yPos,
+      );
+      yPos += 6;
+    });
+  }
+
+  yPos += 6;
+  if (yPos > 265) {
+    doc.addPage();
+    yPos = 20;
+  }
+  doc.setFontSize(12);
+  doc.setTextColor(220, 38, 38);
+  doc.text(`Points à consolider (${data.corrections.length})`, 15, yPos);
+  yPos += 8;
+
+  if (data.corrections.length === 0) {
+    doc.setFontSize(9);
+    doc.setTextColor(120, 120, 120);
+    doc.text('Aucune erreur en attente — continue ainsi !', 15, yPos);
+    yPos += 8;
+  } else {
+    data.corrections.forEach((c) => {
+      if (yPos > 262) {
+        doc.addPage();
+        yPos = 20;
+      }
+      const surah = SURAHS.find((x) => x.id === c.surahNumber);
+      const sevColor =
+        c.severity === 'critical' ? [254, 226, 226] : c.severity === 'major' ? [254, 243, 199] : [241, 245, 249];
+      doc.setFillColor(sevColor[0], sevColor[1], sevColor[2]);
+      doc.roundedRect(10, yPos - 4, pageWidth - 20, 26, 2, 2, 'F');
+
+      doc.setFontSize(10);
+      doc.setTextColor(30, 30, 30);
+      doc.text(`${surah?.transliteration || c.surahNumber} v${c.verseNumber} — ${c.ruleType}`, 14, yPos + 2);
+
+      doc.setFontSize(9);
+      doc.setTextColor(80, 80, 80);
+      const descLines = doc.splitTextToSize(c.ruleDescription, pageWidth - 40);
+      doc.text(descLines, 14, yPos + 9);
+      let inner = yPos + 9 + descLines.length * 4.5;
+      if (c.correctionExample) {
+        doc.setTextColor(34, 139, 34);
+        const corrLines = doc.splitTextToSize(`✓ ${c.correctionExample}`, pageWidth - 40);
+        doc.text(corrLines, 14, inner + 2);
+        inner += corrLines.length * 4.5;
+      }
+      yPos = Math.max(yPos + 28, inner + 6);
+    });
+  }
+
+  doc.setFontSize(8);
+  doc.setTextColor(150, 150, 150);
+  doc.text('Nassihah — Plan de consolidation généré automatiquement', pageWidth / 2, 292, { align: 'center' });
+  doc.save(`consolidation-tajwid-${new Date().toISOString().slice(0, 10)}.pdf`);
+};
