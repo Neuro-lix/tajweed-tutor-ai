@@ -21,6 +21,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { fetchAyah } from '@/lib/quranApi';
 import { AnalysisResult, AppView, getGlobalAyahNumber, normalizeRuleType } from './indexHelpers';
 import { calculateEnvelopeSimilarityScore } from '@/components/recitation/WaveformOverlay';
+import { buildSurahLevels, getRecommendedReview, buildGuidedVerses } from '@/lib/progressInsights';
 
 /**
  * Centralized state hook for the Index page.
@@ -95,6 +96,8 @@ export function useIndexState() {
   const [pendingSaveBlob, setPendingSaveBlob] = useState<Blob | null>(null);
   const [pendingSaveScore, setPendingSaveScore] = useState<number | null>(null);
   const [pendingEnvelopeScore, setPendingEnvelopeScore] = useState<number | null>(null);
+  const [pendingTranscription, setPendingTranscription] = useState<string | null>(null);
+  const [pendingErrorCount, setPendingErrorCount] = useState<number>(0);
   const [showNoCredits, setShowNoCredits] = useState(false);
 
   // ── Audio + storage + credits ──────────────────────────────────────
@@ -250,6 +253,11 @@ export function useIndexState() {
     progress: s.totalVerses > 0 ? (s.masteredVerses / s.totalVerses) * 100 : 0,
   }));
 
+  // ── Progression insights (levels, recommended review, guided verses) ──
+  const surahLevels = buildSurahLevels(surahProgress, corrections);
+  const recommendedReview = getRecommendedReview(surahLevels);
+  const guidedVerses = buildGuidedVerses(corrections, 1);
+
   // Keep userAudioBlob in sync with the recorder hook
   useEffect(() => {
     if (audioBlob && !isRecording) {
@@ -404,6 +412,8 @@ export function useIndexState() {
             word: err.word,
             ruleType: normalizeRuleType(err.ruleType),
             ruleDescription: err.ruleDescription,
+            correctionExample: err.correction ?? null,
+            severity: err.severity ?? null,
           });
         }
       }
@@ -421,6 +431,8 @@ export function useIndexState() {
         setPendingSaveBlob(recording.blob);
         setPendingSaveScore(data.overallScore ?? null);
         setPendingEnvelopeScore(envelopeScore);
+        setPendingTranscription(data.transcribedText ?? null);
+        setPendingErrorCount(Array.isArray(data.errors) ? data.errors.length : 0);
         setShowSaveDialog(true);
       }
     } catch (error) {
@@ -499,11 +511,15 @@ export function useIndexState() {
       durationSeconds: recordingStats.durationMs ? recordingStats.durationMs / 1000 : undefined,
       analysisScore: pendingSaveScore ?? undefined,
       envelopeSimilarityScore: pendingEnvelopeScore ?? undefined,
+      transcription: pendingTranscription,
+      errorCount: pendingErrorCount,
       qiraat: selectedQiraat ?? 'hafs_asim',
     });
     setPendingSaveBlob(null);
     setPendingSaveScore(null);
     setPendingEnvelopeScore(null);
+    setPendingTranscription(null);
+    setPendingErrorCount(0);
     setShowSaveDialog(false);
   };
 
@@ -600,6 +616,10 @@ export function useIndexState() {
     progressData,
     mockCorrections,
     surahStatuses,
+    surahProgress,
+    surahLevels,
+    recommendedReview,
+    guidedVerses,
 
     // handlers
     handleStartRecording,

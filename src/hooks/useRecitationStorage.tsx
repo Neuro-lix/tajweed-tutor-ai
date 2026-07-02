@@ -11,6 +11,8 @@ export interface StoredRecitation {
   durationSeconds: number | null;
   analysisScore: number | null;
   envelopeSimilarityScore: number | null;
+  transcription: string | null;
+  errorCount: number | null;
   qiraat: string;
   createdAt: string;
 }
@@ -25,10 +27,13 @@ interface UseRecitationStorageReturn {
     durationSeconds?: number;
     analysisScore?: number;
     envelopeSimilarityScore?: number;
+    transcription?: string | null;
+    errorCount?: number;
     qiraat?: string;
   }) => Promise<string | null>;
   deleteRecording: (id: string, storagePath: string) => Promise<boolean>;
   downloadRecording: (storagePath: string, filename?: string) => Promise<void>;
+  getPlaybackUrl: (storagePath: string) => Promise<string | null>;
   fetchRecordings: () => Promise<void>;
 }
 
@@ -58,6 +63,8 @@ export const useRecitationStorage = (): UseRecitationStorageReturn => {
           durationSeconds: r.duration_seconds,
           analysisScore: r.analysis_score,
           envelopeSimilarityScore: r.envelope_similarity_score,
+          transcription: r.transcription ?? null,
+          errorCount: r.error_count ?? null,
           qiraat: r.qiraat,
           createdAt: r.created_at,
         }))
@@ -77,6 +84,8 @@ export const useRecitationStorage = (): UseRecitationStorageReturn => {
       durationSeconds?: number;
       analysisScore?: number;
       envelopeSimilarityScore?: number;
+      transcription?: string | null;
+      errorCount?: number;
       qiraat?: string;
     }): Promise<string | null> => {
       if (!user) {
@@ -84,7 +93,7 @@ export const useRecitationStorage = (): UseRecitationStorageReturn => {
         return null;
       }
 
-      const { audioBlob, surahNumber, verseNumber, durationSeconds, analysisScore, qiraat, envelopeSimilarityScore } = params;
+      const { audioBlob, surahNumber, verseNumber, durationSeconds, analysisScore, qiraat, envelopeSimilarityScore, transcription, errorCount } = params;
 
       const ext = audioBlob.type.includes('wav') ? 'wav' : audioBlob.type.includes('mp4') ? 'mp4' : 'webm';
       const timestamp = Date.now();
@@ -112,6 +121,8 @@ export const useRecitationStorage = (): UseRecitationStorageReturn => {
             duration_seconds: durationSeconds ?? null,
             analysis_score: analysisScore ?? null,
             envelope_similarity_score: envelopeSimilarityScore ?? null,
+            transcription: transcription ?? null,
+            error_count: errorCount ?? 0,
             qiraat: qiraat ?? 'hafs_asim',
           })
           .select('id')
@@ -178,12 +189,26 @@ export const useRecitationStorage = (): UseRecitationStorageReturn => {
     []
   );
 
+  const getPlaybackUrl = useCallback(async (storagePath: string): Promise<string | null> => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('recitations')
+        .createSignedUrl(storagePath, 3600);
+      if (error) throw error;
+      return data?.signedUrl ?? null;
+    } catch (err) {
+      console.error('[RecitationStorage] getPlaybackUrl error:', err);
+      return null;
+    }
+  }, []);
+
   return {
     recordings,
     loading,
     saveRecording,
     deleteRecording,
     downloadRecording,
+    getPlaybackUrl,
     fetchRecordings,
   };
 };

@@ -23,6 +23,8 @@ interface Correction {
   word: string;
   ruleType: string;
   ruleDescription: string;
+  correctionExample: string | null;
+  severity: string | null;
   isResolved: boolean;
   createdAt: string;
 }
@@ -130,6 +132,8 @@ export const useUserProgress = () => {
             word: c.word,
             ruleType: c.rule_type,
             ruleDescription: c.rule_description,
+            correctionExample: (c as any).correction_example ?? null,
+            severity: (c as any).severity ?? null,
             isResolved: c.is_resolved || false,
             createdAt: c.created_at,
           }))
@@ -190,6 +194,8 @@ export const useUserProgress = () => {
           word: correction.word,
           rule_type: correction.ruleType,
           rule_description: correction.ruleDescription,
+          correction_example: correction.correctionExample ?? null,
+          severity: correction.severity ?? null,
         })
         .select()
         .single();
@@ -205,6 +211,8 @@ export const useUserProgress = () => {
             word: data.word,
             ruleType: data.rule_type,
             ruleDescription: data.rule_description,
+            correctionExample: (data as any).correction_example ?? null,
+            severity: (data as any).severity ?? null,
             isResolved: false,
             createdAt: data.created_at,
           },

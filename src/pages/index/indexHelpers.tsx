@@ -11,6 +11,8 @@ export type AppView =
   | 'recordings'
   | 'boutique'
   | 'ijaza'
+  | 'guided-review'
+  | 'tajweed-errors'
   | 'admin';
 
 export interface AnalysisResult {
