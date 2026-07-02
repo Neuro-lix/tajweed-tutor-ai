@@ -270,7 +270,7 @@ const Index = () => {
 
         <main className="container mx-auto px-4 py-8">
           <Suspense fallback={<ReportSkeleton />}>
-            <RecordingsLibrary />
+            <RecordingsLibrary userName={s.profile?.fullName} qiraat={s.selectedQiraat ?? undefined} />
           </Suspense>
         </main>
 
