@@ -84,6 +84,33 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
+
+    // ── Best-effort LLM usage logger (never blocks or throws) ──
+    const logUsage = async (entry: {
+      model: string;
+      operation: string;
+      status: string;
+      credits_charged?: number;
+      usage?: Record<string, number> | null;
+    }) => {
+      try {
+        const u = entry.usage ?? {};
+        await sbAdmin.from("llm_usage").insert({
+          user_id: userId,
+          function_name: "analyze-recitation",
+          model: entry.model,
+          operation: entry.operation,
+          prompt_tokens: u.prompt_tokens ?? 0,
+          completion_tokens: u.completion_tokens ?? 0,
+          total_tokens: u.total_tokens ?? 0,
+          credits_charged: entry.credits_charged ?? 0,
+          status: entry.status,
+        });
+      } catch (logErr) {
+        console.error("[analyze-recitation] llm_usage log failed:", logErr);
+      }
+    };
+
     const { data: rl } = await sbAdmin.rpc("check_and_increment_rate_limit", {
       p_user_id: userId, p_action: "analyze-recitation", p_max: 20, p_window_seconds: 3600,
     });
@@ -263,6 +290,11 @@ serve(async (req) => {
     const actualNorm = stripDiacritics(transcribedText || "");
     console.log("[analyze-recitation] Similarity:", similarity.toFixed(2));
 
+    // Log the transcription (Whisper) step — no credit charged, tracking only
+    if (hasAudio && transcriptionOk) {
+      await logUsage({ model: transcriptionEngine, operation: "transcription", status: "success" });
+    }
+
     // 3) Tajweed analysis via Lovable AI Gateway (Gemini model, no external key needed)
     const gatewayUrl = `https://ai.gateway.lovable.dev/v1/chat/completions`;
 
@@ -373,6 +405,7 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
     if (!response.ok) {
       const errorText = await response.text();
       console.error("[analyze-recitation] Lovable AI error:", response.status, errorText);
+      await logUsage({ model: "google/gemini-2.5-flash", operation: "analysis", status: `error_${response.status}` });
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Limite de requêtes atteinte. Réessayez dans un instant." }),
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -389,22 +422,13 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
     const content = aiResponse?.choices?.[0]?.message?.content;
 
     // ── Log LLM usage (best-effort; never blocks the response) ──
-    try {
-      const usage = (aiResponse?.usage ?? {}) as Record<string, number>;
-      await sbAdmin.from("llm_usage").insert({
-        user_id: userId,
-        function_name: "analyze-recitation",
-        model: "google/gemini-2.5-flash",
-        operation: "analysis",
-        prompt_tokens: usage.prompt_tokens ?? 0,
-        completion_tokens: usage.completion_tokens ?? 0,
-        total_tokens: usage.total_tokens ?? 0,
-        credits_charged: 1,
-        status: "success",
-      });
-    } catch (logErr) {
-      console.error("[analyze-recitation] llm_usage log failed:", logErr);
-    }
+    await logUsage({
+      model: "google/gemini-2.5-flash",
+      operation: "analysis",
+      status: "success",
+      credits_charged: 1,
+      usage: (aiResponse?.usage ?? {}) as Record<string, number>,
+    });
 
     let analysis: any;
     try {
