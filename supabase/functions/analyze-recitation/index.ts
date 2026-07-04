@@ -84,6 +84,33 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
+
+    // ── Best-effort LLM usage logger (never blocks or throws) ──
+    const logUsage = async (entry: {
+      model: string;
+      operation: string;
+      status: string;
+      credits_charged?: number;
+      usage?: Record<string, number> | null;
+    }) => {
+      try {
+        const u = entry.usage ?? {};
+        await sbAdmin.from("llm_usage").insert({
+          user_id: userId,
+          function_name: "analyze-recitation",
+          model: entry.model,
+          operation: entry.operation,
+          prompt_tokens: u.prompt_tokens ?? 0,
+          completion_tokens: u.completion_tokens ?? 0,
+          total_tokens: u.total_tokens ?? 0,
+          credits_charged: entry.credits_charged ?? 0,
+          status: entry.status,
+        });
+      } catch (logErr) {
+        console.error("[analyze-recitation] llm_usage log failed:", logErr);
+      }
+    };
+
     const { data: rl } = await sbAdmin.rpc("check_and_increment_rate_limit", {
       p_user_id: userId, p_action: "analyze-recitation", p_max: 20, p_window_seconds: 3600,
     });
