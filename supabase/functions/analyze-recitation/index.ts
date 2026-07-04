@@ -290,6 +290,11 @@ serve(async (req) => {
     const actualNorm = stripDiacritics(transcribedText || "");
     console.log("[analyze-recitation] Similarity:", similarity.toFixed(2));
 
+    // Log the transcription (Whisper) step — no credit charged, tracking only
+    if (hasAudio && transcriptionOk) {
+      await logUsage({ model: transcriptionEngine, operation: "transcription", status: "success" });
+    }
+
     // 3) Tajweed analysis via Lovable AI Gateway (Gemini model, no external key needed)
     const gatewayUrl = `https://ai.gateway.lovable.dev/v1/chat/completions`;
 
