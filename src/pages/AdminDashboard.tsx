@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Users, Clock, Globe, TrendingUp, Award, BookOpen, ShoppingBag, GripVertical, Settings, Eye, EyeOff, BarChart2, Activity, RefreshCw, Target, AlertTriangle, Download, Radar as RadarIcon, CreditCard } from "lucide-react";
+import { ArrowLeft, Users, Clock, Globe, TrendingUp, Award, BookOpen, ShoppingBag, GripVertical, Settings, Eye, EyeOff, BarChart2, Activity, RefreshCw, Target, AlertTriangle, Download, Radar as RadarIcon, CreditCard, Package } from "lucide-react";
+import { downloadFullSourceZip, getBundledFileCount } from "@/lib/downloadSource";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SURAHS } from "@/data/quranData";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip as ReTooltip } from "recharts";
@@ -300,6 +302,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
           <Button variant="outline" size="sm" onClick={loadStats} disabled={refreshing}>
             <RefreshCw className={"w-4 h-4 mr-2 " + (refreshing ? "animate-spin" : "")} />
             Actualiser
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              try {
+                toast.info(`Préparation de ${getBundledFileCount()} fichiers…`);
+                await downloadFullSourceZip();
+                toast.success("ZIP téléchargé");
+              } catch (e) {
+                toast.error("Échec du téléchargement");
+                console.error(e);
+              }
+            }}
+            title="Télécharger le code source complet en ZIP"
+          >
+            <Package className="w-4 h-4 mr-2" />
+            Code (ZIP)
           </Button>
         </div>
       </header>
