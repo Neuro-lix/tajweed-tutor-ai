@@ -46,16 +46,16 @@ export const useLeaderboard = () => {
   const fetchLeaderboard = useCallback(async () => {
     try {
       const { data, error } = await supabase
-        .from('leaderboard')
+        .from('leaderboard_public' as any)
         .select('*')
         .order('total_xp', { ascending: false })
         .limit(100);
 
       if (error) throw error;
 
-      const entries: LeaderboardEntry[] = (data || []).map((entry, index) => ({
+      const entries: LeaderboardEntry[] = (data || []).map((entry: any, index) => ({
         id: entry.id,
-        displayName: entry.display_name || getAnonymousName(entry.user_id),
+        displayName: entry.display_name || getAnonymousName(entry.id),
         totalXp: entry.total_xp,
         currentLevel: entry.current_level,
         totalVersesMastered: entry.total_verses_mastered,
@@ -63,7 +63,7 @@ export const useLeaderboard = () => {
         currentStreak: entry.current_streak,
         longestStreak: entry.longest_streak,
         rankPosition: index + 1,
-        isCurrentUser: user?.id === entry.user_id,
+        isCurrentUser: !!entry.is_current_user,
       }));
 
       setLeaderboard(entries);
