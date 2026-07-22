@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import ProductPreviewModal from '@/components/shop/ProductPreviewModal';
 import { sheetPreviews, livret1Pages, livret2Pages } from '@/data/shopPreviews';
+import { PageSeo } from '@/components/seo/PageSeo';
 
 const PAYPAL_EMAIL = import.meta.env.VITE_PAYPAL_EMAIL || '';
 const RETURN_URL = `${window.location.origin}/shop/success`;

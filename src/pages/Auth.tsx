@@ -139,6 +139,11 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <PageSeo
+        title="Connexion — Tajweed Tutor AI"
+        description="Connecte-toi à Tajweed Tutor AI pour accéder à ton coach IA de récitation du Coran, tes progrès et tes analyses de tajwīd."
+        path="/auth"
+      />
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-10 left-10"><Star8Point size={100} className="text-primary" /></div>
         <div className="absolute bottom-10 right-10"><Star8Point size={150} className="text-gold-warm" /></div>
