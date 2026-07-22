@@ -10,6 +10,7 @@ import { Star8Point } from '@/components/decorative/GeometricPattern';
 import { useLanguage } from '@/contexts/LanguageContext';
 import logoImage from '@/logo.png';
 import { Loader2, Mail, Lock, User, Eye, EyeOff, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
+import { PageSeo } from '@/components/seo/PageSeo';
 
 type AuthView = 'login' | 'signup' | 'forgot';
 
