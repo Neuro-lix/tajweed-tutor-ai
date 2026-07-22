@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import ProductPreviewModal from '@/components/shop/ProductPreviewModal';
 import { sheetPreviews, livret1Pages, livret2Pages } from '@/data/shopPreviews';
+import { PageSeo } from '@/components/seo/PageSeo';
 
 const PAYPAL_EMAIL = import.meta.env.VITE_PAYPAL_EMAIL || '';
 const RETURN_URL = `${window.location.origin}/shop/success`;
@@ -204,6 +205,11 @@ const Shop: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSeo
+        title="Boutique — Crédits & ressources Tajwīd | Tajweed Tutor AI"
+        description="Achète des crédits d'analyse IA et télécharge des ressources Coran & tajwīd : livrets, fiches Makhārij, planners de mémorisation."
+        path="/shop"
+      />
       {/* Header */}
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 flex items-center gap-3">

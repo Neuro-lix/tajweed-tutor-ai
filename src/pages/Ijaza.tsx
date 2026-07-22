@@ -16,6 +16,7 @@ import { SheikhCard } from '@/components/ijaza/SheikhCard';
 import { IjazaRequestForm } from '@/components/ijaza/IjazaRequestForm';
 import { MyIjazaRequests } from '@/components/ijaza/MyIjazaRequests';
 import { IjazaCalendar } from '@/components/ijaza/IjazaCalendar';
+import { PageSeo } from '@/components/seo/PageSeo';
 
 interface IjazaPageProps {
   userName?: string;
@@ -60,6 +61,11 @@ export const IjazaPage: React.FC<IjazaPageProps> = ({
 
   return (
     <div className="min-h-screen bg-background relative">
+      <PageSeo
+        title="Ijāzah — Certification Coran & cours privés | Tajweed Tutor AI"
+        description="Passe une Ijāzah avec des sheikhs égyptiens : prérequis, calendrier, réservation de créneaux et cours privés de tajwīd."
+        path="/ijaza"
+      />
       <GeometricPattern className="text-primary" opacity={0.03} />
 
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">

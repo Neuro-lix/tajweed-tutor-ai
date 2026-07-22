@@ -25,6 +25,7 @@ const Diagnostics = lazy(() => import("./pages/Diagnostics"));
 const Health = lazy(() => import("./pages/Health"));
 const AdminRoute = lazy(() => import("./pages/AdminRoute"));
 const MyLlmUsage = lazy(() => import("./pages/MyLlmUsage"));
+const NooraniQaida = lazy(() => import("./pages/NooraniQaida"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,6 +79,7 @@ const App = () => (
                     <Route path="/verify/:id" element={<VerifyCertificate />} />
                     <Route path="/diagnostics" element={<Diagnostics />} />
                     <Route path="/health" element={<Health />} />
+                    <Route path="/noorani-qaida" element={<NooraniQaida />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
