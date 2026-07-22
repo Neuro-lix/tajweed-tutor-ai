@@ -6,6 +6,7 @@ import { GeometricPattern, Ornament } from '@/components/decorative/GeometricPat
 import logoImage from '@/logo.png';
 import type { IndexState } from '../useIndexState';
 import { renderHeroTitle } from '../indexHelpers';
+import { PageSeo } from '@/components/seo/PageSeo';
 
 interface LandingViewProps {
   state: IndexState;
@@ -16,9 +17,14 @@ export const LandingView = ({ state: s }: LandingViewProps) => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
+      <PageSeo
+        title="Tajweed Tutor AI — Coach IA de récitation du Coran"
+        description="Améliore ta récitation du Coran avec un coach IA de tajwīd : analyse verset par verset, comparaison audio et suivi des 10 Qirā’āt."
+        path="/"
+      />
       <GeometricPattern className="text-primary" opacity={0.04} />
 
-      <div className="relative z-10 container mx-auto px-4 py-12 md:py-20">
+      <main className="relative z-10 container mx-auto px-4 py-12 md:py-20">
         <div className="absolute top-4 right-4 flex gap-2">
           {s.user ? (
             <>
@@ -41,12 +47,22 @@ export const LandingView = ({ state: s }: LandingViewProps) => {
 
         <div className="text-center max-w-4xl mx-auto mb-16 animate-fade-in">
           <div className="flex justify-center mb-8">
-            <img
-              src={logoImage}
-              alt="Tajweed Tutor AI"
-              className="h-24 w-24 object-contain cursor-pointer rounded-2xl shadow-lg"
+            <button
+              type="button"
               onClick={s.handleLogoClick}
-            />
+              aria-label="Tajweed Tutor AI logo"
+              className="rounded-2xl shadow-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <img
+                src={logoImage}
+                alt="Tajweed Tutor AI"
+                width={96}
+                height={96}
+                fetchPriority="high"
+                decoding="async"
+                className="h-24 w-24 object-contain rounded-2xl"
+              />
+            </button>
           </div>
           {s.devMode && (
             <div className="flex flex-col items-center gap-2 mb-4">
@@ -135,7 +151,7 @@ export const LandingView = ({ state: s }: LandingViewProps) => {
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">{feature.title}</h3>
+                <h2 className="text-xl font-semibold text-foreground mb-2">{feature.title}</h2>
                 <p className="text-muted-foreground text-sm">{feature.description}</p>
               </CardContent>
             </Card>
@@ -158,7 +174,7 @@ export const LandingView = ({ state: s }: LandingViewProps) => {
         <p className="text-center text-sm text-muted-foreground mt-8 max-w-xl mx-auto">
           {t.landingDisclaimer}
         </p>
-      </div>
+      </main>
     </div>
   );
 };

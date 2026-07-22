@@ -190,7 +190,14 @@ export const Boutique: React.FC<BoutiqueProps> = ({ onBack }) => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Button variant="ghost" onClick={onBack}><ArrowLeft className="w-4 h-4 mr-2" />Retour</Button>
-            <h1 className="font-bold text-lg cursor-default select-none" onClick={handleTitleClick}>Boutique Islamique</h1>
+            <button
+              type="button"
+              onClick={handleTitleClick}
+              aria-label="Boutique Islamique"
+              className="font-bold text-lg select-none bg-transparent border-0 p-0 cursor-default"
+            >
+              Boutique Islamique
+            </button>
             {cartCount > 0 ? (
               <div className="flex items-center gap-2">
                 <Badge variant="default" className="flex items-center gap-1"><ShoppingCart className="w-3 h-3" />{cartCount} · {cartTotal.toFixed(2)}€</Badge>
