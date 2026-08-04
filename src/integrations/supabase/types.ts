@@ -764,32 +764,6 @@ export type Database = {
           total_xp: number | null
           updated_at: string | null
         }
-        Insert: {
-          current_level?: number | null
-          current_streak?: number | null
-          display_name?: string | null
-          id?: string | null
-          is_current_user?: never
-          longest_streak?: number | null
-          perfect_recitations?: number | null
-          rank_position?: number | null
-          total_verses_mastered?: number | null
-          total_xp?: number | null
-          updated_at?: string | null
-        }
-        Update: {
-          current_level?: number | null
-          current_streak?: number | null
-          display_name?: string | null
-          id?: string | null
-          is_current_user?: never
-          longest_streak?: number | null
-          perfect_recitations?: number | null
-          rank_position?: number | null
-          total_verses_mastered?: number | null
-          total_xp?: number | null
-          updated_at?: string | null
-        }
         Relationships: []
       }
     }
