@@ -175,6 +175,24 @@ export const LandingView = ({ state: s }: LandingViewProps) => {
         <p className="text-center text-sm text-muted-foreground mt-8 max-w-xl mx-auto">
           {t.landingDisclaimer}
         </p>
+
+        <nav
+          aria-label="Ressources d’apprentissage"
+          className="mt-12 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm"
+        >
+          <Link to="/tajwid" className="text-muted-foreground hover:text-primary underline-offset-4 hover:underline">
+            Règles du tajwīd
+          </Link>
+          <Link to="/noorani-qaida" className="text-muted-foreground hover:text-primary underline-offset-4 hover:underline">
+            Noorani Qaida
+          </Link>
+          <Link to="/ijaza" className="text-muted-foreground hover:text-primary underline-offset-4 hover:underline">
+            Ijāza
+          </Link>
+          <Link to="/shop" className="text-muted-foreground hover:text-primary underline-offset-4 hover:underline">
+            Boutique
+          </Link>
+        </nav>
       </main>
     </div>
   );
