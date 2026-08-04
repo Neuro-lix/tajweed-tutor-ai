@@ -3,7 +3,6 @@ import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { GeometricPattern, Ornament } from '@/components/decorative/GeometricPattern';
-import logoImage from '@/logo.png';
 import type { IndexState } from '../useIndexState';
 import { renderHeroTitle } from '../indexHelpers';
 import { PageSeo } from '@/components/seo/PageSeo';
@@ -54,7 +53,9 @@ export const LandingView = ({ state: s }: LandingViewProps) => {
               className="rounded-2xl shadow-lg focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <img
-                src={logoImage}
+                src="/img/logo-192.webp"
+                srcSet="/img/logo-96.webp 96w, /img/logo-192.webp 192w, /img/logo-384.webp 384w"
+                sizes="96px"
                 alt="Tajweed Tutor AI"
                 width={96}
                 height={96}
@@ -174,6 +175,24 @@ export const LandingView = ({ state: s }: LandingViewProps) => {
         <p className="text-center text-sm text-muted-foreground mt-8 max-w-xl mx-auto">
           {t.landingDisclaimer}
         </p>
+
+        <nav
+          aria-label="Ressources d’apprentissage"
+          className="mt-12 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm"
+        >
+          <Link to="/tajwid" className="text-muted-foreground hover:text-primary underline-offset-4 hover:underline">
+            Règles du tajwīd
+          </Link>
+          <Link to="/noorani-qaida" className="text-muted-foreground hover:text-primary underline-offset-4 hover:underline">
+            Noorani Qaida
+          </Link>
+          <Link to="/ijaza" className="text-muted-foreground hover:text-primary underline-offset-4 hover:underline">
+            Ijāza
+          </Link>
+          <Link to="/shop" className="text-muted-foreground hover:text-primary underline-offset-4 hover:underline">
+            Boutique
+          </Link>
+        </nav>
       </main>
     </div>
   );

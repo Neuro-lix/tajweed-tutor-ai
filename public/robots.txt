@@ -12,3 +12,11 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /my-usage
+Disallow: /diagnostics
+Disallow: /health
+Disallow: /shop/success
+
+Sitemap: https://recite-perfectly-bot.lovable.app/sitemap.xml
