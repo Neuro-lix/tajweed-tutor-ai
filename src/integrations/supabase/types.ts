@@ -764,32 +764,6 @@ export type Database = {
           total_xp: number | null
           updated_at: string | null
         }
-        Insert: {
-          current_level?: number | null
-          current_streak?: number | null
-          display_name?: string | null
-          id?: string | null
-          is_current_user?: never
-          longest_streak?: number | null
-          perfect_recitations?: number | null
-          rank_position?: number | null
-          total_verses_mastered?: number | null
-          total_xp?: number | null
-          updated_at?: string | null
-        }
-        Update: {
-          current_level?: number | null
-          current_streak?: number | null
-          display_name?: string | null
-          id?: string | null
-          is_current_user?: never
-          longest_streak?: number | null
-          perfect_recitations?: number | null
-          rank_position?: number | null
-          total_verses_mastered?: number | null
-          total_xp?: number | null
-          updated_at?: string | null
-        }
         Relationships: []
       }
     }
@@ -808,6 +782,22 @@ export type Database = {
         Returns: Json
       }
       deduct_credit: { Args: { p_user_id: string }; Returns: number }
+      get_public_leaderboard: {
+        Args: never
+        Returns: {
+          current_level: number
+          current_streak: number
+          display_name: string
+          id: string
+          is_current_user: boolean
+          longest_streak: number
+          perfect_recitations: number
+          rank_position: number
+          total_verses_mastered: number
+          total_xp: number
+          updated_at: string
+        }[]
+      }
       verify_certificate: {
         Args: { p_id: string }
         Returns: {
