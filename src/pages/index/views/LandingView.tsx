@@ -3,7 +3,6 @@ import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { GeometricPattern, Ornament } from '@/components/decorative/GeometricPattern';
-import logoImage from '@/logo.png';
 import type { IndexState } from '../useIndexState';
 import { renderHeroTitle } from '../indexHelpers';
 import { PageSeo } from '@/components/seo/PageSeo';
@@ -54,7 +53,9 @@ export const LandingView = ({ state: s }: LandingViewProps) => {
               className="rounded-2xl shadow-lg focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <img
-                src={logoImage}
+                src="/img/logo-192.webp"
+                srcSet="/img/logo-96.webp 96w, /img/logo-192.webp 192w, /img/logo-384.webp 384w"
+                sizes="96px"
                 alt="Tajweed Tutor AI"
                 width={96}
                 height={96}
