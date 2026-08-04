@@ -782,22 +782,6 @@ export type Database = {
         Returns: Json
       }
       deduct_credit: { Args: { p_user_id: string }; Returns: number }
-      get_public_leaderboard: {
-        Args: never
-        Returns: {
-          current_level: number
-          current_streak: number
-          display_name: string
-          id: string
-          is_current_user: boolean
-          longest_streak: number
-          perfect_recitations: number
-          rank_position: number
-          total_verses_mastered: number
-          total_xp: number
-          updated_at: string
-        }[]
-      }
       verify_certificate: {
         Args: { p_id: string }
         Returns: {
