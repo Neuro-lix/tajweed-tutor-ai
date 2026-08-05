@@ -26,7 +26,8 @@ const Health = lazy(() => import("./pages/Health"));
 const AdminRoute = lazy(() => import("./pages/AdminRoute"));
 const MyLlmUsage = lazy(() => import("./pages/MyLlmUsage"));
 const NooraniQaida = lazy(() => import("./pages/NooraniQaida"));
-const Tajwid = lazy(() => import("./pages/Tajwid"));
+const TajwidHub = lazy(() => import("./pages/tajweed/TajwidHub"));
+const TajwidTopic = lazy(() => import("./pages/tajweed/TajwidTopic"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -81,7 +82,10 @@ const App = () => (
                     <Route path="/diagnostics" element={<Diagnostics />} />
                     <Route path="/health" element={<Health />} />
                     <Route path="/noorani-qaida" element={<NooraniQaida />} />
-                    <Route path="/tajwid" element={<Tajwid />} />
+                    <Route path="/tajwid" element={<TajwidHub />} />
+                    <Route path="/tajwid/:topic" element={<TajwidTopic />} />
+                    <Route path="/:lang/tajwid" element={<TajwidHub />} />
+                    <Route path="/:lang/tajwid/:topic" element={<TajwidTopic />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
