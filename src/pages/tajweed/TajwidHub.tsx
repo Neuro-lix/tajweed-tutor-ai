@@ -116,7 +116,7 @@ const TajwidHub = () => {
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <p className="text-sm text-muted-foreground">{item.text}</p>
-                    <p dir="auto" className="text-sm text-foreground/80 border-l-2 border-primary/40 pl-3">
+                    <p dir="auto" className="text-sm text-foreground/80 border-s-2 border-primary/40 ps-3">
                       {item.example}
                     </p>
                   </CardContent>
