@@ -19,7 +19,12 @@ export const LOCALE_HREFLANG: Record<Locale, string> = {
   ar: 'ar',
 };
 
-export const TOPIC_SLUGS = ['makharij', 'sifat', 'madd'] as const;
+/** The three core lessons, shown as "pillars" on the hub. */
+export const PILLAR_SLUGS = ['makharij', 'sifat', 'madd'] as const;
+export type PillarSlug = (typeof PILLAR_SLUGS)[number];
+
+/** Every lesson slug, including the extra lessons (waqf/ibtidā', qalqalah). */
+export const TOPIC_SLUGS = ['makharij', 'sifat', 'madd', 'waqf-ibtida', 'qalqalah'] as const;
 export type TopicSlug = (typeof TOPIC_SLUGS)[number];
 
 /** Builds the URL path of a page for a given locale. `/tajwid` for fr, `/en/tajwid` otherwise. */
@@ -73,7 +78,7 @@ export interface HubContent {
 
 type Dict = {
   hub: HubContent;
-  topics: Record<TopicSlug, TopicContent>;
+  topics: Record<PillarSlug, TopicContent>;
 };
 
 const fr: Dict = {
