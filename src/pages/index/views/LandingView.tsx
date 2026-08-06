@@ -6,6 +6,7 @@ import { GeometricPattern, Ornament } from '@/components/decorative/GeometricPat
 import type { IndexState } from '../useIndexState';
 import { renderHeroTitle } from '../indexHelpers';
 import { PageSeo } from '@/components/seo/PageSeo';
+import { TajwidLinks } from '@/pages/tajweed/TajwidLinks';
 
 interface LandingViewProps {
   state: IndexState;
@@ -193,6 +194,8 @@ export const LandingView = ({ state: s }: LandingViewProps) => {
             Boutique
           </Link>
         </nav>
+
+        <TajwidLinks locale="fr" className="mt-12 max-w-3xl mx-auto" />
       </main>
     </div>
   );
