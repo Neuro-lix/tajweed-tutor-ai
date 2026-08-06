@@ -114,6 +114,87 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://recite-perfectly-bot.lovable.app/tajwid/waqf-ibtida</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://recite-perfectly-bot.lovable.app/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://recite-perfectly-bot.lovable.app/en/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://recite-perfectly-bot.lovable.app/ar/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://recite-perfectly-bot.lovable.app/tajwid/waqf-ibtida" />
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://recite-perfectly-bot.lovable.app/en/tajwid/waqf-ibtida</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://recite-perfectly-bot.lovable.app/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://recite-perfectly-bot.lovable.app/en/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://recite-perfectly-bot.lovable.app/ar/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://recite-perfectly-bot.lovable.app/tajwid/waqf-ibtida" />
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://recite-perfectly-bot.lovable.app/ar/tajwid/waqf-ibtida</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://recite-perfectly-bot.lovable.app/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://recite-perfectly-bot.lovable.app/en/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://recite-perfectly-bot.lovable.app/ar/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://recite-perfectly-bot.lovable.app/tajwid/waqf-ibtida" />
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://recite-perfectly-bot.lovable.app/tajwid/qalqalah</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://recite-perfectly-bot.lovable.app/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://recite-perfectly-bot.lovable.app/en/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://recite-perfectly-bot.lovable.app/ar/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://recite-perfectly-bot.lovable.app/tajwid/qalqalah" />
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://recite-perfectly-bot.lovable.app/en/tajwid/qalqalah</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://recite-perfectly-bot.lovable.app/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://recite-perfectly-bot.lovable.app/en/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://recite-perfectly-bot.lovable.app/ar/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://recite-perfectly-bot.lovable.app/tajwid/qalqalah" />
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://recite-perfectly-bot.lovable.app/ar/tajwid/qalqalah</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://recite-perfectly-bot.lovable.app/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://recite-perfectly-bot.lovable.app/en/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://recite-perfectly-bot.lovable.app/ar/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://recite-perfectly-bot.lovable.app/tajwid/qalqalah" />
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://recite-perfectly-bot.lovable.app/tajwid/faq</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://recite-perfectly-bot.lovable.app/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://recite-perfectly-bot.lovable.app/en/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://recite-perfectly-bot.lovable.app/ar/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://recite-perfectly-bot.lovable.app/tajwid/faq" />
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://recite-perfectly-bot.lovable.app/en/tajwid/faq</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://recite-perfectly-bot.lovable.app/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://recite-perfectly-bot.lovable.app/en/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://recite-perfectly-bot.lovable.app/ar/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://recite-perfectly-bot.lovable.app/tajwid/faq" />
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://recite-perfectly-bot.lovable.app/ar/tajwid/faq</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://recite-perfectly-bot.lovable.app/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://recite-perfectly-bot.lovable.app/en/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://recite-perfectly-bot.lovable.app/ar/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://recite-perfectly-bot.lovable.app/tajwid/faq" />
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://recite-perfectly-bot.lovable.app/noorani-qaida</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
