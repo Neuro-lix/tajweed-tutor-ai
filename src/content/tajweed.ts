@@ -454,7 +454,23 @@ const ar: Dict = {
   },
 };
 
-export const TAJWEED_CONTENT: Record<Locale, Dict> = { fr, en, ar };
+import { TAJWEED_EXTRA } from './tajweedExtra';
+
+export interface FullDict {
+  hub: HubContent;
+  topics: Record<TopicSlug, TopicContent>;
+}
+
+const merge = (base: Dict, locale: Locale): FullDict => ({
+  hub: base.hub,
+  topics: { ...base.topics, ...TAJWEED_EXTRA[locale].topics },
+});
+
+export const TAJWEED_CONTENT: Record<Locale, FullDict> = {
+  fr: merge(fr, 'fr'),
+  en: merge(en, 'en'),
+  ar: merge(ar, 'ar'),
+};
 
 export const isLocale = (value: string | undefined): value is Locale =>
   !!value && (LOCALES as readonly string[]).includes(value);
