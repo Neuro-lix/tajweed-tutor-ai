@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { GeometricPattern } from '@/components/decorative/GeometricPattern';
 import { PageSeo } from '@/components/seo/PageSeo';
+import { TajwidLinks } from '@/pages/tajweed/TajwidLinks';
 
 const LESSONS = [
   {
