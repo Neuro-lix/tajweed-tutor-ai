@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { GeometricPattern } from '@/components/decorative/GeometricPattern';
 import { PageSeo } from '@/components/seo/PageSeo';
 import { LocaleSwitcher } from './LocaleSwitcher';
+import { TajwidLinks } from './TajwidLinks';
+import { TopicQuiz } from './TopicQuiz';
 import { buildAlternates } from './seoLinks';
 import {
   TAJWEED_CONTENT,
@@ -30,7 +32,7 @@ const TajwidTopic = () => {
   const content = topics[topic];
   const basePath = `/tajwid/${topic}`;
   const url = `${BASE_URL}${localizedPath(locale, basePath)}`;
-  const siblings = TOPIC_SLUGS.filter((s) => s !== topic);
+  const faqPath = localizedPath(locale, '/tajwid/faq');
 
   return (
     <div className="min-h-screen bg-background relative" dir={dir}>
@@ -136,26 +138,16 @@ const TajwidTopic = () => {
               </Card>
             ))}
           </div>
+          <p className="mt-4 text-sm">
+            <Link to={faqPath} className="text-primary underline-offset-4 hover:underline">
+              {hub.faqHeading} — {hub.h1}
+            </Link>
+          </p>
         </section>
 
-        <nav aria-label={hub.topicsHeading} className="mb-12">
-          <h2 className="text-xl font-semibold text-foreground mb-4">{hub.topicsHeading}</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {siblings.map((slug) => (
-              <Card key={slug}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">{topics[slug].title}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="text-sm text-muted-foreground">{topics[slug].summary}</p>
-                  <Button asChild variant="outline" size="sm">
-                    <Link to={localizedPath(locale, `/tajwid/${slug}`)}>{hub.readMore}</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </nav>
+        <TopicQuiz locale={locale} topic={topic} />
+
+        <TajwidLinks locale={locale} exclude={topic} className="mb-12" />
 
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="py-8 text-center space-y-4">
