@@ -127,6 +127,8 @@ const NooraniQaida = () => {
             récitation (waqf). Un vrai parcours structuré, sans prérequis.
           </p>
         </section>
+
+        <TajwidLinks locale="fr" className="mt-12" />
       </main>
     </div>
   );
