@@ -366,19 +366,14 @@ serve(async (req) => {
       if (!transcriptionOk) {
         console.log("[analyze-recitation] Using Lovable AI transcription (gpt-4o-mini-transcribe)...");
         try {
-          const binaryString = atob(base64Payload);
-          const bytes = new Uint8Array(binaryString.length);
-          for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
-
-          const rawMime = (audioMimeType || "audio/wav").split(";")[0].trim();
-          const ext = rawMime.includes("webm") ? "webm" : rawMime.includes("mp4") ? "mp4" : rawMime.includes("mpeg") || rawMime.includes("mp3") ? "mp3" : "wav";
-
+          const bytes = decodeAudioBytes();
           const formData = new FormData();
-          formData.append("file", new Blob([bytes], { type: rawMime }), `audio.${ext}`);
+          formData.append("file", new Blob([bytes], { type: rawMimeType }), `audio.${audioExt}`);
           formData.append("model", "openai/gpt-4o-mini-transcribe");
           formData.append("language", "ar");
+          // NOTE: `gpt-4o-mini-transcribe` does NOT support `verbose_json` nor
+          // `timestamp_granularities: ["word"]` — it only returns plain text.
+          // Per-word confidence on this path is derived from text similarity.
 
           const whisperResponse = await fetch("https://ai.gateway.lovable.dev/v1/audio/transcriptions", {
             method: "POST",
@@ -408,6 +403,45 @@ serve(async (req) => {
         } catch (e) {
           console.error("[analyze-recitation] Transcription exception:", e);
           whisperError = e instanceof Error ? e.message : "Erreur de transcription";
+        }
+      }
+
+      // ─── Path C: OpenAI whisper-1 with per-word timestamps + probabilities ───
+      // `whisper-1` is the only OpenAI model supporting `verbose_json` +
+      // `timestamp_granularities: ["word"]`, which gives real per-word confidence.
+      if (!transcriptionOk && OPENAI_API_KEY) {
+        console.log("[analyze-recitation] Falling back to OpenAI whisper-1 (verbose_json, word timestamps)...");
+        try {
+          const bytes = decodeAudioBytes();
+          const form = new FormData();
+          form.append("file", new Blob([bytes], { type: rawMimeType }), `audio.${audioExt}`);
+          form.append("model", "whisper-1");
+          form.append("language", "ar");
+          form.append("response_format", "verbose_json");
+          form.append("timestamp_granularities[]", "word");
+
+          const oaResp = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${OPENAI_API_KEY}` },
+            body: form,
+          });
+          if (!oaResp.ok) {
+            const errTxt = await oaResp.text();
+            console.error("[analyze-recitation] OpenAI whisper-1 error:", oaResp.status, errTxt);
+          } else {
+            const oaJson = await oaResp.json();
+            const text = (oaJson.text || "").trim();
+            if (text.length >= 3) {
+              transcribedText = text;
+              transcriptionOk = true;
+              transcriptionEngine = "whisper-1";
+              whisperError = null;
+              whisperWords = Array.isArray(oaJson.words) ? (oaJson.words as WhisperWord[]) : null;
+              console.log("[analyze-recitation] whisper-1 words:", whisperWords?.length ?? 0);
+            }
+          }
+        } catch (e) {
+          console.error("[analyze-recitation] OpenAI whisper-1 exception:", e);
         }
       }
     }
