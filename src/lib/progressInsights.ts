@@ -233,3 +233,156 @@ export const buildPriorityFixes = (
     .sort((a, b) => b.weight - a.weight || b.errorCount - a.errorCount)
     .slice(0, limit);
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Guided repetition driven by the SM-2 review table
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface Sm2ReviewLike {
+  surahNumber: number;
+  verseNumber: number;
+  nextReviewDate: Date;
+  easeFactor: number;
+  repetitions: number;
+}
+
+export type DueStatus = 'overdue' | 'today' | 'upcoming' | 'none';
+
+export interface Sm2GuidedVerse extends GuidedVerse {
+  /** SM-2 scheduling status for this verse. */
+  dueStatus: DueStatus;
+  /** Days late (positive) when overdue, else 0. */
+  daysOverdue: number;
+  /** SM-2 ease factor, when the verse is in the review queue. */
+  easeFactor: number | null;
+  /** Weighted urgency used for ordering. */
+  priority: number;
+  /** Severity-weighted rule breakdown for this verse. */
+  ruleWeights: { rule: string; weight: number }[];
+}
+
+export interface RulePriority {
+  rule: string;
+  /** Severity-weighted, SM-2 boosted score. */
+  score: number;
+  errorCount: number;
+  verseCount: number;
+}
+
+export interface Sm2GuidedPlan {
+  /** Tajwīd rules to focus on, most urgent first. */
+  priorityRules: RulePriority[];
+  /** Verses to replay, most urgent first. */
+  verses: Sm2GuidedVerse[];
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * SM-2 boost: overdue verses and verses with a low ease factor (i.e. repeatedly
+ * failed) weigh more than verses scheduled far in the future.
+ */
+const sm2Boost = (review: Sm2ReviewLike | undefined, now: Date): { boost: number; status: DueStatus; daysOverdue: number } => {
+  if (!review) return { boost: 1, status: 'none', daysOverdue: 0 };
+  const diffDays = Math.floor((now.getTime() - review.nextReviewDate.getTime()) / DAY_MS);
+  // Ease factor 1.3 (hardest) → 1.6x ; 2.5 (easiest) → 1.0x
+  const easeBoost = 1 + Math.max(0, 2.5 - review.easeFactor) / 2;
+  if (diffDays > 0) {
+    return { boost: (2 + Math.min(diffDays, 14) * 0.1) * easeBoost, status: 'overdue', daysOverdue: diffDays };
+  }
+  if (diffDays === 0) return { boost: 1.8 * easeBoost, status: 'today', daysOverdue: 0 };
+  return { boost: 1.1 * easeBoost, status: 'upcoming', daysOverdue: 0 };
+};
+
+/**
+ * Build a guided-repetition plan restricted to the highest-priority tajwīd
+ * rules, ranked with the SM-2 review schedule (overdue + low ease factor first).
+ */
+export const buildSm2GuidedPlan = (
+  corrections: PriorityCorrectionLike[],
+  reviews: Sm2ReviewLike[],
+  options: { ruleLimit?: number; now?: Date } = {},
+): Sm2GuidedPlan => {
+  const { ruleLimit = 3, now = new Date() } = options;
+
+  const reviewByKey = new Map<string, Sm2ReviewLike>();
+  for (const r of reviews) reviewByKey.set(`${r.surahNumber}:${r.verseNumber}`, r);
+
+  interface Acc extends Sm2GuidedVerse {
+    ruleMap: Map<string, number>;
+  }
+  const byVerse = new Map<string, Acc>();
+  const ruleAgg = new Map<string, { score: number; errorCount: number; verses: Set<string> }>();
+
+  for (const c of corrections) {
+    if (c.isResolved) continue;
+    const key = `${c.surahNumber}:${c.verseNumber}`;
+    const review = reviewByKey.get(key);
+    const { boost, status, daysOverdue } = sm2Boost(review, now);
+    const weight = severityWeight(c.severity) * boost;
+
+    let entry = byVerse.get(key);
+    if (!entry) {
+      entry = {
+        key,
+        surahNumber: c.surahNumber,
+        verseNumber: c.verseNumber,
+        name: getSurahName(c.surahNumber),
+        errorCount: 0,
+        rules: [],
+        dueStatus: status,
+        daysOverdue,
+        easeFactor: review ? review.easeFactor : null,
+        priority: 0,
+        ruleWeights: [],
+        ruleMap: new Map<string, number>(),
+      };
+      byVerse.set(key, entry);
+    }
+    entry.errorCount += 1;
+    entry.priority += weight;
+    entry.ruleMap.set(c.ruleType, (entry.ruleMap.get(c.ruleType) ?? 0) + weight);
+    if (!entry.rules.includes(c.ruleType)) entry.rules.push(c.ruleType);
+
+    const agg = ruleAgg.get(c.ruleType) ?? { score: 0, errorCount: 0, verses: new Set<string>() };
+    agg.score += weight;
+    agg.errorCount += 1;
+    agg.verses.add(key);
+    ruleAgg.set(c.ruleType, agg);
+  }
+
+  const priorityRules: RulePriority[] = Array.from(ruleAgg.entries())
+    .map(([rule, a]) => ({
+      rule,
+      score: Math.round(a.score * 10) / 10,
+      errorCount: a.errorCount,
+      verseCount: a.verses.size,
+    }))
+    .sort((a, b) => b.score - a.score || b.errorCount - a.errorCount)
+    .slice(0, ruleLimit);
+
+  const focus = new Set(priorityRules.map((r) => r.rule));
+
+  const verses = Array.from(byVerse.values())
+    .filter((v) => v.rules.some((r) => focus.has(r)))
+    .map((v) => ({
+      key: v.key,
+      surahNumber: v.surahNumber,
+      verseNumber: v.verseNumber,
+      name: v.name,
+      errorCount: v.errorCount,
+      // Only surface the rules that are part of the focus set.
+      rules: v.rules.filter((r) => focus.has(r)),
+      dueStatus: v.dueStatus,
+      daysOverdue: v.daysOverdue,
+      easeFactor: v.easeFactor,
+      priority: Math.round(v.priority * 10) / 10,
+      ruleWeights: Array.from(v.ruleMap.entries())
+        .filter(([rule]) => focus.has(rule))
+        .map(([rule, weight]) => ({ rule, weight: Math.round(weight * 10) / 10 }))
+        .sort((a, b) => b.weight - a.weight),
+    }))
+    .sort((a, b) => b.priority - a.priority || b.errorCount - a.errorCount);
+
+  return { priorityRules, verses };
+};
