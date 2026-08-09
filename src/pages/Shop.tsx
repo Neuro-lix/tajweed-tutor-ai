@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Star, Sparkles, BookOpen, ArrowLeft, Zap, Loader2, Bitcoin, Eye } from 'lucide-react';
+import { ShoppingBag, Star, Sparkles, BookOpen, ArrowLeft, Zap, Loader2, Bitcoin, Eye, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,6 +13,7 @@ import ProductPreviewModal from '@/components/shop/ProductPreviewModal';
 import { sheetPreviews, livret1Pages, livret2Pages } from '@/data/shopPreviews';
 import { PageSeo } from '@/components/seo/PageSeo';
 import { formatCredits } from '@/lib/credits';
+import { usePaddleCheckout } from '@/hooks/usePaddleCheckout';
 
 const PAYPAL_EMAIL = import.meta.env.VITE_PAYPAL_EMAIL || '';
 const RETURN_URL = `${window.location.origin}/shop/success`;
@@ -86,6 +87,22 @@ const Shop: React.FC = () => {
   const { t } = useLanguage();
   const [cryptoLoading, setCryptoLoading] = useState<string | null>(null);
   const [preview, setPreview] = useState<PreviewData | null>(null);
+  const paddle = usePaddleCheckout();
+
+  // Paiement carte bancaire via Paddle (crédits ajoutés par le webhook `paddle-webhook`).
+  const handleCard = (packId: string) => {
+    if (!user) {
+      toast({ title: 'Connexion requise', description: 'Connecte-toi pour payer par carte.', variant: 'destructive' });
+      return;
+    }
+    if (!paddle.configured) {
+      toast({ title: 'Carte bancaire indisponible', description: 'Le token client Paddle n\'est pas encore configuré.', variant: 'destructive' });
+      return;
+    }
+    if (!paddle.openCheckout(packId)) {
+      toast({ title: 'Paddle se charge…', description: 'Réessaie dans un instant.', variant: 'destructive' });
+    }
+  };
 
   const handlePaypal = (itemName: string, price: number, packId?: string, pdfFile?: string) => {
     if (!PAYPAL_EMAIL || PAYPAL_EMAIL.includes('example.com')) {
@@ -266,11 +283,16 @@ const Shop: React.FC = () => {
                     <p className="text-sm text-muted-foreground mb-6">{t.analysesLabel}</p>
                     <div className="mt-auto w-full space-y-2">
                       <div className="text-2xl font-bold text-foreground mb-3">{pack.price.toFixed(2)}€</div>
-                      <Button size="lg" className="w-full rounded-2xl" onClick={() => handlePaypal(`${pack.name} - ${pack.credits} crédits`, pack.price, pack.id)}>
+                      <Button size="lg" className="w-full rounded-2xl" onClick={() => handleCard(pack.id)} disabled={!paddle.configured}>
+                        <CreditCard className="h-4 w-4 mr-2" /> Carte bancaire
+                      </Button>
+                      <Button size="lg" variant="outline" className="w-full rounded-2xl" onClick={() => handlePaypal(`${pack.name} - ${pack.credits} crédits`, pack.price, pack.id)}>
                         <Zap className="h-4 w-4 mr-2" /> PayPal
                       </Button>
                       <CryptoButton name={`${pack.name} - ${pack.credits} crédits`} price={pack.price} type={pack.id} size="lg" />
-                      <p className="text-[10px] text-muted-foreground mt-1">BTC · ETH · USDT · +150 cryptos</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        {paddle.configured ? 'Visa · Mastercard · Apple Pay · ' : ''}BTC · ETH · USDT · +150 cryptos
+                      </p>
                     </div>
                   </div>
                 ))}
