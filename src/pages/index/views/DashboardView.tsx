@@ -32,7 +32,7 @@ export const DashboardView = ({ state: s }: DashboardViewProps) => (
 const DashboardViewInner = ({ state: s }: DashboardViewProps) => {
   /** Full recap PDF: corrections + tajwīd rules + recent scores/progression. */
   const handleDownloadRecapPdf = () => {
-    if (s.corrections.length === 0 && s.recitationSessions?.length === 0) {
+    if (s.corrections.length === 0) {
       toast.info('Récitez un passage pour générer votre récapitulatif.');
       return;
     }
@@ -48,12 +48,9 @@ const DashboardViewInner = ({ state: s }: DashboardViewProps) => {
         correctionExample: c.correctionExample,
         severity: c.severity,
       })),
-      sessions: (s.recitationSessions ?? []).map((r) => ({
-        surahNumber: r.surahNumber,
-        verseNumber: r.verseNumber,
-        createdAt: r.createdAt,
-        analysisScore: r.analysisScore ?? null,
-      })),
+      // Per-session scores live in the "Mes récitations" library (RecordingsLibrary),
+      // not in the dashboard state — the recap covers corrections + tajwīd rules.
+      sessions: [],
     });
     toast.success('Récapitulatif PDF téléchargé.');
   };
