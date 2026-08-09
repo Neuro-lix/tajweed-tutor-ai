@@ -85,6 +85,37 @@ const PRICE_TO_CREDITS: Record<string, { credits: number; label: string }> = {
   pri_PLACEHOLDER_UNLIMITED: { credits: 9999, label: "Abonnement illimité Paddle" },
 };
 
+// ─── IP allowlist: only Paddle's published IPv4 addresses may post here ───
+const PADDLE_IPS_URL = "https://api.paddle.com/ips";
+const IP_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 h
+let ipCache: { ips: Set<string>; fetchedAt: number } | null = null;
+
+async function getPaddleIps(): Promise<Set<string> | null> {
+  if (ipCache && Date.now() - ipCache.fetchedAt < IP_CACHE_TTL_MS) return ipCache.ips;
+  try {
+    const resp = await fetch(PADDLE_IPS_URL);
+    if (!resp.ok) throw new Error(`status ${resp.status}`);
+    const json = await resp.json();
+    // Response shape: { data: { ipv4_addresses: [...] } } (also tolerate a flat array)
+    const list: string[] = json?.data?.ipv4_addresses ?? json?.ipv4_addresses ?? json?.data ?? [];
+    const ips = new Set(
+      list.map((ip: string) => String(ip).trim().split("/")[0]).filter(Boolean),
+    );
+    if (ips.size === 0) throw new Error("empty list");
+    ipCache = { ips, fetchedAt: Date.now() };
+    return ips;
+  } catch (err) {
+    console.error("[paddle-webhook] Could not fetch Paddle IP list:", err);
+    // Keep serving with the last known good list if we have one.
+    return ipCache?.ips ?? null;
+  }
+}
+
+function clientIp(req: Request): string {
+  const fwd = req.headers.get("x-forwarded-for") ?? "";
+  return (fwd.split(",")[0] || req.headers.get("x-real-ip") || "").trim();
+}
+
 serve(async (req) => {
   const corsHeaders = buildCors(req);
   if (req.method === "OPTIONS") {
@@ -92,6 +123,17 @@ serve(async (req) => {
   }
 
   try {
+    // Reject anything that does not come from a published Paddle IP.
+    const allowedIps = await getPaddleIps();
+    const ip = clientIp(req);
+    if (allowedIps && !allowedIps.has(ip)) {
+      console.error(`[paddle-webhook] Rejected request from non-Paddle IP: ${ip || "unknown"}`);
+      return new Response("Forbidden", { status: 403, headers: corsHeaders });
+    }
+    if (!allowedIps) {
+      console.warn("[paddle-webhook] Paddle IP list unavailable — relying on signature only");
+    }
+
     const rawBody = await req.text();
     const paddleSignature = req.headers.get("paddle-signature");
     const PADDLE_WEBHOOK_SECRET = Deno.env.get("PADDLE_WEBHOOK_SECRET");
