@@ -650,6 +650,94 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
               </CardContent>
             </Card>
           </div>
+        ) : tab === "business" ? (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: "Rétention D7", value: stats.business.retentionD7.rate + "%", sub: `${stats.business.retentionD7.retained}/${stats.business.retentionD7.cohort} de la cohorte`, icon: Activity, color: "text-blue-600" },
+                { label: "Rétention D30", value: stats.business.retentionD30.rate + "%", sub: `${stats.business.retentionD30.retained}/${stats.business.retentionD30.cohort} de la cohorte`, icon: Activity, color: "text-indigo-600" },
+                { label: "Conversion payante", value: stats.business.conversionRate + "%", sub: `${stats.business.payingUsers} acheteurs`, icon: CreditCard, color: "text-emerald-600" },
+                { label: "Transactions", value: stats.business.paymentMethods.reduce((s, m) => s + m.count, 0), sub: "achats de crédits", icon: TrendingUp, color: "text-amber-600" },
+              ].map(kpi => (
+                <Card key={kpi.label}>
+                  <CardContent className="p-4 text-center space-y-1">
+                    <kpi.icon className={"w-5 h-5 mx-auto " + kpi.color} />
+                    <p className="text-2xl font-bold">{kpi.value}</p>
+                    <p className="text-xs text-muted-foreground">{kpi.label}</p>
+                    <p className="text-[10px] text-muted-foreground/70">{kpi.sub}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-primary" />Revenus par méthode de paiement
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {stats.business.paymentMethods.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Aucun achat enregistré pour l'instant.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {stats.business.paymentMethods.map(m => (
+                      <div key={m.method} className="flex items-center gap-3">
+                        <span className="text-sm font-medium w-24">{m.method}</span>
+                        <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
+                          <div className="bg-primary h-2 rounded-full" style={{ width: m.pct + "%" }} />
+                        </div>
+                        <Badge variant="secondary" className="text-[10px]">{m.count} · {m.pct}%</Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Target className="w-4 h-4 text-primary" />Entonnoir de conversion
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {(() => {
+                  const f = stats.business.funnel;
+                  const steps = [
+                    { label: "Inscrits", value: f.signups },
+                    { label: "≥ 1 session", value: f.withSession },
+                    { label: "≥ 1 achat", value: f.withPurchase },
+                  ];
+                  return (
+                    <div className="space-y-2">
+                      {steps.map((s, i) => {
+                        const prev = i === 0 ? null : steps[i - 1].value;
+                        const stepRate = prev ? Math.round((s.value / prev) * 100) : null;
+                        const width = f.signups ? Math.max(6, (s.value / f.signups) * 100) : 6;
+                        return (
+                          <div key={s.label} className="space-y-1">
+                            {stepRate !== null && (
+                              <p className="text-[11px] text-muted-foreground pl-1">↓ {stepRate}% de conversion</p>
+                            )}
+                            <div className="flex items-center gap-3">
+                              <div
+                                className="bg-primary/80 text-primary-foreground rounded-md py-2 px-3 text-sm font-medium transition-all"
+                                style={{ width: width + "%" }}
+                              >
+                                {s.value}
+                              </div>
+                              <span className="text-sm text-muted-foreground">{s.label}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+          </div>
         ) : tab === "boutique" ? (
           <div className="space-y-6">
             <Card>
