@@ -16,6 +16,8 @@ import {
 import { useLanguage } from '@/contexts/LanguageContext';
 import { SURAHS } from '@/data/quranData';
 import { generateReportPDF } from '@/utils/pdfGenerator';
+import { PronunciationCoach } from '@/components/coach/PronunciationCoach';
+import { HighlightedVerse } from '@/components/coach/HighlightedVerse';
 
 interface RecitationError {
   word: string;
@@ -184,7 +186,12 @@ export const RecitationReport: React.FC<RecitationReportProps> = ({
             <CardContent className="space-y-3">
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Texte attendu:</p>
-                <p className="font-arabic text-lg" dir="rtl">{expectedText}</p>
+                <HighlightedVerse text={expectedText} errorWords={errors.map((e) => e.word)} />
+                {errors.length > 0 && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Les mots soulignés en rouge sont ceux où une erreur a été détectée.
+                  </p>
+                )}
               </div>
               {transcribedText && (
                 <div>
@@ -256,6 +263,14 @@ export const RecitationReport: React.FC<RecitationReportProps> = ({
                         </p>
                       </div>
                     )}
+                    <div className="pt-2 border-t no-print">
+                      <PronunciationCoach
+                        word={error.word}
+                        ruleType={error.ruleType}
+                        ruleDescription={error.ruleDescription}
+                        correction={error.correction}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>

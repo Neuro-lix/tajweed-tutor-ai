@@ -70,7 +70,11 @@ serve(async (req) => {
       });
     }
 
-    const { text, language = 'fr' } = await req.json();
+    const { text, language = 'fr', speed } = await req.json();
+    // Clamp playback speed (OpenAI TTS accepts 0.25–4.0); used for slow-motion coaching.
+    const ttsSpeed = typeof speed === 'number' && isFinite(speed)
+      ? Math.min(2, Math.max(0.5, speed))
+      : 1;
 
     if (!text || typeof text !== 'string' || text.trim().length === 0) {
       return new Response(JSON.stringify({ error: 'Text is required' }), {
@@ -103,6 +107,7 @@ serve(async (req) => {
         input: text,
         voice: language === 'ar' ? 'nova' : 'alloy', // nova for Arabic-friendly, alloy for others
         response_format: 'mp3',
+        speed: ttsSpeed,
       }),
     });
 

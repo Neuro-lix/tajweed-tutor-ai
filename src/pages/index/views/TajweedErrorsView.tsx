@@ -7,6 +7,7 @@ import { ChevronLeft, BookOpen, Play, FileText, Lightbulb } from 'lucide-react';
 import { getRuleFamilyMeta, classifyRule, RULE_FAMILY_META, type RuleFamily } from '@/lib/tajweedRules';
 import { getSurahName } from '@/lib/progressInsights';
 import { generateCorrectionsSummaryPDF } from '@/utils/pdfGenerator';
+import { PronunciationCoach } from '@/components/coach/PronunciationCoach';
 import { toast } from 'sonner';
 import type { IndexState } from '../useIndexState';
 
@@ -163,6 +164,15 @@ export const TajweedErrorsView = ({ state: s }: Props) => {
                         <div className="flex items-start gap-2 mt-2 text-sm text-emerald-700 bg-emerald-50 rounded-md p-2">
                           <Lightbulb className="h-4 w-4 mt-0.5 shrink-0" />
                           <span>{example}</span>
+                        </div>
+                        <div className="mt-2">
+                          <PronunciationCoach
+                            compact
+                            word={c.word}
+                            ruleType={c.ruleType}
+                            ruleDescription={c.ruleDescription}
+                            correction={c.correctionExample}
+                          />
                         </div>
                       </div>
                     );
