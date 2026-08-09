@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -38,11 +38,14 @@ export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect
   const [focusedIdx, setFocusedIdx] = useState<number>(0);
   const gridRef = useRef<HTMLDivElement | null>(null);
 
-  const surahsByJuz: Record<number, typeof SURAHS> = {};
-  SURAHS.forEach((surah) => {
-    if (!surahsByJuz[surah.juz]) surahsByJuz[surah.juz] = [];
-    surahsByJuz[surah.juz].push(surah);
-  });
+  const surahsByJuz = useMemo(() => {
+    const map: Record<number, typeof SURAHS> = {};
+    SURAHS.forEach((surah) => {
+      if (!map[surah.juz]) map[surah.juz] = [];
+      map[surah.juz].push(surah);
+    });
+    return map;
+  }, []);
 
   const getSurahStatus = (surahId: number): SurahStatus => {
     return surahStatuses.find(s => s.id === surahId) || {
@@ -52,9 +55,10 @@ export const QuranMap: React.FC<QuranMapProps> = ({ surahStatuses, onSurahSelect
     };
   };
 
-  const displayedSurahs = showAll
-    ? (selectedJuz ? surahsByJuz[selectedJuz] || [] : SURAHS)
-    : SURAHS.slice(0, 30);
+  const displayedSurahs = useMemo(
+    () => (showAll ? (selectedJuz ? surahsByJuz[selectedJuz] || [] : SURAHS) : SURAHS.slice(0, 30)),
+    [showAll, selectedJuz, surahsByJuz],
+  );
 
   const juzNumbers = Array.from({ length: 30 }, (_, i) => i + 1);
 

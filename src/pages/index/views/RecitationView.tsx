@@ -15,6 +15,7 @@ import { RecitationSkeleton, ReportSkeleton } from '@/components/ui/skeleton-car
 import { SURAHS } from '@/data/quranData';
 import type { IndexState } from '../useIndexState';
 import { getGlobalAyahNumber } from '../indexHelpers';
+import { formatCredits } from '@/lib/credits';
 
 const RecitationInterface = lazy(() => import('@/components/recitation/RecitationInterface').then(m => ({ default: m.RecitationInterface })));
 const RecitationReport = lazy(() => import('@/components/reports/RecitationReport').then(m => ({ default: m.RecitationReport })));
@@ -48,7 +49,7 @@ export const RecitationView = ({ state: s }: RecitationViewProps) => {
                   s.credits === 0 ? 'bg-destructive/15 text-destructive' : s.isLowCredits ? 'bg-secondary/15 text-secondary' : 'bg-primary/15 text-primary'
                 }`}>
                   <Zap className="h-3.5 w-3.5" />
-                  <span>{s.credits}</span>
+                  <span>{formatCredits(s.credits)}</span>
                 </div>
               )}
               <Star8Point size={24} className="text-primary" />

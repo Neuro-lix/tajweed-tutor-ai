@@ -12,6 +12,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import ProductPreviewModal from '@/components/shop/ProductPreviewModal';
 import { sheetPreviews, livret1Pages, livret2Pages } from '@/data/shopPreviews';
 import { PageSeo } from '@/components/seo/PageSeo';
+import { formatCredits } from '@/lib/credits';
 
 const PAYPAL_EMAIL = import.meta.env.VITE_PAYPAL_EMAIL || '';
 const RETURN_URL = `${window.location.origin}/shop/success`;
@@ -220,7 +221,7 @@ const Shop: React.FC = () => {
           <span className="font-semibold text-lg text-foreground">{t.shopTitle}</span>
           {credits !== null && credits !== undefined && (
             <Badge variant="outline" className="ml-auto">
-              <Zap className="h-3 w-3 mr-1" /> {credits} {t.creditsLabel}
+              <Zap className="h-3 w-3 mr-1" /> {formatCredits(credits)} {t.creditsLabel}
             </Badge>
           )}
         </div>

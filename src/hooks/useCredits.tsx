@@ -35,13 +35,13 @@ export const useCredits = () => {
           .eq('user_id', user.id)
           .maybeSingle();
         if (retryData) {
-          setCredits(retryData.credits);
-          if (retryData.credits === 5) setIsFirstLogin(true);
+          setCredits(Number(retryData.credits));
+          if (Number(retryData.credits) === 5) setIsFirstLogin(true);
         } else {
           setCredits(0);
         }
       } else {
-        setCredits(data.credits);
+        setCredits(Number(data.credits));
       }
     } catch (error) {
       console.error('Error fetching credits:', error);
@@ -55,19 +55,22 @@ export const useCredits = () => {
     fetchCredits();
   }, [fetchCredits]);
 
-  const deductCredit = useCallback(async (): Promise<boolean> => {
+  const deductCredit = useCallback(async (amount = 1): Promise<boolean> => {
     if (!user) return false;
 
     try {
       const { data, error } = await supabase.rpc('deduct_credit', {
         p_user_id: user.id,
+        p_amount: amount,
       });
 
       if (error) throw error;
 
-      if (typeof data === 'number') {
-        setCredits(data);
-        return data >= 0;
+      if (typeof data === 'number' || typeof data === 'string') {
+        const balance = Number(data);
+        if (balance < 0) return false;
+        setCredits(balance);
+        return true;
       }
       return false;
     } catch (error) {
@@ -78,11 +81,16 @@ export const useCredits = () => {
 
   const hasCredits = credits !== null && credits > 0;
   const isLowCredits = credits !== null && credits > 0 && credits <= 2;
+  const hasCreditsFor = useCallback(
+    (amount: number) => credits !== null && credits >= amount,
+    [credits],
+  );
 
   return {
     credits,
     loading,
     hasCredits,
+    hasCreditsFor,
     isLowCredits,
     isFirstLogin,
     deductCredit,

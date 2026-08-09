@@ -129,13 +129,13 @@ export const ReferenceRecitations: React.FC<ReferenceRecitationsProps> = ({
       };
 
   // Build audio URL
-  const getAudioUrl = (reciter: ReciterInfo): string => {
+  const getAudioUrl = useCallback((reciter: ReciterInfo): string => {
     const ayahNumber = getAyahNumber(surahNumber, verseNumber);
     // everyayah.com format: SSSAAA.mp3 (e.g. 001001.mp3)
     const surahPad = String(surahNumber).padStart(3, '0');
     const versePad = String(verseNumber).padStart(3, '0');
     return `${reciter.audioBaseUrl}/${surahPad}${versePad}.mp3`;
-  };
+  }, [surahNumber, verseNumber]);
   
   const getFallbackUrl = (reciter: ReciterInfo): string | null => {
     const fallback = FALLBACK_URLS[reciter.id];
@@ -295,7 +295,7 @@ export const ReferenceRecitations: React.FC<ReferenceRecitationsProps> = ({
     } finally {
       setIsCaching(false);
     }
-  }, [isOnline, isCaching, isCached, selectedReciter, surahNumber, verseNumber, cacheAudio]);
+  }, [isOnline, isCaching, isCached, selectedReciter, surahNumber, verseNumber, cacheAudio, getAudioUrl]);
 
   // Handle reciter change
   const handleReciterChange = (reciter: ReciterInfo) => {

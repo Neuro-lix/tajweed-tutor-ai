@@ -90,7 +90,7 @@ export const useLeaderboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     fetchLeaderboard();

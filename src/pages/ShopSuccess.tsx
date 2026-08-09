@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Download, ArrowLeft, Loader2, Zap } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -44,6 +44,12 @@ const ShopSuccess: React.FC = () => {
   const [creditsAdded, setCreditsAdded] = useState(false);
   const [addingCredits, setAddingCredits] = useState(false);
 
+  // Refs so the polling effect can read the latest values without re-subscribing.
+  const creditsAddedRef = useRef(false);
+  const tRef = useRef(t);
+  useEffect(() => { creditsAddedRef.current = creditsAdded; }, [creditsAdded]);
+  useEffect(() => { tRef.current = t; }, [t]);
+
   const packId = searchParams.get('pack');
   const pdfParam = searchParams.get('pdf');
   const packInfo = packId ? PACK_CREDITS[packId] : null;
@@ -62,10 +68,10 @@ const ShopSuccess: React.FC = () => {
     const timeout = setTimeout(() => {
       clearInterval(interval);
       setAddingCredits(false);
-      if (!creditsAdded) {
+      if (!creditsAddedRef.current) {
         toast({
-          title: t.shopSuccessWaitingConfirm,
-          description: t.shopSuccessWaitingDesc,
+          title: tRef.current.shopSuccessWaitingConfirm,
+          description: tRef.current.shopSuccessWaitingDesc,
         });
       }
     }, 30000);
@@ -74,7 +80,7 @@ const ShopSuccess: React.FC = () => {
       clearInterval(interval);
       clearTimeout(timeout);
     };
-  }, [packInfo, user]);
+  }, [packInfo, user, refetch, toast]);
 
   useEffect(() => {
     if (!packInfo || creditsAdded || !addingCredits) return;
@@ -82,11 +88,11 @@ const ShopSuccess: React.FC = () => {
       setCreditsAdded(true);
       setAddingCredits(false);
       toast({
-        title: t.shopSuccessCreditsAdded,
-        description: t.shopSuccessCreditsAddedDesc,
+        title: tRef.current.shopSuccessCreditsAdded,
+        description: tRef.current.shopSuccessCreditsAddedDesc,
       });
     }
-  }, [credits, packInfo, creditsAdded, addingCredits]);
+  }, [credits, packInfo, creditsAdded, addingCredits, toast]);
 
   const handleDownload = async (fileName: string) => {
     setDownloading(fileName);

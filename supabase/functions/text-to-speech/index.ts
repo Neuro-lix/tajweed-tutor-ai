@@ -1,6 +1,9 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { encode as base64Encode } from 'https://deno.land/std@0.168.0/encoding/base64.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { CREDIT_COSTS } from '../_shared/credit-costs.ts';
+
+const TTS_CREDIT_COST = CREDIT_COSTS.textToSpeech;
 
 type RateLimitResult = { allowed: boolean; count: number; limit: number; reset_at: string };
 
@@ -89,6 +92,24 @@ serve(async (req) => {
       });
     }
 
+    // ── Solde de crédits requis avant tout appel TTS ──
+    const { data: creditRow } = await sbAdmin
+      .from('user_credits')
+      .select('credits')
+      .eq('user_id', userId)
+      .maybeSingle();
+    const balance = Number(creditRow?.credits ?? 0);
+    if (!creditRow || balance < TTS_CREDIT_COST) {
+      return new Response(JSON.stringify({
+        error: 'insufficient_credits',
+        required: TTS_CREDIT_COST,
+        balance,
+        message: "Crédits insuffisants pour la synthèse vocale, achetez un pack de crédits.",
+      }), {
+        status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       console.error('[text-to-speech] Missing LOVABLE_API_KEY');
@@ -125,6 +146,13 @@ serve(async (req) => {
     const audioBuffer = await response.arrayBuffer();
     const base64Audio = base64Encode(audioBuffer);
 
+    // ── Déduction du crédit après un appel réussi ──
+    try {
+      await sbAdmin.rpc('deduct_credit', { p_user_id: userId, p_amount: TTS_CREDIT_COST });
+    } catch (creditErr) {
+      console.error('[text-to-speech] credit deduction failed:', creditErr);
+    }
+
     // ── Log LLM usage (best-effort; TTS has no token counts) ──
     try {
       await sbAdmin.from('llm_usage').insert({
@@ -135,7 +163,7 @@ serve(async (req) => {
         prompt_tokens: 0,
         completion_tokens: 0,
         total_tokens: 0,
-        credits_charged: 0,
+        credits_charged: TTS_CREDIT_COST,
         status: 'success',
       });
     } catch (logErr) {

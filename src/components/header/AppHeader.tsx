@@ -7,6 +7,7 @@ import { LogOut, MessageSquareHeart, Award, Music, ShoppingBag, GraduationCap, Z
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import logoImage from '@/logo.png';
+import { formatCredits } from '@/lib/credits';
 
 interface AppHeaderProps {
   fullName?: string | null;
@@ -68,7 +69,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 }`}
               >
                 <Zap className="h-3.5 w-3.5" />
-                <span>{credits}</span>
+                <span>{formatCredits(credits)}</span>
               </button>
             )}
             <LanguageSelector />

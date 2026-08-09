@@ -802,7 +802,10 @@ export type Database = {
         }
         Returns: Json
       }
-      deduct_credit: { Args: { p_user_id: string }; Returns: number }
+      deduct_credit: {
+        Args: { p_amount?: number; p_user_id: string }
+        Returns: number
+      }
       verify_certificate: {
         Args: { p_id: string }
         Returns: {

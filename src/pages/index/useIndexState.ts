@@ -20,7 +20,7 @@ import { useTranslationSettings } from '@/contexts/TranslationContext';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchAyah } from '@/lib/quranApi';
 import { AnalysisResult, AppView, getGlobalAyahNumber, normalizeRuleType } from './indexHelpers';
-import { calculateEnvelopeSimilarityScore } from '@/components/recitation/WaveformOverlay';
+import { calculateEnvelopeSimilarityScore } from '@/lib/envelopeSimilarity';
 import { buildSurahLevels, getRecommendedReview, buildGuidedVerses } from '@/lib/progressInsights';
 
 /**

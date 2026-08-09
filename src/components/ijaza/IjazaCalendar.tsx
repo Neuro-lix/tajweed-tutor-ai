@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -65,7 +65,7 @@ export const IjazaCalendar: React.FC<IjazaCalendarProps> = ({
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  const loadSlots = async () => {
+  const loadSlots = useCallback(async () => {
     setLoading(true);
     try {
       const startDate = new Date(year, month, 1).toISOString().split("T")[0];
@@ -95,9 +95,9 @@ export const IjazaCalendar: React.FC<IjazaCalendarProps> = ({
       console.error("Calendar load error:", e);
     }
     setLoading(false);
-  };
+  }, [year, month, isAdmin, sheikhId]);
 
-  useEffect(() => { loadSlots(); }, [year, month, isAdmin, sheikhId]);
+  useEffect(() => { loadSlots(); }, [loadSlots]);
 
   const getSlotsForDate = (dateStr: string) =>
     slots.filter(s => s.booking_date === dateStr);
