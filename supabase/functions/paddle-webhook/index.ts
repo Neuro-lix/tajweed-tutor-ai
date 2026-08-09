@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { clientIpFrom, isIpAllowed, parsePaddleIps } from "./ipAllowlist.ts";
 
 // ─── CORS: env-driven allowlist (no wildcard). Paddle posts server-to-server
 // without an Origin, so this mainly matters for any browser preflight. ───
