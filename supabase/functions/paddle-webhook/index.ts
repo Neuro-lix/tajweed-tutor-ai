@@ -245,7 +245,12 @@ serve(async (req) => {
         const { data, error } = await supabase.rpc("add_credits", {
           p_user_id: userId,
           p_amount: totalCredits,
-          p_description: description,
+          // On garde la référence Paddle dans la description : c'est le seul
+          // endroit qui permet ensuite de rapprocher un crédit d'un paiement
+          // (pas de table `payments` dédiée). Format parsé par src/lib/paymentsCsv.ts.
+          p_description: `${description} [txn:${transactionId}]${
+            transaction.invoice_number ? ` [achat:${transaction.invoice_number}]` : ""
+          }`,
         });
 
         if (error) {

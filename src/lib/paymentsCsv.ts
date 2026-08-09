@@ -7,6 +7,21 @@ export interface PaymentRow {
   provider: string;
 }
 
+/**
+ * Références Paddle stockées dans la description par `paddle-webhook`
+ * sous la forme `... [txn:txn_123] [achat:12345]`.
+ */
+export const extractPaddleRefs = (
+  description: string | null,
+): { transactionId: string; purchaseId: string } => ({
+  transactionId: description?.match(/\[txn:([^\]]+)\]/)?.[1] ?? '',
+  purchaseId: description?.match(/\[achat:([^\]]+)\]/)?.[1] ?? '',
+});
+
+/** Description sans les références techniques, pour l'affichage. */
+export const cleanDescription = (description: string | null): string =>
+  (description ?? '').replace(/\s*\[(txn|achat):[^\]]+\]/g, '').trim();
+
 /** Infer the payment provider from the transaction description written by the webhooks. */
 export const inferProvider = (description: string | null): string => {
   const d = (description ?? '').toLowerCase();
@@ -24,18 +39,31 @@ const escapeCell = (v: unknown): string => {
 
 export const buildPaymentsCsv = (rows: PaymentRow[]): string => {
   const lines = [
-    ['Date', 'Fournisseur', 'Type', 'Description', 'Crédits'].join(','),
-    ...rows.map((r) =>
-      [
+    [
+      'Date',
+      'Fournisseur',
+      'Type',
+      'Description',
+      'Crédits',
+      'N° transaction Paddle',
+      'ID achat',
+      'ID mouvement (interne)',
+    ].join(','),
+    ...rows.map((r) => {
+      const refs = extractPaddleRefs(r.description);
+      return [
         new Date(r.createdAt).toLocaleString('fr-FR'),
         r.provider,
         r.type,
-        r.description ?? '',
+        cleanDescription(r.description),
         r.amount,
+        refs.transactionId,
+        refs.purchaseId,
+        r.id,
       ]
         .map(escapeCell)
-        .join(','),
-    ),
+        .join(',');
+    }),
   ];
   return lines.join('\n');
 };

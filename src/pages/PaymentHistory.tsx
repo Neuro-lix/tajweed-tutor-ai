@@ -8,7 +8,20 @@ import { PageSeo } from '@/components/seo/PageSeo';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { formatCredits } from '@/lib/credits';
-import { downloadPaymentsCsv, inferProvider, type PaymentRow } from '@/lib/paymentsCsv';
+import {
+  cleanDescription,
+  downloadPaymentsCsv,
+  extractPaddleRefs,
+  inferProvider,
+  type PaymentRow,
+} from '@/lib/paymentsCsv';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
 
 /**
@@ -28,6 +41,9 @@ const PaymentHistory = () => {
   const { user } = useAuth();
   const [rows, setRows] = useState<PaymentRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState('all');
+  const [provider, setProvider] = useState('all');
+  const [status, setStatus] = useState('all');
 
   const fetchRows = useCallback(async () => {
     if (!user) {
@@ -64,14 +80,33 @@ const PaymentHistory = () => {
     fetchRows();
   }, [fetchRows]);
 
-  const totalCredits = useMemo(() => rows.reduce((sum, r) => sum + r.amount, 0), [rows]);
+  const providers = useMemo(
+    () => Array.from(new Set(rows.map((r) => r.provider))).sort(),
+    [rows],
+  );
+
+  const filtered = useMemo(() => {
+    const cutoff =
+      period === 'all' ? null : Date.now() - Number(period) * 24 * 60 * 60 * 1000;
+    return rows.filter((r) => {
+      if (cutoff && new Date(r.createdAt).getTime() < cutoff) return false;
+      if (provider !== 'all' && r.provider !== provider) return false;
+      if (status !== 'all' && r.type !== status) return false;
+      return true;
+    });
+  }, [rows, period, provider, status]);
+
+  const totalCredits = useMemo(
+    () => filtered.reduce((sum, r) => sum + r.amount, 0),
+    [filtered],
+  );
 
   const handleExport = () => {
-    if (rows.length === 0) {
+    if (filtered.length === 0) {
       toast.info('Aucun paiement à exporter.');
       return;
     }
-    downloadPaymentsCsv(rows);
+    downloadPaymentsCsv(filtered);
     toast.success('Historique exporté en CSV.');
   };
 
@@ -99,10 +134,15 @@ const PaymentHistory = () => {
           <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
             <CardTitle className="text-lg flex items-center gap-2">
               <Receipt className="w-5 h-5 text-primary" />
-              {rows.length} transaction{rows.length > 1 ? 's' : ''}
+              {filtered.length} transaction{filtered.length > 1 ? 's' : ''}
             </CardTitle>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={handleExport} disabled={rows.length === 0}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExport}
+                disabled={filtered.length === 0}
+              >
                 <Download className="w-4 h-4 mr-1.5" /> CSV
               </Button>
               <Button asChild size="sm">
@@ -111,36 +151,86 @@ const PaymentHistory = () => {
             </div>
           </CardHeader>
           <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
+              <Select value={period} onValueChange={setPeriod}>
+                <SelectTrigger aria-label="Période">
+                  <SelectValue placeholder="Période" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toute la période</SelectItem>
+                  <SelectItem value="7">7 derniers jours</SelectItem>
+                  <SelectItem value="30">30 derniers jours</SelectItem>
+                  <SelectItem value="90">90 derniers jours</SelectItem>
+                  <SelectItem value="365">12 derniers mois</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={provider} onValueChange={setProvider}>
+                <SelectTrigger aria-label="Fournisseur">
+                  <SelectValue placeholder="Fournisseur" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les fournisseurs</SelectItem>
+                  {providers.map((p) => (
+                    <SelectItem key={p} value={p}>
+                      {p}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger aria-label="Statut">
+                  <SelectValue placeholder="Statut" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les statuts</SelectItem>
+                  <SelectItem value="purchase">Achat</SelectItem>
+                  <SelectItem value="refund">Remboursement</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             {loading ? (
               <div className="py-10 flex justify-center">
                 <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
               </div>
-            ) : rows.length === 0 ? (
+            ) : filtered.length === 0 ? (
               <div className="py-10 text-center space-y-2">
                 <CreditCard className="w-8 h-8 text-muted-foreground mx-auto" />
-                <p className="text-muted-foreground">Aucun paiement pour l'instant.</p>
+                <p className="text-muted-foreground">
+                  {rows.length === 0
+                    ? "Aucun paiement pour l'instant."
+                    : 'Aucun paiement ne correspond à ces filtres.'}
+                </p>
               </div>
             ) : (
               <>
                 <ul className="divide-y divide-border">
-                  {rows.map((r) => (
+                  {filtered.map((r) => {
+                    const refs = extractPaddleRefs(r.description);
+                    return (
                     <li key={r.id} className="py-3 flex items-center justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <Badge variant="secondary">{r.provider}</Badge>
                           <span className="text-sm truncate">
-                            {typeLabel[r.type] ?? r.type} — {r.description || '—'}
+                            {typeLabel[r.type] ?? r.type} — {cleanDescription(r.description) || '—'}
                           </span>
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {new Date(r.createdAt).toLocaleString('fr-FR')}
                         </p>
+                        {(refs.transactionId || refs.purchaseId) && (
+                          <p className="text-[11px] text-muted-foreground font-mono truncate">
+                            {refs.transactionId && `txn ${refs.transactionId}`}
+                            {refs.purchaseId && ` · achat ${refs.purchaseId}`}
+                          </p>
+                        )}
                       </div>
                       <span className="shrink-0 font-semibold tabular-nums text-emerald-600">
                         +{formatCredits(Math.abs(r.amount))}
                       </span>
                     </li>
-                  ))}
+                    );
+                  })}
                 </ul>
                 <p className="text-xs text-muted-foreground pt-4">
                   Total crédité sur la période affichée : {formatCredits(totalCredits)} crédits.
