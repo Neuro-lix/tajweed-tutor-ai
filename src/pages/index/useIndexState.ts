@@ -21,7 +21,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { fetchAyah } from '@/lib/quranApi';
 import { AnalysisResult, AppView, getGlobalAyahNumber, normalizeRuleType } from './indexHelpers';
 import { calculateEnvelopeSimilarityScore } from '@/lib/envelopeSimilarity';
-import { buildSurahLevels, getRecommendedReview, buildGuidedVerses } from '@/lib/progressInsights';
+import { buildSurahLevels, getRecommendedReview, buildGuidedVerses, buildPriorityFixes } from '@/lib/progressInsights';
 
 /**
  * Centralized state hook for the Index page.
@@ -622,6 +622,7 @@ export function useIndexState() {
     surahLevels,
     recommendedReview,
     guidedVerses,
+    priorityFixes,
 
     // handlers
     handleStartRecording,
