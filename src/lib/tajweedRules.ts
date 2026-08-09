@@ -100,3 +100,41 @@ export const classifyRule = (ruleType: string): RuleFamily => {
 
 export const getRuleFamilyMeta = (ruleType: string): RuleFamilyMeta =>
   RULE_FAMILY_META[classifyRule(ruleType)];
+
+/** Short "how to place the sound" coaching cue per rule family. */
+export const ARTICULATION_TIP: Record<RuleFamily, string> = {
+  makharij:
+    "Place le point d'articulation avant de sonoriser : sens où la langue, les lèvres ou la gorge touchent, puis relâche.",
+  sifat:
+    "Garde la même lettre mais change son épaisseur : bouche pleine et arrière-langue relevée pour l'emphase, bouche fine pour la douceur.",
+  madd:
+    "Compte les temps à voix haute (1‑2, ou 1‑2‑3‑4) et tiens la voyelle sans la couper ni la nasaliser.",
+  noon_meem:
+    "Regarde la lettre qui suit : elle décide entre iẓhār (clair), idghām (fusion), iqlāb (m) et ikhfāʾ (voilé avec ghunna).",
+  ghunna:
+    "Ferme la bouche, laisse le son sortir par le nez et tiens environ deux temps.",
+  qalqala:
+    "Coupe le son puis fais un petit rebond sec, sans ajouter de voyelle après la lettre.",
+  waqf:
+    "Prépare ton souffle : arrête-toi sur une fin de sens et reprends au début d'un groupe de mots.",
+  other: "Écoute la référence, répète lentement, puis à vitesse normale.",
+};
+
+/** Build the spoken coaching script the AI voice reads for a detected error. */
+export const buildCoachingScript = (params: {
+  word?: string | null;
+  ruleType: string;
+  ruleDescription?: string | null;
+  correction?: string | null;
+}): string => {
+  const meta = getRuleFamilyMeta(params.ruleType);
+  const parts = [
+    params.word ? `Sur le mot ${params.word},` : 'Sur ce passage,',
+    `la règle concernée est ${meta.label}.`,
+    params.ruleDescription || meta.description,
+    ARTICULATION_TIP[meta.family],
+    params.correction || meta.genericExample,
+    'Répète maintenant lentement, puis à vitesse normale.',
+  ];
+  return parts.filter(Boolean).join(' ');
+};
