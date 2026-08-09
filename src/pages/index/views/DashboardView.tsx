@@ -176,4 +176,5 @@ const DashboardViewInner = ({ state: s }: DashboardViewProps) => {
       onClose={s.dismissNewCertificate}
     />
   </div>
-);
+  );
+};
