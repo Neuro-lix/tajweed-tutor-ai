@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,10 +12,12 @@ import logoImage from '@/logo.png';
 import { Loader2, Mail, Lock, User, Eye, EyeOff, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
 import { PageSeo } from '@/components/seo/PageSeo';
 
-type AuthView = 'login' | 'signup' | 'forgot';
+type AuthView = 'login' | 'signup' | 'forgot' | 'updatePassword';
 
 const Auth = () => {
-  const [view, setView] = useState<AuthView>('login');
+  const [searchParams] = useSearchParams();
+  const isResetFlow = searchParams.get('reset') === 'true';
+  const [view, setView] = useState<AuthView>(isResetFlow ? 'updatePassword' : 'login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -25,6 +27,8 @@ const Auth = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
   const [signupEmail, setSignupEmail] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [resendMessage, setResendMessage] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
@@ -66,12 +70,57 @@ const Auth = () => {
     return msg || t.unexpectedError;
   };
 
+  // Password-recovery links open a session; don't bounce the user away from the form.
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    if (isResetFlow) return;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) navigate('/');
     });
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, isResetFlow]);
+
+  const newPasswordChecks = {
+    minLength: newPassword.length >= 8,
+    hasUppercase: /[A-Z]/.test(newPassword),
+    hasLowercase: /[a-z]/.test(newPassword),
+    hasNumber: /[0-9]/.test(newPassword),
+    passwordsMatch: newPassword === confirmNewPassword && newPassword.length > 0,
+  };
+  const isNewPasswordValid = newPasswordChecks.minLength && newPasswordChecks.hasUppercase &&
+    newPasswordChecks.hasLowercase && newPasswordChecks.hasNumber;
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isNewPasswordValid) {
+      toast({ title: t.invalidPassword, description: t.passwordCriteria, variant: 'destructive' });
+      return;
+    }
+    if (!newPasswordChecks.passwordsMatch) {
+      toast({ title: t.error, description: t.passwordsDoNotMatch, variant: 'destructive' });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        toast({ title: t.error, description: mapAuthError(error), variant: 'destructive', duration: 8000 });
+        return;
+      }
+      toast({ title: t.passwordUpdated, description: t.loginSuccessDesc });
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        navigate('/dashboard');
+      } else {
+        setView('login');
+        setNewPassword('');
+        setConfirmNewPassword('');
+      }
+    } catch {
+      toast({ title: t.error, description: t.unexpectedError, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Countdown between two resend attempts (avoids hitting the auth rate limit).
   useEffect(() => {
