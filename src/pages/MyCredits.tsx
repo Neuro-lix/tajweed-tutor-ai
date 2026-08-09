@@ -132,6 +132,9 @@ const MyCredits = () => {
             <Button asChild variant="outline" size="sm">
               <Link to="/shop">Recharger</Link>
             </Button>
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/payments">Paiements</Link>
+            </Button>
           </CardHeader>
           <CardContent>
             {loading ? (
