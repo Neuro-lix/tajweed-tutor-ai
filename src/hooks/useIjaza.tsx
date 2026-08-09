@@ -4,7 +4,7 @@ import { useAuth } from './useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 
-interface Sheikh {
+export interface Sheikh {
   id: string;
   name: string;
   specialty: string | null;
@@ -14,7 +14,7 @@ interface Sheikh {
   isAvailable: boolean;
 }
 
-interface AvailabilitySlot {
+export interface AvailabilitySlot {
   id: string;
   sheikhId: string;
   dayOfWeek: number;
@@ -23,7 +23,7 @@ interface AvailabilitySlot {
   isBooked: boolean;
 }
 
-interface IjazaRequest {
+export interface IjazaRequest {
   id: string;
   sheikhId: string | null;
   fullName: string;
@@ -39,7 +39,7 @@ interface IjazaRequest {
   createdAt: string;
 }
 
-interface CreateIjazaRequest {
+export interface CreateIjazaRequest {
   sheikhId?: string;
   fullName: string;
   email: string;

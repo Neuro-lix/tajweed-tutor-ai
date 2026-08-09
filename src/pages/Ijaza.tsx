@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { GeometricPattern, Star8Point } from '@/components/decorative/GeometricPattern';
-import { useIjaza } from '@/hooks/useIjaza';
+import { useIjaza, type CreateIjazaRequest } from '@/hooks/useIjaza';
 import { useAuth } from '@/hooks/useAuth';
 import { SheikhCard } from '@/components/ijaza/SheikhCard';
 import { IjazaRequestForm } from '@/components/ijaza/IjazaRequestForm';
@@ -52,8 +52,8 @@ export const IjazaPage: React.FC<IjazaPageProps> = ({
     { title: 'Recommandation', description: "Lettre de recommandation d'un enseignant (optionnel)", icon: Users, required: false, met: undefined },
   ];
 
-  const handleSelectSlot = (sheikh: any, slot: any) => { setSelectedSlotData({ sheikh, slot }); setShowForm(true); };
-  const handleSubmitRequest = async (data: any) => { const result = await submitRequest(data); if (result) { setShowForm(false); setSelectedSlotData(null); } };
+  const handleSelectSlot = (sheikh: SelectedSlotData['sheikh'], slot: SelectedSlotData['slot']) => { setSelectedSlotData({ sheikh, slot }); setShowForm(true); };
+  const handleSubmitRequest = async (data: CreateIjazaRequest) => { const result = await submitRequest(data); if (result) { setShowForm(false); setSelectedSlotData(null); } };
   const handleCancelForm = () => { setShowForm(false); setSelectedSlotData(null); };
 
   const progressPercent = (masteredSurahs / totalSurahs) * 100;

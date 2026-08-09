@@ -1,3 +1,5 @@
+interface ApiAyah { numberInSurah: number; text: string }
+
 export type QuranVerse = {
   verseNumber: number;
   text: string;
@@ -68,8 +70,8 @@ export const fetchSurah = async (
     safeFetchJson(trUrl).catch(() => null),
   ]);
 
-  const arabicAyahs: any[] = arabic?.data?.ayahs ?? [];
-  const trAyahs: any[] = translation?.data?.ayahs ?? [];
+  const arabicAyahs: ApiAyah[] = arabic?.data?.ayahs ?? [];
+  const trAyahs: ApiAyah[] = translation?.data?.ayahs ?? [];
   const trByNumber = new Map<number, string>(trAyahs.map((a) => [a.numberInSurah, a.text]));
 
   const verses: QuranVerse[] = arabicAyahs.map((a) => ({
