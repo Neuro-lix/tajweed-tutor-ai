@@ -24,3 +24,6 @@ verify_jwt = false
 
 [functions.diagnostics-export]
 verify_jwt = false
+
+[functions.claim-admin]
+verify_jwt = false
