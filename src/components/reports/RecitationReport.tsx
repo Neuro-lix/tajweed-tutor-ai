@@ -18,6 +18,7 @@ import { SURAHS } from '@/data/quranData';
 import { generateReportPDF } from '@/utils/pdfGenerator';
 import { PronunciationCoach } from '@/components/coach/PronunciationCoach';
 import { HighlightedVerse } from '@/components/coach/HighlightedVerse';
+import { ConfidenceVerse, type WordConfidence } from '@/components/coach/ConfidenceVerse';
 
 interface RecitationError {
   word: string;
@@ -40,6 +41,7 @@ interface RecitationReportProps {
   textComparison?: string;
   date?: Date;
   userName?: string;
+  wordConfidence?: WordConfidence[];
   onClose?: () => void;
 }
 
@@ -56,6 +58,7 @@ export const RecitationReport: React.FC<RecitationReportProps> = ({
   textComparison,
   date = new Date(),
   userName,
+  wordConfidence,
   onClose,
 }) => {
   const { t } = useLanguage();
@@ -186,7 +189,11 @@ export const RecitationReport: React.FC<RecitationReportProps> = ({
             <CardContent className="space-y-3">
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Texte attendu:</p>
-                <HighlightedVerse text={expectedText} errorWords={errors.map((e) => e.word)} />
+                {wordConfidence && wordConfidence.length > 0 ? (
+                  <ConfidenceVerse text={expectedText} wordConfidence={wordConfidence} />
+                ) : (
+                  <HighlightedVerse text={expectedText} errorWords={errors.map((e) => e.word)} />
+                )}
                 {errors.length > 0 && (
                   <p className="text-xs text-muted-foreground mt-1">
                     Les mots soulignés en rouge sont ceux où une erreur a été détectée.
