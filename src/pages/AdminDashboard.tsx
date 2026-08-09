@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Users, Clock, Globe, TrendingUp, Award, BookOpen, ShoppingBag, GripVertical, Settings, Eye, EyeOff, BarChart2, Activity, RefreshCw, Target, AlertTriangle, Download, Radar as RadarIcon, CreditCard, Package } from "lucide-react";
+import { ArrowLeft, Users, Clock, TrendingUp, Award, BookOpen, ShoppingBag, Settings, BarChart2, Activity, RefreshCw, Target, AlertTriangle, Download, Radar as RadarIcon, CreditCard, Package, LineChart } from "lucide-react";
 import { downloadFullSourceZip, getBundledFileCount } from "@/lib/downloadSource";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,9 +43,6 @@ interface AdminDashboardProps {
 interface UserStat {
   user_id: string;
   full_name: string | null;
-  country_name: string | null;
-  country_code: string | null;
-  language: string | null;
   registered_at: string;
   total_sessions: number;
   avg_score: number;
@@ -63,6 +60,15 @@ interface SurahMetric {
   errorRate: number;   // 100 - successRate
 }
 
+interface BusinessStats {
+  retentionD7: { cohort: number; retained: number; rate: number };
+  retentionD30: { cohort: number; retained: number; rate: number };
+  payingUsers: number;
+  conversionRate: number;
+  paymentMethods: { method: string; count: number; pct: number }[];
+  funnel: { signups: number; withSession: number; withPurchase: number };
+}
+
 interface DashStats {
   totalUsers: number;
   activeToday: number;
@@ -70,17 +76,12 @@ interface DashStats {
   totalRecitations: number;
   avgScore: number;
   ijazaRequests: number;
-  topCountries: { name: string; code: string; count: number }[];
   registrationsByDay: { date: string; count: number }[];
   users: UserStat[];
   surahMetrics: SurahMetric[];
   tajweedErrorBuckets: TajweedErrorBucket[];
+  business: BusinessStats;
 }
-
-const FLAG = (code: string) => {
-  if (!code || code.length !== 2) return "🌍";
-  return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E0 + c.charCodeAt(0) - 65));
-};
 
 const fmtDate = (d: string | null) => {
   if (!d) return "—";
