@@ -63,7 +63,7 @@ export const useIjaza = () => {
     try {
       const { data: sheikhData } = await supabase.from('sheikhs').select('*').order('name');
       if (sheikhData) {
-        setSheikhs(sheikhData.map((s: any) => ({
+        setSheikhs(sheikhData.map((s) => ({
           id: s.id, name: s.name, specialty: s.specialty, languages: s.languages || [],
           bio: s.bio, imageUrl: s.image_url, isAvailable: s.is_available,
         })));
@@ -71,7 +71,7 @@ export const useIjaza = () => {
 
       const { data: availData } = await supabase.from('sheikh_availability').select('*').eq('is_booked', false).order('day_of_week').order('start_time');
       if (availData) {
-        setAvailability(availData.map((a: any) => ({
+        setAvailability(availData.map((a) => ({
           id: a.id, sheikhId: a.sheikh_id, dayOfWeek: a.day_of_week,
           startTime: a.start_time, endTime: a.end_time, isBooked: a.is_booked,
         })));
@@ -80,7 +80,7 @@ export const useIjaza = () => {
       if (user) {
         const { data: requestData } = await supabase.from('ijaza_requests').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
         if (requestData) {
-          setMyRequests(requestData.map((r: any) => ({
+          setMyRequests(requestData.map((r) => ({
             id: r.id, sheikhId: r.sheikh_id, fullName: r.full_name, email: r.email,
             phone: r.phone, preferredLanguage: r.preferred_language, preferredTime: r.preferred_time,
             experience: r.experience, motivation: r.motivation, status: r.status as IjazaRequest['status'],

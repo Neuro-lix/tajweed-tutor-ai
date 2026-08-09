@@ -19,7 +19,7 @@ export const convertToWav = async (blob: Blob): Promise<{ blob: Blob; mimeType: 
     const arrayBuffer = await blob.arrayBuffer();
     console.log('[AudioConverter] ArrayBuffer size:', arrayBuffer.byteLength);
 
-    const AudioContextCtor = window.AudioContext || (window as any).webkitAudioContext;
+    const AudioContextCtor = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AudioContextCtor) {
       console.warn('[AudioConverter] AudioContext not available, returning original blob');
       return { blob, mimeType: blob.type || 'audio/webm' };

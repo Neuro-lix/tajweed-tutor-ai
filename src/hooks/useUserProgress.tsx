@@ -132,8 +132,8 @@ export const useUserProgress = () => {
             word: c.word,
             ruleType: c.rule_type,
             ruleDescription: c.rule_description,
-            correctionExample: (c as any).correction_example ?? null,
-            severity: (c as any).severity ?? null,
+            correctionExample: c.correction_example ?? null,
+            severity: c.severity ?? null,
             isResolved: c.is_resolved || false,
             createdAt: c.created_at,
           }))
@@ -156,7 +156,7 @@ export const useUserProgress = () => {
     try {
       const updateData: Record<string, unknown> = {};
       if (updates.sessionType !== undefined) updateData.session_type = updates.sessionType;
-      if (updates.selectedQiraat !== undefined) updateData.selected_qiraat = updates.selectedQiraat as any;
+      if (updates.selectedQiraat !== undefined) updateData.selected_qiraat = updates.selectedQiraat;
       if (updates.fullName !== undefined) updateData.full_name = updates.fullName;
 
       const { error } = await supabase
@@ -211,8 +211,8 @@ export const useUserProgress = () => {
             word: data.word,
             ruleType: data.rule_type,
             ruleDescription: data.rule_description,
-            correctionExample: (data as any).correction_example ?? null,
-            severity: (data as any).severity ?? null,
+            correctionExample: data.correction_example ?? null,
+            severity: data.severity ?? null,
             isResolved: false,
             createdAt: data.created_at,
           },

@@ -42,7 +42,7 @@ export const useCertificates = () => {
       if (error) throw error;
 
       setCertificates(
-        (data || []).map((c: any) => ({
+        (data || []).map((c) => ({
           id: c.id,
           surahNumber: c.surah_number,
           certificateType: c.certificate_type,

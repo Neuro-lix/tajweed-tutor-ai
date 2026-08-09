@@ -19,7 +19,7 @@ export const useAudioWaveform = (stream: MediaStream | null, opts?: { fftSize?: 
   const peakRef = useRef(0);
 
   const isSupported = useMemo(() => {
-    return typeof window !== 'undefined' && (!!(window.AudioContext || (window as any).webkitAudioContext));
+    return typeof window !== 'undefined' && (!!(window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext));
   }, []);
 
   useEffect(() => {
@@ -28,7 +28,7 @@ export const useAudioWaveform = (stream: MediaStream | null, opts?: { fftSize?: 
       return;
     }
 
-    const AudioContextCtor = window.AudioContext || (window as any).webkitAudioContext;
+    const AudioContextCtor = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     const ctx: AudioContext = new AudioContextCtor();
     const analyser = ctx.createAnalyser();
     analyser.fftSize = fftSize;

@@ -117,7 +117,7 @@ const Shop: React.FC = () => {
       } else {
         throw new Error('No payment URL returned');
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('[Crypto] Payment error:', err);
       toast({ title: t.shopCryptoError, description: err?.message || t.shopCryptoUnknown, variant: 'destructive' });
     } finally {
