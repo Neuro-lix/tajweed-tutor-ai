@@ -116,6 +116,42 @@ export type Database = {
         }
         Relationships: []
       }
+      hifz_goals: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          target_date: string | null
+          target_surah: number | null
+          target_type: string
+          target_value: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          target_date?: string | null
+          target_surah?: number | null
+          target_type?: string
+          target_value?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          target_date?: string | null
+          target_surah?: number | null
+          target_type?: string
+          target_value?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ijaza_requests: {
         Row: {
           created_at: string
