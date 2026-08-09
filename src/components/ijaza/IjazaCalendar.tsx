@@ -70,13 +70,13 @@ export const IjazaCalendar: React.FC<IjazaCalendarProps> = ({
       let query;
       if (isAdmin) {
         query = supabase
-          .from("admin_calendar_view" as any)
+          .from("admin_calendar_view" as never)
           .select("*")
           .gte("booking_date", startDate)
           .lte("booking_date", endDate);
       } else {
         query = supabase
-          .from("calendar_bookings" as any)
+          .from("calendar_bookings" as never)
           .select("id, booking_date, start_time, end_time, status, notes")
           .eq("status", "available")
           .gte("booking_date", startDate)
@@ -105,7 +105,7 @@ export const IjazaCalendar: React.FC<IjazaCalendarProps> = ({
     }
     try {
       const { error } = await supabase
-        .from("calendar_bookings" as any)
+        .from("calendar_bookings" as never)
         .insert({
           sheikh_id: sheikhId || null,
           booking_date: newSlot.date,
@@ -131,7 +131,7 @@ export const IjazaCalendar: React.FC<IjazaCalendarProps> = ({
 
   const handleDeleteSlot = async (slotId: string) => {
     if (!confirm("Supprimer ce créneau ?")) return;
-    await supabase.from("calendar_bookings" as any).delete().eq("id", slotId);
+    await supabase.from("calendar_bookings" as never).delete().eq("id", slotId);
     toast.success("Créneau supprimé");
     loadSlots();
   };

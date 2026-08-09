@@ -25,7 +25,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   const currentLang = languages.find(l => l.code === language);
 
   return (
-    <Select value={language} onValueChange={(value) => setLanguage(value as any)}>
+    <Select value={language} onValueChange={(value) => setLanguage(value as Parameters<typeof setLanguage>[0])}>
       <SelectTrigger className={`${compact ? 'w-20' : 'w-40'} ${className}`}>
         {showIcon && <Globe className="w-4 h-4 mr-2 flex-shrink-0" />}
         <SelectValue>

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Infinity, Check, Loader2 } from "lucide-react";
+import { Clock, Infinity as InfinityIcon, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -142,7 +142,7 @@ export const PricingSection = ({ onBack }: PricingSectionProps) => {
           <Card variant="elevated" className="p-8 relative border-gold/50">
             <Badge variant="gold" className="absolute -top-3 right-6">{t.pricingRecommended}</Badge>
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 rounded-xl bg-gold/10"><Infinity className="w-6 h-6 text-gold" /></div>
+              <div className="p-3 rounded-xl bg-gold/10"><InfinityIcon className="w-6 h-6 text-gold" /></div>
               <div>
                 <h3 className="text-xl font-semibold text-foreground">{t.pricingUnlimited}</h3>
                 <p className="text-muted-foreground text-sm">{t.pricingMonthly}</p>

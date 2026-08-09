@@ -89,7 +89,7 @@ serve(async (req) => {
       });
     }
     // Sanitize: force role/string shape and clamp content length to mitigate prompt injection / oversized payloads
-    const sanitized = (messages as any[])
+    const sanitized = (messages as Array<{ role?: string; content?: unknown }>)
       .filter((m) => m && typeof m.content === "string")
       .map((m) => ({
         role: m.role === "assistant" ? "assistant" : "user",

@@ -46,14 +46,14 @@ export const useLeaderboard = () => {
   const fetchLeaderboard = useCallback(async () => {
     try {
       const { data, error } = await supabase
-        .from('leaderboard_public' as any)
+        .from('leaderboard_public' as never)
         .select('*')
         .order('total_xp', { ascending: false })
         .limit(100);
 
       if (error) throw error;
 
-      const entries: LeaderboardEntry[] = (data || []).map((entry: any, index) => ({
+      const entries: LeaderboardEntry[] = ((data || []) as unknown as LeaderboardRow[]).map((entry, index) => ({
         id: entry.id,
         displayName: entry.display_name || getAnonymousName(entry.id),
         totalXp: entry.total_xp,

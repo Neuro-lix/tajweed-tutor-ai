@@ -432,7 +432,7 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
       usage: (aiResponse?.usage ?? {}) as Record<string, number>,
     });
 
-    let analysis: any;
+    let analysis: Record<string, unknown>;
     try {
       analysis = JSON.parse(content);
     } catch {
