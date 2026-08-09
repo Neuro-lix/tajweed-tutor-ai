@@ -440,28 +440,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
               </CardContent>
             </Card>
 
-            {/* Countries */}
-            <Card>
-              <CardHeader><CardTitle className="text-base flex items-center gap-2"><Globe className="w-4 h-4 text-primary" />Pays d'origine</CardTitle></CardHeader>
-              <CardContent>
-                {stats.topCountries.length === 0 ? (
-                  <p className="text-muted-foreground text-sm">Aucune donnée de localisation disponible encore. Les pays seront détectés automatiquement à l'inscription via l'IP.</p>
-                ) : (
-                  <div className="space-y-3">
-                    {stats.topCountries.map(c => (
-                      <div key={c.code} className="flex items-center gap-3">
-                        <span className="text-xl">{FLAG(c.code)}</span>
-                        <span className="text-sm font-medium w-32">{c.name}</span>
-                        <div className="flex-1 bg-muted rounded-full h-2">
-                          <div className="bg-primary h-2 rounded-full" style={{ width: (c.count / stats.totalUsers * 100) + "%" }} />
-                        </div>
-                        <span className="text-sm text-muted-foreground w-8 text-right">{c.count}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </div>
         ) : tab === "users" ? (
           <div className="space-y-4">
