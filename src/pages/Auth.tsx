@@ -24,6 +24,10 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
+  const [signupEmail, setSignupEmail] = useState<string | null>(null);
+  const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -68,6 +72,38 @@ const Auth = () => {
     });
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  // Countdown between two resend attempts (avoids hitting the auth rate limit).
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(id);
+  }, [cooldown]);
+
+  const handleResendConfirmation = async () => {
+    const target = signupEmail || email;
+    if (!target || cooldown > 0) return;
+    setResendState('sending');
+    setResendMessage(null);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: target,
+        options: { emailRedirectTo: `${window.location.origin}/` },
+      });
+      if (error) {
+        setResendState('error');
+        setResendMessage(mapAuthError(error));
+      } else {
+        setResendState('sent');
+        setResendMessage(`Email renvoyé à ${target}. Pense à vérifier tes spams.`);
+        setCooldown(60);
+      }
+    } catch {
+      setResendState('error');
+      setResendMessage(t.unexpectedError);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
