@@ -195,6 +195,42 @@ const Auth = () => {
     </div>
   );
 
+  const ResendPanel = () => (
+    <div className="mt-4 rounded-lg border border-border bg-muted/40 p-3 space-y-2">
+      <p className="text-sm font-medium">Je n'ai pas reçu l'email</p>
+      <p className="text-xs text-muted-foreground">
+        Vérifie tes spams, puis renvoie le message de validation
+        {signupEmail ? ` à ${signupEmail}` : ''}.
+      </p>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="w-full"
+        onClick={handleResendConfirmation}
+        disabled={resendState === 'sending' || cooldown > 0 || !(signupEmail || email)}
+      >
+        {resendState === 'sending' ? (
+          <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Envoi en cours…</>
+        ) : cooldown > 0 ? (
+          `Renvoyer (${cooldown}s)`
+        ) : (
+          <><Mail className="mr-2 h-4 w-4" />Renvoyer l'email de validation</>
+        )}
+      </Button>
+      {resendMessage && (
+        <p
+          className={`flex items-start gap-1.5 text-xs ${resendState === 'error' ? 'text-red-500' : 'text-green-600'}`}
+          role="status"
+          aria-live="polite"
+        >
+          {resendState === 'error' ? <XCircle className="h-3 w-3 mt-0.5" /> : <CheckCircle2 className="h-3 w-3 mt-0.5" />}
+          {resendMessage}
+        </p>
+      )}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <PageSeo
