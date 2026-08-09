@@ -168,6 +168,23 @@ serve(async (req) => {
         return new Response("Missing user_id", { status: 400, headers: corsHeaders });
       }
 
+      // Mémorise l'identifiant client Paddle pour Retain (best-effort).
+      const paddleCustomerId = transaction.customer_id;
+      if (paddleCustomerId) {
+        try {
+          const sbAdmin = createClient(
+            Deno.env.get("SUPABASE_URL")!,
+            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+          );
+          await sbAdmin
+            .from("profiles")
+            .update({ paddle_customer_id: String(paddleCustomerId) })
+            .eq("id", userId);
+        } catch (err) {
+          console.error("[paddle-webhook] Could not store paddle_customer_id:", err);
+        }
+      }
+
       // Determine credits from line items
       let totalCredits = 0;
       let description = "Achat Paddle";
