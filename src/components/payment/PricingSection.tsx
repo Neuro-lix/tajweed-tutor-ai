@@ -70,33 +70,37 @@ export const PricingSection = ({ onBack }: PricingSectionProps) => {
   }, [user]);
 
   // Load Paddle.js script
+  const [paddleScriptLoaded, setPaddleScriptLoaded] = useState(false);
   useEffect(() => {
     if (document.getElementById("paddle-js")) {
-      setPaddleReady(!!window.Paddle);
+      setPaddleScriptLoaded(true);
       return;
     }
     const script = document.createElement("script");
     script.id = "paddle-js";
     script.src = "https://cdn.paddle.com/paddle/v2/paddle.js";
     script.async = true;
-    script.onload = () => {
-      const clientToken = import.meta.env.VITE_PADDLE_CLIENT_TOKEN;
-      if (window.Paddle && clientToken) {
-        // Environnement live (par défaut) — aucune configuration sandbox.
-        const pwCustomer = paddleCustomerId
-          ? { id: paddleCustomerId }
-          : user?.email
-            ? { email: user.email }
-            : undefined;
-        window.Paddle.Initialize({
-          token: clientToken,
-          ...(pwCustomer ? { pwCustomer } : {}),
-        });
-        setPaddleReady(true);
-      }
-    };
+    script.onload = () => setPaddleScriptLoaded(true);
     document.head.appendChild(script);
-  }, [paddleCustomerId, user?.email]);
+  }, []);
+
+  // Initialize (ou ré-initialise) Paddle dès que l'identité client est connue.
+  useEffect(() => {
+    if (!paddleScriptLoaded || !window.Paddle) return;
+    const clientToken = import.meta.env.VITE_PADDLE_CLIENT_TOKEN;
+    if (!clientToken) return;
+    // Environnement live (par défaut) — aucune configuration sandbox.
+    const pwCustomer = paddleCustomerId
+      ? { id: paddleCustomerId }
+      : user?.email
+        ? { email: user.email }
+        : undefined;
+    window.Paddle.Initialize({
+      token: clientToken,
+      ...(pwCustomer ? { pwCustomer } : {}),
+    });
+    setPaddleReady(true);
+  }, [paddleScriptLoaded, paddleCustomerId, user?.email]);
 
   const handleCheckout = (priceType: "hourly" | "unlimited") => {
     if (!paddleReady || !window.Paddle) {
