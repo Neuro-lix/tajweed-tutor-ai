@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { clientIpFrom, isIpAllowed, parsePaddleIps } from "./ipAllowlist.ts";
 
 // ─── CORS: env-driven allowlist (no wildcard). Paddle posts server-to-server
 // without an Origin, so this mainly matters for any browser preflight. ───
@@ -76,12 +77,21 @@ async function verifyPaddleSignature(
   }
 }
 
-// Map Paddle price IDs to credit amounts
-// Update these when you create your Paddle products
+// Map Paddle price IDs to credit amounts.
+// Credit amounts mirror the packs listed in src/pages/Shop.tsx.
 const PRICE_TO_CREDITS: Record<string, { credits: number; label: string }> = {
-  // Hourly plan: grant 20 credits per hour purchased
+  // Pack Starter — 50 crédits / 1,99 €
+  pri_01kzm74zem2gd72bsd3an0h1vw: { credits: 50, label: "Pack Starter (50 crédits)" },
+  // Pack Standard — 150 crédits / 4,99 €
+  pri_01kzm7exmw1w0apnysd76kgszh: { credits: 150, label: "Pack Standard (150 crédits)" },
+  // ⚠️ TODO — Pack Premium (400 crédits / 9,99 €): the price ID provided
+  // ("pri_01kzm7m6rwbdfks53gns8sjq4eca") is 28 chars after the `pri_` prefix,
+  // while Paddle IDs are 26. Add the exact ID here once confirmed — we do not
+  // guess it, otherwise premium purchases would silently grant no credits.
+  // pri_XXXXXXXXXXXXXXXXXXXXXXXXXX: { credits: 400, label: "Pack Premium (400 crédits)" },
+
+  // Legacy placeholders kept for the hourly / unlimited plans (not yet created in Paddle)
   pri_PLACEHOLDER_HOURLY: { credits: 20, label: "Achat horaire Paddle" },
-  // Unlimited monthly subscription: grant unlimited flag or large credit amount
   pri_PLACEHOLDER_UNLIMITED: { credits: 9999, label: "Abonnement illimité Paddle" },
 };
 
@@ -96,11 +106,7 @@ async function getPaddleIps(): Promise<Set<string> | null> {
     const resp = await fetch(PADDLE_IPS_URL);
     if (!resp.ok) throw new Error(`status ${resp.status}`);
     const json = await resp.json();
-    // Response shape: { data: { ipv4_addresses: [...] } } (also tolerate a flat array)
-    const list: string[] = json?.data?.ipv4_addresses ?? json?.ipv4_addresses ?? json?.data ?? [];
-    const ips = new Set(
-      list.map((ip: string) => String(ip).trim().split("/")[0]).filter(Boolean),
-    );
+    const ips = parsePaddleIps(json);
     if (ips.size === 0) throw new Error("empty list");
     ipCache = { ips, fetchedAt: Date.now() };
     return ips;
@@ -112,8 +118,7 @@ async function getPaddleIps(): Promise<Set<string> | null> {
 }
 
 function clientIp(req: Request): string {
-  const fwd = req.headers.get("x-forwarded-for") ?? "";
-  return (fwd.split(",")[0] || req.headers.get("x-real-ip") || "").trim();
+  return clientIpFrom(req.headers);
 }
 
 serve(async (req) => {
@@ -126,7 +131,7 @@ serve(async (req) => {
     // Reject anything that does not come from a published Paddle IP.
     const allowedIps = await getPaddleIps();
     const ip = clientIp(req);
-    if (allowedIps && !allowedIps.has(ip)) {
+    if (!isIpAllowed(ip, allowedIps)) {
       console.error(`[paddle-webhook] Rejected request from non-Paddle IP: ${ip || "unknown"}`);
       return new Response("Forbidden", { status: 403, headers: corsHeaders });
     }
@@ -176,10 +181,14 @@ serve(async (req) => {
             Deno.env.get("SUPABASE_URL")!,
             Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
           );
-          await sbAdmin
+          // INVARIANT: profiles.user_id is the auth user id (profiles.id is the row PK).
+          // Matching on `id` here silently updated 0 rows — covered by
+          // tests/unit/paddle-webhook.test.ts.
+          const { error: profErr } = await sbAdmin
             .from("profiles")
             .update({ paddle_customer_id: String(paddleCustomerId) })
-            .eq("id", userId);
+            .eq("user_id", userId);
+          if (profErr) throw profErr;
         } catch (err) {
           console.error("[paddle-webhook] Could not store paddle_customer_id:", err);
         }

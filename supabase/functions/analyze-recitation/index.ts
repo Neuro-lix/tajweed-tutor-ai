@@ -53,6 +53,79 @@ const computeSimilarity = (expected: string, actual: string): number => {
   return union === 0 ? 0 : inter / union;
 };
 
+// ─── Word-by-word confidence ────────────────────────────────────────────
+type ConfidenceLevel = "high" | "medium" | "low";
+// `word` is the expected (Quranic) word — that's what the frontend highlights.
+// `expectedWord` is kept as an explicit alias, `heardWord` is what Whisper heard.
+type WordConfidence = { word: string; expectedWord: string; heardWord: string; confidence: ConfidenceLevel };
+/** Word emitted by Whisper `verbose_json` + `timestamp_granularities: ["word"]`. */
+type WhisperWord = { word: string; start?: number; end?: number; probability?: number; confidence?: number };
+
+/** Dice coefficient on character bigrams (0..1) — tolerant to small spelling drifts. */
+const charSimilarity = (a: string, b: string): number => {
+  if (!a || !b) return 0;
+  if (a === b) return 1;
+  if (a.length < 2 || b.length < 2) return a === b ? 1 : 0;
+  const bigrams = (s: string) => {
+    const out: string[] = [];
+    for (let i = 0; i < s.length - 1; i++) out.push(s.slice(i, i + 2));
+    return out;
+  };
+  const A = bigrams(a);
+  const B = bigrams(b);
+  const pool = [...B];
+  let hits = 0;
+  for (const g of A) {
+    const idx = pool.indexOf(g);
+    if (idx >= 0) { hits++; pool.splice(idx, 1); }
+  }
+  return (2 * hits) / (A.length + B.length);
+};
+
+/**
+ * Align each EXPECTED word with the closest transcribed word (position window +
+ * character similarity after diacritic stripping) and derive a confidence level.
+ * When Whisper returned per-word probabilities, they take precedence.
+ */
+const buildWordConfidence = (
+  expectedText: string,
+  transcribedText: string,
+  whisperWords: WhisperWord[] | null,
+): WordConfidence[] => {
+  const expected = (expectedText || "").split(/\s+/).filter(Boolean);
+  const actual = (transcribedText || "").split(/\s+/).filter(Boolean);
+  if (expected.length === 0) return [];
+
+  const actualNormed = actual.map((w) => stripDiacritics(w));
+  const probByNormWord = new Map<string, number>();
+  for (const w of whisperWords ?? []) {
+    const p = typeof w.probability === "number" ? w.probability
+      : typeof w.confidence === "number" ? w.confidence : null;
+    if (p !== null) probByNormWord.set(stripDiacritics(w.word || ""), p);
+  }
+
+  const WINDOW = 3; // allow ±3 words of positional drift
+  return expected.map((rawWord, i) => {
+    const target = stripDiacritics(rawWord);
+    // Scale expected position onto the transcript length
+    const anchor = actual.length > 0
+      ? Math.round((i / Math.max(1, expected.length - 1)) * Math.max(0, actual.length - 1))
+      : 0;
+    let best = 0;
+    let bestWord = "";
+    for (let j = Math.max(0, anchor - WINDOW); j < Math.min(actualNormed.length, anchor + WINDOW + 1); j++) {
+      const sim = charSimilarity(target, actualNormed[j]);
+      if (sim > best) { best = sim; bestWord = actual[j]; }
+    }
+
+    const whisperProb = bestWord ? probByNormWord.get(stripDiacritics(bestWord)) : undefined;
+    // Whisper confidence wins when available, otherwise textual similarity.
+    const score = typeof whisperProb === "number" ? Math.min(whisperProb, best === 0 ? whisperProb : (whisperProb + best) / 2) : best;
+    const confidence: ConfidenceLevel = score >= 0.8 ? "high" : score >= 0.5 ? "medium" : "low";
+    return { word: rawWord, expectedWord: rawWord, heardWord: bestWord, confidence };
+  });
+};
+
 serve(async (req) => {
   const corsHeaders = buildCors(req);
   if (req.method === "OPTIONS") {
@@ -154,13 +227,82 @@ serve(async (req) => {
     let transcribedText = "";
     let transcriptionOk = false;
     let whisperError: string | null = null;
-    let transcriptionEngine: "gpt-4o-mini-transcribe" | "whisper-1" | "whisper-large-v3" = "gpt-4o-mini-transcribe";
+    let transcriptionEngine:
+      | "quran-whisper"
+      | "gpt-4o-mini-transcribe"
+      | "whisper-1"
+      | "whisper-large-v3" = "gpt-4o-mini-transcribe";
+    // Per-word timings/probabilities, when the transcription engine provides them.
+    let whisperWords: WhisperWord[] | null = null;
 
     if (hasAudio) {
       const base64Payload = audioBase64.includes(",") ? audioBase64.split(",")[1] : audioBase64;
 
+      // Decode once — reused by the HuggingFace and OpenAI paths.
+      const decodeAudioBytes = (): Uint8Array => {
+        const binaryString = atob(base64Payload);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+        return bytes;
+      };
+      const rawMimeType = (audioMimeType || "audio/wav").split(";")[0].trim();
+      const audioExt = rawMimeType.includes("webm") ? "webm"
+        : rawMimeType.includes("mp4") ? "mp4"
+        : rawMimeType.includes("mpeg") || rawMimeType.includes("mp3") ? "mp3"
+        : "wav";
+
+      // ─── Path 0: Quran-specialised Whisper (tarteel-ai) via HuggingFace ───
+      // Fine-tuned on Quranic recitation → noticeably better than generic Whisper
+      // on tajwīd-relevant phonetics. Falls through to the generic cascade on any failure.
+      // ⚠️ MANUAL SETUP: add the `HUGGINGFACE_API_KEY` secret to enable this path.
+      const HUGGINGFACE_API_KEY = Deno.env.get("HUGGINGFACE_API_KEY");
+      if (!HUGGINGFACE_API_KEY) {
+        console.warn(
+          "[analyze-recitation] HUGGINGFACE_API_KEY not configured — skipping the Quran-specialised " +
+          "model (tarteel-ai/whisper-base-ar-quran) and falling back to the generic Whisper cascade.",
+        );
+      } else {
+        console.log("[analyze-recitation] Trying HuggingFace tarteel-ai/whisper-base-ar-quran...");
+        try {
+          const hfResp = await fetch(
+            "https://api-inference.huggingface.co/models/tarteel-ai/whisper-base-ar-quran",
+            {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
+                "Content-Type": rawMimeType,
+                "x-wait-for-model": "true",
+              },
+              body: decodeAudioBytes(),
+            },
+          );
+          if (!hfResp.ok) {
+            const errTxt = await hfResp.text();
+            console.error("[analyze-recitation] HuggingFace error:", hfResp.status, errTxt);
+            whisperError = `HuggingFace ${hfResp.status}, fallback moteur générique`;
+          } else {
+            const hfJson = await hfResp.json();
+            const hfText = (typeof hfJson === "string" ? hfJson : (hfJson.text ?? "")).trim();
+            if (hfText.length >= 3) {
+              transcribedText = hfText;
+              transcriptionOk = true;
+              transcriptionEngine = "quran-whisper";
+              whisperError = null;
+              // NOTE: the HF inference API for this model returns plain text only —
+              // no per-word probabilities, so confidence falls back to text similarity.
+              console.log("[analyze-recitation] Quran-Whisper result:", hfText.substring(0, 100));
+            } else {
+              whisperError = "Quran-Whisper vide, fallback moteur générique";
+            }
+          }
+        } catch (e) {
+          console.error("[analyze-recitation] HuggingFace exception:", e);
+          whisperError = "HuggingFace exception, fallback moteur générique";
+        }
+      }
+
       // ─── Path A: Replicate Whisper-large-v3 (vowelled Arabic, +30% precision) ───
-      if (useReplicate) {
+      if (!transcriptionOk && useReplicate) {
         console.log("[analyze-recitation] Trying Replicate Whisper-large-v3...");
         try {
           const dataUri = `data:${audioMimeType || "audio/wav"};base64,${base64Payload}`;
@@ -224,19 +366,14 @@ serve(async (req) => {
       if (!transcriptionOk) {
         console.log("[analyze-recitation] Using Lovable AI transcription (gpt-4o-mini-transcribe)...");
         try {
-          const binaryString = atob(base64Payload);
-          const bytes = new Uint8Array(binaryString.length);
-          for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
-
-          const rawMime = (audioMimeType || "audio/wav").split(";")[0].trim();
-          const ext = rawMime.includes("webm") ? "webm" : rawMime.includes("mp4") ? "mp4" : rawMime.includes("mpeg") || rawMime.includes("mp3") ? "mp3" : "wav";
-
+          const bytes = decodeAudioBytes();
           const formData = new FormData();
-          formData.append("file", new Blob([bytes], { type: rawMime }), `audio.${ext}`);
+          formData.append("file", new Blob([bytes], { type: rawMimeType }), `audio.${audioExt}`);
           formData.append("model", "openai/gpt-4o-mini-transcribe");
           formData.append("language", "ar");
+          // NOTE: `gpt-4o-mini-transcribe` does NOT support `verbose_json` nor
+          // `timestamp_granularities: ["word"]` — it only returns plain text.
+          // Per-word confidence on this path is derived from text similarity.
 
           const whisperResponse = await fetch("https://ai.gateway.lovable.dev/v1/audio/transcriptions", {
             method: "POST",
@@ -268,6 +405,45 @@ serve(async (req) => {
           whisperError = e instanceof Error ? e.message : "Erreur de transcription";
         }
       }
+
+      // ─── Path C: OpenAI whisper-1 with per-word timestamps + probabilities ───
+      // `whisper-1` is the only OpenAI model supporting `verbose_json` +
+      // `timestamp_granularities: ["word"]`, which gives real per-word confidence.
+      if (!transcriptionOk && OPENAI_API_KEY) {
+        console.log("[analyze-recitation] Falling back to OpenAI whisper-1 (verbose_json, word timestamps)...");
+        try {
+          const bytes = decodeAudioBytes();
+          const form = new FormData();
+          form.append("file", new Blob([bytes], { type: rawMimeType }), `audio.${audioExt}`);
+          form.append("model", "whisper-1");
+          form.append("language", "ar");
+          form.append("response_format", "verbose_json");
+          form.append("timestamp_granularities[]", "word");
+
+          const oaResp = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${OPENAI_API_KEY}` },
+            body: form,
+          });
+          if (!oaResp.ok) {
+            const errTxt = await oaResp.text();
+            console.error("[analyze-recitation] OpenAI whisper-1 error:", oaResp.status, errTxt);
+          } else {
+            const oaJson = await oaResp.json();
+            const text = (oaJson.text || "").trim();
+            if (text.length >= 3) {
+              transcribedText = text;
+              transcriptionOk = true;
+              transcriptionEngine = "whisper-1";
+              whisperError = null;
+              whisperWords = Array.isArray(oaJson.words) ? (oaJson.words as WhisperWord[]) : null;
+              console.log("[analyze-recitation] whisper-1 words:", whisperWords?.length ?? 0);
+            }
+          }
+        } catch (e) {
+          console.error("[analyze-recitation] OpenAI whisper-1 exception:", e);
+        }
+      }
     }
 
     // 2) Early return if transcription failed (status 422 so the client can branch)
@@ -291,6 +467,11 @@ serve(async (req) => {
     const expectedNorm = stripDiacritics(expectedText || "");
     const actualNorm = stripDiacritics(transcribedText || "");
     console.log("[analyze-recitation] Similarity:", similarity.toFixed(2));
+
+    // Per-word alignment + confidence (Whisper probabilities when available)
+    const wordConfidence = buildWordConfidence(expectedText || "", transcribedText || "", whisperWords);
+    const weakWords = wordConfidence.filter((w) => w.confidence !== "high");
+    console.log("[analyze-recitation] Weak words:", weakWords.length, "/", wordConfidence.length);
 
     // Log the transcription (Whisper) step — no credit charged, tracking only
     if (hasAudio && transcriptionOk) {
@@ -354,6 +535,22 @@ serve(async (req) => {
 - **Verset** : ${verseNumber}
 - **Qiraat** : ${qiraat || "hafs_asim"}
 - **Similarité Jaccard pré-calculée** : ${similarity.toFixed(2)}
+
+## Analyse mot par mot (alignement + niveau de confiance)
+${
+  wordConfidence.length === 0
+    ? "(non disponible)"
+    : wordConfidence
+        .map((w) => `- "${w.word}" ← entendu "${w.heardWord || "(rien)"}" → confiance ${w.confidence}`)
+        .join("\n")
+}
+
+### Mots à confiance basse/moyenne (À ANALYSER EN PRIORITÉ)
+${weakWords.length === 0 ? "(aucun — la récitation est nette partout)" : weakWords.map((w) => `- ${w.word} (${w.confidence})`).join("\n")}
+
+**Concentre ton analyse tajwīd sur ces mots-là**, dans l'ordre : d'abord les `low`, puis les `medium`.
+N'analyse les mots `high` que si une règle de tajwīd évidente y est en jeu. Les champs "word" de
+tes "errors" doivent en priorité correspondre à ces mots à confiance basse/moyenne.
 
 ## Texte attendu (avec diacritiques)
 "${expectedText}"
@@ -473,6 +670,8 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
     analysis.whisperError = whisperError;
     analysis.similarity = similarity;
     analysis.transcriptionEngine = transcriptionEngine;
+    analysis.wordConfidence = wordConfidence.map((w) => ({ word: w.word, confidence: w.confidence }));
+    analysis.wordDetails = wordConfidence;
 
     return new Response(JSON.stringify(analysis), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

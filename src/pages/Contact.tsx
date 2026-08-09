@@ -27,14 +27,27 @@ const Contact = () => {
     }
     setSending(true);
     try {
-      const { error } = await supabase.from("contact_messages").insert({
-        user_id: user?.id ?? null,
-        name: name.trim(),
-        email: email.trim(),
-        subject: subject.trim(),
-        message: message.trim(),
-      });
+      // Generate the id client-side: reads on `contact_messages` are admin-only,
+      // so we cannot `.select()` the inserted row back.
+      const messageId = crypto.randomUUID();
+      const { error } = await supabase
+        .from("contact_messages")
+        .insert({
+          id: messageId,
+          user_id: user?.id ?? null,
+          name: name.trim(),
+          email: email.trim(),
+          subject: subject.trim(),
+          message: message.trim(),
+        });
       if (error) throw error;
+
+      // Notify the team by email (best-effort — the message is already stored
+      // in `contact_messages` and readable from the admin dashboard either way).
+      supabase.functions
+        .invoke("contact-notify", { body: { messageId } })
+        .catch((e) => console.warn("[contact] notification failed", e));
+
       setSent(true);
       setSubject("");
       setMessage("");

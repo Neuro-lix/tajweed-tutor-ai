@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { LanguageSelector } from '@/components/settings/LanguageSelector';
 import { ThemeToggle } from '@/components/settings/ThemeToggle';
 import { OfflineIndicator } from '@/components/offline/OfflineIndicator';
-import { LogOut, MessageSquareHeart, Award, Music, ShoppingBag, GraduationCap, Zap } from 'lucide-react';
+import { LogOut, MessageSquareHeart, Award, Music, ShoppingBag, GraduationCap, Zap, BrainCircuit } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import logoImage from '@/logo.png';
@@ -57,9 +57,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             {credits !== null && credits !== undefined && (
               <button
                 type="button"
-                onClick={() => navigate('/my-usage')}
-                title="Voir ma consommation IA"
-                aria-label="Voir ma consommation IA"
+                onClick={() => navigate('/my-credits')}
+                title="Voir mes crédits et mon historique"
+                aria-label="Voir mes crédits et mon historique"
                 className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-opacity hover:opacity-80 ${
                   credits === 0
                     ? 'bg-destructive/15 text-destructive'
@@ -74,6 +74,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             )}
             <LanguageSelector />
             <ThemeToggle />
+            <Button variant="ghost" size="sm" onClick={() => navigate('/hifz')} className="hidden sm:flex">
+              <BrainCircuit className="h-4 w-4 md:mr-1" />
+              <span className="hidden md:inline">Ḥifẓ</span>
+            </Button>
             <Button variant="ghost" size="sm" onClick={onFeedbackClick} className="hidden sm:flex">
               <MessageSquareHeart className="h-4 w-4" />
             </Button>

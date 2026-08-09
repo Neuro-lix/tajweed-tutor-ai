@@ -26,6 +26,8 @@ const Diagnostics = lazy(() => import("./pages/Diagnostics"));
 const Health = lazy(() => import("./pages/Health"));
 const AdminRoute = lazy(() => import("./pages/AdminRoute"));
 const MyLlmUsage = lazy(() => import("./pages/MyLlmUsage"));
+const MyCredits = lazy(() => import("./pages/MyCredits"));
+const HifzPlan = lazy(() => import("./pages/HifzPlan"));
 const NooraniQaida = lazy(() => import("./pages/NooraniQaida"));
 const TajwidHub = lazy(() => import("./pages/tajweed/TajwidHub"));
 const TajwidTopic = lazy(() => import("./pages/tajweed/TajwidTopic"));
@@ -81,6 +83,8 @@ const App = () => (
                     <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                     <Route path="/admin" element={<ProtectedRoute><AdminRoute /></ProtectedRoute>} />
                     <Route path="/my-usage" element={<ProtectedRoute><MyLlmUsage /></ProtectedRoute>} />
+                    <Route path="/my-credits" element={<ProtectedRoute><MyCredits /></ProtectedRoute>} />
+                    <Route path="/hifz" element={<ProtectedRoute><HifzPlan /></ProtectedRoute>} />
                     <Route path="/ijaza" element={<Ijaza />} />
                     <Route path="/shop" element={<Shop />} />
                     <Route path="/shop/success" element={<ProtectedRoute><ShopSuccess /></ProtectedRoute>} />

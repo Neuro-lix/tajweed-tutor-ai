@@ -21,7 +21,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { fetchAyah } from '@/lib/quranApi';
 import { AnalysisResult, AppView, getGlobalAyahNumber, normalizeRuleType } from './indexHelpers';
 import { calculateEnvelopeSimilarityScore } from '@/lib/envelopeSimilarity';
-import { buildSurahLevels, getRecommendedReview, buildGuidedVerses } from '@/lib/progressInsights';
+import { buildSurahLevels, getRecommendedReview, buildGuidedVerses, buildPriorityFixes } from '@/lib/progressInsights';
 
 /**
  * Centralized state hook for the Index page.
@@ -257,6 +257,8 @@ export function useIndexState() {
   const surahLevels = buildSurahLevels(surahProgress, corrections);
   const recommendedReview = getRecommendedReview(surahLevels);
   const guidedVerses = buildGuidedVerses(corrections, 1);
+  // Prioritised "what to fix next" for the reading in use.
+  const priorityFixes = buildPriorityFixes(corrections, 5);
 
   // Keep userAudioBlob in sync with the recorder hook
   useEffect(() => {
@@ -620,6 +622,7 @@ export function useIndexState() {
     surahLevels,
     recommendedReview,
     guidedVerses,
+    priorityFixes,
 
     // handlers
     handleStartRecording,
