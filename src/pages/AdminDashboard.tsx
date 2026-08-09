@@ -124,6 +124,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         .from("corrections")
         .select("rule_type, rule_description");
 
+      // Credit purchases (business KPIs)
+      const { data: creditTx } = await supabase
+        .from("credit_transactions")
+        .select("user_id, type, description, created_at");
+
       const now = new Date();
       const todayStr = now.toISOString().split("T")[0];
 
@@ -146,9 +151,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
         : 0;
 
-      // Top countries - skipped since profiles table doesn't have country columns
-      const topCountries: { name: string; code: string; count: number }[] = [];
-
       // Registrations by day (last 14 days)
       const last14 = Array.from({ length: 14 }, (_, i) => {
         const d = new Date(now);
@@ -170,9 +172,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         return {
           user_id: p.user_id,
           full_name: p.full_name,
-          country_name: null,
-          country_code: null,
-          language: null,
           registered_at: p.created_at,
           total_sessions: userSessions.length,
           avg_score: userScores.length ? Math.round(userScores.reduce((a, b) => a + b, 0) / userScores.length) : 0,
@@ -183,7 +182,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
 
       // Per-surah tajweed metrics (success rate = % sessions with score >= 85)
       const surahMap = new Map<number, { scores: number[]; total: number }>();
-      (sessions || []).forEach((s: any) => {
+      (sessions || []).forEach((s) => {
         if (!s.surah_number) return;
         const entry = surahMap.get(s.surah_number) || { scores: [], total: 0 };
         entry.total += 1;
@@ -212,25 +211,81 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
       // Tajweed error buckets (radar chart)
       const bucketMap = new Map<string, number>();
       Object.keys(TAJWEED_KEYWORDS).forEach(k => bucketMap.set(k, 0));
-      (corrections || []).forEach((c: any) => {
+      (corrections || []).forEach((c) => {
         const cat = classifyTajweedError(`${c.rule_type || ''} ${c.rule_description || ''}`);
         if (cat) bucketMap.set(cat, (bucketMap.get(cat) || 0) + 1);
       });
       const tajweedErrorBuckets: TajweedErrorBucket[] = Array.from(bucketMap.entries())
         .map(([category, count]) => ({ category, count }));
 
+      // ── Business KPIs ──
+      const purchases = (creditTx || []).filter(tx => tx.type === "purchase");
+      const payingIds = new Set(purchases.map(tx => tx.user_id));
+      const sessionUserIds = new Set((sessions || []).map(s => s.user_id));
+      const DAY = 86400000;
+
+      const retention = (minDays: number, maxDays: number, windowDays: number) => {
+        const cohortUsers = (profiles || []).filter(p => {
+          const age = (now.getTime() - new Date(p.created_at).getTime()) / DAY;
+          return age >= minDays && age <= maxDays;
+        });
+        const retained = cohortUsers.filter(p => {
+          const reg = new Date(p.created_at).getTime();
+          return (sessions || []).some(s =>
+            s.user_id === p.user_id &&
+            new Date(s.created_at).getTime() >= reg &&
+            new Date(s.created_at).getTime() <= reg + windowDays * DAY
+          );
+        }).length;
+        return {
+          cohort: cohortUsers.length,
+          retained,
+          rate: cohortUsers.length ? Math.round((retained / cohortUsers.length) * 100) : 0,
+        };
+      };
+
+      const methodCounts = new Map<string, number>();
+      purchases.forEach(tx => {
+        const desc = (tx.description || "").toLowerCase();
+        const method = desc.includes("crypto") ? "Crypto"
+          : desc.includes("paddle") ? "Paddle"
+          : "Autre";
+        methodCounts.set(method, (methodCounts.get(method) || 0) + 1);
+      });
+      const paymentMethods = Array.from(methodCounts.entries())
+        .map(([method, count]) => ({
+          method,
+          count,
+          pct: purchases.length ? Math.round((count / purchases.length) * 100) : 0,
+        }))
+        .sort((a, b) => b.count - a.count);
+
+      const totalUsers = (profiles || []).length;
+      const business: BusinessStats = {
+        retentionD7: retention(7, 14, 7),
+        retentionD30: retention(30, 37, 30),
+        payingUsers: payingIds.size,
+        conversionRate: totalUsers ? Math.round((payingIds.size / totalUsers) * 100) : 0,
+        paymentMethods,
+        funnel: {
+          signups: totalUsers,
+          withSession: (profiles || []).filter(p => sessionUserIds.has(p.user_id)).length,
+          withPurchase: (profiles || []).filter(p => payingIds.has(p.user_id)).length,
+        },
+      };
+
       setStats({
-        totalUsers: (profiles || []).length,
+        totalUsers,
         activeToday: activeTodayIds.size,
         avgSessionMin,
         totalRecitations: (sessions || []).length,
         avgScore,
         ijazaRequests: (ijaza || []).length,
-        topCountries,
         registrationsByDay: regsByDay,
         users: userStats,
         surahMetrics,
         tajweedErrorBuckets,
+        business,
       });
     } catch (e) {
       console.error("Admin stats error:", e);
