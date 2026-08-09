@@ -298,16 +298,63 @@ const Auth = () => {
             <img src={logoImage} alt="Tajweed Tutor AI" className="h-24 w-24 object-contain rounded-2xl" />
           </div>
           <CardTitle className="text-3xl font-amiri">
-            {view === 'login' ? t.loginTitle : view === 'signup' ? t.signupTitle : t.forgotPasswordTitle}
+            {view === 'login' ? t.loginTitle
+              : view === 'signup' ? t.signupTitle
+              : view === 'updatePassword' ? t.resetPasswordTitle
+              : t.forgotPasswordTitle}
           </CardTitle>
           <CardDescription className="text-base">
             {view === 'login' ? t.accessLearning
               : view === 'signup' ? t.startJourney
+              : view === 'updatePassword' ? t.updatePasswordDesc
               : t.resetPasswordDesc}
           </CardDescription>
         </CardHeader>
 
         <CardContent>
+
+          {/* UPDATE PASSWORD (reset link) */}
+          {view === 'updatePassword' && (
+            <form onSubmit={handleUpdatePassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">{t.newPassword}</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input id="newPassword" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="pl-10 pr-10" required minLength={8} />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {newPassword.length > 0 && (
+                  <div className="grid grid-cols-2 gap-1 pt-2">
+                    <PasswordCheck valid={newPasswordChecks.minLength} label={t.minChars} />
+                    <PasswordCheck valid={newPasswordChecks.hasUppercase} label={t.oneUppercase} />
+                    <PasswordCheck valid={newPasswordChecks.hasLowercase} label={t.oneLowercase} />
+                    <PasswordCheck valid={newPasswordChecks.hasNumber} label={t.oneDigit} />
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmNewPassword">{t.confirmNewPassword}</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input id="confirmNewPassword" type={showConfirmPassword ? 'text' : 'password'} placeholder="••••••••" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} className={`pl-10 pr-10 ${confirmNewPassword.length > 0 ? newPasswordChecks.passwordsMatch ? 'border-green-500' : 'border-red-500' : ''}`} required />
+                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {confirmNewPassword.length > 0 && !newPasswordChecks.passwordsMatch && (
+                  <p className="text-xs text-red-500">{t.passwordsDoNotMatch}</p>
+                )}
+              </div>
+              <Button type="submit" className="w-full" size="lg" disabled={loading || !isNewPasswordValid || !newPasswordChecks.passwordsMatch}>
+                {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t.loading}</> : t.updatePasswordButton}
+              </Button>
+              <button type="button" onClick={() => setView('login')} className="w-full text-sm text-primary hover:underline flex items-center justify-center gap-1">
+                <ArrowLeft className="w-3 h-3" />{t.backToLogin}
+              </button>
+            </form>
+          )}
 
           {/* FORGOT PASSWORD */}
           {view === 'forgot' && (
