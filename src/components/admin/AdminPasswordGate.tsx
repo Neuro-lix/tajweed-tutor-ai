@@ -11,8 +11,9 @@ import { toast } from 'sonner';
 
 /**
  * Déblocage de l'espace admin par mot de passe.
- * Le mot de passe n'est jamais présent côté client : il est vérifié par la
- * fonction serveur `claim_admin_access`, qui attribue le rôle admin en base.
+ * Le mot de passe n'est jamais présent côté client : il est envoyé à l'edge
+ * function `claim-admin`, qui valide le JWT puis vérifie le hash en base et
+ * attribue le rôle admin. Rien n'est exposé dans le schéma API public.
  */
 export const AdminPasswordGate = ({ onBack }: { onBack: () => void }) => {
   const { user } = useAuth();
@@ -28,9 +29,11 @@ export const AdminPasswordGate = ({ onBack }: { onBack: () => void }) => {
     }
     setLoading(true);
     try {
-      const { data, error } = await supabase.rpc('claim_admin_access', { _password: password });
+      const { data, error } = await supabase.functions.invoke('claim-admin', {
+        body: { password },
+      });
       if (error) throw error;
-      if (data === true) {
+      if (data?.granted === true) {
         toast.success('Accès administrateur débloqué');
         window.location.reload();
       } else {
