@@ -124,10 +124,20 @@ export const PricingSection = ({ onBack }: PricingSectionProps) => {
                 <li key={i} className="flex items-center gap-2 text-muted-foreground"><Check className="w-4 h-4 text-gold" />{feature}</li>
               ))}
             </ul>
-            <Button variant="outline" className="w-full" onClick={() => handleCheckout("hourly")} disabled={loading !== null}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => handleCheckout("hourly")}
+              disabled={loading !== null || HOURLY_UNAVAILABLE}
+            >
               {loading === "hourly" ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              {t.pricingBuyHour}
+              {HOURLY_UNAVAILABLE ? "Bientôt disponible" : t.pricingBuyHour}
             </Button>
+            {HOURLY_UNAVAILABLE && (
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Le paiement par carte sera activé prochainement.
+              </p>
+            )}
           </Card>
           <Card variant="elevated" className="p-8 relative border-gold/50">
             <Badge variant="gold" className="absolute -top-3 right-6">{t.pricingRecommended}</Badge>
@@ -147,10 +157,20 @@ export const PricingSection = ({ onBack }: PricingSectionProps) => {
                 <li key={i} className="flex items-center gap-2 text-muted-foreground"><Check className="w-4 h-4 text-gold" />{feature}</li>
               ))}
             </ul>
-            <Button variant="gold" className="w-full" onClick={() => handleCheckout("unlimited")} disabled={loading !== null}>
+            <Button
+              variant="gold"
+              className="w-full"
+              onClick={() => handleCheckout("unlimited")}
+              disabled={loading !== null || UNLIMITED_UNAVAILABLE}
+            >
               {loading === "unlimited" ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              {t.pricingSubscribe}
+              {UNLIMITED_UNAVAILABLE ? "Bientôt disponible" : t.pricingSubscribe}
             </Button>
+            {UNLIMITED_UNAVAILABLE && (
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Le paiement par carte sera activé prochainement.
+              </p>
+            )}
           </Card>
         </div>
         {onBack && (
