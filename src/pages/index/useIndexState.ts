@@ -257,6 +257,8 @@ export function useIndexState() {
   const surahLevels = buildSurahLevels(surahProgress, corrections);
   const recommendedReview = getRecommendedReview(surahLevels);
   const guidedVerses = buildGuidedVerses(corrections, 1);
+  // Prioritised "what to fix next" for the reading in use.
+  const priorityFixes = buildPriorityFixes(corrections, 5);
 
   // Keep userAudioBlob in sync with the recorder hook
   useEffect(() => {
