@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Infinity, Check, Loader2 } from "lucide-react";
+import { Clock, Infinity as InfinityIcon, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,11 +23,16 @@ declare global {
           items: { priceId: string; quantity: number }[];
           successUrl?: string;
           customer?: { email?: string };
+          customData?: Record<string, string>;
         }) => void;
       };
     };
   }
 }
+
+const isPlaceholder = (priceId: string) => priceId.startsWith("pri_PLACEHOLDER");
+const HOURLY_UNAVAILABLE = isPlaceholder(PADDLE_PRODUCTS.hourly);
+const UNLIMITED_UNAVAILABLE = isPlaceholder(PADDLE_PRODUCTS.unlimited);
 
 interface PricingSectionProps {
   onBack?: () => void;
@@ -72,7 +77,7 @@ export const PricingSection = ({ onBack }: PricingSectionProps) => {
     }
 
     const priceId = PADDLE_PRODUCTS[priceType];
-    if (priceId.includes("PLACEHOLDER")) {
+    if (isPlaceholder(priceId)) {
       toast.error("Les produits Paddle ne sont pas encore configurés.");
       return;
     }
@@ -84,7 +89,7 @@ export const PricingSection = ({ onBack }: PricingSectionProps) => {
         successUrl: `${window.location.origin}/?payment=success`,
         ...(user?.email ? { customer: { email: user.email } } : {}),
         customData: user ? { user_id: user.id } : undefined,
-      } as any);
+      });
     } catch (error) {
       console.error("Paddle checkout error:", error);
       toast.error(t.error);
@@ -119,15 +124,25 @@ export const PricingSection = ({ onBack }: PricingSectionProps) => {
                 <li key={i} className="flex items-center gap-2 text-muted-foreground"><Check className="w-4 h-4 text-gold" />{feature}</li>
               ))}
             </ul>
-            <Button variant="outline" className="w-full" onClick={() => handleCheckout("hourly")} disabled={loading !== null}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => handleCheckout("hourly")}
+              disabled={loading !== null || HOURLY_UNAVAILABLE}
+            >
               {loading === "hourly" ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              {t.pricingBuyHour}
+              {HOURLY_UNAVAILABLE ? "Bientôt disponible" : t.pricingBuyHour}
             </Button>
+            {HOURLY_UNAVAILABLE && (
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Le paiement par carte sera activé prochainement.
+              </p>
+            )}
           </Card>
           <Card variant="elevated" className="p-8 relative border-gold/50">
             <Badge variant="gold" className="absolute -top-3 right-6">{t.pricingRecommended}</Badge>
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 rounded-xl bg-gold/10"><Infinity className="w-6 h-6 text-gold" /></div>
+              <div className="p-3 rounded-xl bg-gold/10"><InfinityIcon className="w-6 h-6 text-gold" /></div>
               <div>
                 <h3 className="text-xl font-semibold text-foreground">{t.pricingUnlimited}</h3>
                 <p className="text-muted-foreground text-sm">{t.pricingMonthly}</p>
@@ -142,10 +157,20 @@ export const PricingSection = ({ onBack }: PricingSectionProps) => {
                 <li key={i} className="flex items-center gap-2 text-muted-foreground"><Check className="w-4 h-4 text-gold" />{feature}</li>
               ))}
             </ul>
-            <Button variant="gold" className="w-full" onClick={() => handleCheckout("unlimited")} disabled={loading !== null}>
+            <Button
+              variant="gold"
+              className="w-full"
+              onClick={() => handleCheckout("unlimited")}
+              disabled={loading !== null || UNLIMITED_UNAVAILABLE}
+            >
               {loading === "unlimited" ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              {t.pricingSubscribe}
+              {UNLIMITED_UNAVAILABLE ? "Bientôt disponible" : t.pricingSubscribe}
             </Button>
+            {UNLIMITED_UNAVAILABLE && (
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Le paiement par carte sera activé prochainement.
+              </p>
+            )}
           </Card>
         </div>
         {onBack && (

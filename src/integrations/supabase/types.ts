@@ -227,6 +227,27 @@ export type Database = {
         }
         Relationships: []
       }
+      processed_payment_events: {
+        Row: {
+          created_at: string
+          external_id: string
+          id: string
+          provider: string
+        }
+        Insert: {
+          created_at?: string
+          external_id: string
+          id?: string
+          provider: string
+        }
+        Update: {
+          created_at?: string
+          external_id?: string
+          id?: string
+          provider?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

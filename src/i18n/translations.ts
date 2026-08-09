@@ -231,6 +231,12 @@ export interface TranslationKeys {
   yourNamePlaceholder: string;
   confirmPasswordLabel: string;
   passwordsNoMatch: string;
+  newPassword: string;
+  confirmNewPassword: string;
+  passwordUpdated: string;
+  passwordsDoNotMatch: string;
+  updatePasswordButton: string;
+  updatePasswordDesc: string;
   sendLinkButton: string;
   sendingButton: string;
   minChars: string;
@@ -483,6 +489,12 @@ export interface TranslationKeys {
 const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: TranslationKeys } = {
   fr: {
     appName: 'Quran Tajwid',
+    newPassword: 'Nouveau mot de passe',
+    confirmNewPassword: 'Confirmer le nouveau mot de passe',
+    passwordUpdated: 'Mot de passe mis à jour',
+    passwordsDoNotMatch: 'Les mots de passe ne correspondent pas',
+    updatePasswordButton: 'Mettre à jour le mot de passe',
+    updatePasswordDesc: 'Choisis un nouveau mot de passe pour ton compte',
     loading: 'Chargement...',
     error: 'Erreur',
     success: 'Succès',
@@ -892,6 +904,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   en: {
     appName: 'Quran Tajweed',
+    newPassword: 'New password',
+    confirmNewPassword: 'Confirm new password',
+    passwordUpdated: 'Password updated',
+    passwordsDoNotMatch: 'Passwords do not match',
+    updatePasswordButton: 'Update password',
+    updatePasswordDesc: 'Choose a new password for your account',
     loading: 'Loading...',
     error: 'Error',
     success: 'Success',
@@ -1292,6 +1310,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   ar: {
     appName: 'تجويد القرآن',
+    newPassword: 'كلمة المرور الجديدة',
+    confirmNewPassword: 'تأكيد كلمة المرور الجديدة',
+    passwordUpdated: 'تم تحديث كلمة المرور',
+    passwordsDoNotMatch: 'كلمتا المرور غير متطابقتين',
+    updatePasswordButton: 'تحديث كلمة المرور',
+    updatePasswordDesc: 'اختر كلمة مرور جديدة لحسابك',
     loading: 'جاري التحميل...',
     error: 'خطأ',
     success: 'نجاح',
@@ -1692,6 +1716,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   de: {
     appName: 'Quran Tajweed',
+    newPassword: 'Neues Passwort',
+    confirmNewPassword: 'Neues Passwort bestätigen',
+    passwordUpdated: 'Passwort aktualisiert',
+    passwordsDoNotMatch: 'Passwörter stimmen nicht überein',
+    updatePasswordButton: 'Passwort aktualisieren',
+    updatePasswordDesc: 'Wähle ein neues Passwort für dein Konto',
     loading: 'Laden...',
     error: 'Fehler',
     success: 'Erfolg',
@@ -2091,6 +2121,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   es: {
     appName: 'Quran Tajweed',
+    newPassword: 'Nueva contraseña',
+    confirmNewPassword: 'Confirmar nueva contraseña',
+    passwordUpdated: 'Contraseña actualizada',
+    passwordsDoNotMatch: 'Las contraseñas no coinciden',
+    updatePasswordButton: 'Actualizar contraseña',
+    updatePasswordDesc: 'Elige una nueva contraseña para tu cuenta',
     loading: 'Cargando...',
     error: 'Error',
     success: 'Éxito',
@@ -2490,6 +2526,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   it: {
     appName: 'Quran Tajweed',
+    newPassword: 'Nuova password',
+    confirmNewPassword: 'Conferma nuova password',
+    passwordUpdated: 'Password aggiornata',
+    passwordsDoNotMatch: 'Le password non corrispondono',
+    updatePasswordButton: 'Aggiorna password',
+    updatePasswordDesc: 'Scegli una nuova password per il tuo account',
     loading: 'Caricamento...',
     error: 'Errore',
     success: 'Successo',
@@ -2597,6 +2639,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   pt: {
     appName: 'Quran Tajweed',
+    newPassword: 'Nova palavra-passe',
+    confirmNewPassword: 'Confirmar nova palavra-passe',
+    passwordUpdated: 'Palavra-passe atualizada',
+    passwordsDoNotMatch: 'As palavras-passe não coincidem',
+    updatePasswordButton: 'Atualizar palavra-passe',
+    updatePasswordDesc: 'Escolhe uma nova palavra-passe para a tua conta',
     loading: 'Carregando...',
     error: 'Erro',
     success: 'Sucesso',
@@ -2704,6 +2752,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   nl: {
     appName: 'Quran Tajweed',
+    newPassword: 'Nieuw wachtwoord',
+    confirmNewPassword: 'Bevestig nieuw wachtwoord',
+    passwordUpdated: 'Wachtwoord bijgewerkt',
+    passwordsDoNotMatch: 'Wachtwoorden komen niet overeen',
+    updatePasswordButton: 'Wachtwoord bijwerken',
+    updatePasswordDesc: 'Kies een nieuw wachtwoord voor je account',
     loading: 'Laden...',
     error: 'Fout',
     success: 'Succes',
@@ -2811,6 +2865,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   ur: {
     appName: 'قرآن تجوید',
+    newPassword: 'نیا پاس ورڈ',
+    confirmNewPassword: 'نئے پاس ورڈ کی تصدیق کریں',
+    passwordUpdated: 'پاس ورڈ اپ ڈیٹ ہو گیا',
+    passwordsDoNotMatch: 'پاس ورڈ آپس میں نہیں ملتے',
+    updatePasswordButton: 'پاس ورڈ اپ ڈیٹ کریں',
+    updatePasswordDesc: 'اپنے اکاؤنٹ کے لیے نیا پاس ورڈ منتخب کریں',
     loading: 'لوڈ ہو رہا ہے...',
     error: 'خرابی',
     success: 'کامیابی',
@@ -2918,6 +2978,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   bn: {
     appName: 'কুরআন তাজবীদ',
+    newPassword: 'নতুন পাসওয়ার্ড',
+    confirmNewPassword: 'নতুন পাসওয়ার্ড নিশ্চিত করুন',
+    passwordUpdated: 'পাসওয়ার্ড আপডেট হয়েছে',
+    passwordsDoNotMatch: 'পাসওয়ার্ড মিলছে না',
+    updatePasswordButton: 'পাসওয়ার্ড আপডেট করুন',
+    updatePasswordDesc: 'আপনার অ্যাকাউন্টের জন্য নতুন পাসওয়ার্ড বেছে নিন',
     loading: 'লোড হচ্ছে...',
     error: 'ত্রুটি',
     success: 'সফল',
@@ -3025,6 +3091,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   hi: {
     appName: 'कुरआन तजवीद',
+    newPassword: 'नया पासवर्ड',
+    confirmNewPassword: 'नए पासवर्ड की पुष्टि करें',
+    passwordUpdated: 'पासवर्ड अपडेट हो गया',
+    passwordsDoNotMatch: 'पासवर्ड मेल नहीं खाते',
+    updatePasswordButton: 'पासवर्ड अपडेट करें',
+    updatePasswordDesc: 'अपने खाते के लिए नया पासवर्ड चुनें',
     loading: 'लोड हो रहा है...',
     error: 'त्रुटि',
     success: 'सफल',
@@ -3132,6 +3204,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   fa: {
     appName: 'قرآن تجوید',
+    newPassword: 'رمز عبور جدید',
+    confirmNewPassword: 'تأیید رمز عبور جدید',
+    passwordUpdated: 'رمز عبور به‌روزرسانی شد',
+    passwordsDoNotMatch: 'رمزهای عبور مطابقت ندارند',
+    updatePasswordButton: 'به‌روزرسانی رمز عبور',
+    updatePasswordDesc: 'یک رمز عبور جدید برای حساب خود انتخاب کنید',
     loading: 'در حال بارگذاری...',
     error: 'خطا',
     success: 'موفق',
@@ -3239,6 +3317,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   ru: {
     appName: 'Коран Таджвид',
+    newPassword: 'Новый пароль',
+    confirmNewPassword: 'Подтвердите новый пароль',
+    passwordUpdated: 'Пароль обновлён',
+    passwordsDoNotMatch: 'Пароли не совпадают',
+    updatePasswordButton: 'Обновить пароль',
+    updatePasswordDesc: 'Выберите новый пароль для аккаунта',
     loading: 'Загрузка...',
     error: 'Ошибка',
     success: 'Успех',
@@ -3346,6 +3430,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   zh: {
     appName: '古兰经诵读',
+    newPassword: '新密码',
+    confirmNewPassword: '确认新密码',
+    passwordUpdated: '密码已更新',
+    passwordsDoNotMatch: '两次输入的密码不一致',
+    updatePasswordButton: '更新密码',
+    updatePasswordDesc: '为你的账户设置新密码',
     loading: '加载中...',
     error: '错误',
     success: '成功',
@@ -3453,6 +3543,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   tr: {
     appName: 'Kuran Tecvid',
+    newPassword: 'Yeni şifre',
+    confirmNewPassword: 'Yeni şifreyi onayla',
+    passwordUpdated: 'Şifre güncellendi',
+    passwordsDoNotMatch: 'Şifreler eşleşmiyor',
+    updatePasswordButton: 'Şifreyi güncelle',
+    updatePasswordDesc: 'Hesabın için yeni bir şifre seç',
     loading: 'Yükleniyor...',
     error: 'Hata',
     success: 'Başarılı',
@@ -3560,6 +3656,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   id: {
     appName: 'Quran Tajweed',
+    newPassword: 'Kata sandi baru',
+    confirmNewPassword: 'Konfirmasi kata sandi baru',
+    passwordUpdated: 'Kata sandi diperbarui',
+    passwordsDoNotMatch: 'Kata sandi tidak cocok',
+    updatePasswordButton: 'Perbarui kata sandi',
+    updatePasswordDesc: 'Pilih kata sandi baru untuk akunmu',
     loading: 'Memuat...',
     error: 'Kesalahan',
     success: 'Berhasil',
@@ -3667,6 +3769,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   ms: {
     appName: 'Quran Tajweed',
+    newPassword: 'Kata laluan baharu',
+    confirmNewPassword: 'Sahkan kata laluan baharu',
+    passwordUpdated: 'Kata laluan dikemas kini',
+    passwordsDoNotMatch: 'Kata laluan tidak sepadan',
+    updatePasswordButton: 'Kemas kini kata laluan',
+    updatePasswordDesc: 'Pilih kata laluan baharu untuk akaun anda',
     loading: 'Memuatkan...',
     error: 'Ralat',
     success: 'Berjaya',
@@ -3774,6 +3882,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   sw: {
     appName: 'Quran Tajweed',
+    newPassword: 'Nenosiri jipya',
+    confirmNewPassword: 'Thibitisha nenosiri jipya',
+    passwordUpdated: 'Nenosiri limesasishwa',
+    passwordsDoNotMatch: 'Manenosiri hayalingani',
+    updatePasswordButton: 'Sasisha nenosiri',
+    updatePasswordDesc: 'Chagua nenosiri jipya kwa akaunti yako',
     loading: 'Inapakia...',
     error: 'Hitilafu',
     success: 'Mafanikio',
@@ -3881,6 +3995,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   pl: {
     appName: 'Koran Tadżwid',
+    newPassword: 'Nowe hasło',
+    confirmNewPassword: 'Potwierdź nowe hasło',
+    passwordUpdated: 'Hasło zaktualizowane',
+    passwordsDoNotMatch: 'Hasła nie są zgodne',
+    updatePasswordButton: 'Zaktualizuj hasło',
+    updatePasswordDesc: 'Wybierz nowe hasło do swojego konta',
     loading: 'Ładowanie...',
     error: 'Błąd',
     success: 'Sukces',
@@ -3988,6 +4108,12 @@ const translations: Record<LanguageCode, Partial<TranslationKeys>> & { fr: Trans
 },
   uk: {
     appName: 'Коран Таджвід',
+    newPassword: 'Новий пароль',
+    confirmNewPassword: 'Підтвердіть новий пароль',
+    passwordUpdated: 'Пароль оновлено',
+    passwordsDoNotMatch: 'Паролі не збігаються',
+    updatePasswordButton: 'Оновити пароль',
+    updatePasswordDesc: 'Виберіть новий пароль для облікового запису',
     loading: 'Завантаження...',
     error: 'Помилка',
     success: 'Успіх',

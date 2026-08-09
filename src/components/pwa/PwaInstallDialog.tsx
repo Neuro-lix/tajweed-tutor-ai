@@ -34,13 +34,13 @@ const markDismissed = () => {
 const isStandaloneMode = () => {
   // display-mode is standard; navigator.standalone is iOS Safari legacy
   const dm = window.matchMedia?.("(display-mode: standalone)")?.matches;
-  const iosStandalone = (navigator as any).standalone === true;
+  const iosStandalone = (navigator as Navigator & { standalone?: boolean }).standalone === true;
   return Boolean(dm || iosStandalone);
 };
 
 const isIOS = () => {
   const ua = navigator.userAgent || "";
-  return /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
+  return /iPad|iPhone|iPod/.test(ua) && !(window as Window & { MSStream?: unknown }).MSStream;
 };
 
 export const PwaInstallDialog: React.FC = () => {

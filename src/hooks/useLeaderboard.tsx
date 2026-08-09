@@ -2,6 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
+// Tables not present in generated Supabase types yet.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type UntypedTable = any;
+
 export interface LeaderboardEntry {
   id: string;
   displayName: string;
@@ -13,6 +17,18 @@ export interface LeaderboardEntry {
   longestStreak: number;
   rankPosition: number | null;
   isCurrentUser: boolean;
+}
+
+interface LeaderboardRow {
+  id: string;
+  display_name: string | null;
+  total_xp: number;
+  current_level: number;
+  total_verses_mastered: number;
+  perfect_recitations: number;
+  current_streak: number;
+  longest_streak: number;
+  is_current_user?: boolean | null;
 }
 
 const ANONYMOUS_NAMES = [
@@ -46,14 +62,14 @@ export const useLeaderboard = () => {
   const fetchLeaderboard = useCallback(async () => {
     try {
       const { data, error } = await supabase
-        .from('leaderboard_public' as any)
+        .from('leaderboard_public' as UntypedTable)
         .select('*')
         .order('total_xp', { ascending: false })
         .limit(100);
 
       if (error) throw error;
 
-      const entries: LeaderboardEntry[] = (data || []).map((entry: any, index) => ({
+      const entries: LeaderboardEntry[] = ((data || []) as unknown as LeaderboardRow[]).map((entry, index) => ({
         id: entry.id,
         displayName: entry.display_name || getAnonymousName(entry.id),
         totalXp: entry.total_xp,

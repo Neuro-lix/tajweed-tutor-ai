@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Users, Clock, Globe, TrendingUp, Award, BookOpen, ShoppingBag, GripVertical, Settings, Eye, EyeOff, BarChart2, Activity, RefreshCw, Target, AlertTriangle, Download, Radar as RadarIcon, CreditCard, Package } from "lucide-react";
+import { ArrowLeft, Users, Clock, TrendingUp, Award, BookOpen, ShoppingBag, Settings, BarChart2, Activity, RefreshCw, Target, AlertTriangle, Download, Radar as RadarIcon, CreditCard, Package, LineChart } from "lucide-react";
 import { downloadFullSourceZip, getBundledFileCount } from "@/lib/downloadSource";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,9 +43,6 @@ interface AdminDashboardProps {
 interface UserStat {
   user_id: string;
   full_name: string | null;
-  country_name: string | null;
-  country_code: string | null;
-  language: string | null;
   registered_at: string;
   total_sessions: number;
   avg_score: number;
@@ -63,6 +60,15 @@ interface SurahMetric {
   errorRate: number;   // 100 - successRate
 }
 
+interface BusinessStats {
+  retentionD7: { cohort: number; retained: number; rate: number };
+  retentionD30: { cohort: number; retained: number; rate: number };
+  payingUsers: number;
+  conversionRate: number;
+  paymentMethods: { method: string; count: number; pct: number }[];
+  funnel: { signups: number; withSession: number; withPurchase: number };
+}
+
 interface DashStats {
   totalUsers: number;
   activeToday: number;
@@ -70,17 +76,12 @@ interface DashStats {
   totalRecitations: number;
   avgScore: number;
   ijazaRequests: number;
-  topCountries: { name: string; code: string; count: number }[];
   registrationsByDay: { date: string; count: number }[];
   users: UserStat[];
   surahMetrics: SurahMetric[];
   tajweedErrorBuckets: TajweedErrorBucket[];
+  business: BusinessStats;
 }
-
-const FLAG = (code: string) => {
-  if (!code || code.length !== 2) return "🌍";
-  return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E0 + c.charCodeAt(0) - 65));
-};
 
 const fmtDate = (d: string | null) => {
   if (!d) return "—";
@@ -96,7 +97,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
   const { isAdmin, loading: roleLoading } = useIsAdmin();
   const [stats, setStats] = useState<DashStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"overview" | "users" | "tajweed" | "boutique" | "credits">("overview");
+  type AdminTab = "overview" | "users" | "tajweed" | "business" | "boutique" | "credits";
+  const [tab, setTab] = useState<AdminTab>("overview");
   const [refreshing, setRefreshing] = useState(false);
 
   const loadStats = async () => {
@@ -123,6 +125,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         .from("corrections")
         .select("rule_type, rule_description");
 
+      // Credit purchases (business KPIs)
+      const { data: creditTx } = await supabase
+        .from("credit_transactions")
+        .select("user_id, type, description, created_at");
+
       const now = new Date();
       const todayStr = now.toISOString().split("T")[0];
 
@@ -145,9 +152,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
         : 0;
 
-      // Top countries - skipped since profiles table doesn't have country columns
-      const topCountries: { name: string; code: string; count: number }[] = [];
-
       // Registrations by day (last 14 days)
       const last14 = Array.from({ length: 14 }, (_, i) => {
         const d = new Date(now);
@@ -169,9 +173,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
         return {
           user_id: p.user_id,
           full_name: p.full_name,
-          country_name: null,
-          country_code: null,
-          language: null,
           registered_at: p.created_at,
           total_sessions: userSessions.length,
           avg_score: userScores.length ? Math.round(userScores.reduce((a, b) => a + b, 0) / userScores.length) : 0,
@@ -182,7 +183,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
 
       // Per-surah tajweed metrics (success rate = % sessions with score >= 85)
       const surahMap = new Map<number, { scores: number[]; total: number }>();
-      (sessions || []).forEach((s: any) => {
+      (sessions || []).forEach((s) => {
         if (!s.surah_number) return;
         const entry = surahMap.get(s.surah_number) || { scores: [], total: 0 };
         entry.total += 1;
@@ -211,25 +212,81 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
       // Tajweed error buckets (radar chart)
       const bucketMap = new Map<string, number>();
       Object.keys(TAJWEED_KEYWORDS).forEach(k => bucketMap.set(k, 0));
-      (corrections || []).forEach((c: any) => {
+      (corrections || []).forEach((c) => {
         const cat = classifyTajweedError(`${c.rule_type || ''} ${c.rule_description || ''}`);
         if (cat) bucketMap.set(cat, (bucketMap.get(cat) || 0) + 1);
       });
       const tajweedErrorBuckets: TajweedErrorBucket[] = Array.from(bucketMap.entries())
         .map(([category, count]) => ({ category, count }));
 
+      // ── Business KPIs ──
+      const purchases = (creditTx || []).filter(tx => tx.type === "purchase");
+      const payingIds = new Set(purchases.map(tx => tx.user_id));
+      const sessionUserIds = new Set((sessions || []).map(s => s.user_id));
+      const DAY = 86400000;
+
+      const retention = (minDays: number, maxDays: number, windowDays: number) => {
+        const cohortUsers = (profiles || []).filter(p => {
+          const age = (now.getTime() - new Date(p.created_at).getTime()) / DAY;
+          return age >= minDays && age <= maxDays;
+        });
+        const retained = cohortUsers.filter(p => {
+          const reg = new Date(p.created_at).getTime();
+          return (sessions || []).some(s =>
+            s.user_id === p.user_id &&
+            new Date(s.created_at).getTime() >= reg &&
+            new Date(s.created_at).getTime() <= reg + windowDays * DAY
+          );
+        }).length;
+        return {
+          cohort: cohortUsers.length,
+          retained,
+          rate: cohortUsers.length ? Math.round((retained / cohortUsers.length) * 100) : 0,
+        };
+      };
+
+      const methodCounts = new Map<string, number>();
+      purchases.forEach(tx => {
+        const desc = (tx.description || "").toLowerCase();
+        const method = desc.includes("crypto") ? "Crypto"
+          : desc.includes("paddle") ? "Paddle"
+          : "Autre";
+        methodCounts.set(method, (methodCounts.get(method) || 0) + 1);
+      });
+      const paymentMethods = Array.from(methodCounts.entries())
+        .map(([method, count]) => ({
+          method,
+          count,
+          pct: purchases.length ? Math.round((count / purchases.length) * 100) : 0,
+        }))
+        .sort((a, b) => b.count - a.count);
+
+      const totalUsers = (profiles || []).length;
+      const business: BusinessStats = {
+        retentionD7: retention(7, 14, 7),
+        retentionD30: retention(30, 37, 30),
+        payingUsers: payingIds.size,
+        conversionRate: totalUsers ? Math.round((payingIds.size / totalUsers) * 100) : 0,
+        paymentMethods,
+        funnel: {
+          signups: totalUsers,
+          withSession: (profiles || []).filter(p => sessionUserIds.has(p.user_id)).length,
+          withPurchase: (profiles || []).filter(p => payingIds.has(p.user_id)).length,
+        },
+      };
+
       setStats({
-        totalUsers: (profiles || []).length,
+        totalUsers,
         activeToday: activeTodayIds.size,
         avgSessionMin,
         totalRecitations: (sessions || []).length,
         avgScore,
         ijazaRequests: (ijaza || []).length,
-        topCountries,
         registrationsByDay: regsByDay,
         users: userStats,
         surahMetrics,
         tajweedErrorBuckets,
+        business,
       });
     } catch (e) {
       console.error("Admin stats error:", e);
@@ -318,12 +375,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
             { key: "overview", label: "Vue d'ensemble", icon: BarChart2 },
             { key: "users", label: "Utilisateurs", icon: Users },
             { key: "tajweed", label: "Tajwīd par sourate", icon: Target },
+            { key: "business", label: "Business", icon: LineChart },
             { key: "boutique", label: "Boutique", icon: ShoppingBag },
             { key: "credits", label: "💳 Crédits LLM", icon: CreditCard },
           ].map(t => (
             <button
               key={t.key}
-              onClick={() => setTab(t.key as any)}
+              onClick={() => setTab(t.key as AdminTab)}
               className={"flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors " + (tab === t.key ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground")}
             >
               <t.icon className="w-4 h-4" />{t.label}
@@ -384,28 +442,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
               </CardContent>
             </Card>
 
-            {/* Countries */}
-            <Card>
-              <CardHeader><CardTitle className="text-base flex items-center gap-2"><Globe className="w-4 h-4 text-primary" />Pays d'origine</CardTitle></CardHeader>
-              <CardContent>
-                {stats.topCountries.length === 0 ? (
-                  <p className="text-muted-foreground text-sm">Aucune donnée de localisation disponible encore. Les pays seront détectés automatiquement à l'inscription via l'IP.</p>
-                ) : (
-                  <div className="space-y-3">
-                    {stats.topCountries.map(c => (
-                      <div key={c.code} className="flex items-center gap-3">
-                        <span className="text-xl">{FLAG(c.code)}</span>
-                        <span className="text-sm font-medium w-32">{c.name}</span>
-                        <div className="flex-1 bg-muted rounded-full h-2">
-                          <div className="bg-primary h-2 rounded-full" style={{ width: (c.count / stats.totalUsers * 100) + "%" }} />
-                        </div>
-                        <span className="text-sm text-muted-foreground w-8 text-right">{c.count}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </div>
         ) : tab === "users" ? (
           <div className="space-y-4">
@@ -418,8 +454,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
                   <thead>
                     <tr className="border-b border-border bg-muted/30">
                       <th className="text-left p-3 font-medium">Utilisateur</th>
-                      <th className="text-left p-3 font-medium">Pays</th>
-                      <th className="text-left p-3 font-medium">Langue</th>
                       <th className="text-left p-3 font-medium">Inscrit le</th>
                       <th className="text-right p-3 font-medium">Sessions</th>
                       <th className="text-right p-3 font-medium">Score moy.</th>
@@ -433,12 +467,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
                         <td className="p-3">
                           <span className="font-medium">{u.full_name || "Anonyme"}</span>
                         </td>
-                        <td className="p-3">
-                          {u.country_code ? (
-                            <span className="flex items-center gap-1">{FLAG(u.country_code)}<span className="text-xs text-muted-foreground">{u.country_name}</span></span>
-                          ) : <span className="text-muted-foreground text-xs">—</span>}
-                        </td>
-                        <td className="p-3"><Badge variant="outline" className="text-xs">{u.language || "fr"}</Badge></td>
                         <td className="p-3 text-muted-foreground">{fmtDate(u.registered_at)}</td>
                         <td className="p-3 text-right font-medium">{u.total_sessions}</td>
                         <td className="p-3 text-right">
@@ -451,7 +479,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
                       </tr>
                     ))}
                     {stats.users.length === 0 && (
-                      <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Aucun utilisateur inscrit pour l'instant</td></tr>
+                      <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">Aucun utilisateur inscrit pour l'instant</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -619,6 +647,94 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
                     </tbody>
                   </table>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+        ) : tab === "business" ? (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: "Rétention D7", value: stats.business.retentionD7.rate + "%", sub: `${stats.business.retentionD7.retained}/${stats.business.retentionD7.cohort} de la cohorte`, icon: Activity, color: "text-blue-600" },
+                { label: "Rétention D30", value: stats.business.retentionD30.rate + "%", sub: `${stats.business.retentionD30.retained}/${stats.business.retentionD30.cohort} de la cohorte`, icon: Activity, color: "text-indigo-600" },
+                { label: "Conversion payante", value: stats.business.conversionRate + "%", sub: `${stats.business.payingUsers} acheteurs`, icon: CreditCard, color: "text-emerald-600" },
+                { label: "Transactions", value: stats.business.paymentMethods.reduce((s, m) => s + m.count, 0), sub: "achats de crédits", icon: TrendingUp, color: "text-amber-600" },
+              ].map(kpi => (
+                <Card key={kpi.label}>
+                  <CardContent className="p-4 text-center space-y-1">
+                    <kpi.icon className={"w-5 h-5 mx-auto " + kpi.color} />
+                    <p className="text-2xl font-bold">{kpi.value}</p>
+                    <p className="text-xs text-muted-foreground">{kpi.label}</p>
+                    <p className="text-[10px] text-muted-foreground/70">{kpi.sub}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-primary" />Revenus par méthode de paiement
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {stats.business.paymentMethods.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Aucun achat enregistré pour l'instant.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {stats.business.paymentMethods.map(m => (
+                      <div key={m.method} className="flex items-center gap-3">
+                        <span className="text-sm font-medium w-24">{m.method}</span>
+                        <div className="flex-1 bg-muted rounded-full h-2 overflow-hidden">
+                          <div className="bg-primary h-2 rounded-full" style={{ width: m.pct + "%" }} />
+                        </div>
+                        <Badge variant="secondary" className="text-[10px]">{m.count} · {m.pct}%</Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Target className="w-4 h-4 text-primary" />Entonnoir de conversion
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {(() => {
+                  const f = stats.business.funnel;
+                  const steps = [
+                    { label: "Inscrits", value: f.signups },
+                    { label: "≥ 1 session", value: f.withSession },
+                    { label: "≥ 1 achat", value: f.withPurchase },
+                  ];
+                  return (
+                    <div className="space-y-2">
+                      {steps.map((s, i) => {
+                        const prev = i === 0 ? null : steps[i - 1].value;
+                        const stepRate = prev ? Math.round((s.value / prev) * 100) : null;
+                        const width = f.signups ? Math.max(6, (s.value / f.signups) * 100) : 6;
+                        return (
+                          <div key={s.label} className="space-y-1">
+                            {stepRate !== null && (
+                              <p className="text-[11px] text-muted-foreground pl-1">↓ {stepRate}% de conversion</p>
+                            )}
+                            <div className="flex items-center gap-3">
+                              <div
+                                className="bg-primary/80 text-primary-foreground rounded-md py-2 px-3 text-sm font-medium transition-all"
+                                style={{ width: width + "%" }}
+                              >
+                                {s.value}
+                              </div>
+                              <span className="text-sm text-muted-foreground">{s.label}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
               </CardContent>
             </Card>
           </div>

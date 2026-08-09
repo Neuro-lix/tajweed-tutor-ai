@@ -14,7 +14,7 @@ window.addEventListener("error", (e) => {
       time: new Date().toISOString(),
     });
     localStorage.setItem("healthcheck_errors", JSON.stringify(errors.slice(0, 5)));
-  } catch {}
+  } catch { /* storage unavailable — ignore */ }
 });
 window.addEventListener("unhandledrejection", (e) => {
   try {
@@ -25,7 +25,7 @@ window.addEventListener("unhandledrejection", (e) => {
       time: new Date().toISOString(),
     });
     localStorage.setItem("healthcheck_errors", JSON.stringify(errors.slice(0, 5)));
-  } catch {}
+  } catch { /* storage unavailable — ignore */ }
 });
 
 try {

@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
+type RateLimitResult = { allowed: boolean; count: number; limit: number; reset_at: string };
+
 // ─── CORS: env-driven allowlist (no wildcard) ───────────────────────────
 const DEFAULT_ALLOWED_ORIGINS = [
   "https://recite-perfectly-bot.lovable.app",
@@ -114,8 +116,8 @@ serve(async (req) => {
     const { data: rl } = await sbAdmin.rpc("check_and_increment_rate_limit", {
       p_user_id: userId, p_action: "analyze-recitation", p_max: 20, p_window_seconds: 3600,
     });
-    if (rl && (rl as any).allowed === false) {
-      const resetAt = (rl as any).reset_at;
+    if (rl && (rl as RateLimitResult).allowed === false) {
+      const resetAt = (rl as RateLimitResult).reset_at;
       const retryAfter = Math.max(1, Math.ceil((new Date(resetAt).getTime() - Date.now()) / 1000));
       return new Response(JSON.stringify({ error: "Rate limit exceeded", retry_after: retryAfter }), {
         status: 429,
@@ -430,7 +432,7 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
       usage: (aiResponse?.usage ?? {}) as Record<string, number>,
     });
 
-    let analysis: any;
+    let analysis: Record<string, unknown>;
     try {
       analysis = JSON.parse(content);
     } catch {

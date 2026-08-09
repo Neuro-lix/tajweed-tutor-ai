@@ -55,7 +55,7 @@ export const useRecitationStorage = (): UseRecitationStorageReturn => {
       if (error) throw error;
 
       setRecordings(
-        (data || []).map((r: any) => ({
+        (data || []).map((r) => ({
           id: r.id,
           surahNumber: r.surah_number,
           verseNumber: r.verse_number,

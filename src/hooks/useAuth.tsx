@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           context: 'useAuth',
         });
         localStorage.setItem('healthcheck_errors', JSON.stringify(errors.slice(0, 10)));
-      } catch {}
+      } catch { /* storage unavailable — ignore */ }
       setLoading(false);
     }, 5000);
 

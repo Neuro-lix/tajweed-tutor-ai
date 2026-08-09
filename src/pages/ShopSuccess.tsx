@@ -100,10 +100,10 @@ const ShopSuccess: React.FC = () => {
       }
 
       window.open(data.signedUrl, '_blank');
-    } catch (err: any) {
+    } catch (err) {
       toast({
         title: t.shopSuccessDownloadError,
-        description: err.message || t.shopSuccessRetryLater,
+        description: (err instanceof Error ? err.message : '') || t.shopSuccessRetryLater,
         variant: 'destructive',
       });
     } finally {

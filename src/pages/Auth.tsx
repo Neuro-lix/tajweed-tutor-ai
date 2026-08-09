@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,10 +12,12 @@ import logoImage from '@/logo.png';
 import { Loader2, Mail, Lock, User, Eye, EyeOff, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
 import { PageSeo } from '@/components/seo/PageSeo';
 
-type AuthView = 'login' | 'signup' | 'forgot';
+type AuthView = 'login' | 'signup' | 'forgot' | 'updatePassword';
 
 const Auth = () => {
-  const [view, setView] = useState<AuthView>('login');
+  const [searchParams] = useSearchParams();
+  const isResetFlow = searchParams.get('reset') === 'true';
+  const [view, setView] = useState<AuthView>(isResetFlow ? 'updatePassword' : 'login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -25,6 +27,8 @@ const Auth = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
   const [signupEmail, setSignupEmail] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [resendMessage, setResendMessage] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
@@ -66,12 +70,57 @@ const Auth = () => {
     return msg || t.unexpectedError;
   };
 
+  // Password-recovery links open a session; don't bounce the user away from the form.
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    if (isResetFlow) return;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) navigate('/');
     });
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, isResetFlow]);
+
+  const newPasswordChecks = {
+    minLength: newPassword.length >= 8,
+    hasUppercase: /[A-Z]/.test(newPassword),
+    hasLowercase: /[a-z]/.test(newPassword),
+    hasNumber: /[0-9]/.test(newPassword),
+    passwordsMatch: newPassword === confirmNewPassword && newPassword.length > 0,
+  };
+  const isNewPasswordValid = newPasswordChecks.minLength && newPasswordChecks.hasUppercase &&
+    newPasswordChecks.hasLowercase && newPasswordChecks.hasNumber;
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isNewPasswordValid) {
+      toast({ title: t.invalidPassword, description: t.passwordCriteria, variant: 'destructive' });
+      return;
+    }
+    if (!newPasswordChecks.passwordsMatch) {
+      toast({ title: t.error, description: t.passwordsDoNotMatch, variant: 'destructive' });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        toast({ title: t.error, description: mapAuthError(error), variant: 'destructive', duration: 8000 });
+        return;
+      }
+      toast({ title: t.passwordUpdated, description: t.loginSuccessDesc });
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        navigate('/dashboard');
+      } else {
+        setView('login');
+        setNewPassword('');
+        setConfirmNewPassword('');
+      }
+    } catch {
+      toast({ title: t.error, description: t.unexpectedError, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Countdown between two resend attempts (avoids hitting the auth rate limit).
   useEffect(() => {
@@ -249,16 +298,63 @@ const Auth = () => {
             <img src={logoImage} alt="Tajweed Tutor AI" className="h-24 w-24 object-contain rounded-2xl" />
           </div>
           <CardTitle className="text-3xl font-amiri">
-            {view === 'login' ? t.loginTitle : view === 'signup' ? t.signupTitle : t.forgotPasswordTitle}
+            {view === 'login' ? t.loginTitle
+              : view === 'signup' ? t.signupTitle
+              : view === 'updatePassword' ? t.updatePasswordButton
+              : t.forgotPasswordTitle}
           </CardTitle>
           <CardDescription className="text-base">
             {view === 'login' ? t.accessLearning
               : view === 'signup' ? t.startJourney
+              : view === 'updatePassword' ? t.updatePasswordDesc
               : t.resetPasswordDesc}
           </CardDescription>
         </CardHeader>
 
         <CardContent>
+
+          {/* UPDATE PASSWORD (reset link) */}
+          {view === 'updatePassword' && (
+            <form onSubmit={handleUpdatePassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">{t.newPassword}</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input id="newPassword" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="pl-10 pr-10" required minLength={8} />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {newPassword.length > 0 && (
+                  <div className="grid grid-cols-2 gap-1 pt-2">
+                    <PasswordCheck valid={newPasswordChecks.minLength} label={t.minChars} />
+                    <PasswordCheck valid={newPasswordChecks.hasUppercase} label={t.oneUppercase} />
+                    <PasswordCheck valid={newPasswordChecks.hasLowercase} label={t.oneLowercase} />
+                    <PasswordCheck valid={newPasswordChecks.hasNumber} label={t.oneDigit} />
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmNewPassword">{t.confirmNewPassword}</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input id="confirmNewPassword" type={showConfirmPassword ? 'text' : 'password'} placeholder="••••••••" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} className={`pl-10 pr-10 ${confirmNewPassword.length > 0 ? newPasswordChecks.passwordsMatch ? 'border-green-500' : 'border-red-500' : ''}`} required />
+                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {confirmNewPassword.length > 0 && !newPasswordChecks.passwordsMatch && (
+                  <p className="text-xs text-red-500">{t.passwordsDoNotMatch}</p>
+                )}
+              </div>
+              <Button type="submit" className="w-full" size="lg" disabled={loading || !isNewPasswordValid || !newPasswordChecks.passwordsMatch}>
+                {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t.loading}</> : t.updatePasswordButton}
+              </Button>
+              <button type="button" onClick={() => setView('login')} className="w-full text-sm text-primary hover:underline flex items-center justify-center gap-1">
+                <ArrowLeft className="w-3 h-3" />{t.backToLogin}
+              </button>
+            </form>
+          )}
 
           {/* FORGOT PASSWORD */}
           {view === 'forgot' && (

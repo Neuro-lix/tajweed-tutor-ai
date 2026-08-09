@@ -32,7 +32,7 @@ async function decodeToPeaks(
     arrayBuffer = await source.arrayBuffer();
   }
 
-  const Ctx = (window as any).AudioContext || (window as any).webkitAudioContext;
+  const Ctx = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!Ctx) throw new Error('AudioContext unsupported');
   const ctx: AudioContext = new Ctx();
   let buffer: AudioBuffer;
