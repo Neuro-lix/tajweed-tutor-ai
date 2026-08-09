@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, ArrowRight, Download, ListChecks } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Download, ListChecks, Table2 } from 'lucide-react';
 import { getRuleFamilyMeta, classifyRule } from '@/lib/tajweedRules';
 import type { PriorityFix } from '@/lib/progressInsights';
 
@@ -12,6 +12,7 @@ interface Props {
   onOpenSurah: (surahNumber: number, verseNumber: number) => void;
   onOpenAllErrors: () => void;
   onDownloadPdf: () => void;
+  onDownloadCsv: () => void;
 }
 
 const rank = ['bg-destructive/15 text-destructive', 'bg-amber-500/15 text-amber-600', 'bg-primary/15 text-primary'];
@@ -22,6 +23,7 @@ export const PriorityFixesCard = ({
   onOpenSurah,
   onOpenAllErrors,
   onDownloadPdf,
+  onDownloadCsv,
 }: Props) => (
   <Card>
     <CardHeader className="pb-3">
@@ -107,7 +109,17 @@ export const PriorityFixesCard = ({
           disabled={fixes.length === 0}
         >
           <Download className="h-4 w-4 mr-1.5" />
-          PDF récapitulatif
+          PDF
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1"
+          onClick={onDownloadCsv}
+          disabled={fixes.length === 0}
+        >
+          <Table2 className="h-4 w-4 mr-1.5" />
+          CSV
         </Button>
       </div>
     </CardContent>

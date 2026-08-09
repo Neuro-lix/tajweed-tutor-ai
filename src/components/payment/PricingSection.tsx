@@ -60,7 +60,8 @@ export const PricingSection = ({ onBack }: PricingSectionProps) => {
       const { data } = await supabase
         .from("profiles")
         .select("paddle_customer_id")
-        .eq("id", user.id)
+        // INVARIANT: profiles.user_id est l'id auth (profiles.id est la PK de ligne).
+        .eq("user_id", user.id)
         .maybeSingle();
       if (!cancelled) setPaddleCustomerId(data?.paddle_customer_id ?? null);
     })();
