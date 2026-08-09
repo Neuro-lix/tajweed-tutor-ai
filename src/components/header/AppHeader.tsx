@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { LanguageSelector } from '@/components/settings/LanguageSelector';
 import { ThemeToggle } from '@/components/settings/ThemeToggle';
 import { OfflineIndicator } from '@/components/offline/OfflineIndicator';
-import { LogOut, MessageSquareHeart, Award, Music, ShoppingBag, GraduationCap, Zap } from 'lucide-react';
+import { LogOut, MessageSquareHeart, Award, Music, ShoppingBag, GraduationCap, Zap, BrainCircuit } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import logoImage from '@/logo.png';
