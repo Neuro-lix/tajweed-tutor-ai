@@ -21,7 +21,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { fetchAyah } from '@/lib/quranApi';
 import { AnalysisResult, AppView, getGlobalAyahNumber, normalizeRuleType } from './indexHelpers';
 import { calculateEnvelopeSimilarityScore } from '@/lib/envelopeSimilarity';
-import { buildSurahLevels, getRecommendedReview, buildGuidedVerses, buildPriorityFixes } from '@/lib/progressInsights';
+import { buildSurahLevels, getRecommendedReview, buildGuidedVerses, buildPriorityFixes, buildSm2GuidedPlan } from '@/lib/progressInsights';
 
 /**
  * Centralized state hook for the Index page.
@@ -257,6 +257,8 @@ export function useIndexState() {
   const surahLevels = buildSurahLevels(surahProgress, corrections);
   const recommendedReview = getRecommendedReview(surahLevels);
   const guidedVerses = buildGuidedVerses(corrections, 1);
+  // Guided repetition driven by the SM-2 schedule: only the top-priority rules.
+  const guidedPlan = buildSm2GuidedPlan(corrections, reviewQueue, { ruleLimit: 3 });
   // Prioritised "what to fix next" for the reading in use.
   const priorityFixes = buildPriorityFixes(corrections, 5);
 
@@ -622,6 +624,7 @@ export function useIndexState() {
     surahLevels,
     recommendedReview,
     guidedVerses,
+    guidedPlan,
     priorityFixes,
 
     // handlers
