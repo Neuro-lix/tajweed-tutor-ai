@@ -871,6 +871,10 @@ export type Database = {
         }
         Returns: Json
       }
+      claim_admin_access: {
+        Args: { _password: string; _user_id: string }
+        Returns: boolean
+      }
       deduct_credit: {
         Args: { p_amount?: number; p_user_id: string }
         Returns: number
