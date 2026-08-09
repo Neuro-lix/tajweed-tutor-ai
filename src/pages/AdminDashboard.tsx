@@ -452,8 +452,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
                   <thead>
                     <tr className="border-b border-border bg-muted/30">
                       <th className="text-left p-3 font-medium">Utilisateur</th>
-                      <th className="text-left p-3 font-medium">Pays</th>
-                      <th className="text-left p-3 font-medium">Langue</th>
                       <th className="text-left p-3 font-medium">Inscrit le</th>
                       <th className="text-right p-3 font-medium">Sessions</th>
                       <th className="text-right p-3 font-medium">Score moy.</th>
@@ -467,12 +465,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
                         <td className="p-3">
                           <span className="font-medium">{u.full_name || "Anonyme"}</span>
                         </td>
-                        <td className="p-3">
-                          {u.country_code ? (
-                            <span className="flex items-center gap-1">{FLAG(u.country_code)}<span className="text-xs text-muted-foreground">{u.country_name}</span></span>
-                          ) : <span className="text-muted-foreground text-xs">—</span>}
-                        </td>
-                        <td className="p-3"><Badge variant="outline" className="text-xs">{u.language || "fr"}</Badge></td>
                         <td className="p-3 text-muted-foreground">{fmtDate(u.registered_at)}</td>
                         <td className="p-3 text-right font-medium">{u.total_sessions}</td>
                         <td className="p-3 text-right">
@@ -485,7 +477,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
                       </tr>
                     ))}
                     {stats.users.length === 0 && (
-                      <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">Aucun utilisateur inscrit pour l'instant</td></tr>
+                      <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">Aucun utilisateur inscrit pour l'instant</td></tr>
                     )}
                   </tbody>
                 </table>
