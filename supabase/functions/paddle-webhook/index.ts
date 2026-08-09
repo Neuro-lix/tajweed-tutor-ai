@@ -84,11 +84,8 @@ const PRICE_TO_CREDITS: Record<string, { credits: number; label: string }> = {
   pri_01kzm74zem2gd72bsd3an0h1vw: { credits: 50, label: "Pack Starter (50 crédits)" },
   // Pack Standard — 150 crédits / 4,99 €
   pri_01kzm7exmw1w0apnysd76kgszh: { credits: 150, label: "Pack Standard (150 crédits)" },
-  // ⚠️ TODO — Pack Premium (400 crédits / 9,99 €): the price ID provided
-  // ("pri_01kzm7m6rwbdfks53gns8sjq4eca") is 28 chars after the `pri_` prefix,
-  // while Paddle IDs are 26. Add the exact ID here once confirmed — we do not
-  // guess it, otherwise premium purchases would silently grant no credits.
-  // pri_XXXXXXXXXXXXXXXXXXXXXXXXXX: { credits: 400, label: "Pack Premium (400 crédits)" },
+  // Pack Premium — 400 crédits / 9,99 € (ID confirmé par l'utilisateur, 26 chars)
+  pri_01kzm7m6rwbdfks53gns8sjq4e: { credits: 400, label: "Pack Premium (400 crédits)" },
 
   // Legacy placeholders kept for the hourly / unlimited plans (not yet created in Paddle)
   pri_PLACEHOLDER_HOURLY: { credits: 20, label: "Achat horaire Paddle" },

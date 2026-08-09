@@ -14,6 +14,7 @@ import { CertificateModal } from '@/components/certificates/CertificateModal';
 import { ProgressInsightsCard } from '@/components/dashboard/ProgressInsightsCard';
 import { PriorityFixesCard } from '@/components/dashboard/PriorityFixesCard';
 import { generateCorrectionsSummaryPDF } from '@/utils/pdfGenerator';
+import { downloadCorrectionsCsv } from '@/lib/correctionsCsv';
 import { QIRAAT_NAMES } from '@/data/quranData';
 import { DashboardSkeleton, QuranMapSkeleton } from '@/components/ui/skeleton-card';
 import type { IndexState } from '../useIndexState';
@@ -53,6 +54,33 @@ const DashboardViewInner = ({ state: s }: DashboardViewProps) => {
       sessions: [],
     });
     toast.success('Récapitulatif PDF téléchargé.');
+  };
+
+  /** CSV export: corrections détaillées + bloc statistiques et priorités. */
+  const handleDownloadCsv = () => {
+    if (s.corrections.length === 0) {
+      toast.info('Récitez un passage pour générer votre export.');
+      return;
+    }
+    downloadCorrectionsCsv(
+      s.corrections.map((c) => ({
+        surahNumber: c.surahNumber,
+        verseNumber: c.verseNumber,
+        word: c.word,
+        ruleType: c.ruleType,
+        ruleDescription: c.ruleDescription,
+        correctionExample: c.correctionExample,
+        severity: c.severity,
+        isResolved: c.isResolved,
+        createdAt: c.createdAt,
+      })),
+      s.priorityFixes,
+      {
+        userName: s.profile?.fullName ?? undefined,
+        qiraat: s.selectedQiraat ? QIRAAT_NAMES[s.selectedQiraat] : undefined,
+      },
+    );
+    toast.success('Export CSV téléchargé.');
   };
 
   return (
@@ -103,6 +131,7 @@ const DashboardViewInner = ({ state: s }: DashboardViewProps) => {
             }}
             onOpenAllErrors={() => s.setCurrentView('tajweed-errors')}
             onDownloadPdf={handleDownloadRecapPdf}
+            onDownloadCsv={handleDownloadCsv}
           />
           <StreakPanel />
           <RewardsPanel
