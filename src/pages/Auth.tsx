@@ -154,6 +154,9 @@ const Auth = () => {
         });
       } else {
         toast({ title: t.accountCreated, description: t.checkEmailConfirm });
+        setSignupEmail(email);
+        setResendState('idle');
+        setResendMessage(null);
       }
     } catch {
       toast({ title: t.error, description: t.unexpectedError, variant: "destructive" });
