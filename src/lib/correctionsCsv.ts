@@ -1,4 +1,4 @@
-import { getSurahName } from '@/data/quranData';
+import { getSurahName } from '@/lib/progressInsights';
 import type { PriorityFix } from '@/lib/progressInsights';
 
 export interface CsvCorrection {
