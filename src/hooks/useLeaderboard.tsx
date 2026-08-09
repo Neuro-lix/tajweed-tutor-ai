@@ -2,6 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
+// Tables not present in generated Supabase types yet.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type UntypedTable = any;
+
 export interface LeaderboardEntry {
   id: string;
   displayName: string;
@@ -58,7 +62,7 @@ export const useLeaderboard = () => {
   const fetchLeaderboard = useCallback(async () => {
     try {
       const { data, error } = await supabase
-        .from('leaderboard_public' as never)
+        .from('leaderboard_public' as UntypedTable)
         .select('*')
         .order('total_xp', { ascending: false })
         .limit(100);

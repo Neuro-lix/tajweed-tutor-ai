@@ -6,6 +6,10 @@ import { ChevronLeft, ChevronRight, Plus, X, Clock, User, Lock } from "lucide-re
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// Tables not present in generated Supabase types yet.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type UntypedTable = any;
+
 interface CalendarSlot {
   id: string;
   booking_date: string;
@@ -70,13 +74,13 @@ export const IjazaCalendar: React.FC<IjazaCalendarProps> = ({
       let query;
       if (isAdmin) {
         query = supabase
-          .from("admin_calendar_view" as never)
+          .from("admin_calendar_view" as UntypedTable)
           .select("*")
           .gte("booking_date", startDate)
           .lte("booking_date", endDate);
       } else {
         query = supabase
-          .from("calendar_bookings" as never)
+          .from("calendar_bookings" as UntypedTable)
           .select("id, booking_date, start_time, end_time, status, notes")
           .eq("status", "available")
           .gte("booking_date", startDate)
@@ -105,7 +109,7 @@ export const IjazaCalendar: React.FC<IjazaCalendarProps> = ({
     }
     try {
       const { error } = await supabase
-        .from("calendar_bookings" as never)
+        .from("calendar_bookings" as UntypedTable)
         .insert({
           sheikh_id: sheikhId || null,
           booking_date: newSlot.date,
@@ -131,7 +135,7 @@ export const IjazaCalendar: React.FC<IjazaCalendarProps> = ({
 
   const handleDeleteSlot = async (slotId: string) => {
     if (!confirm("Supprimer ce créneau ?")) return;
-    await supabase.from("calendar_bookings" as never).delete().eq("id", slotId);
+    await supabase.from("calendar_bookings" as UntypedTable).delete().eq("id", slotId);
     toast.success("Créneau supprimé");
     loadSlots();
   };
