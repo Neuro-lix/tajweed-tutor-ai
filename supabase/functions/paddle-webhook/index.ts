@@ -96,11 +96,7 @@ async function getPaddleIps(): Promise<Set<string> | null> {
     const resp = await fetch(PADDLE_IPS_URL);
     if (!resp.ok) throw new Error(`status ${resp.status}`);
     const json = await resp.json();
-    // Response shape: { data: { ipv4_addresses: [...] } } (also tolerate a flat array)
-    const list: string[] = json?.data?.ipv4_addresses ?? json?.ipv4_addresses ?? json?.data ?? [];
-    const ips = new Set(
-      list.map((ip: string) => String(ip).trim().split("/")[0]).filter(Boolean),
-    );
+    const ips = parsePaddleIps(json);
     if (ips.size === 0) throw new Error("empty list");
     ipCache = { ips, fetchedAt: Date.now() };
     return ips;
@@ -112,8 +108,7 @@ async function getPaddleIps(): Promise<Set<string> | null> {
 }
 
 function clientIp(req: Request): string {
-  const fwd = req.headers.get("x-forwarded-for") ?? "";
-  return (fwd.split(",")[0] || req.headers.get("x-real-ip") || "").trim();
+  return clientIpFrom(req.headers);
 }
 
 serve(async (req) => {
@@ -126,7 +121,7 @@ serve(async (req) => {
     // Reject anything that does not come from a published Paddle IP.
     const allowedIps = await getPaddleIps();
     const ip = clientIp(req);
-    if (allowedIps && !allowedIps.has(ip)) {
+    if (!isIpAllowed(ip, allowedIps)) {
       console.error(`[paddle-webhook] Rejected request from non-Paddle IP: ${ip || "unknown"}`);
       return new Response("Forbidden", { status: 403, headers: corsHeaders });
     }
