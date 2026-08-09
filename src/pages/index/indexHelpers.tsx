@@ -33,6 +33,9 @@ export interface AnalysisResult {
   expectedText?: string;
   whisperError?: string | null;
   transcriptionImpossible?: boolean;
+  /** Per-word confidence from the transcription/alignment step. */
+  wordConfidence?: Array<{ word: string; confidence: 'high' | 'medium' | 'low' }>;
+  transcriptionEngine?: string;
 }
 
 const CUMULATIVE_VERSES = [
