@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react';
+import { toast } from 'sonner';
 import { AppHeader } from '@/components/header/AppHeader';
 import { MultilingualChat } from '@/components/chat/MultilingualChat';
 import { FeedbackForm } from '@/components/feedback/FeedbackForm';
@@ -11,6 +12,9 @@ import { OfflineCacheManager } from '@/components/offline/OfflineCacheManager';
 import { RewardsPanel } from '@/components/rewards/RewardsPanel';
 import { CertificateModal } from '@/components/certificates/CertificateModal';
 import { ProgressInsightsCard } from '@/components/dashboard/ProgressInsightsCard';
+import { PriorityFixesCard } from '@/components/dashboard/PriorityFixesCard';
+import { generateCorrectionsSummaryPDF } from '@/utils/pdfGenerator';
+import { QIRAAT_NAMES } from '@/data/quranData';
 import { DashboardSkeleton, QuranMapSkeleton } from '@/components/ui/skeleton-card';
 import type { IndexState } from '../useIndexState';
 
@@ -22,6 +26,39 @@ interface DashboardViewProps {
 }
 
 export const DashboardView = ({ state: s }: DashboardViewProps) => (
+  <DashboardViewInner state={s} />
+);
+
+const DashboardViewInner = ({ state: s }: DashboardViewProps) => {
+  /** Full recap PDF: corrections + tajwīd rules + recent scores/progression. */
+  const handleDownloadRecapPdf = () => {
+    if (s.corrections.length === 0 && s.recitationSessions?.length === 0) {
+      toast.info('Récitez un passage pour générer votre récapitulatif.');
+      return;
+    }
+    generateCorrectionsSummaryPDF({
+      userName: s.profile?.fullName ?? undefined,
+      qiraat: s.selectedQiraat ?? undefined,
+      corrections: s.corrections.map((c) => ({
+        surahNumber: c.surahNumber,
+        verseNumber: c.verseNumber,
+        word: c.word,
+        ruleType: c.ruleType,
+        ruleDescription: c.ruleDescription,
+        correctionExample: c.correctionExample,
+        severity: c.severity,
+      })),
+      sessions: (s.recitationSessions ?? []).map((r) => ({
+        surahNumber: r.surahNumber,
+        verseNumber: r.verseNumber,
+        createdAt: r.createdAt,
+        analysisScore: r.analysisScore ?? null,
+      })),
+    });
+    toast.success('Récapitulatif PDF téléchargé.');
+  };
+
+  return (
   <div className="min-h-screen bg-background">
     <AppHeader
       fullName={s.profile?.fullName}
@@ -58,6 +95,17 @@ export const DashboardView = ({ state: s }: DashboardViewProps) => (
               s.setCurrentVerse(1);
               s.setCurrentView('recitation');
             }}
+          />
+          <PriorityFixesCard
+            fixes={s.priorityFixes}
+            qiraatLabel={s.selectedQiraat ? QIRAAT_NAMES[s.selectedQiraat] : undefined}
+            onOpenSurah={(surahId, verse) => {
+              s.setCurrentSurah(surahId);
+              s.setCurrentVerse(verse);
+              s.setCurrentView('recitation');
+            }}
+            onOpenAllErrors={() => s.setCurrentView('tajweed-errors')}
+            onDownloadPdf={handleDownloadRecapPdf}
           />
           <StreakPanel />
           <RewardsPanel
