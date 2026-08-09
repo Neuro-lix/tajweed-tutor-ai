@@ -40,6 +40,28 @@ const Auth = () => {
     passwordChecks.hasLowercase && passwordChecks.hasNumber;
   const canSubmitSignup = isPasswordValid && passwordChecks.passwordsMatch && email && fullName;
 
+  // Maps Supabase auth errors to clear, user-friendly messages
+  const mapAuthError = (err: { message?: string; code?: string; status?: number }): string => {
+    const code = (err as any)?.code || '';
+    const msg = err?.message || '';
+    if (code === 'weak_password' || /known to be weak|pwned/i.test(msg))
+      return "Ce mot de passe apparaît dans des fuites de données connues. Choisis un mot de passe unique (évite les mots courants, prénoms, 123456…).";
+    if (code === 'user_already_exists' || /already registered|already been registered/i.test(msg))
+      return t.emailAlreadyUsed;
+    if (code === 'over_email_send_rate_limit' || err?.status === 429 || /rate limit|too many/i.test(msg))
+      return "Trop de tentatives. Patiente une minute puis réessaie.";
+    if (code === 'email_address_invalid' || /invalid email/i.test(msg))
+      return "Adresse email invalide. Vérifie l'orthographe.";
+    if (code === 'signup_disabled')
+      return "Les inscriptions sont temporairement désactivées.";
+    if (/Invalid login credentials/i.test(msg)) return t.emailOrPasswordWrong;
+    if (/Email not confirmed/i.test(msg))
+      return "Ton email n'est pas encore confirmé. Ouvre le lien reçu par email.";
+    if (/fetch|network/i.test(msg))
+      return "Connexion au serveur impossible. Vérifie ta connexion internet et réessaie.";
+    return msg || t.unexpectedError;
+  };
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) navigate('/');
@@ -55,9 +77,7 @@ const Auth = () => {
       if (error) {
         toast({
           title: t.loginErrorTitle,
-          description: error.message.includes('Invalid login credentials')
-            ? t.emailOrPasswordWrong
-            : error.message,
+          description: mapAuthError(error),
           variant: "destructive",
         });
       } else {
@@ -92,10 +112,9 @@ const Auth = () => {
       if (error) {
         toast({
           title: t.error,
-          description: error.message.includes('already registered')
-            ? t.emailAlreadyUsed
-            : error.message,
+          description: mapAuthError(error),
           variant: "destructive",
+          duration: 8000,
         });
       } else {
         toast({ title: t.accountCreated, description: t.checkEmailConfirm });
@@ -119,7 +138,7 @@ const Auth = () => {
         redirectTo: `${window.location.origin}/auth?reset=true`,
       });
       if (error) {
-        toast({ title: t.error, description: error.message, variant: "destructive" });
+        toast({ title: t.error, description: mapAuthError(error), variant: "destructive" });
       } else {
         setForgotSent(true);
       }
