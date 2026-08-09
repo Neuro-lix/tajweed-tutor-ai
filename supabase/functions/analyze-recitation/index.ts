@@ -227,13 +227,82 @@ serve(async (req) => {
     let transcribedText = "";
     let transcriptionOk = false;
     let whisperError: string | null = null;
-    let transcriptionEngine: "gpt-4o-mini-transcribe" | "whisper-1" | "whisper-large-v3" = "gpt-4o-mini-transcribe";
+    let transcriptionEngine:
+      | "quran-whisper"
+      | "gpt-4o-mini-transcribe"
+      | "whisper-1"
+      | "whisper-large-v3" = "gpt-4o-mini-transcribe";
+    // Per-word timings/probabilities, when the transcription engine provides them.
+    let whisperWords: WhisperWord[] | null = null;
 
     if (hasAudio) {
       const base64Payload = audioBase64.includes(",") ? audioBase64.split(",")[1] : audioBase64;
 
+      // Decode once — reused by the HuggingFace and OpenAI paths.
+      const decodeAudioBytes = (): Uint8Array => {
+        const binaryString = atob(base64Payload);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+        return bytes;
+      };
+      const rawMimeType = (audioMimeType || "audio/wav").split(";")[0].trim();
+      const audioExt = rawMimeType.includes("webm") ? "webm"
+        : rawMimeType.includes("mp4") ? "mp4"
+        : rawMimeType.includes("mpeg") || rawMimeType.includes("mp3") ? "mp3"
+        : "wav";
+
+      // ─── Path 0: Quran-specialised Whisper (tarteel-ai) via HuggingFace ───
+      // Fine-tuned on Quranic recitation → noticeably better than generic Whisper
+      // on tajwīd-relevant phonetics. Falls through to the generic cascade on any failure.
+      // ⚠️ MANUAL SETUP: add the `HUGGINGFACE_API_KEY` secret to enable this path.
+      const HUGGINGFACE_API_KEY = Deno.env.get("HUGGINGFACE_API_KEY");
+      if (!HUGGINGFACE_API_KEY) {
+        console.warn(
+          "[analyze-recitation] HUGGINGFACE_API_KEY not configured — skipping the Quran-specialised " +
+          "model (tarteel-ai/whisper-base-ar-quran) and falling back to the generic Whisper cascade.",
+        );
+      } else {
+        console.log("[analyze-recitation] Trying HuggingFace tarteel-ai/whisper-base-ar-quran...");
+        try {
+          const hfResp = await fetch(
+            "https://api-inference.huggingface.co/models/tarteel-ai/whisper-base-ar-quran",
+            {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
+                "Content-Type": rawMimeType,
+                "x-wait-for-model": "true",
+              },
+              body: decodeAudioBytes(),
+            },
+          );
+          if (!hfResp.ok) {
+            const errTxt = await hfResp.text();
+            console.error("[analyze-recitation] HuggingFace error:", hfResp.status, errTxt);
+            whisperError = `HuggingFace ${hfResp.status}, fallback moteur générique`;
+          } else {
+            const hfJson = await hfResp.json();
+            const hfText = (typeof hfJson === "string" ? hfJson : (hfJson.text ?? "")).trim();
+            if (hfText.length >= 3) {
+              transcribedText = hfText;
+              transcriptionOk = true;
+              transcriptionEngine = "quran-whisper";
+              whisperError = null;
+              // NOTE: the HF inference API for this model returns plain text only —
+              // no per-word probabilities, so confidence falls back to text similarity.
+              console.log("[analyze-recitation] Quran-Whisper result:", hfText.substring(0, 100));
+            } else {
+              whisperError = "Quran-Whisper vide, fallback moteur générique";
+            }
+          }
+        } catch (e) {
+          console.error("[analyze-recitation] HuggingFace exception:", e);
+          whisperError = "HuggingFace exception, fallback moteur générique";
+        }
+      }
+
       // ─── Path A: Replicate Whisper-large-v3 (vowelled Arabic, +30% precision) ───
-      if (useReplicate) {
+      if (!transcriptionOk && useReplicate) {
         console.log("[analyze-recitation] Trying Replicate Whisper-large-v3...");
         try {
           const dataUri = `data:${audioMimeType || "audio/wav"};base64,${base64Payload}`;
