@@ -176,10 +176,14 @@ serve(async (req) => {
             Deno.env.get("SUPABASE_URL")!,
             Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
           );
-          await sbAdmin
+          // INVARIANT: profiles.user_id is the auth user id (profiles.id is the row PK).
+          // Matching on `id` here silently updated 0 rows — covered by
+          // tests/unit/paddle-webhook.test.ts.
+          const { error: profErr } = await sbAdmin
             .from("profiles")
             .update({ paddle_customer_id: String(paddleCustomerId) })
-            .eq("id", userId);
+            .eq("user_id", userId);
+          if (profErr) throw profErr;
         } catch (err) {
           console.error("[paddle-webhook] Could not store paddle_customer_id:", err);
         }
