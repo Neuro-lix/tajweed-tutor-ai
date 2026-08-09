@@ -468,6 +468,11 @@ serve(async (req) => {
     const actualNorm = stripDiacritics(transcribedText || "");
     console.log("[analyze-recitation] Similarity:", similarity.toFixed(2));
 
+    // Per-word alignment + confidence (Whisper probabilities when available)
+    const wordConfidence = buildWordConfidence(expectedText || "", transcribedText || "", whisperWords);
+    const weakWords = wordConfidence.filter((w) => w.confidence !== "high");
+    console.log("[analyze-recitation] Weak words:", weakWords.length, "/", wordConfidence.length);
+
     // Log the transcription (Whisper) step — no credit charged, tracking only
     if (hasAudio && transcriptionOk) {
       await logUsage({ model: transcriptionEngine, operation: "transcription", status: "success" });
@@ -530,6 +535,22 @@ serve(async (req) => {
 - **Verset** : ${verseNumber}
 - **Qiraat** : ${qiraat || "hafs_asim"}
 - **Similarité Jaccard pré-calculée** : ${similarity.toFixed(2)}
+
+## Analyse mot par mot (alignement + niveau de confiance)
+${
+  wordConfidence.length === 0
+    ? "(non disponible)"
+    : wordConfidence
+        .map((w) => `- "${w.word}" ← entendu "${w.heardWord || "(rien)"}" → confiance ${w.confidence}`)
+        .join("\n")
+}
+
+### Mots à confiance basse/moyenne (À ANALYSER EN PRIORITÉ)
+${weakWords.length === 0 ? "(aucun — la récitation est nette partout)" : weakWords.map((w) => `- ${w.word} (${w.confidence})`).join("\n")}
+
+**Concentre ton analyse tajwīd sur ces mots-là**, dans l'ordre : d'abord les `low`, puis les `medium`.
+N'analyse les mots `high` que si une règle de tajwīd évidente y est en jeu. Les champs "word" de
+tes "errors" doivent en priorité correspondre à ces mots à confiance basse/moyenne.
 
 ## Texte attendu (avec diacritiques)
 "${expectedText}"
@@ -649,6 +670,8 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
     analysis.whisperError = whisperError;
     analysis.similarity = similarity;
     analysis.transcriptionEngine = transcriptionEngine;
+    analysis.wordConfidence = wordConfidence.map((w) => ({ word: w.word, confidence: w.confidence }));
+    analysis.wordDetails = wordConfidence;
 
     return new Response(JSON.stringify(analysis), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
