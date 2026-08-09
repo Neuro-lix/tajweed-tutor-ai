@@ -42,7 +42,7 @@ const Auth = () => {
 
   // Maps Supabase auth errors to clear, user-friendly messages
   const mapAuthError = (err: { message?: string; code?: string; status?: number }): string => {
-    const code = (err as any)?.code || '';
+    const code = err?.code ?? '';
     const msg = err?.message || '';
     if (code === 'weak_password' || /known to be weak|pwned/i.test(msg))
       return "Ce mot de passe apparaît dans des fuites de données connues. Choisis un mot de passe unique (évite les mots courants, prénoms, 123456…).";
