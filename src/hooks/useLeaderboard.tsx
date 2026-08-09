@@ -15,6 +15,18 @@ export interface LeaderboardEntry {
   isCurrentUser: boolean;
 }
 
+interface LeaderboardRow {
+  id: string;
+  display_name: string | null;
+  total_xp: number;
+  current_level: number;
+  total_verses_mastered: number;
+  perfect_recitations: number;
+  current_streak: number;
+  longest_streak: number;
+  is_current_user?: boolean | null;
+}
+
 const ANONYMOUS_NAMES = [
   'Récitateur Émérite',
   'Élève Assidu',
