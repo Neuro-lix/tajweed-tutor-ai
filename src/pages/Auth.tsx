@@ -287,6 +287,9 @@ const Auth = () => {
                     <PasswordCheck valid={passwordChecks.hasNumber} label={t.oneDigit} />
                   </div>
                 )}
+                <p className="text-xs text-muted-foreground">
+                  Astuce : utilise un mot de passe unique. Les mots de passe présents dans des fuites connues sont refusés.
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">{t.confirmPasswordLabel}</Label>
