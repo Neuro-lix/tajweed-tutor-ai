@@ -24,6 +24,10 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
+  const [signupEmail, setSignupEmail] = useState<string | null>(null);
+  const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -68,6 +72,38 @@ const Auth = () => {
     });
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  // Countdown between two resend attempts (avoids hitting the auth rate limit).
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(id);
+  }, [cooldown]);
+
+  const handleResendConfirmation = async () => {
+    const target = signupEmail || email;
+    if (!target || cooldown > 0) return;
+    setResendState('sending');
+    setResendMessage(null);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: target,
+        options: { emailRedirectTo: `${window.location.origin}/` },
+      });
+      if (error) {
+        setResendState('error');
+        setResendMessage(mapAuthError(error));
+      } else {
+        setResendState('sent');
+        setResendMessage(`Email renvoyé à ${target}. Pense à vérifier tes spams.`);
+        setCooldown(60);
+      }
+    } catch {
+      setResendState('error');
+      setResendMessage(t.unexpectedError);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,6 +154,9 @@ const Auth = () => {
         });
       } else {
         toast({ title: t.accountCreated, description: t.checkEmailConfirm });
+        setSignupEmail(email);
+        setResendState('idle');
+        setResendMessage(null);
       }
     } catch {
       toast({ title: t.error, description: t.unexpectedError, variant: "destructive" });
@@ -153,6 +192,42 @@ const Auth = () => {
     <div className={`flex items-center gap-2 text-xs ${valid ? 'text-green-600' : 'text-muted-foreground'}`}>
       {valid ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
       {label}
+    </div>
+  );
+
+  const ResendPanel = () => (
+    <div className="mt-4 rounded-lg border border-border bg-muted/40 p-3 space-y-2">
+      <p className="text-sm font-medium">Je n'ai pas reçu l'email</p>
+      <p className="text-xs text-muted-foreground">
+        Vérifie tes spams, puis renvoie le message de validation
+        {signupEmail ? ` à ${signupEmail}` : ''}.
+      </p>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="w-full"
+        onClick={handleResendConfirmation}
+        disabled={resendState === 'sending' || cooldown > 0 || !(signupEmail || email)}
+      >
+        {resendState === 'sending' ? (
+          <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Envoi en cours…</>
+        ) : cooldown > 0 ? (
+          `Renvoyer (${cooldown}s)`
+        ) : (
+          <><Mail className="mr-2 h-4 w-4" />Renvoyer l'email de validation</>
+        )}
+      </Button>
+      {resendMessage && (
+        <p
+          className={`flex items-start gap-1.5 text-xs ${resendState === 'error' ? 'text-red-500' : 'text-green-600'}`}
+          role="status"
+          aria-live="polite"
+        >
+          {resendState === 'error' ? <XCircle className="h-3 w-3 mt-0.5" /> : <CheckCircle2 className="h-3 w-3 mt-0.5" />}
+          {resendMessage}
+        </p>
+      )}
     </div>
   );
 
@@ -250,6 +325,7 @@ const Auth = () => {
                   {t.noAccountSignup}
                 </button>
               </div>
+              <ResendPanel />
             </form>
           )}
 
@@ -312,6 +388,7 @@ const Auth = () => {
                   {t.alreadyHaveAccount}
                 </button>
               </div>
+              {signupEmail && <ResendPanel />}
             </form>
           )}
 
