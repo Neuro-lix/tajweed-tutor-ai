@@ -210,6 +210,26 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://recite-perfectly-bot.lovable.app/contact</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://recite-perfectly-bot.lovable.app/conditions-generales</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://recite-perfectly-bot.lovable.app/confidentialite</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://recite-perfectly-bot.lovable.app/remboursement</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
     <loc>https://recite-perfectly-bot.lovable.app/auth</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>

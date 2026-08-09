@@ -1,5 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { CREDIT_COSTS } from "../_shared/credit-costs.ts";
+
+const CHAT_CREDIT_COST = CREDIT_COSTS.chatMessage;
 
 type RateLimitResult = { allowed: boolean; count: number; limit: number; reset_at: string };
 
@@ -79,6 +82,24 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Rate limit exceeded", retry_after: retryAfter }), {
         status: 429,
         headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": String(retryAfter) },
+      });
+    }
+
+    // ── Solde de crédits requis avant tout appel LLM ──
+    const { data: creditRow } = await sbAdmin
+      .from("user_credits")
+      .select("credits")
+      .eq("user_id", userId)
+      .maybeSingle();
+    const balance = Number(creditRow?.credits ?? 0);
+    if (!creditRow || balance < CHAT_CREDIT_COST) {
+      return new Response(JSON.stringify({
+        error: "insufficient_credits",
+        required: CHAT_CREDIT_COST,
+        balance,
+        message: "Crédits insuffisants pour utiliser le chat, achetez un pack de crédits.",
+      }), {
+        status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -173,6 +194,13 @@ Sois concis mais informatif.`;
     const data = await response.json();
     const content = data?.choices?.[0]?.message?.content ?? "Desole, je n'ai pas pu repondre.";
 
+    // ── Déduction du crédit après une réponse réussie ──
+    try {
+      await sbAdmin.rpc("deduct_credit", { p_user_id: userId, p_amount: CHAT_CREDIT_COST });
+    } catch (creditErr) {
+      console.error("[chat-assistant] credit deduction failed:", creditErr);
+    }
+
     // ── Log LLM usage (best-effort; never blocks the response) ──
     try {
       const usage = (data?.usage ?? {}) as Record<string, number>;
@@ -184,7 +212,7 @@ Sois concis mais informatif.`;
         prompt_tokens: usage.prompt_tokens ?? 0,
         completion_tokens: usage.completion_tokens ?? 0,
         total_tokens: usage.total_tokens ?? 0,
-        credits_charged: 0,
+        credits_charged: CHAT_CREDIT_COST,
         status: "success",
       });
     } catch (logErr) {

@@ -1,7 +1,6 @@
-import JSZip from "jszip";
-
 // Bundle every text source file at build time via Vite's import.meta.glob.
-// `as: "raw"` inlines the file contents as strings.
+// Lazy (non-eager) so the raw sources land in their own chunks instead of
+// bloating the admin bundle; they are only fetched when the ZIP is generated.
 const files = import.meta.glob(
   [
     "/src/**/*",
@@ -20,12 +19,19 @@ const files = import.meta.glob(
     "/nginx.conf",
     "/.env.example",
   ],
-  { query: "?raw", import: "default", eager: true },
-) as Record<string, string>;
+  { query: "?raw", import: "default" },
+) as Record<string, () => Promise<string>>;
 
 export async function downloadFullSourceZip(): Promise<void> {
+  const { default: JSZip } = await import("jszip");
   const zip = new JSZip();
-  for (const [path, content] of Object.entries(files)) {
+  for (const [path, load] of Object.entries(files)) {
+    let content = "";
+    try {
+      content = await load();
+    } catch {
+      // Unreadable/binary asset — keep the archive complete with an empty file.
+    }
     // strip leading slash so the zip has a clean root
     zip.file(path.replace(/^\//, ""), content ?? "");
   }

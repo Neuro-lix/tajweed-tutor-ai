@@ -31,6 +31,10 @@ const entries: SitemapEntry[] = [
   { path: "/noorani-qaida", changefreq: "monthly", priority: "0.8" },
   { path: "/ijaza", changefreq: "monthly", priority: "0.7" },
   { path: "/shop", changefreq: "weekly", priority: "0.6" },
+  { path: "/contact", changefreq: "yearly", priority: "0.5" },
+  { path: "/conditions-generales", changefreq: "yearly", priority: "0.3" },
+  { path: "/confidentialite", changefreq: "yearly", priority: "0.3" },
+  { path: "/remboursement", changefreq: "yearly", priority: "0.3" },
   { path: "/auth", changefreq: "yearly", priority: "0.3" },
 ];
 

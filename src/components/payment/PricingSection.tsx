@@ -6,6 +6,7 @@ import { Clock, Infinity as InfinityIcon, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 // Paddle product/price IDs — à configurer quand vous aurez votre compte Paddle
 const PADDLE_PRODUCTS = {
@@ -17,7 +18,10 @@ declare global {
   interface Window {
     Paddle?: {
       Environment: { set: (env: string) => void };
-      Initialize: (opts: { token: string }) => void;
+      Initialize: (opts: {
+        token: string;
+        pwCustomer?: { id?: string; email?: string };
+      }) => void;
       Checkout: {
         open: (opts: {
           items: { priceId: string; quantity: number }[];
@@ -43,32 +47,60 @@ export const PricingSection = ({ onBack }: PricingSectionProps) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState<string | null>(null);
   const [paddleReady, setPaddleReady] = useState(false);
+  const [paddleCustomerId, setPaddleCustomerId] = useState<string | null>(null);
+
+  // Retain a besoin de l'identifiant client Paddle de l'utilisateur connecté.
+  useEffect(() => {
+    let cancelled = false;
+    if (!user) {
+      setPaddleCustomerId(null);
+      return;
+    }
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("paddle_customer_id")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (!cancelled) setPaddleCustomerId(data?.paddle_customer_id ?? null);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   // Load Paddle.js script
+  const [paddleScriptLoaded, setPaddleScriptLoaded] = useState(false);
   useEffect(() => {
     if (document.getElementById("paddle-js")) {
-      setPaddleReady(!!window.Paddle);
+      setPaddleScriptLoaded(true);
       return;
     }
     const script = document.createElement("script");
     script.id = "paddle-js";
     script.src = "https://cdn.paddle.com/paddle/v2/paddle.js";
     script.async = true;
-    script.onload = () => {
-      // Initialize Paddle with client-side token (publishable)
-      // TODO: Replace with your real Paddle client-side token
-      const clientToken = import.meta.env.VITE_PADDLE_CLIENT_TOKEN;
-      if (window.Paddle && clientToken) {
-        // Use sandbox for dev, remove for production
-        if (import.meta.env.DEV) {
-          window.Paddle.Environment.set("sandbox");
-        }
-        window.Paddle.Initialize({ token: clientToken });
-        setPaddleReady(true);
-      }
-    };
+    script.onload = () => setPaddleScriptLoaded(true);
     document.head.appendChild(script);
   }, []);
+
+  // Initialize (ou ré-initialise) Paddle dès que l'identité client est connue.
+  useEffect(() => {
+    if (!paddleScriptLoaded || !window.Paddle) return;
+    const clientToken = import.meta.env.VITE_PADDLE_CLIENT_TOKEN;
+    if (!clientToken) return;
+    // Environnement live (par défaut) — aucune configuration sandbox.
+    const pwCustomer = paddleCustomerId
+      ? { id: paddleCustomerId }
+      : user?.email
+        ? { email: user.email }
+        : undefined;
+    window.Paddle.Initialize({
+      token: clientToken,
+      ...(pwCustomer ? { pwCustomer } : {}),
+    });
+    setPaddleReady(true);
+  }, [paddleScriptLoaded, paddleCustomerId, user?.email]);
 
   const handleCheckout = (priceType: "hourly" | "unlimited") => {
     if (!paddleReady || !window.Paddle) {

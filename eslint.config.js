@@ -23,4 +23,13 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "off",
     },
   },
+  {
+    // shadcn/ui primitives, contexts and hooks intentionally export variants,
+    // context objects and hooks next to their components. Fast-refresh only
+    // loses component state in dev, so the rule is noise here.
+    files: ["src/components/ui/**/*.{ts,tsx}", "src/contexts/**/*.tsx", "src/hooks/**/*.tsx"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
 );

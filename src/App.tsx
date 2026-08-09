@@ -12,6 +12,7 @@ import { TranslationProvider } from "@/contexts/TranslationContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { PwaInstallDialog } from "@/components/pwa/PwaInstallDialog";
 import { SwUpdateBanner } from "@/components/pwa/SwUpdateBanner";
+import { SiteFooter } from "@/components/layout/SiteFooter";
 
 // Lazy-load all routes for code-splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -29,6 +30,10 @@ const NooraniQaida = lazy(() => import("./pages/NooraniQaida"));
 const TajwidHub = lazy(() => import("./pages/tajweed/TajwidHub"));
 const TajwidTopic = lazy(() => import("./pages/tajweed/TajwidTopic"));
 const TajwidFaq = lazy(() => import("./pages/tajweed/TajwidFaq"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Terms = lazy(() => import("./pages/legal/Terms"));
+const Privacy = lazy(() => import("./pages/legal/Privacy"));
+const Refund = lazy(() => import("./pages/legal/Refund"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -89,9 +94,14 @@ const App = () => (
                     <Route path="/:lang/tajwid" element={<TajwidHub />} />
                     <Route path="/:lang/tajwid/faq" element={<TajwidFaq />} />
                     <Route path="/:lang/tajwid/:topic" element={<TajwidTopic />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/conditions-generales" element={<Terms />} />
+                    <Route path="/confidentialite" element={<Privacy />} />
+                    <Route path="/remboursement" element={<Refund />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
+                  <SiteFooter />
                 </Suspense>
               </TooltipProvider>
             </AuthProvider>

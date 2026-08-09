@@ -1,11 +1,14 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useCredits } from './useCredits';
+import { CREDIT_COSTS } from '@/lib/credits';
 
 export const useTextToSpeech = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { hasCreditsFor, refetch: refetchCredits } = useCredits();
 
   const speak = useCallback(async (
     text: string,
@@ -13,6 +16,11 @@ export const useTextToSpeech = () => {
     options?: { speed?: number },
   ) => {
     if (!text.trim()) return;
+
+    if (!hasCreditsFor(CREDIT_COSTS.textToSpeech)) {
+      setError('Crédits insuffisants pour la synthèse vocale, achetez un pack de crédits.');
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -28,8 +36,15 @@ export const useTextToSpeech = () => {
       const { data, error: fnError } = await supabase.functions.invoke('text-to-speech', {
         body: { text, language, speed: options?.speed },
       });
-      if (fnError) throw new Error(fnError.message || 'Failed to generate speech');
+      if (fnError) {
+        throw new Error(
+          (data as { message?: string } | null)?.message
+            || fnError.message
+            || 'Failed to generate speech',
+        );
+      }
       if (!data?.audioContent) throw new Error(data?.error || 'Failed to generate speech');
+      refetchCredits();
 
       // Play audio from base64
       const audioUrl = `data:audio/mpeg;base64,${data.audioContent}`;
@@ -54,7 +69,7 @@ export const useTextToSpeech = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [hasCreditsFor, refetchCredits]);
 
   const stop = useCallback(() => {
     if (audioRef.current) {

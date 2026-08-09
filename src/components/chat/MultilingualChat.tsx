@@ -5,6 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+import { useCredits } from '@/hooks/useCredits';
+import { CREDIT_COSTS, formatCredits } from '@/lib/credits';
+import { Link } from 'react-router-dom';
 import { MessageCircle, Send, X, Globe, Loader2, Volume2, VolumeX } from 'lucide-react';
 
 interface Message {
@@ -38,6 +41,9 @@ export const MultilingualChat: React.FC = () => {
   const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { speak, stop, isSpeaking, isLoading: ttsLoading } = useTextToSpeech();
+  const { credits, hasCreditsFor, refetch: refetchCredits } = useCredits();
+  const canChat = hasCreditsFor(CREDIT_COSTS.chatMessage);
+  const canSpeak = hasCreditsFor(CREDIT_COSTS.textToSpeech);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,6 +51,7 @@ export const MultilingualChat: React.FC = () => {
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
+    if (!canChat) return;
 
     const userMessage: Message = {
       id: crypto.randomUUID(),
@@ -74,9 +81,10 @@ export const MultilingualChat: React.FC = () => {
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+      refetchCredits();
       
       // Auto-speak the response if enabled
-      if (autoSpeak && responseText) {
+      if (autoSpeak && responseText && canSpeak) {
         speak(responseText, language);
       }
     } catch (error) {
@@ -172,10 +180,14 @@ export const MultilingualChat: React.FC = () => {
                         setSpeakingMessageId(null);
                       } else {
                         setSpeakingMessageId(msg.id);
-                        speak(msg.content, language).then(() => setSpeakingMessageId(null));
+                        speak(msg.content, language)
+                          .then(() => {
+                            setSpeakingMessageId(null);
+                            refetchCredits();
+                          });
                       }
                     }}
-                    disabled={ttsLoading}
+                    disabled={ttsLoading || !canSpeak}
                   >
                     {speakingMessageId === msg.id && isSpeaking ? (
                       <VolumeX className="h-3 w-3" />
@@ -201,6 +213,16 @@ export const MultilingualChat: React.FC = () => {
       </CardContent>
 
       <div className="p-3 border-t flex-shrink-0">
+        {!canChat ? (
+          <div className="text-sm text-center space-y-2">
+            <p className="text-muted-foreground">
+              Crédits insuffisants pour utiliser le chat ({formatCredits(credits)} restant).
+            </p>
+            <Button asChild size="sm" className="w-full">
+              <Link to="/shop">Acheter des crédits</Link>
+            </Button>
+          </div>
+        ) : (
         <div className="flex gap-2">
           <Input
             value={input}
@@ -214,6 +236,7 @@ export const MultilingualChat: React.FC = () => {
             <Send className="w-4 h-4" />
           </Button>
         </div>
+        )}
       </div>
     </Card>
   );

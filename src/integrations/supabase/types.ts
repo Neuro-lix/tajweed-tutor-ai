@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          subject: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          subject: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          subject?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       corrections: {
         Row: {
           correction_example: string | null
@@ -253,6 +283,7 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          paddle_customer_id: string | null
           selected_qiraat: Database["public"]["Enums"]["qiraat_type"] | null
           session_type: Database["public"]["Enums"]["session_type"] | null
           updated_at: string
@@ -262,6 +293,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          paddle_customer_id?: string | null
           selected_qiraat?: Database["public"]["Enums"]["qiraat_type"] | null
           session_type?: Database["public"]["Enums"]["session_type"] | null
           updated_at?: string
@@ -271,6 +303,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          paddle_customer_id?: string | null
           selected_qiraat?: Database["public"]["Enums"]["qiraat_type"] | null
           session_type?: Database["public"]["Enums"]["session_type"] | null
           updated_at?: string
@@ -802,7 +835,10 @@ export type Database = {
         }
         Returns: Json
       }
-      deduct_credit: { Args: { p_user_id: string }; Returns: number }
+      deduct_credit: {
+        Args: { p_amount?: number; p_user_id: string }
+        Returns: number
+      }
       verify_certificate: {
         Args: { p_id: string }
         Returns: {

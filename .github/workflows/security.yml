@@ -14,6 +14,12 @@ jobs:
           node-version: 20
       - run: npm ci
       - name: NPM Audit (high/critical only)
+        # Note: les vulnérabilités "high" restantes proviennent uniquement de
+        # dépendances transitives tierces (workbox-build / rollup-plugin-terser / ws
+        # tirées par vite-plugin-pwa). vite-plugin-pwa a été mis à jour en 1.x, ce qui
+        # corrige la majorité d'entre elles ; s'il en reste, aucun correctif amont
+        # n'est disponible pour l'instant et elles n'affectent que la chaîne de build,
+        # pas le code exécuté par les utilisateurs.
         run: npm audit --audit-level=high
       - name: Lint (fail on warnings)
         run: npx eslint . --max-warnings=0

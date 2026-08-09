@@ -1,0 +1,1 @@
+ALTER TABLE public.llm_usage ALTER COLUMN credits_charged TYPE NUMERIC(10,2);
