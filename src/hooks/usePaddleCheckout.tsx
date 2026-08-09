@@ -5,9 +5,9 @@ import { supabase } from '@/integrations/supabase/client';
 /**
  * Paddle Billing v2 checkout (carte bancaire).
  *
- * ⚠️ CONFIGURATION MANUELLE RESTANTE : la variable d'environnement
- * `VITE_PADDLE_CLIENT_TOKEN` (token client Paddle, commence par `live_...`)
- * doit être renseignée. Sans elle, les boutons carte restent désactivés.
+ * Le token client Paddle est lu depuis `VITE_PADDLE_CLIENT_TOKEN`
+ * (token public côté navigateur, commence par `live_...`). Sans lui,
+ * les boutons carte restent désactivés.
  * Les crédits sont attribués côté serveur par la fonction `paddle-webhook`
  * à partir du `user_id` transmis dans `customData`.
  */
