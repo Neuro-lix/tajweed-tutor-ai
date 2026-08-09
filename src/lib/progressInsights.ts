@@ -6,6 +6,12 @@ export interface CorrectionLike {
   ruleType: string;
 }
 
+export interface PriorityCorrectionLike extends CorrectionLike {
+  severity?: string | null;
+  ruleDescription?: string;
+  isResolved?: boolean;
+}
+
 export interface SurahProgressLike {
   surahNumber: number;
   status: 'not_started' | 'in_progress' | 'mastered';
@@ -136,4 +142,94 @@ export const buildGuidedVerses = (
   return Array.from(map.values())
     .filter((v) => v.errorCount >= threshold)
     .sort((a, b) => b.errorCount - a.errorCount);
+};
+
+export interface PriorityFix {
+  key: string;
+  surahNumber: number;
+  name: string;
+  arabic: string;
+  /** Weighted urgency: critical=3, major=2, minor=1. */
+  weight: number;
+  errorCount: number;
+  verseCount: number;
+  /** Verse numbers concerned, ascending, for the deep link. */
+  verses: number[];
+  /** Distinct tajwīd rules concerned, most frequent first. */
+  rules: { rule: string; count: number }[];
+  /** Human summary of the rules concerned. */
+  ruleSummary: string;
+}
+
+const severityWeight = (severity?: string | null): number => {
+  switch (severity) {
+    case 'critical':
+      return 3;
+    case 'major':
+      return 2;
+    default:
+      return 1;
+  }
+};
+
+/**
+ * Build the prioritised "what to fix next" list for the reading (qirāʾa) in use.
+ * Grouped by surah, sorted by weighted severity then raw error volume.
+ */
+export const buildPriorityFixes = (
+  corrections: PriorityCorrectionLike[],
+  limit = 5,
+): PriorityFix[] => {
+  const bySurah = new Map<number, PriorityFix & { ruleMap: Map<string, number>; verseSet: Set<number> }>();
+
+  for (const c of corrections) {
+    if (c.isResolved) continue;
+    let entry = bySurah.get(c.surahNumber);
+    if (!entry) {
+      entry = {
+        key: String(c.surahNumber),
+        surahNumber: c.surahNumber,
+        name: getSurahName(c.surahNumber),
+        arabic: getSurahArabic(c.surahNumber),
+        weight: 0,
+        errorCount: 0,
+        verseCount: 0,
+        verses: [],
+        rules: [],
+        ruleSummary: '',
+        ruleMap: new Map<string, number>(),
+        verseSet: new Set<number>(),
+      };
+      bySurah.set(c.surahNumber, entry);
+    }
+    entry.errorCount += 1;
+    entry.weight += severityWeight(c.severity);
+    entry.verseSet.add(c.verseNumber);
+    entry.ruleMap.set(c.ruleType, (entry.ruleMap.get(c.ruleType) ?? 0) + 1);
+  }
+
+  return Array.from(bySurah.values())
+    .map((e) => {
+      const rules = Array.from(e.ruleMap.entries())
+        .map(([rule, count]) => ({ rule, count }))
+        .sort((a, b) => b.count - a.count);
+      const verses = Array.from(e.verseSet).sort((a, b) => a - b);
+      return {
+        key: e.key,
+        surahNumber: e.surahNumber,
+        name: e.name,
+        arabic: e.arabic,
+        weight: e.weight,
+        errorCount: e.errorCount,
+        verseCount: verses.length,
+        verses,
+        rules,
+        ruleSummary: rules
+          .slice(0, 3)
+          .map((r) => `${r.rule} (${r.count})`)
+          .join(' · '),
+      };
+    })
+    .sort((a, b) => b.weight - a.weight || b.errorCount - a.errorCount)
+    .slice(0, limit);
 };
