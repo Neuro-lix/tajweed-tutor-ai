@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useTextToSpeech = () => {
@@ -7,7 +7,11 @@ export const useTextToSpeech = () => {
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const speak = useCallback(async (text: string, language: string = 'fr') => {
+  const speak = useCallback(async (
+    text: string,
+    language: string = 'fr',
+    options?: { speed?: number },
+  ) => {
     if (!text.trim()) return;
 
     setIsLoading(true);
@@ -20,28 +24,12 @@ export const useTextToSpeech = () => {
         audioRef.current = null;
       }
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/text-to-speech`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ text, language }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to generate speech');
-      }
-
-      const data = await response.json();
-
-      if (data.error) {
-        throw new Error(data.error);
-      }
+      // invoke() attaches the signed-in user's JWT, which the function requires.
+      const { data, error: fnError } = await supabase.functions.invoke('text-to-speech', {
+        body: { text, language, speed: options?.speed },
+      });
+      if (fnError) throw new Error(fnError.message || 'Failed to generate speech');
+      if (!data?.audioContent) throw new Error(data?.error || 'Failed to generate speech');
 
       // Play audio from base64
       const audioUrl = `data:audio/mpeg;base64,${data.audioContent}`;
@@ -74,6 +62,12 @@ export const useTextToSpeech = () => {
       audioRef.current = null;
       setIsSpeaking(false);
     }
+  }, []);
+
+  // Stop playback when the component using the hook unmounts.
+  useEffect(() => () => {
+    audioRef.current?.pause();
+    audioRef.current = null;
   }, []);
 
   return {
