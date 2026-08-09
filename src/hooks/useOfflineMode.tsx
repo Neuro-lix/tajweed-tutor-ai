@@ -57,11 +57,6 @@ export const useOfflineMode = () => {
     };
   }, []);
 
-  // Update cache stats once DB is ready
-  useEffect(() => {
-    if (isDbReady) updateCacheStats();
-  }, [isDbReady]);
-
   const openDatabase = (): Promise<IDBDatabase> => {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -90,6 +85,50 @@ export const useOfflineMode = () => {
   const getVerseKey = (surah: number, verse: number, translationId?: string) =>
     `${surah}:${verse}:${translationId ?? ''}`;
   const getAudioKey = (surah: number, verse: number, reciter: string) => `${surah}:${verse}:${reciter}`;
+
+  // Update cache statistics
+  const updateCacheStats = useCallback(async () => {
+    if (!isDbReady) return;
+
+    try {
+      const db = await openDatabase();
+      
+      const verseCount = await new Promise<number>((resolve) => {
+        const transaction = db.transaction(VERSE_STORE, 'readonly');
+        const store = transaction.objectStore(VERSE_STORE);
+        const request = store.count();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => resolve(0);
+      });
+
+      const audioCount = await new Promise<number>((resolve) => {
+        const transaction = db.transaction(AUDIO_STORE, 'readonly');
+        const store = transaction.objectStore(AUDIO_STORE);
+        const request = store.count();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => resolve(0);
+      });
+
+      db.close();
+
+      // Estimate size (rough approximation)
+      const estimatedSize = verseCount * 500 + audioCount * 100000; // bytes
+      
+      setCacheStats({
+        verses: verseCount,
+        audio: audioCount,
+        size: estimatedSize,
+      });
+    } catch (error) {
+      console.error('Failed to update cache stats:', error);
+    }
+  }, [isDbReady]);
+
+  // Update cache stats once DB is ready
+  useEffect(() => {
+    if (isDbReady) updateCacheStats();
+  }, [isDbReady, updateCacheStats]);
+
 
   // Cache a verse
   const cacheVerse = useCallback(async (
@@ -126,7 +165,7 @@ export const useOfflineMode = () => {
     } catch (error) {
       console.error('Failed to cache verse:', error);
     }
-  }, [isDbReady]);
+  }, [isDbReady, updateCacheStats]);
 
   // Cache audio
   const cacheAudio = useCallback(async (
@@ -160,7 +199,7 @@ export const useOfflineMode = () => {
     } catch (error) {
       console.error('Failed to cache audio:', error);
     }
-  }, [isDbReady]);
+  }, [isDbReady, updateCacheStats]);
 
   // Get cached verse
   const getCachedVerse = useCallback(async (
@@ -265,43 +304,6 @@ export const useOfflineMode = () => {
     }
   }, [isDbReady]);
 
-  // Update cache statistics
-  const updateCacheStats = async () => {
-    if (!isDbReady) return;
-
-    try {
-      const db = await openDatabase();
-      
-      const verseCount = await new Promise<number>((resolve) => {
-        const transaction = db.transaction(VERSE_STORE, 'readonly');
-        const store = transaction.objectStore(VERSE_STORE);
-        const request = store.count();
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => resolve(0);
-      });
-
-      const audioCount = await new Promise<number>((resolve) => {
-        const transaction = db.transaction(AUDIO_STORE, 'readonly');
-        const store = transaction.objectStore(AUDIO_STORE);
-        const request = store.count();
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => resolve(0);
-      });
-
-      db.close();
-
-      // Estimate size (rough approximation)
-      const estimatedSize = verseCount * 500 + audioCount * 100000; // bytes
-      
-      setCacheStats({
-        verses: verseCount,
-        audio: audioCount,
-        size: estimatedSize,
-      });
-    } catch (error) {
-      console.error('Failed to update cache stats:', error);
-    }
-  };
 
   // Clear all cache
   const clearCache = useCallback(async () => {

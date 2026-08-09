@@ -44,7 +44,7 @@ export const useUserProgress = () => {
   const [corrections, setCorrections] = useState<Correction[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
 
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     if (!user) {
       setLoading(false);
       return;
@@ -148,7 +148,7 @@ export const useUserProgress = () => {
 
   useEffect(() => {
     fetchUserData();
-  }, [user]);
+  }, [fetchUserData]);
 
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) return;
