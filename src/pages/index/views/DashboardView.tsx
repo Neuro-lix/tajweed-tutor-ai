@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { AppHeader } from '@/components/header/AppHeader';
 import { MultilingualChat } from '@/components/chat/MultilingualChat';
@@ -13,8 +13,10 @@ import { RewardsPanel } from '@/components/rewards/RewardsPanel';
 import { CertificateModal } from '@/components/certificates/CertificateModal';
 import { ProgressInsightsCard } from '@/components/dashboard/ProgressInsightsCard';
 import { PriorityFixesCard } from '@/components/dashboard/PriorityFixesCard';
+import { CsvExportDialog, defaultCsvFilters, type CsvFilters } from '@/components/dashboard/CsvExportDialog';
 import { generateCorrectionsSummaryPDF } from '@/utils/pdfGenerator';
 import { downloadCorrectionsCsv } from '@/lib/correctionsCsv';
+import { buildPriorityFixes } from '@/lib/progressInsights';
 import { QIRAAT_NAMES } from '@/data/quranData';
 import { DashboardSkeleton, QuranMapSkeleton } from '@/components/ui/skeleton-card';
 import type { IndexState } from '../useIndexState';
@@ -31,6 +33,32 @@ export const DashboardView = ({ state: s }: DashboardViewProps) => (
 );
 
 const DashboardViewInner = ({ state: s }: DashboardViewProps) => {
+  const [csvOpen, setCsvOpen] = useState(false);
+  const [csvFilters, setCsvFilters] = useState<CsvFilters>(defaultCsvFilters);
+
+  /** Corrections matching the current CSV filters (period, surah, severity, status). */
+  const filteredCorrections = useMemo(() => {
+    const since =
+      csvFilters.periodDays > 0 ? Date.now() - csvFilters.periodDays * 86_400_000 : null;
+    return s.corrections.filter((c) => {
+      if (since && new Date(c.createdAt).getTime() < since) return false;
+      if (csvFilters.surahNumber && c.surahNumber !== csvFilters.surahNumber) return false;
+      if (csvFilters.severity !== 'all' && c.severity !== csvFilters.severity) return false;
+      if (csvFilters.status === 'pending' && c.isResolved) return false;
+      if (csvFilters.status === 'resolved' && !c.isResolved) return false;
+      return true;
+    });
+  }, [s.corrections, csvFilters]);
+
+  const availableSurahs = useMemo(
+    () => Array.from(new Set(s.corrections.map((c) => c.surahNumber))),
+    [s.corrections],
+  );
+  const availableSeverities = useMemo(
+    () => Array.from(new Set(s.corrections.map((c) => c.severity).filter(Boolean))) as string[],
+    [s.corrections],
+  );
+
   /** Full recap PDF: corrections + tajwīd rules + recent scores/progression. */
   const handleDownloadRecapPdf = () => {
     if (s.corrections.length === 0) {
@@ -56,14 +84,13 @@ const DashboardViewInner = ({ state: s }: DashboardViewProps) => {
     toast.success('Récapitulatif PDF téléchargé.');
   };
 
-  /** CSV export: corrections détaillées + bloc statistiques et priorités. */
+  /** CSV export: corrections filtrées + bloc statistiques et priorités. */
   const handleDownloadCsv = () => {
-    if (s.corrections.length === 0) {
-      toast.info('Récitez un passage pour générer votre export.');
+    if (filteredCorrections.length === 0) {
+      toast.info('Aucune correction ne correspond à ces filtres.');
       return;
     }
-    downloadCorrectionsCsv(
-      s.corrections.map((c) => ({
+    const rows = filteredCorrections.map((c) => ({
         surahNumber: c.surahNumber,
         verseNumber: c.verseNumber,
         word: c.word,
@@ -73,13 +100,16 @@ const DashboardViewInner = ({ state: s }: DashboardViewProps) => {
         severity: c.severity,
         isResolved: c.isResolved,
         createdAt: c.createdAt,
-      })),
-      s.priorityFixes,
+    }));
+    downloadCorrectionsCsv(
+      rows,
+      buildPriorityFixes(rows),
       {
         userName: s.profile?.fullName ?? undefined,
         qiraat: s.selectedQiraat ? QIRAAT_NAMES[s.selectedQiraat] : undefined,
       },
     );
+    setCsvOpen(false);
     toast.success('Export CSV téléchargé.');
   };
 
@@ -131,7 +161,7 @@ const DashboardViewInner = ({ state: s }: DashboardViewProps) => {
             }}
             onOpenAllErrors={() => s.setCurrentView('tajweed-errors')}
             onDownloadPdf={handleDownloadRecapPdf}
-            onDownloadCsv={handleDownloadCsv}
+            onDownloadCsv={() => setCsvOpen(true)}
           />
           <StreakPanel />
           <RewardsPanel
@@ -187,6 +217,17 @@ const DashboardViewInner = ({ state: s }: DashboardViewProps) => {
 
     <MultilingualChat />
     <FeedbackForm isOpen={s.showFeedbackForm} onClose={() => s.setShowFeedbackForm(false)} />
+
+    <CsvExportDialog
+      open={csvOpen}
+      onOpenChange={setCsvOpen}
+      availableSurahs={availableSurahs}
+      availableSeverities={availableSeverities}
+      matchCount={filteredCorrections.length}
+      filters={csvFilters}
+      onFiltersChange={setCsvFilters}
+      onExport={handleDownloadCsv}
+    />
 
     <CertificateModal
       certificate={s.newCertificate ? {

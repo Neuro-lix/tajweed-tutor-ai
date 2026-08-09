@@ -69,9 +69,12 @@ serve(async (req) => {
       return json({ error: 'rate_limited' }, 429, corsHeaders);
     }
 
-    const { data, error } = await admin
-      .schema('private')
-      .rpc('claim_admin_access', { _user_id: user.id, _password: password });
+    // The verification logic lives in `private.claim_admin_access`, but PostgREST
+    // only exposes the `public` schema — we call the service-role-only wrapper.
+    const { data, error } = await admin.rpc('claim_admin_access', {
+      _user_id: user.id,
+      _password: password,
+    });
 
     if (error) {
       console.error('claim-admin rpc error', error.message);
