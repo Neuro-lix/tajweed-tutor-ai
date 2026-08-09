@@ -53,6 +53,77 @@ const computeSimilarity = (expected: string, actual: string): number => {
   return union === 0 ? 0 : inter / union;
 };
 
+// ─── Word-by-word confidence ────────────────────────────────────────────
+type ConfidenceLevel = "high" | "medium" | "low";
+type WordConfidence = { word: string; expectedWord: string; confidence: ConfidenceLevel };
+/** Word emitted by Whisper `verbose_json` + `timestamp_granularities: ["word"]`. */
+type WhisperWord = { word: string; start?: number; end?: number; probability?: number; confidence?: number };
+
+/** Dice coefficient on character bigrams (0..1) — tolerant to small spelling drifts. */
+const charSimilarity = (a: string, b: string): number => {
+  if (!a || !b) return 0;
+  if (a === b) return 1;
+  if (a.length < 2 || b.length < 2) return a === b ? 1 : 0;
+  const bigrams = (s: string) => {
+    const out: string[] = [];
+    for (let i = 0; i < s.length - 1; i++) out.push(s.slice(i, i + 2));
+    return out;
+  };
+  const A = bigrams(a);
+  const B = bigrams(b);
+  const pool = [...B];
+  let hits = 0;
+  for (const g of A) {
+    const idx = pool.indexOf(g);
+    if (idx >= 0) { hits++; pool.splice(idx, 1); }
+  }
+  return (2 * hits) / (A.length + B.length);
+};
+
+/**
+ * Align each EXPECTED word with the closest transcribed word (position window +
+ * character similarity after diacritic stripping) and derive a confidence level.
+ * When Whisper returned per-word probabilities, they take precedence.
+ */
+const buildWordConfidence = (
+  expectedText: string,
+  transcribedText: string,
+  whisperWords: WhisperWord[] | null,
+): WordConfidence[] => {
+  const expected = (expectedText || "").split(/\s+/).filter(Boolean);
+  const actual = (transcribedText || "").split(/\s+/).filter(Boolean);
+  if (expected.length === 0) return [];
+
+  const actualNormed = actual.map((w) => stripDiacritics(w));
+  const probByNormWord = new Map<string, number>();
+  for (const w of whisperWords ?? []) {
+    const p = typeof w.probability === "number" ? w.probability
+      : typeof w.confidence === "number" ? w.confidence : null;
+    if (p !== null) probByNormWord.set(stripDiacritics(w.word || ""), p);
+  }
+
+  const WINDOW = 3; // allow ±3 words of positional drift
+  return expected.map((rawWord, i) => {
+    const target = stripDiacritics(rawWord);
+    // Scale expected position onto the transcript length
+    const anchor = actual.length > 0
+      ? Math.round((i / Math.max(1, expected.length - 1)) * Math.max(0, actual.length - 1))
+      : 0;
+    let best = 0;
+    let bestWord = "";
+    for (let j = Math.max(0, anchor - WINDOW); j < Math.min(actualNormed.length, anchor + WINDOW + 1); j++) {
+      const sim = charSimilarity(target, actualNormed[j]);
+      if (sim > best) { best = sim; bestWord = actual[j]; }
+    }
+
+    const whisperProb = bestWord ? probByNormWord.get(stripDiacritics(bestWord)) : undefined;
+    // Whisper confidence wins when available, otherwise textual similarity.
+    const score = typeof whisperProb === "number" ? Math.min(whisperProb, best === 0 ? whisperProb : (whisperProb + best) / 2) : best;
+    const confidence: ConfidenceLevel = score >= 0.8 ? "high" : score >= 0.5 ? "medium" : "low";
+    return { word: rawWord, expectedWord: bestWord, confidence };
+  });
+};
+
 serve(async (req) => {
   const corsHeaders = buildCors(req);
   if (req.method === "OPTIONS") {
