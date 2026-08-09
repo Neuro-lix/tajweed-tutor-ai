@@ -253,6 +253,7 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          paddle_customer_id: string | null
           selected_qiraat: Database["public"]["Enums"]["qiraat_type"] | null
           session_type: Database["public"]["Enums"]["session_type"] | null
           updated_at: string
@@ -262,6 +263,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          paddle_customer_id?: string | null
           selected_qiraat?: Database["public"]["Enums"]["qiraat_type"] | null
           session_type?: Database["public"]["Enums"]["session_type"] | null
           updated_at?: string
@@ -271,6 +273,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          paddle_customer_id?: string | null
           selected_qiraat?: Database["public"]["Enums"]["qiraat_type"] | null
           session_type?: Database["public"]["Enums"]["session_type"] | null
           updated_at?: string
