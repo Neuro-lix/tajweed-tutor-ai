@@ -300,7 +300,7 @@ const Auth = () => {
           <CardTitle className="text-3xl font-amiri">
             {view === 'login' ? t.loginTitle
               : view === 'signup' ? t.signupTitle
-              : view === 'updatePassword' ? t.resetPasswordTitle
+              : view === 'updatePassword' ? t.updatePasswordButton
               : t.forgotPasswordTitle}
           </CardTitle>
           <CardDescription className="text-base">
