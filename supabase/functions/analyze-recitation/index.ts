@@ -55,7 +55,9 @@ const computeSimilarity = (expected: string, actual: string): number => {
 
 // ─── Word-by-word confidence ────────────────────────────────────────────
 type ConfidenceLevel = "high" | "medium" | "low";
-type WordConfidence = { word: string; expectedWord: string; confidence: ConfidenceLevel };
+// `word` is the expected (Quranic) word — that's what the frontend highlights.
+// `expectedWord` is kept as an explicit alias, `heardWord` is what Whisper heard.
+type WordConfidence = { word: string; expectedWord: string; heardWord: string; confidence: ConfidenceLevel };
 /** Word emitted by Whisper `verbose_json` + `timestamp_granularities: ["word"]`. */
 type WhisperWord = { word: string; start?: number; end?: number; probability?: number; confidence?: number };
 
@@ -120,7 +122,7 @@ const buildWordConfidence = (
     // Whisper confidence wins when available, otherwise textual similarity.
     const score = typeof whisperProb === "number" ? Math.min(whisperProb, best === 0 ? whisperProb : (whisperProb + best) / 2) : best;
     const confidence: ConfidenceLevel = score >= 0.8 ? "high" : score >= 0.5 ? "medium" : "low";
-    return { word: rawWord, expectedWord: bestWord, confidence };
+    return { word: rawWord, expectedWord: rawWord, heardWord: bestWord, confidence };
   });
 };
 
