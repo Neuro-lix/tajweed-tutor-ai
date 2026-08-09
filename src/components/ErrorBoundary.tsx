@@ -21,7 +21,7 @@ export class ErrorBoundary extends Component<Props, State> {
         time: new Date().toISOString(),
       });
       localStorage.setItem('healthcheck_errors', JSON.stringify(errors.slice(0, 5)));
-    } catch {}
+    } catch { /* storage unavailable — ignore */ }
   }
 
   render() {

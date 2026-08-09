@@ -63,7 +63,7 @@ export default function VerifyCertificate() {
       } else {
         localStorage.setItem(RATE_KEY, JSON.stringify({ count: raw.count + 1, reset: raw.reset }));
       }
-    } catch {}
+    } catch { /* storage unavailable — ignore */ }
   }, []);
 
   useEffect(() => {
