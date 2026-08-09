@@ -325,6 +325,7 @@ const Auth = () => {
                   {t.noAccountSignup}
                 </button>
               </div>
+              <ResendPanel />
             </form>
           )}
 
@@ -387,6 +388,7 @@ const Auth = () => {
                   {t.alreadyHaveAccount}
                 </button>
               </div>
+              {signupEmail && <ResendPanel />}
             </form>
           )}
 
