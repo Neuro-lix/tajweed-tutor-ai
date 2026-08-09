@@ -116,10 +116,7 @@ serve(async (req) => {
     console.log("[paddle-webhook] Payload:", JSON.stringify(event.data, null, 2));
 
     // Handle completed transactions (one-time or first subscription payment)
-    if (
-      event.event_type === "transaction.completed" ||
-      event.event_type === "transaction.paid"
-    ) {
+    if (event.event_type === "transaction.completed") {
       const transaction = event.data;
       const customData = transaction.custom_data || {};
       const userId = customData.user_id;
@@ -160,6 +157,25 @@ serve(async (req) => {
           Deno.env.get("SUPABASE_URL")!,
           Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
         );
+
+        // Idempotence: never credit the same Paddle transaction twice
+        const transactionId = String(transaction.id ?? "");
+        if (!transactionId) {
+          console.error("[paddle-webhook] Missing transaction id");
+          return new Response("Missing transaction id", { status: 400, headers: corsHeaders });
+        }
+
+        const { error: dedupeError } = await supabase
+          .from("processed_payment_events")
+          .insert({ provider: "paddle", external_id: transactionId });
+
+        if (dedupeError) {
+          console.log(`[paddle-webhook] Transaction ${transactionId} already processed, skipping`);
+          return new Response(JSON.stringify({ received: true, deduped: true }), {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
 
         const { data, error } = await supabase.rpc("add_credits", {
           p_user_id: userId,
