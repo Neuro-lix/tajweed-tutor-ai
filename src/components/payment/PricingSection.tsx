@@ -23,11 +23,16 @@ declare global {
           items: { priceId: string; quantity: number }[];
           successUrl?: string;
           customer?: { email?: string };
+          customData?: Record<string, string>;
         }) => void;
       };
     };
   }
 }
+
+const isPlaceholder = (priceId: string) => priceId.startsWith("pri_PLACEHOLDER");
+const HOURLY_UNAVAILABLE = isPlaceholder(PADDLE_PRODUCTS.hourly);
+const UNLIMITED_UNAVAILABLE = isPlaceholder(PADDLE_PRODUCTS.unlimited);
 
 interface PricingSectionProps {
   onBack?: () => void;
@@ -72,7 +77,7 @@ export const PricingSection = ({ onBack }: PricingSectionProps) => {
     }
 
     const priceId = PADDLE_PRODUCTS[priceType];
-    if (priceId.includes("PLACEHOLDER")) {
+    if (isPlaceholder(priceId)) {
       toast.error("Les produits Paddle ne sont pas encore configurés.");
       return;
     }
@@ -84,7 +89,7 @@ export const PricingSection = ({ onBack }: PricingSectionProps) => {
         successUrl: `${window.location.origin}/?payment=success`,
         ...(user?.email ? { customer: { email: user.email } } : {}),
         customData: user ? { user_id: user.id } : undefined,
-      } as any);
+      });
     } catch (error) {
       console.error("Paddle checkout error:", error);
       toast.error(t.error);
