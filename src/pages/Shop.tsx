@@ -297,7 +297,7 @@ const Shop: React.FC = () => {
                       <Button size="lg" variant="outline" className="w-full rounded-2xl" onClick={() => handlePaypal(`${pack.name} - ${pack.credits} crédits`, pack.price, pack.id)}>
                         <Zap className="h-4 w-4 mr-2" /> PayPal
                       </Button>
-                      <CryptoButton name={`${pack.name} - ${pack.credits} crédits`} price={pack.price} type={pack.id} size="lg" />
+                      <CryptoButton productId={`pack_${pack.id}`} name={`${pack.name} - ${pack.credits} crédits`} price={pack.price} size="lg" />
                       <p className="text-[10px] text-muted-foreground mt-1">
                         {paddle.configured ? 'Visa · Mastercard · Apple Pay · ' : ''}BTC · ETH · USDT · +150 cryptos
                       </p>
@@ -331,7 +331,7 @@ const Shop: React.FC = () => {
                   <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 rounded-2xl px-8 font-semibold text-lg shadow-card w-full" onClick={() => handlePaypal('Bundle Complet - 2 Livrets', 9)}>
                     <Sparkles className="h-5 w-5 mr-2" /> PayPal
                   </Button>
-                  <Button size="lg" variant="outline" className="rounded-2xl px-8 font-semibold text-lg w-full border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10" onClick={() => handleCrypto('Bundle Complet - 2 Livrets', 9)} disabled={cryptoLoading === 'Bundle Complet - 2 Livrets-9'}>
+                  <Button size="lg" variant="outline" className="rounded-2xl px-8 font-semibold text-lg w-full border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10" onClick={() => handleCrypto('bundle', 'Bundle Complet - 2 Livrets', 9)} disabled={cryptoLoading === 'Bundle Complet - 2 Livrets-9'}>
                     {cryptoLoading === 'Bundle Complet - 2 Livrets-9' ? <Loader2 className="h-5 w-5 mr-2 animate-spin" /> : <Bitcoin className="h-5 w-5 mr-2" />}
                     Crypto
                   </Button>
@@ -355,7 +355,7 @@ const Shop: React.FC = () => {
                         <Eye className="h-3 w-3 mr-1" /> {t.previewLabel}
                       </Button>
                       <Button size="sm" className="w-full rounded-2xl" onClick={() => handlePaypal(sheet.name, sheet.price, undefined, sheet.pdfFile)}>PayPal</Button>
-                      <CryptoButton name={sheet.name} price={sheet.price} size="sm" />
+                      <CryptoButton productId={sheet.id} name={sheet.name} price={sheet.price} size="sm" />
                     </div>
                   </div>
                 ))}
@@ -390,7 +390,7 @@ const Shop: React.FC = () => {
                           <Eye className="h-3 w-3 mr-1" /> {t.previewLabel}
                         </Button>
                         <Button size="sm" className="w-full rounded-2xl" onClick={() => handlePaypal(sheet.name, sheet.price, undefined, sheet.pdfFile)}>PayPal</Button>
-                        <CryptoButton name={sheet.name} price={sheet.price} size="sm" />
+                        <CryptoButton productId={sheet.id} name={sheet.name} price={sheet.price} size="sm" />
                       </div>
                     </div>
                   );
@@ -426,7 +426,7 @@ const Shop: React.FC = () => {
                           <Eye className="h-3 w-3 mr-1" /> {t.previewLabel}
                         </Button>
                         <Button size="sm" className="w-full rounded-2xl" onClick={() => handlePaypal(sheet.name, sheet.price, undefined, sheet.pdfFile)}>PayPal</Button>
-                        <CryptoButton name={sheet.name} price={sheet.price} size="sm" />
+                        <CryptoButton productId={sheet.id} name={sheet.name} price={sheet.price} size="sm" />
                       </div>
                     </div>
                   );
@@ -458,7 +458,7 @@ const Shop: React.FC = () => {
                       <Button size="lg" className="rounded-2xl flex-1" onClick={() => handlePaypal('Livret 1 - Mon Voyage avec le Coran', 5)}>
                         <BookOpen className="h-4 w-4 mr-2" /> PayPal
                       </Button>
-                      <Button size="lg" variant="outline" className="rounded-2xl flex-1 border-2" onClick={() => handleCrypto('Livret 1 - Mon Voyage avec le Coran', 5)} disabled={cryptoLoading === 'Livret 1 - Mon Voyage avec le Coran-5'}>
+                      <Button size="lg" variant="outline" className="rounded-2xl flex-1 border-2" onClick={() => handleCrypto('livret1', 'Livret 1 - Mon Voyage avec le Coran', 5)} disabled={cryptoLoading === 'Livret 1 - Mon Voyage avec le Coran-5'}>
                         {cryptoLoading === 'Livret 1 - Mon Voyage avec le Coran-5' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Bitcoin className="h-4 w-4 mr-2" />}
                         Crypto
                       </Button>
@@ -485,7 +485,7 @@ const Shop: React.FC = () => {
                       <Button size="lg" variant="gold" className="rounded-2xl flex-1" onClick={() => handlePaypal('Livret 2 - Master Collection Tajweed', 5)}>
                         <BookOpen className="h-4 w-4 mr-2" /> PayPal
                       </Button>
-                      <Button size="lg" variant="outline" className="rounded-2xl flex-1 border-2" onClick={() => handleCrypto('Livret 2 - Master Collection Tajweed', 5)} disabled={cryptoLoading === 'Livret 2 - Master Collection Tajweed-5'}>
+                      <Button size="lg" variant="outline" className="rounded-2xl flex-1 border-2" onClick={() => handleCrypto('livret2', 'Livret 2 - Master Collection Tajweed', 5)} disabled={cryptoLoading === 'Livret 2 - Master Collection Tajweed-5'}>
                         {cryptoLoading === 'Livret 2 - Master Collection Tajweed-5' ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Bitcoin className="h-4 w-4 mr-2" />}
                         Crypto
                       </Button>
@@ -505,7 +505,7 @@ const Shop: React.FC = () => {
           onClose={() => setPreview(null)}
           product={preview}
           onPaypal={() => { handlePaypal(preview.name, preview.price); setPreview(null); }}
-          onCrypto={() => { handleCrypto(preview.name, preview.price); setPreview(null); }}
+          onCrypto={() => { handleCrypto(preview.id, preview.name, preview.price); setPreview(null); }}
           cryptoLoading={cryptoLoading === `${preview.name}-${preview.price}`}
         />
       )}
