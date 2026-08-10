@@ -30,6 +30,7 @@ export interface CsvFilters {
   status: 'all' | 'pending' | 'resolved';
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const defaultCsvFilters: CsvFilters = {
   periodDays: 0,
   surahNumber: 0,
