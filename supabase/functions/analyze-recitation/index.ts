@@ -548,8 +548,8 @@ ${
 ### Mots à confiance basse/moyenne (À ANALYSER EN PRIORITÉ)
 ${weakWords.length === 0 ? "(aucun — la récitation est nette partout)" : weakWords.map((w) => `- ${w.word} (${w.confidence})`).join("\n")}
 
-**Concentre ton analyse tajwīd sur ces mots-là**, dans l'ordre : d'abord les `low`, puis les `medium`.
-N'analyse les mots `high` que si une règle de tajwīd évidente y est en jeu. Les champs "word" de
+**Concentre ton analyse tajwīd sur ces mots-là**, dans l'ordre : d'abord les "low", puis les "medium".
+N'analyse les mots "high" que si une règle de tajwīd évidente y est en jeu. Les champs "word" de
 tes "errors" doivent en priorité correspondre à ces mots à confiance basse/moyenne.
 
 ## Texte attendu (avec diacritiques)
