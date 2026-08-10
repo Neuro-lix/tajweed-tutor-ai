@@ -454,6 +454,7 @@ const Auth = () => {
                 <ArrowLeft className="w-3 h-3" />{t.backToLogin}
               </button>
             </form>
+            )
           )}
 
           {/* FORGOT PASSWORD */}
