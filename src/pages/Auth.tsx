@@ -121,9 +121,13 @@ const Auth = () => {
           access_token: accessToken,
           refresh_token: refreshToken,
         });
-        if (!cancelled) error
-          ? setRecoveryError("Lien de réinitialisation invalide ou expiré. Demande un nouveau lien.")
-          : setRecoveryReady(true);
+        if (!cancelled) {
+          if (error) {
+            setRecoveryError("Lien de réinitialisation invalide ou expiré. Demande un nouveau lien.");
+          } else {
+            setRecoveryReady(true);
+          }
+        }
         return;
       }
 
@@ -131,9 +135,13 @@ const Auth = () => {
       const code = searchParams.get('code');
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (!cancelled) error
-          ? setRecoveryError("Lien de réinitialisation invalide ou expiré. Demande un nouveau lien.")
-          : setRecoveryReady(true);
+        if (!cancelled) {
+          if (error) {
+            setRecoveryError("Lien de réinitialisation invalide ou expiré. Demande un nouveau lien.");
+          } else {
+            setRecoveryReady(true);
+          }
+        }
         return;
       }
 
@@ -141,9 +149,13 @@ const Auth = () => {
       const tokenHash = searchParams.get('token_hash');
       if (tokenHash) {
         const { error } = await supabase.auth.verifyOtp({ type: 'recovery', token_hash: tokenHash });
-        if (!cancelled) error
-          ? setRecoveryError("Lien de réinitialisation invalide ou expiré. Demande un nouveau lien.")
-          : setRecoveryReady(true);
+        if (!cancelled) {
+          if (error) {
+            setRecoveryError("Lien de réinitialisation invalide ou expiré. Demande un nouveau lien.");
+          } else {
+            setRecoveryReady(true);
+          }
+        }
         return;
       }
 
