@@ -201,6 +201,24 @@ serve(async (req) => {
 
     const { audioBase64, audioMimeType, surahNumber, verseNumber, expectedText, qiraat } = await req.json();
 
+    // ── Solde de crédits requis AVANT toute transcription / appel LLM ──
+    const { data: creditRow } = await sbAdmin
+      .from("user_credits")
+      .select("credits")
+      .eq("user_id", userId)
+      .maybeSingle();
+    const balance = Number(creditRow?.credits ?? 0);
+    if (!creditRow || balance < CREDIT_COSTS.analyzeRecitation) {
+      return new Response(JSON.stringify({
+        error: "insufficient_credits",
+        required: CREDIT_COSTS.analyzeRecitation,
+        balance,
+        message: "Crédits insuffisants pour analyser une récitation, achetez un pack de crédits.",
+      }), {
+        status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // ── Payload size guard (~5 MB base64 ≈ 3.75 MB binary)
     if (typeof audioBase64 === "string" && audioBase64.length > 5_000_000) {
       return new Response(JSON.stringify({
