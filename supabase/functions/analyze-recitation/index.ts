@@ -682,6 +682,21 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
     analysis.wordConfidence = wordConfidence.map((w) => ({ word: w.word, confidence: w.confidence }));
     analysis.wordDetails = wordConfidence;
 
+    // ── Déduction du crédit côté serveur (service_role uniquement).
+    // Le client n'a plus le droit d'appeler deduct_credit directement.
+    let remainingCredits: number | null = null;
+    try {
+      const { data: balance } = await sbAdmin.rpc("deduct_credit", {
+        p_user_id: userId,
+        p_amount: CREDIT_COSTS.analyzeRecitation,
+      });
+      const num = Number(balance);
+      remainingCredits = Number.isFinite(num) && num >= 0 ? num : null;
+    } catch (creditErr) {
+      console.error("[analyze-recitation] credit deduction failed:", creditErr);
+    }
+    analysis.remainingCredits = remainingCredits;
+
     return new Response(JSON.stringify(analysis), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
