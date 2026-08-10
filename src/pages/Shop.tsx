@@ -115,16 +115,19 @@ const Shop: React.FC = () => {
     const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${PAYPAL_EMAIL}&item_name=${encodeURIComponent(itemName)}&amount=${price}&currency_code=EUR&return=${encodeURIComponent(returnUrl)}&cancel_return=${encodeURIComponent(CANCEL_URL)}`;
     window.open(paypalUrl, '_blank');
   };
-  const handleCrypto = async (productName: string, price: number, productType?: string) => {
-    const userId = user?.id || `guest-${Date.now()}`;
+  // Le prix et le libellé sont résolus côté serveur depuis le catalogue :
+  // on n'envoie qu'un identifiant produit.
+  const handleCrypto = async (productId: string, productName: string, price: number) => {
+    if (!user) {
+      toast({ title: 'Connexion requise', description: 'Connecte-toi pour payer en crypto.', variant: 'destructive' });
+      return;
+    }
     const key = `${productName}-${price}`;
     setCryptoLoading(key);
     try {
-      console.log('[Crypto] Creating payment:', { productName, price, productType, userId });
       const { data, error } = await supabase.functions.invoke('create-crypto-payment', {
-        body: { amount: price, productName, productType: productType || '', userId },
+        body: { productId },
       });
-      console.log('[Crypto] Response:', { data, error });
       if (error) {
         const msg = typeof error === 'object' && 'message' in error ? error.message : JSON.stringify(error);
         throw new Error(msg);
