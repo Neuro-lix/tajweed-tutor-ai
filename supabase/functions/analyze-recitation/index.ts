@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { CREDIT_COSTS } from "../_shared/credit-costs.ts";
 
 type RateLimitResult = { allowed: boolean; count: number; limit: number; reset_at: string };
 

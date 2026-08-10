@@ -55,29 +55,17 @@ export const useCredits = () => {
     fetchCredits();
   }, [fetchCredits]);
 
-  const deductCredit = useCallback(async (amount = 1): Promise<boolean> => {
-    if (!user) return false;
-
-    try {
-      const { data, error } = await supabase.rpc('deduct_credit', {
-        p_user_id: user.id,
-        p_amount: amount,
-      });
-
-      if (error) throw error;
-
-      if (typeof data === 'number' || typeof data === 'string') {
-        const balance = Number(data);
-        if (balance < 0) return false;
-        setCredits(balance);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Error deducting credit:', error);
-      return false;
+  // La déduction de crédits est effectuée exclusivement côté serveur
+  // (edge functions avec service_role). Le client se contente de rafraîchir
+  // le solde, ou de l'appliquer localement si le serveur l'a renvoyé.
+  const applyRemainingCredits = useCallback((balance: number | null | undefined) => {
+    const num = Number(balance);
+    if (balance !== null && balance !== undefined && Number.isFinite(num) && num >= 0) {
+      setCredits(num);
+      return true;
     }
-  }, [user]);
+    return false;
+  }, []);
 
   const hasCredits = credits !== null && credits > 0;
   const isLowCredits = credits !== null && credits > 0 && credits <= 2;
@@ -93,7 +81,7 @@ export const useCredits = () => {
     hasCreditsFor,
     isLowCredits,
     isFirstLogin,
-    deductCredit,
+    applyRemainingCredits,
     refetch: fetchCredits,
   };
 };
