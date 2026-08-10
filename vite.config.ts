@@ -107,7 +107,8 @@ export default defineConfig(({ mode }) => ({
           }
           // Chunk dédié à l'admin (route déjà lazy-loadée)
           if (id.includes("/src/pages/AdminDashboard") || id.includes("/src/components/admin/")) return "admin";
-          if (id.includes("/src/i18n/") || id.includes("/src/content/")) return "app-content";
+          if (id.includes("/src/i18n/")) return "app-i18n";
+          if (id.includes("/src/content/")) return "app-content";
           if (id.includes("/src/data/")) return "app-data";
           return undefined;
         },
