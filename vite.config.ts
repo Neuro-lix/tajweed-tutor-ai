@@ -85,4 +85,33 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Limite d'avertissement resserrée : chaque chunk doit rester léger
+    chunkSizeWarningLimit: 500,
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes("node_modules")) {
+            if (id.includes("recharts") || id.includes("d3-") || id.includes("victory-vendor")) return "vendor-charts";
+            if (id.includes("jszip") || id.includes("pako")) return "vendor-zip";
+            if (id.includes("html2canvas")) return "vendor-html2canvas";
+            if (id.includes("jspdf") || id.includes("qrcode")) return "vendor-pdf";
+            if (id.includes("@radix-ui") || id.includes("cmdk") || id.includes("vaul")) return "vendor-radix";
+            if (id.includes("@supabase")) return "vendor-supabase";
+            if (id.includes("react-router")) return "vendor-router";
+            if (id.includes("@tanstack")) return "vendor-query";
+            if (id.includes("lucide-react")) return "vendor-icons";
+            if (id.includes("date-fns")) return "vendor-date";
+            if (id.includes("react-dom") || id.includes("/react/") || id.includes("scheduler")) return "vendor-react";
+            return "vendor";
+          }
+          // Chunk dédié à l'admin (route déjà lazy-loadée)
+          if (id.includes("/src/pages/AdminDashboard") || id.includes("/src/components/admin/")) return "admin";
+          if (id.includes("/src/i18n/") || id.includes("/src/content/")) return "app-content";
+          if (id.includes("/src/data/")) return "app-data";
+          return undefined;
+        },
+      },
+    },
+  },
 }));
