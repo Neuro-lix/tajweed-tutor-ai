@@ -114,7 +114,7 @@ export function useIndexState() {
   } = useAudioRecorder();
 
   const { saveRecording } = useRecitationStorage();
-  const { credits, hasCredits, isLowCredits, deductCredit, refetch: refetchCredits } = useCredits();
+  const { credits, hasCredits, isLowCredits, applyRemainingCredits, refetch: refetchCredits } = useCredits();
   const sessionTimer = useSessionTimer();
 
   // ── Verse text state ──────────────────────────────────────────────
@@ -372,8 +372,9 @@ export function useIndexState() {
 
       setAnalysisStep('done');
 
-      if (!devMode) {
-        await deductCredit();
+      // Le crédit est déduit côté serveur par l'edge function ; on synchronise
+      // simplement le solde renvoyé (ou on rafraîchit depuis la base).
+      if (!applyRemainingCredits(data?.remainingCredits)) {
         refetchCredits();
       }
 
