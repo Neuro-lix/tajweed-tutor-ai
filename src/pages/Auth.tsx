@@ -401,6 +401,20 @@ const Auth = () => {
 
           {/* UPDATE PASSWORD (reset link) */}
           {view === 'updatePassword' && (
+            recoveryError ? (
+              <div className="space-y-4 text-center">
+                <XCircle className="h-10 w-10 text-destructive mx-auto" />
+                <p className="text-sm text-muted-foreground">{recoveryError}</p>
+                <Button className="w-full" onClick={() => { setRecoveryError(null); setView('forgot'); setForgotSent(false); }}>
+                  Demander un nouveau lien
+                </Button>
+              </div>
+            ) : !recoveryReady ? (
+              <div className="flex flex-col items-center gap-3 py-6">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground">Vérification du lien…</p>
+              </div>
+            ) : (
             <form onSubmit={handleUpdatePassword} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="newPassword">{t.newPassword}</Label>
