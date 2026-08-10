@@ -256,7 +256,16 @@ serve(async (req) => {
       // on tajwīd-relevant phonetics. Falls through to the generic cascade on any failure.
       // ⚠️ MANUAL SETUP: add the `HUGGINGFACE_API_KEY` secret to enable this path.
       const HUGGINGFACE_API_KEY = Deno.env.get("HUGGINGFACE_API_KEY");
-      if (!HUGGINGFACE_API_KEY) {
+      // Opt-in switch: the Quran-specialised model runs on a paid HuggingFace
+      // account, so it stays OFF until `ENABLE_QURAN_WHISPER` is set to "true".
+      const quranWhisperEnabled =
+        (Deno.env.get("ENABLE_QURAN_WHISPER") ?? "false").toLowerCase() === "true";
+      if (!quranWhisperEnabled) {
+        console.log(
+          "[analyze-recitation] Quran-specialised model disabled (ENABLE_QURAN_WHISPER != true) — " +
+          "using the Whisper cascade with word-level confidence.",
+        );
+      } else if (!HUGGINGFACE_API_KEY) {
         console.warn(
           "[analyze-recitation] HUGGINGFACE_API_KEY not configured — skipping the Quran-specialised " +
           "model (tarteel-ai/whisper-base-ar-quran) and falling back to the generic Whisper cascade.",
