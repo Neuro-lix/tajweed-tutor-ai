@@ -69,6 +69,7 @@ const memorisationSheets: Product[] = [
 // handlePaypal is defined inside the Shop component to access toast
 
 type PreviewData = {
+  id: string;
   name: string;
   icon: string;
   price: number;
