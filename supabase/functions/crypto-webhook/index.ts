@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getCatalogItem } from "../_shared/crypto-catalog.ts";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -48,21 +49,40 @@ serve(async (req) => {
     console.log("[crypto-webhook] Received:", JSON.stringify(payload));
 
     if (payload.payment_status === "finished") {
-      const orderId = payload.order_id as string;
+      const orderId = String(payload.order_id ?? "");
       // Use double underscore as separator to preserve UUID (which contains dashes)
+      // Format: <userId>__<productId>__<timestamp>
       const parts = orderId.split("__");
       const userId = parts[0];
-      const description = payload.order_description || "";
+      const productId = parts[1] ?? "";
 
       if (!userId || userId.length < 32) {
         console.error("[crypto-webhook] Invalid userId from order_id:", orderId);
         return new Response("Invalid order", { status: 400 });
       }
 
-      let creditsToAdd = 0;
-      if (description.includes("Starter")) creditsToAdd = 50;
-      else if (description.includes("Standard")) creditsToAdd = 150;
-      else if (description.includes("Premium")) creditsToAdd = 400;
+      // ── Le produit (prix + crédits) vient du catalogue serveur, jamais de
+      // la description libre renvoyée par le fournisseur de paiement.
+      const item = getCatalogItem(productId);
+      if (!item) {
+        console.error("[crypto-webhook] Unknown product in order_id:", orderId);
+        return new Response("OK", { status: 200 });
+      }
+
+      // ── Le montant réellement payé doit correspondre au prix du palier
+      // (petite tolérance pour les arrondis de conversion).
+      const paidAmount = Number(
+        payload.price_amount ?? payload.pay_amount ?? payload.actually_paid ?? 0,
+      );
+      const paidCurrency = String(payload.price_currency ?? "eur").toLowerCase();
+      if (paidCurrency !== "eur" || !(paidAmount >= item.price - 0.01)) {
+        console.error(
+          `[crypto-webhook] Amount mismatch for ${item.id}: paid ${paidAmount} ${paidCurrency}, expected ${item.price} eur`,
+        );
+        return new Response("Amount mismatch", { status: 400 });
+      }
+
+      const creditsToAdd = item.credits;
 
       if (creditsToAdd > 0) {
         const supabase = createClient(
@@ -89,7 +109,7 @@ serve(async (req) => {
         const { error } = await supabase.rpc("add_credits", {
           p_user_id: userId,
           p_amount: creditsToAdd,
-          p_description: `Achat crypto: ${description}`,
+          p_description: `Achat crypto: ${item.name}`,
         });
 
         if (error) {
