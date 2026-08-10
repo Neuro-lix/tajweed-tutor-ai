@@ -16,7 +16,18 @@ type AuthView = 'login' | 'signup' | 'forgot' | 'updatePassword';
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
-  const isResetFlow = searchParams.get('reset') === 'true';
+  // A recovery link can arrive in several shapes depending on the email template
+  // and the auth flow: ?reset=true, ?code=..., ?token_hash=..&type=recovery,
+  // or #access_token=..&type=recovery.
+  const hashParams = new URLSearchParams(
+    typeof window !== 'undefined' ? window.location.hash.replace(/^#/, '') : '',
+  );
+  const isResetFlow =
+    searchParams.get('reset') === 'true' ||
+    searchParams.get('type') === 'recovery' ||
+    hashParams.get('type') === 'recovery' ||
+    !!searchParams.get('code') ||
+    !!searchParams.get('token_hash');
   const [view, setView] = useState<AuthView>(isResetFlow ? 'updatePassword' : 'login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,6 +43,8 @@ const Auth = () => {
   const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [resendMessage, setResendMessage] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
+  const [recoveryReady, setRecoveryReady] = useState(false);
+  const [recoveryError, setRecoveryError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -79,6 +92,71 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, [navigate, isResetFlow]);
 
+  // Establish the recovery session from whatever the email link carries.
+  useEffect(() => {
+    if (!isResetFlow) return;
+    let cancelled = false;
+
+    const run = async () => {
+      const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+      const errDesc = hash.get('error_description') || searchParams.get('error_description');
+      if (errDesc) {
+        if (!cancelled) setRecoveryError(
+          /expired|invalid/i.test(errDesc)
+            ? "Ce lien de réinitialisation a expiré ou a déjà été utilisé. Demande un nouveau lien."
+            : errDesc,
+        );
+        return;
+      }
+
+      // 1) Already have a session (detectSessionInUrl handled the hash).
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) { if (!cancelled) setRecoveryReady(true); return; }
+
+      // 2) Implicit flow tokens in the URL hash.
+      const accessToken = hash.get('access_token');
+      const refreshToken = hash.get('refresh_token');
+      if (accessToken && refreshToken) {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        if (!cancelled) error
+          ? setRecoveryError("Lien de réinitialisation invalide ou expiré. Demande un nouveau lien.")
+          : setRecoveryReady(true);
+        return;
+      }
+
+      // 3) PKCE flow: ?code=...
+      const code = searchParams.get('code');
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (!cancelled) error
+          ? setRecoveryError("Lien de réinitialisation invalide ou expiré. Demande un nouveau lien.")
+          : setRecoveryReady(true);
+        return;
+      }
+
+      // 4) Newer email templates: ?token_hash=...&type=recovery
+      const tokenHash = searchParams.get('token_hash');
+      if (tokenHash) {
+        const { error } = await supabase.auth.verifyOtp({ type: 'recovery', token_hash: tokenHash });
+        if (!cancelled) error
+          ? setRecoveryError("Lien de réinitialisation invalide ou expiré. Demande un nouveau lien.")
+          : setRecoveryReady(true);
+        return;
+      }
+
+      if (!cancelled) setRecoveryError(
+        "Aucune session de réinitialisation détectée. Ouvre le lien reçu par email depuis ce même navigateur, ou demande un nouveau lien.",
+      );
+    };
+
+    run();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isResetFlow]);
+
   const newPasswordChecks = {
     minLength: newPassword.length >= 8,
     hasUppercase: /[A-Z]/.test(newPassword),
@@ -103,7 +181,15 @@ const Auth = () => {
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) {
-        toast({ title: t.error, description: mapAuthError(error), variant: 'destructive', duration: 8000 });
+        const missingSession = /session|jwt|not authenticated/i.test(error.message || '');
+        toast({
+          title: t.error,
+          description: missingSession
+            ? "Ta session de réinitialisation a expiré. Demande un nouveau lien par email."
+            : mapAuthError(error),
+          variant: 'destructive',
+          duration: 8000,
+        });
         return;
       }
       toast({ title: t.passwordUpdated, description: t.loginSuccessDesc });
