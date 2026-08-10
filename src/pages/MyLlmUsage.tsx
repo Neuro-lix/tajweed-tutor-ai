@@ -18,6 +18,15 @@ const fmtDateTime = (d: string) =>
     day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
   });
 
+/** Regroupe la consommation par moteur (modèle IA) pour la vue de facturation. */
+const engineLabel = (model: string | null) => {
+  if (!model) return 'Moteur inconnu';
+  if (model.includes('transcribe') || model.includes('whisper')) return `Transcription — ${model}`;
+  if (model.includes('tts')) return `Synthèse vocale — ${model}`;
+  if (model.includes('gemini')) return `Analyse tajwīd — ${model}`;
+  return model;
+};
+
 /**
  * Personal LLM usage page for any signed-in user. RLS on `llm_usage`
  * guarantees a non-admin only ever receives their own rows.
@@ -26,6 +35,22 @@ export default function MyLlmUsage() {
   const navigate = useNavigate();
   const { rows, summary, loading, error, refetch } = useLlmCredits(100);
   const { credits } = useCredits();
+
+  const byEngine = React.useMemo(() => {
+    const map = new Map<string, { calls: number; tokens: number; credits: number; last: string }>();
+    for (const r of rows) {
+      const key = r.model ?? 'unknown';
+      const cur = map.get(key) ?? { calls: 0, tokens: 0, credits: 0, last: r.created_at };
+      cur.calls += 1;
+      cur.tokens += r.total_tokens ?? 0;
+      cur.credits += r.credits_charged ?? 0;
+      if (new Date(r.created_at) > new Date(cur.last)) cur.last = r.created_at;
+      map.set(key, cur);
+    }
+    return [...map.entries()].sort((a, b) => b[1].credits - a[1].credits);
+  }, [rows]);
+
+  const totalCredits = byEngine.reduce((s, [, v]) => s + v.credits, 0) || 1;
 
   return (
     <main className="min-h-screen bg-background">
@@ -82,8 +107,38 @@ export default function MyLlmUsage() {
           <Card><CardContent className="p-4 text-sm text-destructive">{error}</CardContent></Card>
         )}
 
+        {/* Consommation par moteur */}
         <Card>
-          <CardHeader><CardTitle className="text-base">Mes appels récents</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">Consommation par moteur</CardTitle></CardHeader>
+          <CardContent>
+            {byEngine.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Aucune consommation enregistrée.</p>
+            ) : (
+              <div className="space-y-4" data-testid="usage-by-engine">
+                {byEngine.map(([model, v]) => (
+                  <div key={model}>
+                    <div className="flex items-baseline justify-between gap-3 mb-1">
+                      <p className="text-sm font-medium text-foreground truncate">{engineLabel(model)}</p>
+                      <p className="text-sm text-muted-foreground whitespace-nowrap">
+                        {v.credits.toFixed(2)} cr. · {v.calls} appels · {v.tokens.toLocaleString('fr-FR')} tokens
+                      </p>
+                    </div>
+                    <div className="h-2 rounded-full bg-muted overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full"
+                        style={{ width: `${Math.max(2, (v.credits / totalCredits) * 100)}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">Dernier appel : {fmtDateTime(v.last)}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle className="text-base">Historique de facturation par analyse</CardTitle></CardHeader>
           <CardContent>
             {loading ? (
               <p className="text-sm text-muted-foreground animate-pulse">Chargement…</p>
