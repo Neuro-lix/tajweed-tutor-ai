@@ -151,6 +151,7 @@ const Shop: React.FC = () => {
     const data = sheetPreviews[sheet.id];
     if (!data) return;
     setPreview({
+      id: sheet.id,
       name: sheet.name,
       icon: sheet.icon,
       price: sheet.price,
@@ -162,6 +163,7 @@ const Shop: React.FC = () => {
 
   const openLivret1Preview = () => {
     setPreview({
+      id: 'livret1',
       name: 'Livret 1 — Mon Voyage avec le Coran',
       icon: '📗',
       price: 5,
@@ -180,6 +182,7 @@ const Shop: React.FC = () => {
 
   const openLivret2Preview = () => {
     setPreview({
+      id: 'livret2',
       name: 'Livret 2 — Master Collection Tajweed',
       icon: '📘',
       price: 5,
@@ -198,6 +201,7 @@ const Shop: React.FC = () => {
 
   const openBundlePreview = () => {
     setPreview({
+      id: 'bundle',
       name: 'Bundle Complet — Les 2 Livrets',
       icon: '📚',
       price: 9,
@@ -214,11 +218,11 @@ const Shop: React.FC = () => {
     });
   };
 
-  const CryptoButton = ({ name, price, type, size = 'default' }: { name: string; price: number; type?: string; size?: 'sm' | 'default' | 'lg' }) => {
+  const CryptoButton = ({ productId, name, price, size = 'default' }: { productId: string; name: string; price: number; size?: 'sm' | 'default' | 'lg' }) => {
     const key = `${name}-${price}`;
     const isLoading = cryptoLoading === key;
     return (
-      <Button variant="outline" size={size} className="w-full rounded-2xl border-2 border-border hover:border-primary" onClick={() => handleCrypto(name, price, type)} disabled={isLoading}>
+      <Button variant="outline" size={size} className="w-full rounded-2xl border-2 border-border hover:border-primary" onClick={() => handleCrypto(productId, name, price)} disabled={isLoading}>
         {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Bitcoin className="h-4 w-4 mr-2" />}
         Crypto
       </Button>
