@@ -14,6 +14,7 @@ import { useOfflineMode } from '@/hooks/useOfflineMode';
 import { useCertificates } from '@/hooks/useCertificates';
 import { useRecitationStorage } from '@/hooks/useRecitationStorage';
 import { useCredits } from '@/hooks/useCredits';
+import { CREDIT_COSTS, formatCredits } from '@/lib/credits';
 import { useSessionTimer } from '@/hooks/useSessionTimer';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslationSettings } from '@/contexts/TranslationContext';
