@@ -348,11 +348,29 @@ export function useIndexState() {
       if (error) {
         // Surface a friendly toast when the server reports empty transcription (422)
         let serverCode = '';
+        let serverBalance: number | undefined;
         try {
-          const body = await (error as { context?: { json?: () => Promise<{ error?: string }> } }).context?.json?.();
+          const body = await (error as { context?: { json?: () => Promise<{ error?: string; balance?: number }> } }).context?.json?.();
           serverCode = body?.error ?? '';
+          serverBalance = body?.balance;
         } catch {
           /* ignore parse errors */
+        }
+        if (serverCode === 'insufficient_credits') {
+          applyRemainingCredits(serverBalance ?? 0);
+          setAnalysisStep('error');
+          toast.error('Crédits insuffisants', {
+            description:
+              `Il te faut au moins ${CREDIT_COSTS.analyzeRecitation} crédit pour lancer une analyse. Solde actuel : ${formatCredits(serverBalance ?? 0)}.`,
+            duration: 8000,
+            action: { label: 'Recharger', onClick: () => navigate('/shop') },
+          });
+          setAiFeedback({
+            status: 'review',
+            message: 'Crédits insuffisants',
+            details: 'Recharge ton solde depuis la boutique pour relancer une analyse de ta récitation.',
+          });
+          return;
         }
         if (serverCode === 'transcription_empty') {
           toast.error(t.transcriptionImpossibleMsg, {
@@ -362,6 +380,22 @@ export function useIndexState() {
         throw error;
       }
       if (data?.error) {
+        if (data.error === 'insufficient_credits') {
+          applyRemainingCredits(Number(data.balance ?? 0));
+          setAnalysisStep('error');
+          toast.error('Crédits insuffisants', {
+            description:
+              `Il te faut au moins ${CREDIT_COSTS.analyzeRecitation} crédit pour lancer une analyse. Solde actuel : ${formatCredits(Number(data.balance ?? 0))}.`,
+            duration: 8000,
+            action: { label: 'Recharger', onClick: () => navigate('/shop') },
+          });
+          setAiFeedback({
+            status: 'review',
+            message: 'Crédits insuffisants',
+            details: 'Recharge ton solde depuis la boutique pour relancer une analyse de ta récitation.',
+          });
+          return;
+        }
         if (data.error === 'transcription_empty') {
           toast.error(t.transcriptionImpossibleMsg, {
             description: 'Aucune voix captée. Réenregistre dans un endroit plus calme.',
