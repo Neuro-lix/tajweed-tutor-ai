@@ -13,6 +13,7 @@ import { RewardsPanel } from '@/components/rewards/RewardsPanel';
 import { CertificateModal } from '@/components/certificates/CertificateModal';
 import { ProgressInsightsCard } from '@/components/dashboard/ProgressInsightsCard';
 import { PriorityFixesCard } from '@/components/dashboard/PriorityFixesCard';
+import { CreditUsageCard } from '@/components/dashboard/CreditUsageCard';
 import { CsvExportDialog, defaultCsvFilters, type CsvFilters } from '@/components/dashboard/CsvExportDialog';
 import { generateCorrectionsSummaryPDF } from '@/utils/pdfGenerator';
 import { downloadCorrectionsCsv } from '@/lib/correctionsCsv';
@@ -163,6 +164,7 @@ const DashboardViewInner = ({ state: s }: DashboardViewProps) => {
             onDownloadPdf={handleDownloadRecapPdf}
             onDownloadCsv={() => setCsvOpen(true)}
           />
+          <CreditUsageCard />
           <StreakPanel />
           <RewardsPanel
             certificates={s.certificates.map(c => ({
