@@ -334,30 +334,56 @@ const Auth = () => {
       return;
     }
     setLoading(true);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth?reset=true`,
-      });
-      if (error) {
-        // Diagnostic détaillé : rate limit, redirect URL refusée, SMTP non configuré…
-        console.error('[auth] resetPasswordForEmail failed', {
-          code: (error as { code?: string }).code ?? null,
-          status: (error as { status?: number }).status ?? null,
-          name: error.name,
-          message: error.message,
-          redirectTo: `${window.location.origin}/auth?reset=true`,
-          email,
-          raw: error,
-        });
-        toast({ title: t.error, description: mapAuthError(error), variant: "destructive" });
-      } else {
-        setForgotSent(true);
+    await runResetEmail();
+    setLoading(false);
+  };
+
+  /** Envoi (ou renvoi) du lien de réinitialisation, avec limitation de tentatives. */
+  const runResetEmail = async () => {
+    setEmailActionSending(true);
+    setEmailActionError(null);
+    const result = await sendPasswordReset(supabase.auth, {
+      email,
+      redirectTo: `${window.location.origin}/auth?reset=true`,
+      attempts: resetAttempts,
+    });
+    setResetAttempts(result.attempts);
+    setEmailActionSending(false);
+    if (result.status === 'sent') {
+      setEmailActionTarget(email.trim());
+      setEmailCooldown(result.retryInSeconds);
+      setForgotSent(true);
+    } else if (result.status === 'rate_limited') {
+      setEmailCooldown(result.retryInSeconds);
+      setEmailActionError(result.message);
+      if (!forgotSent) toast({ title: t.error, description: result.message, variant: 'destructive' });
+    } else {
+      setEmailActionError(result.message);
+      if (!forgotSent) toast({ title: t.error, description: result.message, variant: 'destructive' });
+    }
+  };
+
+  /** Envoi (ou renvoi) du lien magique de connexion. */
+  const runMagicLink = async () => {
+    setEmailActionSending(true);
+    setEmailActionError(null);
+    const result = await sendMagicLink(supabase.auth, {
+      email,
+      redirectTo: `${window.location.origin}/`,
+      attempts: magicAttempts,
+    });
+    setMagicAttempts(result.attempts);
+    setEmailActionSending(false);
+    if (result.status === 'sent') {
+      setEmailActionTarget(email.trim());
+      setEmailCooldown(result.retryInSeconds);
+      setView('magicSent');
+    } else {
+      setEmailActionError(result.message);
+      setEmailCooldown(result.retryInSeconds);
+      if (view !== 'magicSent') {
+        toast({ title: t.error, description: result.message, variant: 'destructive' });
       }
-    } catch (err) {
-      console.error('[auth] resetPasswordForEmail threw', err);
-      toast({ title: t.error, description: t.unexpectedError, variant: "destructive" });
-    } finally {
-      setLoading(false);
     }
   };
 
