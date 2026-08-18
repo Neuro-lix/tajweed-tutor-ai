@@ -324,11 +324,22 @@ const Auth = () => {
         redirectTo: `${window.location.origin}/auth?reset=true`,
       });
       if (error) {
+        // Diagnostic détaillé : rate limit, redirect URL refusée, SMTP non configuré…
+        console.error('[auth] resetPasswordForEmail failed', {
+          code: (error as { code?: string }).code ?? null,
+          status: (error as { status?: number }).status ?? null,
+          name: error.name,
+          message: error.message,
+          redirectTo: `${window.location.origin}/auth?reset=true`,
+          email,
+          raw: error,
+        });
         toast({ title: t.error, description: mapAuthError(error), variant: "destructive" });
       } else {
         setForgotSent(true);
       }
-    } catch {
+    } catch (err) {
+      console.error('[auth] resetPasswordForEmail threw', err);
       toast({ title: t.error, description: t.unexpectedError, variant: "destructive" });
     } finally {
       setLoading(false);
