@@ -458,12 +458,14 @@ const Auth = () => {
             {view === 'login' ? t.loginTitle
               : view === 'signup' ? t.signupTitle
               : view === 'updatePassword' ? t.updatePasswordButton
+              : view === 'magicSent' ? 'Lien magique envoyé'
               : t.forgotPasswordTitle}
           </CardTitle>
           <CardDescription className="text-base">
             {view === 'login' ? t.accessLearning
               : view === 'signup' ? t.startJourney
               : view === 'updatePassword' ? t.updatePasswordDesc
+              : view === 'magicSent' ? 'Connecte-toi en un clic depuis ta boîte mail.'
               : t.resetPasswordDesc}
           </CardDescription>
         </CardHeader>
