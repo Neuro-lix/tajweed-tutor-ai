@@ -242,6 +242,13 @@ const Auth = () => {
     return () => clearTimeout(id);
   }, [cooldown]);
 
+  // Compte à rebours des envois de liens (magique / réinitialisation).
+  useEffect(() => {
+    if (emailCooldown <= 0) return;
+    const id = setTimeout(() => setEmailCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(id);
+  }, [emailCooldown]);
+
   const handleResendConfirmation = async () => {
     const target = signupEmail || email;
     if (!target || cooldown > 0) return;
