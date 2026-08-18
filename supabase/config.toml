@@ -1,29 +1,23 @@
 project_id = "zymyzuydidefjmiympsl"
 
-[functions.text-to-speech]
-verify_jwt = false
-
-[functions.analyze-recitation]
-verify_jwt = false
-
-
-[functions.chat-assistant]
-verify_jwt = false
-
-[functions.create-crypto-payment]
-verify_jwt = false
-
-[functions.crypto-webhook]
-verify_jwt = false
-
-[functions.paddle-webhook]
-verify_jwt = false
-
-[functions.verify-certificate]
-verify_jwt = false
-
-[functions.diagnostics-export]
-verify_jwt = false
-
-[functions.claim-admin]
-verify_jwt = false
+[functions]
+  [functions.analyze-recitation]
+    verify_jwt = false
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.chat-assistant]
+    verify_jwt = false
+  [functions.claim-admin]
+    verify_jwt = false
+  [functions.create-crypto-payment]
+    verify_jwt = false
+  [functions.crypto-webhook]
+    verify_jwt = false
+  [functions.diagnostics-export]
+    verify_jwt = false
+  [functions.paddle-webhook]
+    verify_jwt = false
+  [functions.text-to-speech]
+    verify_jwt = false
+  [functions.verify-certificate]
+    verify_jwt = false
