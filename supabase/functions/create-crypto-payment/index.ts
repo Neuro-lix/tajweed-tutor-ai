@@ -6,6 +6,8 @@ import { getCatalogItem } from "../_shared/crypto-catalog.ts";
 const DEFAULT_ALLOWED_ORIGINS = [
   "https://recite-perfectly-bot.lovable.app",
   "https://id-preview--dd06a156-64f5-407d-bf79-94ef3c169108.lovable.app",
+  "https://tajweedtutorai.com",
+  "https://www.tajweedtutorai.com",
   "http://localhost:8080",
   "http://localhost:5173",
 ];
@@ -92,7 +94,7 @@ serve(async (req) => {
     }
 
     // Use origin from request or fallback
-    const origin = req.headers.get("origin") || "https://recite-perfectly-bot.lovable.app";
+    const origin = req.headers.get("origin") || "https://tajweedtutorai.com";
 
     const response = await fetch("https://api.nowpayments.io/v1/invoice", {
       method: "POST",

@@ -19,4 +19,4 @@ Disallow: /diagnostics
 Disallow: /health
 Disallow: /shop/success
 
-Sitemap: https://recite-perfectly-bot.lovable.app/sitemap.xml
+Sitemap: https://tajweedtutorai.com/sitemap.xml

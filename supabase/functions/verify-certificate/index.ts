@@ -4,6 +4,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 const DEFAULT_ALLOWED_ORIGINS = [
   'https://recite-perfectly-bot.lovable.app',
   'https://id-preview--dd06a156-64f5-407d-bf79-94ef3c169108.lovable.app',
+  'https://tajweedtutorai.com',
+  'https://www.tajweedtutorai.com',
   'http://localhost:8080',
   'http://localhost:5173',
 ];

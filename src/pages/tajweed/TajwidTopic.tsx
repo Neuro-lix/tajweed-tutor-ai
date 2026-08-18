@@ -17,7 +17,7 @@ import {
   type TopicSlug,
 } from '@/content/tajweed';
 
-const BASE_URL = 'https://recite-perfectly-bot.lovable.app';
+const BASE_URL = 'https://tajweedtutorai.com';
 
 const isTopic = (value: string | undefined): value is TopicSlug =>
   !!value && (TOPIC_SLUGS as readonly string[]).includes(value);

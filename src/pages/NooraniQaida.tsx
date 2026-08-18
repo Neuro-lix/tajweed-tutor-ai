@@ -56,7 +56,7 @@ const NooraniQaida = () => {
           '@type': 'Course',
           name: 'Noorani Qaida — Apprendre à lire le Coran',
           description: 'Cours interactif de Noorani Qaida avec pratique guidée par un coach IA de tajwīd.',
-          provider: { '@type': 'Organization', name: 'Tajweed Tutor AI', url: 'https://recite-perfectly-bot.lovable.app/' },
+          provider: { '@type': 'Organization', name: 'Tajweed Tutor AI', url: 'https://tajweedtutorai.com/' },
           inLanguage: 'fr',
           educationalLevel: 'Débutant',
         })}</script>

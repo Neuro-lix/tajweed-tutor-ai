@@ -19,7 +19,7 @@ interface PageSeoProps {
   alternates?: AlternateLink[];
 }
 
-const BASE_URL = 'https://recite-perfectly-bot.lovable.app';
+const BASE_URL = 'https://tajweedtutorai.com';
 
 export const PageSeo = ({
   title,
