@@ -530,18 +530,36 @@ const Auth = () => {
             )
           )}
 
+          {/* MAGIC LINK SENT */}
+          {view === 'magicSent' && (
+            <EmailSentPanel
+              email={emailActionTarget}
+              title="Lien magique envoyé ✅"
+              description="Ouvre le message de connexion envoyé à"
+              attempts={magicAttempts}
+              cooldown={Math.max(emailCooldown, cooldownRemaining(magicAttempts))}
+              sending={emailActionSending}
+              error={emailActionError}
+              onResend={runMagicLink}
+              onBack={() => { setView('login'); setEmailActionError(null); }}
+            />
+          )}
+
           {/* FORGOT PASSWORD */}
           {view === 'forgot' && (
             <div className="space-y-4">
               {forgotSent ? (
-                <div className="text-center space-y-4 py-4">
-                  <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto" />
-                  <p className="font-medium">{t.emailSentTitle}</p>
-                  <p className="text-sm text-muted-foreground">{t.checkMailReset}</p>
-                  <Button variant="outline" className="w-full" onClick={() => { setView('login'); setForgotSent(false); }}>
-                    <ArrowLeft className="w-4 h-4 mr-2" />{t.backToLogin}
-                  </Button>
-                </div>
+                <EmailSentPanel
+                  email={emailActionTarget}
+                  title={t.emailSentTitle}
+                  description="Le lien de réinitialisation a été envoyé à"
+                  attempts={resetAttempts}
+                  cooldown={Math.max(emailCooldown, cooldownRemaining(resetAttempts))}
+                  sending={emailActionSending}
+                  error={emailActionError}
+                  onResend={runResetEmail}
+                  onBack={() => { setView('login'); setForgotSent(false); setEmailActionError(null); }}
+                />
               ) : (
                 <form onSubmit={handleForgotPassword} className="space-y-4">
                   <div className="space-y-2">
