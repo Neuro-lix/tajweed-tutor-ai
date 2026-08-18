@@ -613,6 +613,17 @@ const Auth = () => {
                   {t.noAccountSignup}
                 </button>
               </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={runMagicLink}
+                disabled={emailActionSending || !email}
+              >
+                {emailActionSending
+                  ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Envoi en cours…</>
+                  : <><Sparkles className="mr-2 h-4 w-4" />Recevoir un lien magique</>}
+              </Button>
               <ResendPanel />
             </form>
           )}
