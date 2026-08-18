@@ -53,6 +53,13 @@ const Auth = () => {
   const [cooldown, setCooldown] = useState(0);
   const [recoveryReady, setRecoveryReady] = useState(false);
   const [recoveryError, setRecoveryError] = useState<string | null>(null);
+  // Envois d'e-mails d'auth (lien magique / réinitialisation) : tentatives + état.
+  const [magicAttempts, setMagicAttempts] = useState<AuthEmailAttempts>(emptyAttempts());
+  const [resetAttempts, setResetAttempts] = useState<AuthEmailAttempts>(emptyAttempts());
+  const [emailActionSending, setEmailActionSending] = useState(false);
+  const [emailActionError, setEmailActionError] = useState<string | null>(null);
+  const [emailActionTarget, setEmailActionTarget] = useState('');
+  const [emailCooldown, setEmailCooldown] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
