@@ -16,7 +16,7 @@ import {
 } from '@/content/tajweed';
 import { TAJWEED_EXTRA } from '@/content/tajweedExtra';
 
-const BASE_URL = 'https://recite-perfectly-bot.lovable.app';
+const BASE_URL = 'https://tajweedtutorai.com';
 
 const TajwidHub = () => {
   const { lang } = useParams();

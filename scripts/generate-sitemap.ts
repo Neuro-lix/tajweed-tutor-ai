@@ -2,7 +2,7 @@
 import { writeFileSync } from "fs";
 import { resolve } from "path";
 
-const BASE_URL = "https://recite-perfectly-bot.lovable.app";
+const BASE_URL = "https://tajweedtutorai.com";
 
 const LOCALES = ["fr", "en", "ar"] as const;
 const DEFAULT_LOCALE = "fr";
