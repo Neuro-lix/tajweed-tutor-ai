@@ -9,10 +9,18 @@ import { useToast } from '@/hooks/use-toast';
 import { Star8Point } from '@/components/decorative/GeometricPattern';
 import { useLanguage } from '@/contexts/LanguageContext';
 import logoImage from '@/logo.png';
-import { Loader2, Mail, Lock, User, Eye, EyeOff, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Eye, EyeOff, CheckCircle2, XCircle, ArrowLeft, Sparkles } from 'lucide-react';
 import { PageSeo } from '@/components/seo/PageSeo';
+import { EmailSentPanel } from '@/components/auth/EmailSentPanel';
+import {
+  cooldownRemaining,
+  emptyAttempts,
+  sendMagicLink,
+  sendPasswordReset,
+  type AuthEmailAttempts,
+} from '@/lib/authEmailActions';
 
-type AuthView = 'login' | 'signup' | 'forgot' | 'updatePassword';
+type AuthView = 'login' | 'signup' | 'forgot' | 'updatePassword' | 'magicSent';
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -45,6 +53,13 @@ const Auth = () => {
   const [cooldown, setCooldown] = useState(0);
   const [recoveryReady, setRecoveryReady] = useState(false);
   const [recoveryError, setRecoveryError] = useState<string | null>(null);
+  // Envois d'e-mails d'auth (lien magique / réinitialisation) : tentatives + état.
+  const [magicAttempts, setMagicAttempts] = useState<AuthEmailAttempts>(emptyAttempts());
+  const [resetAttempts, setResetAttempts] = useState<AuthEmailAttempts>(emptyAttempts());
+  const [emailActionSending, setEmailActionSending] = useState(false);
+  const [emailActionError, setEmailActionError] = useState<string | null>(null);
+  const [emailActionTarget, setEmailActionTarget] = useState('');
+  const [emailCooldown, setEmailCooldown] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -227,6 +242,13 @@ const Auth = () => {
     return () => clearTimeout(id);
   }, [cooldown]);
 
+  // Compte à rebours des envois de liens (magique / réinitialisation).
+  useEffect(() => {
+    if (emailCooldown <= 0) return;
+    const id = setTimeout(() => setEmailCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(id);
+  }, [emailCooldown]);
+
   const handleResendConfirmation = async () => {
     const target = signupEmail || email;
     if (!target || cooldown > 0) return;
@@ -319,30 +341,56 @@ const Auth = () => {
       return;
     }
     setLoading(true);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth?reset=true`,
-      });
-      if (error) {
-        // Diagnostic détaillé : rate limit, redirect URL refusée, SMTP non configuré…
-        console.error('[auth] resetPasswordForEmail failed', {
-          code: (error as { code?: string }).code ?? null,
-          status: (error as { status?: number }).status ?? null,
-          name: error.name,
-          message: error.message,
-          redirectTo: `${window.location.origin}/auth?reset=true`,
-          email,
-          raw: error,
-        });
-        toast({ title: t.error, description: mapAuthError(error), variant: "destructive" });
-      } else {
-        setForgotSent(true);
+    await runResetEmail();
+    setLoading(false);
+  };
+
+  /** Envoi (ou renvoi) du lien de réinitialisation, avec limitation de tentatives. */
+  const runResetEmail = async () => {
+    setEmailActionSending(true);
+    setEmailActionError(null);
+    const result = await sendPasswordReset(supabase.auth, {
+      email,
+      redirectTo: `${window.location.origin}/auth?reset=true`,
+      attempts: resetAttempts,
+    });
+    setResetAttempts(result.attempts);
+    setEmailActionSending(false);
+    if (result.status === 'sent') {
+      setEmailActionTarget(email.trim());
+      setEmailCooldown(result.retryInSeconds);
+      setForgotSent(true);
+    } else if (result.status === 'rate_limited') {
+      setEmailCooldown(result.retryInSeconds);
+      setEmailActionError(result.message);
+      if (!forgotSent) toast({ title: t.error, description: result.message, variant: 'destructive' });
+    } else {
+      setEmailActionError(result.message);
+      if (!forgotSent) toast({ title: t.error, description: result.message, variant: 'destructive' });
+    }
+  };
+
+  /** Envoi (ou renvoi) du lien magique de connexion. */
+  const runMagicLink = async () => {
+    setEmailActionSending(true);
+    setEmailActionError(null);
+    const result = await sendMagicLink(supabase.auth, {
+      email,
+      redirectTo: `${window.location.origin}/`,
+      attempts: magicAttempts,
+    });
+    setMagicAttempts(result.attempts);
+    setEmailActionSending(false);
+    if (result.status === 'sent') {
+      setEmailActionTarget(email.trim());
+      setEmailCooldown(result.retryInSeconds);
+      setView('magicSent');
+    } else {
+      setEmailActionError(result.message);
+      setEmailCooldown(result.retryInSeconds);
+      if (view !== 'magicSent') {
+        toast({ title: t.error, description: result.message, variant: 'destructive' });
       }
-    } catch (err) {
-      console.error('[auth] resetPasswordForEmail threw', err);
-      toast({ title: t.error, description: t.unexpectedError, variant: "destructive" });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -410,12 +458,14 @@ const Auth = () => {
             {view === 'login' ? t.loginTitle
               : view === 'signup' ? t.signupTitle
               : view === 'updatePassword' ? t.updatePasswordButton
+              : view === 'magicSent' ? 'Lien magique envoyé'
               : t.forgotPasswordTitle}
           </CardTitle>
           <CardDescription className="text-base">
             {view === 'login' ? t.accessLearning
               : view === 'signup' ? t.startJourney
               : view === 'updatePassword' ? t.updatePasswordDesc
+              : view === 'magicSent' ? 'Connecte-toi en un clic depuis ta boîte mail.'
               : t.resetPasswordDesc}
           </CardDescription>
         </CardHeader>
@@ -480,18 +530,36 @@ const Auth = () => {
             )
           )}
 
+          {/* MAGIC LINK SENT */}
+          {view === 'magicSent' && (
+            <EmailSentPanel
+              email={emailActionTarget}
+              title="Lien magique envoyé ✅"
+              description="Ouvre le message de connexion envoyé à"
+              attempts={magicAttempts}
+              cooldown={Math.max(emailCooldown, cooldownRemaining(magicAttempts))}
+              sending={emailActionSending}
+              error={emailActionError}
+              onResend={runMagicLink}
+              onBack={() => { setView('login'); setEmailActionError(null); }}
+            />
+          )}
+
           {/* FORGOT PASSWORD */}
           {view === 'forgot' && (
             <div className="space-y-4">
               {forgotSent ? (
-                <div className="text-center space-y-4 py-4">
-                  <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto" />
-                  <p className="font-medium">{t.emailSentTitle}</p>
-                  <p className="text-sm text-muted-foreground">{t.checkMailReset}</p>
-                  <Button variant="outline" className="w-full" onClick={() => { setView('login'); setForgotSent(false); }}>
-                    <ArrowLeft className="w-4 h-4 mr-2" />{t.backToLogin}
-                  </Button>
-                </div>
+                <EmailSentPanel
+                  email={emailActionTarget}
+                  title={t.emailSentTitle}
+                  description="Le lien de réinitialisation a été envoyé à"
+                  attempts={resetAttempts}
+                  cooldown={Math.max(emailCooldown, cooldownRemaining(resetAttempts))}
+                  sending={emailActionSending}
+                  error={emailActionError}
+                  onResend={runResetEmail}
+                  onBack={() => { setView('login'); setForgotSent(false); setEmailActionError(null); }}
+                />
               ) : (
                 <form onSubmit={handleForgotPassword} className="space-y-4">
                   <div className="space-y-2">
@@ -545,6 +613,17 @@ const Auth = () => {
                   {t.noAccountSignup}
                 </button>
               </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={runMagicLink}
+                disabled={emailActionSending || !email}
+              >
+                {emailActionSending
+                  ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Envoi en cours…</>
+                  : <><Sparkles className="mr-2 h-4 w-4" />Recevoir un lien magique</>}
+              </Button>
               <ResendPanel />
             </form>
           )}
