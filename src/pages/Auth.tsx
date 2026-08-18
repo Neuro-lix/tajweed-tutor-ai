@@ -9,10 +9,18 @@ import { useToast } from '@/hooks/use-toast';
 import { Star8Point } from '@/components/decorative/GeometricPattern';
 import { useLanguage } from '@/contexts/LanguageContext';
 import logoImage from '@/logo.png';
-import { Loader2, Mail, Lock, User, Eye, EyeOff, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Eye, EyeOff, CheckCircle2, XCircle, ArrowLeft, Sparkles } from 'lucide-react';
 import { PageSeo } from '@/components/seo/PageSeo';
+import { EmailSentPanel } from '@/components/auth/EmailSentPanel';
+import {
+  cooldownRemaining,
+  emptyAttempts,
+  sendMagicLink,
+  sendPasswordReset,
+  type AuthEmailAttempts,
+} from '@/lib/authEmailActions';
 
-type AuthView = 'login' | 'signup' | 'forgot' | 'updatePassword';
+type AuthView = 'login' | 'signup' | 'forgot' | 'updatePassword' | 'magicSent';
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
