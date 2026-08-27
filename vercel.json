@@ -5,9 +5,7 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "devCommand": "vite",
-  "rewrites": [
-    { "source": "/((?!assets/).*)", "destination": "/index.html" }
-  ],
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "headers": [
     {
       "source": "/sw.js",
