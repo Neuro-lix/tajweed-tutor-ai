@@ -1,0 +1,10 @@
+# Fichiers exclus du déploiement Vercel (frontend uniquement)
+supabase/
+tests/
+playwright.config.ts
+Dockerfile
+nginx.conf
+*.md
+!README.md
+.env.example
+.lovable/
