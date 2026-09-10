@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Users, Clock, TrendingUp, Award, BookOpen, ShoppingBag, Settings, BarChart2, Activity, RefreshCw, Target, AlertTriangle, Download, Radar as RadarIcon, CreditCard, Package, LineChart } from "lucide-react";
+import { ArrowLeft, Users, Clock, TrendingUp, Award, BookOpen, ShoppingBag, Settings, BarChart2, Activity, RefreshCw, Target, AlertTriangle, Download, Radar as RadarIcon, CreditCard, Package, LineChart, Mail } from "lucide-react";
 import { downloadFullSourceZip, getBundledFileCount } from "@/lib/downloadSource";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
