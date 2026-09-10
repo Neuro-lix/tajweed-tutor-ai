@@ -381,6 +381,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
             { key: "boutique", label: "Boutique", icon: ShoppingBag },
             { key: "payments", label: "Suivi des paiements", icon: CreditCard },
             { key: "emails", label: "Suivi des e-mails", icon: Mail },
+            { key: "analyses", label: "Suivi des analyses", icon: Target },
             { key: "credits", label: "💳 Crédits LLM", icon: CreditCard },
           ].map(t => (
             <button

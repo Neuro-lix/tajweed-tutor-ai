@@ -22,6 +22,7 @@ const VerifyCertificate = lazy(() => import("./pages/VerifyCertificate"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Shop = lazy(() => import("./pages/Shop"));
 const ShopSuccess = lazy(() => import("./pages/ShopSuccess"));
+const CryptoCheckout = lazy(() => import("./pages/CryptoCheckout"));
 const Diagnostics = lazy(() => import("./pages/Diagnostics"));
 const Health = lazy(() => import("./pages/Health"));
 const AdminRoute = lazy(() => import("./pages/AdminRoute"));
