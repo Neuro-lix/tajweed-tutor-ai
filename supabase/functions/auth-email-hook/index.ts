@@ -190,6 +190,20 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders })
   }
 
+  // Health endpoint (public, read-only): confirme que la fonction est deployee
+  // et liste les templates enregistres (utilise par la page Diagnostic).
+  if (url.pathname.endsWith('/health')) {
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        senderDomain: SENDER_DOMAIN,
+        siteUrl: SITE_URL,
+        templates: Object.keys(EMAIL_TEMPLATES),
+      }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    )
+  }
+
   // Route to preview handler for /preview path
   if (url.pathname.endsWith('/preview')) {
     return handlePreview(req)
