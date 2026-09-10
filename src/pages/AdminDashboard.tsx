@@ -765,6 +765,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
           <PaymentsTab />
         ) : tab === "emails" ? (
           <EmailsTab />
+        ) : tab === "analyses" ? (
+          <AnalysesTab />
         ) : (
           <LlmCreditsTab />
         )}

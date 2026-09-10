@@ -90,6 +90,7 @@ const App = () => (
                     <Route path="/hifz" element={<ProtectedRoute><HifzPlan /></ProtectedRoute>} />
                     <Route path="/ijaza" element={<Ijaza />} />
                     <Route path="/shop" element={<Shop />} />
+                    <Route path="/shop/crypto" element={<CryptoCheckout />} />
                     <Route path="/shop/success" element={<ProtectedRoute><ShopSuccess /></ProtectedRoute>} />
                     <Route path="/verify/:id" element={<VerifyCertificate />} />
                     <Route path="/diagnostics" element={<Diagnostics />} />
