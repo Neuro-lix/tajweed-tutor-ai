@@ -209,5 +209,51 @@ Deno.serve(async (req) => {
     return handlePreview(req)
   }
 
-  return handler(req)
+  // On journalise chaque demande d'e-mail (envoyé / rejeté) pour la page
+  // « Suivi des e-mails » de l'admin. Le corps est relu puis réinjecté.
+  const raw = await req.text()
+  const forwarded = new Request(req.url, {
+    method: req.method,
+    headers: req.headers,
+    body: raw,
+  })
+
+  let email = 'inconnu'
+  let emailType = 'inconnu'
+  try {
+    const parsed = JSON.parse(raw)
+    email = parsed?.user?.email ?? parsed?.email ?? 'inconnu'
+    emailType = parsed?.email_data?.email_action_type ?? 'inconnu'
+  } catch {
+    // corps non JSON : on journalise quand même le résultat
+  }
+
+  const response = await handler(forwarded)
+
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    if (supabaseUrl && serviceKey) {
+      const ok = response.status < 400
+      await fetch(`${supabaseUrl}/rest/v1/email_events`, {
+        method: 'POST',
+        headers: {
+          apikey: serviceKey,
+          Authorization: `Bearer ${serviceKey}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify({
+          email,
+          email_type: emailType,
+          status: ok ? 'envoyé' : 'rejeté',
+          error_message: ok ? null : `HTTP ${response.status}`,
+        }),
+      })
+    }
+  } catch (logError) {
+    console.error('email_events logging failed', logError)
+  }
+
+  return response
 })
