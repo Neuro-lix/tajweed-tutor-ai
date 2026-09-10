@@ -1,16 +1,56 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
-export default defineConfig(({ mode }) => ({
+/**
+ * Validation des variables d'environnement au build : le build échoue si une
+ * variable Supabase est absente ou invalide (évite un site publié cassé).
+ */
+function validateSupabaseEnv(mode: string, command: string): Plugin {
+  return {
+    name: "validate-supabase-env",
+    apply: "build",
+    buildStart() {
+      const env = { ...loadEnv(mode, process.cwd(), ""), ...process.env };
+      const errors: string[] = [];
+
+      const url = env.VITE_SUPABASE_URL;
+      if (!url) errors.push("VITE_SUPABASE_URL est manquante");
+      else if (!/^https:\/\/[a-z0-9-]+\.supabase\.(co|in)(\/)?$/i.test(url.trim()))
+        errors.push(`VITE_SUPABASE_URL est invalide: "${url}"`);
+
+      const projectId = env.VITE_SUPABASE_PROJECT_ID;
+      if (!projectId) errors.push("VITE_SUPABASE_PROJECT_ID est manquante");
+      else if (!/^[a-z0-9]{20}$/i.test(projectId.trim()))
+        errors.push(`VITE_SUPABASE_PROJECT_ID est invalide: "${projectId}"`);
+
+      const key = env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      if (!key) errors.push("VITE_SUPABASE_PUBLISHABLE_KEY est manquante");
+      else if (!/^(eyJ[\w-]+\.[\w-]+\.[\w-]+|sb_publishable_[\w-]+)$/.test(key.trim()))
+        errors.push("VITE_SUPABASE_PUBLISHABLE_KEY est invalide (clé anon/publishable attendue)");
+
+      if (url && projectId && !url.includes(projectId))
+        errors.push("VITE_SUPABASE_URL et VITE_SUPABASE_PROJECT_ID ne correspondent pas");
+
+      if (errors.length > 0) {
+        this.error(
+          `Configuration Supabase invalide (${command}):\n - ` + errors.join("\n - "),
+        );
+      }
+    },
+  };
+}
+
+export default defineConfig(({ mode, command }) => ({
   server: {
     host: "::",
     port: 8080,
   },
   plugins: [
     react(),
+    validateSupabaseEnv(mode, command),
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
