@@ -116,6 +116,42 @@ export type Database = {
         }
         Relationships: []
       }
+      crypto_orders: {
+        Row: {
+          created_at: string
+          id: string
+          items: Json
+          paid_at: string | null
+          payment_id: string | null
+          status: string
+          total_amount: number
+          total_credits: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          items: Json
+          paid_at?: string | null
+          payment_id?: string | null
+          status?: string
+          total_amount: number
+          total_credits?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          items?: Json
+          paid_at?: string | null
+          payment_id?: string | null
+          status?: string
+          total_amount?: number
+          total_credits?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       email_events: {
         Row: {
           created_at: string
