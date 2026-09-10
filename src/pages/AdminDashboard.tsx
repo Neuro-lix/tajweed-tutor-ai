@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Users, Clock, TrendingUp, Award, BookOpen, ShoppingBag, Settings, BarChart2, Activity, RefreshCw, Target, AlertTriangle, Download, Radar as RadarIcon, CreditCard, Package, LineChart } from "lucide-react";
+import { ArrowLeft, Users, Clock, TrendingUp, Award, BookOpen, ShoppingBag, Settings, BarChart2, Activity, RefreshCw, Target, AlertTriangle, Download, Radar as RadarIcon, CreditCard, Package, LineChart, Mail } from "lucide-react";
 import { downloadFullSourceZip, getBundledFileCount } from "@/lib/downloadSource";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,8 @@ import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Responsi
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { LlmCreditsTab } from "@/components/admin/LlmCreditsTab";
 import { AdminPasswordGate } from "@/components/admin/AdminPasswordGate";
+import { PaymentsTab } from "@/components/admin/PaymentsTab";
+import { EmailsTab } from "@/components/admin/EmailsTab";
 
 interface TajweedErrorBucket {
   category: string;
@@ -97,7 +99,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
   const { isAdmin, loading: roleLoading } = useIsAdmin();
   const [stats, setStats] = useState<DashStats | null>(null);
   const [loading, setLoading] = useState(true);
-  type AdminTab = "overview" | "users" | "tajweed" | "business" | "boutique" | "credits";
+  type AdminTab = "overview" | "users" | "tajweed" | "business" | "boutique" | "payments" | "emails" | "credits";
   const [tab, setTab] = useState<AdminTab>("overview");
   const [refreshing, setRefreshing] = useState(false);
 
@@ -377,6 +379,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
             { key: "tajweed", label: "Tajwīd par sourate", icon: Target },
             { key: "business", label: "Business", icon: LineChart },
             { key: "boutique", label: "Boutique", icon: ShoppingBag },
+            { key: "payments", label: "Suivi des paiements", icon: CreditCard },
+            { key: "emails", label: "Suivi des e-mails", icon: Mail },
             { key: "credits", label: "💳 Crédits LLM", icon: CreditCard },
           ].map(t => (
             <button
@@ -755,6 +759,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
               </CardContent>
             </Card>
           </div>
+        ) : tab === "payments" ? (
+          <PaymentsTab />
+        ) : tab === "emails" ? (
+          <EmailsTab />
         ) : (
           <LlmCreditsTab />
         )}
