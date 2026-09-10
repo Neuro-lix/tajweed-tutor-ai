@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RefreshCw, Trash2, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { SupabaseHealthCard } from '@/components/diagnostics/SupabaseHealthCard';
 
 const SW_VERSION_KEY = 'app_sw_version';
 const BUILD_KEY = 'app_build_marker';
@@ -107,6 +108,7 @@ export default function Diagnostics() {
     <div className="min-h-screen bg-background p-6">
       <div className="container mx-auto max-w-2xl space-y-4">
         <h1 className="text-2xl font-bold">Diagnostics</h1>
+        <SupabaseHealthCard />
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Service Worker / Cache</CardTitle>
