@@ -257,6 +257,9 @@ const Shop: React.FC = () => {
         <div className="container mx-auto max-w-3xl">
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-foreground mb-4">✨ {t.shopTitle}</h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">{t.shopSubtitle}</p>
+          <Button size="lg" className="rounded-2xl mt-6" onClick={() => navigate('/shop/crypto')}>
+            <ShoppingBag className="h-4 w-4 mr-2" /> Panier & paiement (euros ou crypto)
+          </Button>
         </div>
       </section>
 

@@ -22,6 +22,7 @@ const VerifyCertificate = lazy(() => import("./pages/VerifyCertificate"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Shop = lazy(() => import("./pages/Shop"));
 const ShopSuccess = lazy(() => import("./pages/ShopSuccess"));
+const CryptoCheckout = lazy(() => import("./pages/CryptoCheckout"));
 const Diagnostics = lazy(() => import("./pages/Diagnostics"));
 const Health = lazy(() => import("./pages/Health"));
 const AdminRoute = lazy(() => import("./pages/AdminRoute"));
@@ -89,6 +90,7 @@ const App = () => (
                     <Route path="/hifz" element={<ProtectedRoute><HifzPlan /></ProtectedRoute>} />
                     <Route path="/ijaza" element={<Ijaza />} />
                     <Route path="/shop" element={<Shop />} />
+                    <Route path="/shop/crypto" element={<CryptoCheckout />} />
                     <Route path="/shop/success" element={<ProtectedRoute><ShopSuccess /></ProtectedRoute>} />
                     <Route path="/verify/:id" element={<VerifyCertificate />} />
                     <Route path="/diagnostics" element={<Diagnostics />} />

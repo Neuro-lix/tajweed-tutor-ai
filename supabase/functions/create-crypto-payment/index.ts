@@ -61,14 +61,42 @@ serve(async (req) => {
     const userId = user.id;
 
     const body = await req.json().catch(() => ({}));
-    // ── Prix & libellé résolus depuis le catalogue serveur uniquement.
-    const item = getCatalogItem(body?.productId);
-    if (!item) {
-      return new Response(JSON.stringify({ error: "Unknown product" }), {
+
+    // ── Panier : soit un `productId` unique, soit une liste `items`.
+    // Les prix, libellés et crédits proviennent toujours du catalogue serveur.
+    type Line = { productId: string; quantity: number };
+    const rawLines: Line[] = Array.isArray(body?.items) && body.items.length
+      ? body.items.map((l: { productId?: unknown; quantity?: unknown }) => ({
+        productId: String(l?.productId ?? ""),
+        quantity: Math.min(Math.max(Number(l?.quantity ?? 1) | 0, 1), 20),
+      }))
+      : [{ productId: String(body?.productId ?? ""), quantity: 1 }];
+
+    if (rawLines.length === 0 || rawLines.length > 20) {
+      return new Response(JSON.stringify({ error: "Invalid cart" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const resolved: { id: string; name: string; price: number; credits: number; quantity: number }[] = [];
+    for (const line of rawLines) {
+      const catalogItem = getCatalogItem(line.productId);
+      if (!catalogItem) {
+        return new Response(JSON.stringify({ error: "Unknown product" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      resolved.push({ ...catalogItem, quantity: line.quantity });
+    }
+
+    const totalAmount = Math.round(
+      resolved.reduce((s, i) => s + i.price * i.quantity, 0) * 100,
+    ) / 100;
+    const totalCredits = resolved.reduce((s, i) => s + i.credits * i.quantity, 0);
+    const isCart = resolved.length > 1 || resolved[0].quantity > 1;
+    const item = resolved[0];
 
     const NOWPAYMENTS_API_KEY = Deno.env.get("NOWPAYMENTS_API_KEY");
     if (!NOWPAYMENTS_API_KEY) throw new Error("NOWPAYMENTS_API_KEY not configured");
@@ -96,6 +124,27 @@ serve(async (req) => {
     // Use origin from request or fallback
     const origin = req.headers.get("origin") || "https://tajweedtutorai.com";
 
+    // ── Panier multi-lignes : on enregistre la commande puis on référence
+    // son identifiant dans l'order_id (`order:<uuid>`).
+    let reference = item.id;
+    let description = item.name;
+    if (isCart) {
+      const { data: order, error: orderErr } = await sbAdmin
+        .from("crypto_orders")
+        .insert({
+          user_id: userId,
+          items: resolved,
+          total_amount: totalAmount,
+          total_credits: totalCredits,
+          status: "pending",
+        })
+        .select("id")
+        .single();
+      if (orderErr || !order) throw new Error("Could not create order");
+      reference = `order:${order.id}`;
+      description = `Panier Nassihah (${resolved.length} article(s), ${totalCredits} crédits)`;
+    }
+
     const response = await fetch("https://api.nowpayments.io/v1/invoice", {
       method: "POST",
       headers: {
@@ -103,15 +152,15 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        price_amount: item.price,
+        price_amount: totalAmount,
         price_currency: "eur",
         ipn_callback_url: `${SUPABASE_URL}/functions/v1/crypto-webhook`,
         success_url: `${origin}/shop/success?method=crypto`,
-        cancel_url: `${origin}/shop`,
-        order_description: item.name,
+        cancel_url: `${origin}/shop/crypto`,
+        order_description: description,
         // Use double underscore to preserve UUID integrity
-        // Format: <userId>__<productId>__<timestamp>
-        order_id: `${userId}__${item.id}__${Date.now()}`,
+        // Format: <userId>__<productId|order:uuid>__<timestamp>
+        order_id: `${userId}__${reference}__${Date.now()}`,
       }),
     });
 

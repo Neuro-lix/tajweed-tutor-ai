@@ -105,6 +105,34 @@ Deno.serve(async (req) => {
       result.webhookEvents = events ?? [];
     }
 
+    if (scope === 'all' || scope === 'analyses') {
+      const { data: usage } = await admin
+        .from('llm_usage')
+        .select('id, user_id, function_name, model, operation, status, credits_charged, total_tokens, created_at')
+        .order('created_at', { ascending: false })
+        .limit(500);
+
+      const usageUserIds = [...new Set((usage ?? []).map((u) => u.user_id))];
+      const { data: usageProfiles } = usageUserIds.length
+        ? await admin.from('profiles').select('user_id, full_name').in('user_id', usageUserIds)
+        : { data: [] as { user_id: string; full_name: string | null }[] };
+      const usageNameById = new Map((usageProfiles ?? []).map((p) => [p.user_id, p.full_name]));
+
+      result.analyses = (usage ?? []).map((u) => ({
+        id: u.id,
+        userId: u.user_id,
+        userName: usageNameById.get(u.user_id) ?? null,
+        functionName: u.function_name,
+        model: u.model,
+        operation: u.operation,
+        status: u.status,
+        credits: Number(u.credits_charged),
+        totalTokens: u.total_tokens,
+        createdAt: u.created_at,
+        link: `/admin?analysis=${u.id}`,
+      }));
+    }
+
     if (scope === 'all' || scope === 'emails') {
       const { data: emails } = await admin
         .from('email_events')

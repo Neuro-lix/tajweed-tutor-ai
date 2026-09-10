@@ -61,9 +61,37 @@ serve(async (req) => {
         return new Response("Invalid order", { status: 400 });
       }
 
-      // ── Le produit (prix + crédits) vient du catalogue serveur, jamais de
-      // la description libre renvoyée par le fournisseur de paiement.
-      const item = getCatalogItem(productId);
+      const admin = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      );
+
+      // ── Le produit (prix + crédits) vient du catalogue serveur ou de la
+      // commande enregistrée, jamais de la description libre du fournisseur.
+      let item: { id: string; name: string; price: number; credits: number } | null = null;
+      let orderRowId: string | null = null;
+
+      if (productId.startsWith("order:")) {
+        orderRowId = productId.slice("order:".length);
+        const { data: order } = await admin
+          .from("crypto_orders")
+          .select("id, user_id, total_amount, total_credits, status")
+          .eq("id", orderRowId)
+          .maybeSingle();
+        if (!order || order.user_id !== userId) {
+          console.error("[crypto-webhook] Unknown order:", orderId);
+          return new Response("OK", { status: 200 });
+        }
+        item = {
+          id: `order:${order.id}`,
+          name: "Panier Nassihah",
+          price: Number(order.total_amount),
+          credits: Number(order.total_credits),
+        };
+      } else {
+        item = getCatalogItem(productId);
+      }
+
       if (!item) {
         console.error("[crypto-webhook] Unknown product in order_id:", orderId);
         return new Response("OK", { status: 200 });
@@ -83,21 +111,16 @@ serve(async (req) => {
       }
 
       const creditsToAdd = item.credits;
+      const paymentId = String(payload.payment_id ?? payload.id ?? "");
 
       if (creditsToAdd > 0) {
-        const supabase = createClient(
-          Deno.env.get("SUPABASE_URL")!,
-          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-        );
-
-        // Idempotence: refuse to credit the same payment twice
-        const paymentId = String(payload.payment_id ?? payload.id ?? "");
         if (!paymentId) {
           console.error("[crypto-webhook] Missing payment id, skipping credit");
           return new Response("Invalid payload", { status: 400 });
         }
 
-        const { error: dedupeError } = await supabase
+        // Idempotence: refuse to credit the same payment twice
+        const { error: dedupeError } = await admin
           .from("processed_payment_events")
           .insert({ provider: "nowpayments", external_id: paymentId });
 
@@ -106,7 +129,7 @@ serve(async (req) => {
           return new Response("OK", { status: 200 });
         }
 
-        const { error } = await supabase.rpc("add_credits", {
+        const { error } = await admin.rpc("add_credits", {
           p_user_id: userId,
           p_amount: creditsToAdd,
           p_description: `Achat crypto: ${item.name}`,
@@ -117,6 +140,13 @@ serve(async (req) => {
         } else {
           console.log(`[crypto-webhook] Added ${creditsToAdd} credits to ${userId}`);
         }
+      }
+
+      if (orderRowId) {
+        await admin
+          .from("crypto_orders")
+          .update({ status: "paid", payment_id: paymentId || null, paid_at: new Date().toISOString() })
+          .eq("id", orderRowId);
       }
     }
 
