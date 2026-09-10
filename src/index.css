@@ -204,3 +204,26 @@
 [id*="lovable"], [class*="lovable-badge"], [data-lovable] {
   display: none !important;
 }
+
+/* Mode impression : n'imprimer que la zone marquée .print-area */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .print-area .text-muted-foreground {
+    color: #444 !important;
+  }
+}
