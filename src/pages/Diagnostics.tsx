@@ -204,6 +204,9 @@ export default function Diagnostics() {
               <Button onClick={exportDiagnostics} variant="outline" size="sm" disabled={exporting} data-testid="export-diagnostics">
                 <Download className="w-4 h-4 mr-1" /> Exporter JSON
               </Button>
+              <Button onClick={exportDiagnosticsPdf} variant="outline" size="sm" disabled={pdfBusy} data-testid="export-diagnostics-pdf">
+                <Download className="w-4 h-4 mr-1" /> {pdfBusy ? 'Génération…' : 'Télécharger le PDF'}
+              </Button>
               <Button onClick={hardReload} variant="destructive" size="sm" disabled={busy}>
                 <Trash2 className="w-4 h-4 mr-1" /> Hard reload
               </Button>
