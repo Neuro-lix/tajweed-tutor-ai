@@ -124,6 +124,27 @@ serve(async (req) => {
     // Use origin from request or fallback
     const origin = req.headers.get("origin") || "https://tajweedtutorai.com";
 
+    // ── Panier multi-lignes : on enregistre la commande puis on référence
+    // son identifiant dans l'order_id (`order:<uuid>`).
+    let reference = item.id;
+    let description = item.name;
+    if (isCart) {
+      const { data: order, error: orderErr } = await sbAdmin
+        .from("crypto_orders")
+        .insert({
+          user_id: userId,
+          items: resolved,
+          total_amount: totalAmount,
+          total_credits: totalCredits,
+          status: "pending",
+        })
+        .select("id")
+        .single();
+      if (orderErr || !order) throw new Error("Could not create order");
+      reference = `order:${order.id}`;
+      description = `Panier Nassihah (${resolved.length} article(s), ${totalCredits} crédits)`;
+    }
+
     const response = await fetch("https://api.nowpayments.io/v1/invoice", {
       method: "POST",
       headers: {
@@ -131,15 +152,15 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        price_amount: item.price,
+        price_amount: totalAmount,
         price_currency: "eur",
         ipn_callback_url: `${SUPABASE_URL}/functions/v1/crypto-webhook`,
         success_url: `${origin}/shop/success?method=crypto`,
-        cancel_url: `${origin}/shop`,
-        order_description: item.name,
+        cancel_url: `${origin}/shop/crypto`,
+        order_description: description,
         // Use double underscore to preserve UUID integrity
-        // Format: <userId>__<productId>__<timestamp>
-        order_id: `${userId}__${item.id}__${Date.now()}`,
+        // Format: <userId>__<productId|order:uuid>__<timestamp>
+        order_id: `${userId}__${reference}__${Date.now()}`,
       }),
     });
 
