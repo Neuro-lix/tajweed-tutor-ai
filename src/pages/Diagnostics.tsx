@@ -15,6 +15,7 @@ export default function Diagnostics() {
   const [registrations, setRegistrations] = useState<number>(0);
   const [busy, setBusy] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [pdfBusy, setPdfBusy] = useState(false);
 
   const refresh = async () => {
     setSwVersion(localStorage.getItem(SW_VERSION_KEY) || 'unknown');
@@ -52,6 +53,76 @@ export default function Diagnostics() {
       localStorage.removeItem(BUILD_KEY);
     } finally {
       window.location.replace('/?sw-cleanup=' + Date.now());
+    }
+  };
+
+  /** PDF récapitulatif du diagnostic, généré et téléchargé depuis l'app. */
+  const exportDiagnosticsPdf = async () => {
+    setPdfBusy(true);
+    try {
+      const { default: jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+      let y = 20;
+      const line = (text: string, size = 10, bold = false) => {
+        doc.setFontSize(size);
+        doc.setFont('helvetica', bold ? 'bold' : 'normal');
+        for (const chunk of doc.splitTextToSize(text, 170) as string[]) {
+          if (y > 275) {
+            doc.addPage();
+            y = 20;
+          }
+          doc.text(chunk, 20, y);
+          y += size * 0.55 + 3;
+        }
+      };
+
+      line('Diagnostic Nassihah', 18, true);
+      line(new Date().toLocaleString('fr-FR'), 10);
+      y += 4;
+
+      line('Environnement', 13, true);
+      line(`URL base de donnees : ${import.meta.env.VITE_SUPABASE_URL ? 'configuree' : 'manquante'}`);
+      line(`Cle publique : ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ? 'configuree' : 'manquante'}`);
+      line(`Identifiant projet : ${import.meta.env.VITE_SUPABASE_PROJECT_ID ? 'configure' : 'manquant'}`);
+      y += 4;
+
+      line('Application', 13, true);
+      line(`Version du service worker : ${localStorage.getItem(SW_VERSION_KEY) || 'inconnue'}`);
+      line(`Marqueur de build : ${localStorage.getItem(BUILD_KEY) || 'inconnu'}`);
+      line(`Enregistrements service worker : ${registrations}`);
+      line(`Caches (${cacheNames.length}) : ${cacheNames.join(', ') || 'aucun'}`);
+      y += 4;
+
+      line('Connexion et e-mails', 13, true);
+      try {
+        const { error: dbError } = await supabase.from('sheikhs').select('id').limit(1);
+        line(`Acces base de donnees : ${dbError ? 'echec - ' + dbError.message : 'OK'}`);
+      } catch {
+        line('Acces base de donnees : echec');
+      }
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        line(`Service de connexion : OK (${session ? 'session active' : 'aucune session'})`);
+      } catch {
+        line('Service de connexion : echec');
+      }
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/auth-email-hook/health`,
+        );
+        const health = await res.json();
+        const templates: string[] = health?.templates ?? [];
+        line(`Domaine expediteur : ${health?.senderDomain ?? 'inconnu'}`);
+        line(`Modeles e-mail deployes : ${templates.join(', ') || 'aucun'}`);
+        line(`Lien magique : ${templates.includes('magiclink') ? 'configure' : 'absent'}`);
+        line(`Mot de passe oublie : ${templates.includes('recovery') ? 'configure' : 'absent'}`);
+      } catch {
+        line('Service e-mail : injoignable');
+      }
+
+      doc.save(`diagnostic-${new Date().toISOString().split('T')[0]}.pdf`);
+    } finally {
+      setPdfBusy(false);
     }
   };
 
