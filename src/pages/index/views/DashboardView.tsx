@@ -14,6 +14,7 @@ import { CertificateModal } from '@/components/certificates/CertificateModal';
 import { ProgressInsightsCard } from '@/components/dashboard/ProgressInsightsCard';
 import { PriorityFixesCard } from '@/components/dashboard/PriorityFixesCard';
 import { CreditUsageCard } from '@/components/dashboard/CreditUsageCard';
+import { CorrectionsChecklistCard } from '@/components/dashboard/CorrectionsChecklistCard';
 import { CsvExportDialog, defaultCsvFilters, type CsvFilters } from '@/components/dashboard/CsvExportDialog';
 import { generateCorrectionsSummaryPDF } from '@/utils/pdfGenerator';
 import { downloadCorrectionsCsv } from '@/lib/correctionsCsv';
@@ -163,6 +164,12 @@ const DashboardViewInner = ({ state: s }: DashboardViewProps) => {
             onOpenAllErrors={() => s.setCurrentView('tajweed-errors')}
             onDownloadPdf={handleDownloadRecapPdf}
             onDownloadCsv={() => setCsvOpen(true)}
+          />
+          <CorrectionsChecklistCard
+            corrections={s.corrections}
+            userName={s.profile?.fullName ?? undefined}
+            qiraatLabel={s.selectedQiraat ? QIRAAT_NAMES[s.selectedQiraat] : undefined}
+            onDownloadPdf={handleDownloadRecapPdf}
           />
           <CreditUsageCard />
           <StreakPanel />
