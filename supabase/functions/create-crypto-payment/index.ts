@@ -61,14 +61,42 @@ serve(async (req) => {
     const userId = user.id;
 
     const body = await req.json().catch(() => ({}));
-    // ── Prix & libellé résolus depuis le catalogue serveur uniquement.
-    const item = getCatalogItem(body?.productId);
-    if (!item) {
-      return new Response(JSON.stringify({ error: "Unknown product" }), {
+
+    // ── Panier : soit un `productId` unique, soit une liste `items`.
+    // Les prix, libellés et crédits proviennent toujours du catalogue serveur.
+    type Line = { productId: string; quantity: number };
+    const rawLines: Line[] = Array.isArray(body?.items) && body.items.length
+      ? body.items.map((l: { productId?: unknown; quantity?: unknown }) => ({
+        productId: String(l?.productId ?? ""),
+        quantity: Math.min(Math.max(Number(l?.quantity ?? 1) | 0, 1), 20),
+      }))
+      : [{ productId: String(body?.productId ?? ""), quantity: 1 }];
+
+    if (rawLines.length === 0 || rawLines.length > 20) {
+      return new Response(JSON.stringify({ error: "Invalid cart" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const resolved: { id: string; name: string; price: number; credits: number; quantity: number }[] = [];
+    for (const line of rawLines) {
+      const catalogItem = getCatalogItem(line.productId);
+      if (!catalogItem) {
+        return new Response(JSON.stringify({ error: "Unknown product" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      resolved.push({ ...catalogItem, quantity: line.quantity });
+    }
+
+    const totalAmount = Math.round(
+      resolved.reduce((s, i) => s + i.price * i.quantity, 0) * 100,
+    ) / 100;
+    const totalCredits = resolved.reduce((s, i) => s + i.credits * i.quantity, 0);
+    const isCart = resolved.length > 1 || resolved[0].quantity > 1;
+    const item = resolved[0];
 
     const NOWPAYMENTS_API_KEY = Deno.env.get("NOWPAYMENTS_API_KEY");
     if (!NOWPAYMENTS_API_KEY) throw new Error("NOWPAYMENTS_API_KEY not configured");
