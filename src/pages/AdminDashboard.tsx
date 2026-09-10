@@ -11,6 +11,8 @@ import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Responsi
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { LlmCreditsTab } from "@/components/admin/LlmCreditsTab";
 import { AdminPasswordGate } from "@/components/admin/AdminPasswordGate";
+import { PaymentsTab } from "@/components/admin/PaymentsTab";
+import { EmailsTab } from "@/components/admin/EmailsTab";
 
 interface TajweedErrorBucket {
   category: string;
@@ -97,7 +99,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
   const { isAdmin, loading: roleLoading } = useIsAdmin();
   const [stats, setStats] = useState<DashStats | null>(null);
   const [loading, setLoading] = useState(true);
-  type AdminTab = "overview" | "users" | "tajweed" | "business" | "boutique" | "credits";
+  type AdminTab = "overview" | "users" | "tajweed" | "business" | "boutique" | "payments" | "emails" | "credits";
   const [tab, setTab] = useState<AdminTab>("overview");
   const [refreshing, setRefreshing] = useState(false);
 
@@ -377,6 +379,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
             { key: "tajweed", label: "Tajwīd par sourate", icon: Target },
             { key: "business", label: "Business", icon: LineChart },
             { key: "boutique", label: "Boutique", icon: ShoppingBag },
+            { key: "payments", label: "Suivi des paiements", icon: CreditCard },
+            { key: "emails", label: "Suivi des e-mails", icon: Mail },
             { key: "credits", label: "💳 Crédits LLM", icon: CreditCard },
           ].map(t => (
             <button
@@ -755,6 +759,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
               </CardContent>
             </Card>
           </div>
+        ) : tab === "payments" ? (
+          <PaymentsTab />
+        ) : tab === "emails" ? (
+          <EmailsTab />
         ) : (
           <LlmCreditsTab />
         )}
