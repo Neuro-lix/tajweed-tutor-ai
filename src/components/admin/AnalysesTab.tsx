@@ -39,6 +39,7 @@ export const AnalysesTab = () => {
   const [status, setStatus] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<AnalysisRow | null>(null);
 
   const load = async () => {
     setLoading(true);
