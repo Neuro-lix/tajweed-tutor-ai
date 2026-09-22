@@ -17,6 +17,8 @@ project_id = "zymyzuydidefjmiympsl"
     verify_jwt = false
   [functions.paddle-webhook]
     verify_jwt = false
+  [functions.tajweed-asr-analyze]
+    verify_jwt = false
   [functions.text-to-speech]
     verify_jwt = false
   [functions.verify-certificate]
