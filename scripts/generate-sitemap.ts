@@ -4,7 +4,7 @@ import { resolve } from "path";
 
 const BASE_URL = "https://tajweedtutorai.com";
 
-const LOCALES = ["fr", "en", "ar"] as const;
+const LOCALES = ["fr", "en", "ar", "id", "ms"] as const;
 const DEFAULT_LOCALE = "fr";
 const localizedPath = (locale: string, path: string) =>
   locale === DEFAULT_LOCALE ? path : `/${locale}${path}`;

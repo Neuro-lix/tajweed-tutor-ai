@@ -14,25 +14,8 @@ const PADDLE_PRODUCTS = {
   unlimited: "pri_PLACEHOLDER_UNLIMITED", // Remplacer par le vrai price ID Paddle
 };
 
-declare global {
-  interface Window {
-    Paddle?: {
-      Environment: { set: (env: string) => void };
-      Initialize: (opts: {
-        token: string;
-        pwCustomer?: { id?: string; email?: string };
-      }) => void;
-      Checkout: {
-        open: (opts: {
-          items: { priceId: string; quantity: number }[];
-          successUrl?: string;
-          customer?: { email?: string };
-          customData?: Record<string, string>;
-        }) => void;
-      };
-    };
-  }
-}
+// Le typage global de `window.Paddle` est déclaré une seule fois,
+// dans `@/hooks/usePaddleCheckout`.
 
 const isPlaceholder = (priceId: string) => priceId.startsWith("pri_PLACEHOLDER");
 const HOURLY_UNAVAILABLE = isPlaceholder(PADDLE_PRODUCTS.hourly);

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { RefreshCw, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -40,6 +41,7 @@ export const AnalysesTab = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<AnalysisRow | null>(null);
+  const [search, setSearch] = useState('');
 
   const load = async () => {
     setLoading(true);
@@ -54,7 +56,14 @@ export const AnalysesTab = () => {
     load();
   }, []);
 
-  const filtered = rows.filter((r) => status === 'all' || r.status === status);
+  const q = search.trim().toLowerCase();
+  const filtered = rows.filter(
+    (r) =>
+      (status === 'all' || r.status === status) &&
+      (!q ||
+        (r.userName ?? '').toLowerCase().includes(q) ||
+        r.userId.toLowerCase().includes(q)),
+  );
   const totalCredits = filtered.reduce((s, r) => s + r.credits, 0);
 
   const exportCsv = () => {
@@ -86,6 +95,12 @@ export const AnalysesTab = () => {
             {s === 'all' ? 'Toutes' : s === 'success' ? 'Réussies' : 'En erreur'}
           </Button>
         ))}
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Filtrer par utilisateur (nom ou identifiant)"
+          className="h-9 w-full sm:w-72"
+        />
         <div className="ml-auto flex gap-2">
           <Button size="sm" variant="outline" onClick={load} disabled={loading}>
             <RefreshCw className={'w-4 h-4 mr-2 ' + (loading ? 'animate-spin' : '')} />

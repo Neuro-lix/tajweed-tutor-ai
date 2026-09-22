@@ -1,7 +1,7 @@
 // Localized Tajwīd content (fr = default locale, en, ar).
 // Used by the /tajwid hub and the three topic pages.
 
-export const LOCALES = ['fr', 'en', 'ar'] as const;
+export const LOCALES = ['fr', 'en', 'ar', 'id', 'ms'] as const;
 export type Locale = (typeof LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = 'fr';
@@ -10,6 +10,8 @@ export const LOCALE_LABELS: Record<Locale, string> = {
   fr: 'Français',
   en: 'English',
   ar: 'العربية',
+  id: 'Bahasa Indonesia',
+  ms: 'Bahasa Melayu',
 };
 
 /** hreflang value for each locale. */
@@ -17,6 +19,8 @@ export const LOCALE_HREFLANG: Record<Locale, string> = {
   fr: 'fr',
   en: 'en',
   ar: 'ar',
+  id: 'id',
+  ms: 'ms',
 };
 
 /** The three core lessons, shown as "pillars" on the hub. */
@@ -455,6 +459,8 @@ const ar: Dict = {
 };
 
 import { TAJWEED_EXTRA } from './tajweedExtra';
+import { idDict } from './tajweed.id';
+import { msDict } from './tajweed.ms';
 
 export interface FullDict {
   hub: HubContent;
@@ -470,6 +476,8 @@ export const TAJWEED_CONTENT: Record<Locale, FullDict> = {
   fr: merge(fr, 'fr'),
   en: merge(en, 'en'),
   ar: merge(ar, 'ar'),
+  id: merge(idDict, 'id'),
+  ms: merge(msDict, 'ms'),
 };
 
 export const isLocale = (value: string | undefined): value is Locale =>

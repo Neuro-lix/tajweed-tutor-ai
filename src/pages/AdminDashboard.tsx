@@ -14,6 +14,7 @@ import { AdminPasswordGate } from "@/components/admin/AdminPasswordGate";
 import { PaymentsTab } from "@/components/admin/PaymentsTab";
 import { EmailsTab } from "@/components/admin/EmailsTab";
 import { AnalysesTab } from "@/components/admin/AnalysesTab";
+import { UsersTab } from "@/components/admin/UsersTab";
 
 interface TajweedErrorBucket {
   category: string;
@@ -100,7 +101,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
   const { isAdmin, loading: roleLoading } = useIsAdmin();
   const [stats, setStats] = useState<DashStats | null>(null);
   const [loading, setLoading] = useState(true);
-  type AdminTab = "overview" | "users" | "tajweed" | "business" | "boutique" | "payments" | "emails" | "analyses" | "credits";
+  type AdminTab = "overview" | "users" | "accounts" | "tajweed" | "business" | "boutique" | "payments" | "emails" | "analyses" | "credits";
   const [tab, setTab] = useState<AdminTab>("overview");
   const [refreshing, setRefreshing] = useState(false);
 
@@ -377,6 +378,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
           {[
             { key: "overview", label: "Vue d'ensemble", icon: BarChart2 },
             { key: "users", label: "Utilisateurs", icon: Users },
+            { key: "accounts", label: "Gestion des comptes", icon: Users },
             { key: "tajweed", label: "Tajwīd par sourate", icon: Target },
             { key: "business", label: "Business", icon: LineChart },
             { key: "boutique", label: "Boutique", icon: ShoppingBag },
@@ -765,6 +767,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
           <PaymentsTab />
         ) : tab === "emails" ? (
           <EmailsTab />
+        ) : tab === "accounts" ? (
+          <UsersTab />
         ) : tab === "analyses" ? (
           <AnalysesTab />
         ) : (

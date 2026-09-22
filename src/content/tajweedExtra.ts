@@ -400,4 +400,7 @@ const ar: ExtraDict = {
   },
 };
 
-export const TAJWEED_EXTRA: Record<Locale, ExtraDict> = { fr, en, ar };
+import { idExtra } from './tajweed.id';
+import { msExtra } from './tajweed.ms';
+
+export const TAJWEED_EXTRA: Record<Locale, ExtraDict> = { fr, en, ar, id: idExtra, ms: msExtra };
