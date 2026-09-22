@@ -136,12 +136,9 @@ export const AnalysesTab = () => {
                     </td>
                     <td className="py-2 pr-3">{r.credits.toFixed(2)}</td>
                     <td className="py-2">
-                      <a
-                        href={r.link}
-                        className="inline-flex items-center gap-1 text-primary hover:underline text-xs"
-                      >
-                        Ouvrir <ExternalLink className="w-3 h-3" />
-                      </a>
+                      <Button size="sm" variant="ghost" className="text-xs" onClick={() => setSelected(r)}>
+                        <Eye className="w-3 h-3 mr-1" /> Détails
+                      </Button>
                     </td>
                   </tr>
                 ))}
