@@ -1,4 +1,8 @@
 import { lazy, Suspense, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Award } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { AppHeader } from '@/components/header/AppHeader';
 import { MultilingualChat } from '@/components/chat/MultilingualChat';
@@ -171,6 +175,20 @@ const DashboardViewInner = ({ state: s }: DashboardViewProps) => {
             qiraatLabel={s.selectedQiraat ? QIRAAT_NAMES[s.selectedQiraat] : undefined}
             onDownloadPdf={handleDownloadRecapPdf}
           />
+          <Card>
+            <CardContent className="py-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <Award className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold">Mes ijāzas</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Enregistrez vos ijāzas, leur chaîne de transmission, et suivez votre parcours.
+              </p>
+              <Button variant="secondary" size="sm" className="w-full" asChild>
+                <Link to="/mes-ijazas">Ouvrir mes ijāzas</Link>
+              </Button>
+            </CardContent>
+          </Card>
           <CreditUsageCard />
           <StreakPanel />
           <RewardsPanel
