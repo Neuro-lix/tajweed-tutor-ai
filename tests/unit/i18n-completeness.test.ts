@@ -13,7 +13,7 @@ describe('i18n completeness', () => {
     }
   });
 
-  for (const lang of ['id', 'ms'] as const) {
+  for (const lang of LANGUAGE_LIST.map((l) => l.code)) {
     it(`"${lang}" covers every French key`, () => {
       const dict = translations[lang] as Dict;
       const missing = refKeys.filter((k) => !(k in dict));
