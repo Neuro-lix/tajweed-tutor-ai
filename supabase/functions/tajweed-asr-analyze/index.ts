@@ -53,7 +53,7 @@ const ASR_PIPELINE_ENABLED =
 /** Modèle par défaut, surchargeable (Inference Endpoint dédié en Phase 4). */
 const HF_MODEL = Deno.env.get("HF_ASR_MODEL") ?? "tarteel-ai/whisper-base-ar-quran";
 const HF_ENDPOINT_URL = Deno.env.get("HF_ASR_ENDPOINT_URL")
-  ?? `https://api-inference.huggingface.co/models/${HF_MODEL}`;
+  ?? `https://router.huggingface.co/hf-inference/models/${HF_MODEL}`;
 const MAX_AUDIO_BYTES = 12 * 1024 * 1024; // 12 MB
 
 type AsrWord = { word: string; start: number | null; end: number | null };
