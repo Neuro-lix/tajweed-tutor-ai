@@ -29,6 +29,7 @@ const AdminRoute = lazy(() => import("./pages/AdminRoute"));
 const MyLlmUsage = lazy(() => import("./pages/MyLlmUsage"));
 const MyCredits = lazy(() => import("./pages/MyCredits"));
 const MyAnalyses = lazy(() => import("./pages/MyAnalyses"));
+const MyIjaza = lazy(() => import("./pages/MyIjaza"));
 const PaymentHistory = lazy(() => import("./pages/PaymentHistory"));
 const HifzPlan = lazy(() => import("./pages/HifzPlan"));
 const NooraniQaida = lazy(() => import("./pages/NooraniQaida"));
@@ -89,6 +90,7 @@ const App = () => (
                     <Route path="/my-credits" element={<ProtectedRoute><MyCredits /></ProtectedRoute>} />
                     <Route path="/mes-analyses" element={<ProtectedRoute><MyAnalyses /></ProtectedRoute>} />
                     <Route path="/mes-analyses/:id" element={<ProtectedRoute><MyAnalyses /></ProtectedRoute>} />
+                    <Route path="/mes-ijazas" element={<ProtectedRoute><MyIjaza /></ProtectedRoute>} />
                     <Route path="/payments" element={<ProtectedRoute><PaymentHistory /></ProtectedRoute>} />
                     <Route path="/hifz" element={<ProtectedRoute><HifzPlan /></ProtectedRoute>} />
                     <Route path="/ijaza" element={<Ijaza />} />

@@ -22,6 +22,20 @@
       "when": 1789043845415,
       "tag": "0002_create_crypto_orders",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790091875509,
+      "tag": "0003_create_user_ijaza_certificates",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790091897690,
+      "tag": "0004_ijaza_docs_storage_policies",
+      "breakpoints": true
     }
   ]
 }

@@ -733,6 +733,54 @@ export type Database = {
         }
         Relationships: []
       }
+      user_ijaza_certificates: {
+        Row: {
+          attachment_path: string | null
+          certificate_number: string | null
+          created_at: string
+          id: string
+          issued_on: string | null
+          notes: string | null
+          riwaya: string
+          sanad: string | null
+          scope: string | null
+          sheikh_name: string
+          student_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attachment_path?: string | null
+          certificate_number?: string | null
+          created_at?: string
+          id?: string
+          issued_on?: string | null
+          notes?: string | null
+          riwaya?: string
+          sanad?: string | null
+          scope?: string | null
+          sheikh_name: string
+          student_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attachment_path?: string | null
+          certificate_number?: string | null
+          created_at?: string
+          id?: string
+          issued_on?: string | null
+          notes?: string | null
+          riwaya?: string
+          sanad?: string | null
+          scope?: string | null
+          sheikh_name?: string
+          student_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_levels: {
         Row: {
           created_at: string
