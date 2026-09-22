@@ -2,8 +2,14 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, ExternalLink } from 'lucide-react';
+import { RefreshCw, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface AnalysisRow {
   id: string;
@@ -33,6 +39,7 @@ export const AnalysesTab = () => {
   const [status, setStatus] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<AnalysisRow | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -129,12 +136,9 @@ export const AnalysesTab = () => {
                     </td>
                     <td className="py-2 pr-3">{r.credits.toFixed(2)}</td>
                     <td className="py-2">
-                      <a
-                        href={r.link}
-                        className="inline-flex items-center gap-1 text-primary hover:underline text-xs"
-                      >
-                        Ouvrir <ExternalLink className="w-3 h-3" />
-                      </a>
+                      <Button size="sm" variant="ghost" className="text-xs" onClick={() => setSelected(r)}>
+                        <Eye className="w-3 h-3 mr-1" /> Détails
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -143,6 +147,34 @@ export const AnalysesTab = () => {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Détail de l'analyse</DialogTitle>
+          </DialogHeader>
+          {selected && (
+            <dl className="text-sm space-y-2">
+              {[
+                ['Date', fmt(selected.createdAt)],
+                ['Utilisateur', selected.userName ?? selected.userId],
+                ['Fonction', selected.functionName],
+                ['Modèle', selected.model ?? '—'],
+                ['Opération', selected.operation],
+                ['Statut', selected.status],
+                ['Crédits', selected.credits.toFixed(2)],
+                ['Tokens', String(selected.totalTokens ?? 0)],
+                ['Identifiant', selected.id],
+              ].map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-4 border-b border-border/50 pb-1">
+                  <dt className="text-muted-foreground">{k}</dt>
+                  <dd className="text-right break-all">{v}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
