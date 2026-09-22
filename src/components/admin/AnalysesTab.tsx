@@ -147,6 +147,34 @@ export const AnalysesTab = () => {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Détail de l'analyse</DialogTitle>
+          </DialogHeader>
+          {selected && (
+            <dl className="text-sm space-y-2">
+              {[
+                ['Date', fmt(selected.createdAt)],
+                ['Utilisateur', selected.userName ?? selected.userId],
+                ['Fonction', selected.functionName],
+                ['Modèle', selected.model ?? '—'],
+                ['Opération', selected.operation],
+                ['Statut', selected.status],
+                ['Crédits', selected.credits.toFixed(2)],
+                ['Tokens', String(selected.totalTokens ?? 0)],
+                ['Identifiant', selected.id],
+              ].map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-4 border-b border-border/50 pb-1">
+                  <dt className="text-muted-foreground">{k}</dt>
+                  <dd className="text-right break-all">{v}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
