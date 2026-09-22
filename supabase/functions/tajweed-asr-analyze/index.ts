@@ -135,10 +135,10 @@ serve(async (req) => {
 
     // ─── Rate limit (réutilise la RPC existante) ──────────────────────
     const { data: rl } = await supabase.rpc("check_and_increment_rate_limit", {
-      _user_id: userId,
-      _endpoint: "tajweed-asr-analyze",
-      _limit: 30,
-      _window_minutes: 10,
+      p_user_id: userId,
+      p_action: "tajweed-asr-analyze",
+      p_max: 30,
+      p_window_seconds: 600,
     });
     const limit = rl as { allowed?: boolean } | null;
     if (limit && limit.allowed === false) {
