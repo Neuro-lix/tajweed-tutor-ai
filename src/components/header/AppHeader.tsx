@@ -74,6 +74,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             )}
             <LanguageSelector />
             <ThemeToggle />
+            <Button variant="ghost" size="sm" onClick={() => navigate('/mes-analyses')} className="hidden sm:flex">
+              <span className="hidden md:inline">Mes analyses</span>
+              <span className="md:hidden">Analyses</span>
+            </Button>
             <Button variant="ghost" size="sm" onClick={() => navigate('/hifz')} className="hidden sm:flex">
               <BrainCircuit className="h-4 w-4 md:mr-1" />
               <span className="hidden md:inline">Ḥifẓ</span>

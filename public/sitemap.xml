@@ -10,6 +10,8 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid" />
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
@@ -19,6 +21,8 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid" />
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
@@ -28,6 +32,30 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid" />
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://tajweedtutorai.com/id/tajwid</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid" />
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://tajweedtutorai.com/ms/tajwid</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid" />
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
@@ -37,6 +65,8 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/makharij" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/makharij" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/makharij" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/makharij" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/makharij" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/makharij" />
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -46,6 +76,8 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/makharij" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/makharij" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/makharij" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/makharij" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/makharij" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/makharij" />
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -55,6 +87,30 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/makharij" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/makharij" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/makharij" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/makharij" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/makharij" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/makharij" />
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tajweedtutorai.com/id/tajwid/makharij</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/makharij" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/makharij" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/makharij" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/makharij" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/makharij" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/makharij" />
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tajweedtutorai.com/ms/tajwid/makharij</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/makharij" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/makharij" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/makharij" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/makharij" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/makharij" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/makharij" />
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -64,6 +120,8 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/sifat" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/sifat" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/sifat" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/sifat" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/sifat" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/sifat" />
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -73,6 +131,8 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/sifat" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/sifat" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/sifat" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/sifat" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/sifat" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/sifat" />
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -82,6 +142,30 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/sifat" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/sifat" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/sifat" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/sifat" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/sifat" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/sifat" />
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tajweedtutorai.com/id/tajwid/sifat</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/sifat" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/sifat" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/sifat" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/sifat" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/sifat" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/sifat" />
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tajweedtutorai.com/ms/tajwid/sifat</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/sifat" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/sifat" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/sifat" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/sifat" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/sifat" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/sifat" />
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -91,6 +175,8 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/madd" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/madd" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/madd" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/madd" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/madd" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/madd" />
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -100,6 +186,8 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/madd" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/madd" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/madd" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/madd" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/madd" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/madd" />
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -109,6 +197,30 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/madd" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/madd" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/madd" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/madd" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/madd" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/madd" />
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tajweedtutorai.com/id/tajwid/madd</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/madd" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/madd" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/madd" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/madd" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/madd" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/madd" />
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tajweedtutorai.com/ms/tajwid/madd</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/madd" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/madd" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/madd" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/madd" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/madd" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/madd" />
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -118,6 +230,8 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/waqf-ibtida" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/waqf-ibtida" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/waqf-ibtida" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/waqf-ibtida" />
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -127,6 +241,8 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/waqf-ibtida" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/waqf-ibtida" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/waqf-ibtida" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/waqf-ibtida" />
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -136,6 +252,30 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/waqf-ibtida" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/waqf-ibtida" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/waqf-ibtida" />
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tajweedtutorai.com/id/tajwid/waqf-ibtida</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/waqf-ibtida" />
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tajweedtutorai.com/ms/tajwid/waqf-ibtida</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/waqf-ibtida" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/waqf-ibtida" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/waqf-ibtida" />
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -145,6 +285,8 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/qalqalah" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/qalqalah" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/qalqalah" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/qalqalah" />
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -154,6 +296,8 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/qalqalah" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/qalqalah" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/qalqalah" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/qalqalah" />
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -163,6 +307,30 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/qalqalah" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/qalqalah" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/qalqalah" />
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tajweedtutorai.com/id/tajwid/qalqalah</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/qalqalah" />
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tajweedtutorai.com/ms/tajwid/qalqalah</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/qalqalah" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/qalqalah" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/qalqalah" />
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -172,6 +340,8 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/faq" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/faq" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/faq" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/faq" />
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -181,6 +351,8 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/faq" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/faq" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/faq" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/faq" />
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -190,6 +362,30 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/faq" />
     <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/faq" />
     <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/faq" />
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tajweedtutorai.com/id/tajwid/faq</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/faq" />
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tajweedtutorai.com/ms/tajwid/faq</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://tajweedtutorai.com/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://tajweedtutorai.com/en/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tajweedtutorai.com/ar/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="id" href="https://tajweedtutorai.com/id/tajwid/faq" />
+    <xhtml:link rel="alternate" hreflang="ms" href="https://tajweedtutorai.com/ms/tajwid/faq" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://tajweedtutorai.com/tajwid/faq" />
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

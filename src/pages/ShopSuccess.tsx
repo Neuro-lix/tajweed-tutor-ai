@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useCredits } from '@/hooks/useCredits';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { PADDLE_TXN_KEY, verifyPaddleTransaction } from '@/hooks/usePaddleCheckout';
 
 const PDF_FILES = [
   { name: 'Hifz Tracker', file: 'hifz-tracker.pdf' },
@@ -57,11 +58,55 @@ const ShopSuccess: React.FC = () => {
     ? PDF_FILES.filter(f => f.file === pdfParam)
     : (!packInfo ? PDF_FILES : []);
 
+  // Crédit instantané : dès le retour de Paddle, on fait vérifier le paiement
+  // côté serveur au lieu d'attendre le webhook. Le sondage reste un filet de
+  // sécurité si la vérification instantanée n'est pas disponible.
+  useEffect(() => {
+    if (!packInfo || !user) return;
+    let cancelled = false;
+    const txnId =
+      searchParams.get('_ptxn') ||
+      searchParams.get('transaction_id') ||
+      (() => {
+        try {
+          return sessionStorage.getItem(PADDLE_TXN_KEY);
+        } catch {
+          return null;
+        }
+      })();
+    if (!txnId) return;
+
+    (async () => {
+      const result = await verifyPaddleTransaction(txnId);
+      if (cancelled) return;
+      try {
+        sessionStorage.removeItem(PADDLE_TXN_KEY);
+      } catch {
+        /* rien à nettoyer */
+      }
+      if (result.credited || result.alreadyCredited) {
+        await refetch();
+        if (cancelled) return;
+        setCreditsAdded(true);
+        setAddingCredits(false);
+        toast({
+          title: tRef.current.shopSuccessCreditsAdded,
+          description: tRef.current.shopSuccessCreditsAddedDesc,
+        });
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [packInfo, user, searchParams, refetch, toast]);
+
   useEffect(() => {
     if (!packInfo || !user) return;
 
     setAddingCredits(true);
     const interval = setInterval(async () => {
+      if (creditsAddedRef.current) return;
       await refetch();
     }, 2000);
 

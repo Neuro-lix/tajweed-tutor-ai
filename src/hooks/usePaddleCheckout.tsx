@@ -17,11 +17,41 @@ export const PADDLE_PRICE_IDS: Record<string, string> = {
   premium: 'pri_01kzm7m6rwbdfks53gns8sjq4e', // 400 crédits — 9,99 €
 };
 
+/** Clé de session où l'on mémorise la dernière transaction Paddle validée. */
+export const PADDLE_TXN_KEY = 'paddle_last_transaction_id';
+
+/**
+ * Crédite immédiatement le compte après un paiement carte, sans attendre le
+ * webhook. La vérification du paiement et le calcul des crédits sont faits
+ * côté serveur (`paddle-verify`), le navigateur n'envoie que l'identifiant.
+ */
+export interface PaddleVerifyResult {
+  credited: boolean;
+  alreadyCredited?: boolean;
+  credits?: number;
+  balance?: number;
+  error?: string;
+}
+
+export const verifyPaddleTransaction = async (
+  transactionId: string,
+): Promise<PaddleVerifyResult> => {
+  const { data, error } = await supabase.functions.invoke('paddle-verify', {
+    body: { transactionId },
+  });
+  if (error) return { credited: false };
+  return (data ?? { credited: false }) as PaddleVerifyResult;
+};
+
 declare global {
   interface Window {
     Paddle?: {
       Environment: { set: (env: string) => void };
-      Initialize: (opts: { token: string; pwCustomer?: { id?: string; email?: string } }) => void;
+      Initialize: (opts: {
+        token: string;
+        pwCustomer?: { id?: string; email?: string };
+        eventCallback?: (event: { name?: string; data?: { transaction_id?: string } }) => void;
+      }) => void;
       Checkout: {
         open: (opts: {
           items: { priceId: string; quantity: number }[];
@@ -62,6 +92,17 @@ export const usePaddleCheckout = () => {
       if (!window.Paddle) return;
       window.Paddle.Initialize({
         token: clientToken,
+        // Dès que le paiement est validé, on mémorise la transaction pour
+        // créditer immédiatement sans attendre le webhook.
+        eventCallback: (event) => {
+          if (event?.name === 'checkout.completed' && event.data?.transaction_id) {
+            try {
+              sessionStorage.setItem(PADDLE_TXN_KEY, event.data.transaction_id);
+            } catch {
+              /* stockage indisponible : on retombera sur le webhook */
+            }
+          }
+        },
         ...(customerId
           ? { pwCustomer: { id: customerId } }
           : user?.email
