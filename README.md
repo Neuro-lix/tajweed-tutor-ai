@@ -72,3 +72,33 @@ To connect a domain, navigate to Project > Settings > Domains and click Connect 
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
 .
+
+## Secrets Edge Functions (Hugging Face)
+
+Les fonctions `tajweed-asr-analyze` et `analyze-recitation` utilisent un secret
+côté serveur, **pas** une variable `.env` frontend :
+
+| Secret | Usage |
+| --- | --- |
+| `HUGGINGFACE_API_KEY` | Transcription ASR spécialisée Coran (`tarteel-ai/whisper-base-ar-quran`) |
+
+Étapes exactes pour l'ajouter :
+
+1. Ouvrir le **Dashboard Supabase** du projet.
+2. **Project Settings → Edge Functions → Secrets**.
+3. **Add new secret** : nom `HUGGINGFACE_API_KEY`, valeur = le jeton
+   Hugging Face (commence par `hf_`).
+4. Le jeton doit avoir la permission **« Make calls to Inference Providers »**
+   (jeton *fine-grained* → section Inference), sinon l'API renvoie `403`.
+5. Sauvegarder, puis redéployer les deux fonctions.
+
+Au démarrage, chaque fonction journalise l'état du secret :
+`STARTUP: secret HUGGINGFACE_API_KEY absent …` ou `STARTUP: HUGGINGFACE_API_KEY détectée.`
+Sans le secret, `tajweed-asr-analyze` répond `503 asr_not_configured` et
+`analyze-recitation` bascule automatiquement sur le pipeline LLM seul.
+
+Secrets optionnels liés : `ENABLE_ASR_PIPELINE` (`true`/`false`),
+`HF_ASR_MODEL`, `HF_ASR_ENDPOINT_URL`.
+
+> ⚠️ La précision automatique ne remplace pas un professeur ou un cheikh
+> habilité : elle assiste la révision, elle ne délivre pas d'ijāza.
