@@ -1447,6 +1447,6 @@ export const fillAccountVars = (
   vars: Record<string, string | number>,
 ): string =>
   Object.entries(vars).reduce(
-    (acc, [k, v]) => acc.replaceAll(`{${k}}`, String(v)),
+    (acc, [k, v]) => acc.split(`{${k}}`).join(String(v)),
     template,
   );
