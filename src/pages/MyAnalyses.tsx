@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Eye, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { getAccountStrings, fillAccountVars, type AccountStrings } from '@/i18n/accountPages';
 
 interface UsageRow {
   id: string;
@@ -31,8 +33,8 @@ interface SessionRow {
   created_at: string;
 }
 
-const fmt = (d: string) =>
-  new Date(d).toLocaleString('fr-FR', {
+const fmt = (d: string, locale: string) =>
+  new Date(d).toLocaleString(locale, {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -40,11 +42,11 @@ const fmt = (d: string) =>
     minute: '2-digit',
   });
 
-const Shell = ({ children, onBack }: { children: React.ReactNode; onBack: () => void }) => (
+const Shell = ({ children, onBack, a }: { children: React.ReactNode; onBack: () => void; a: AccountStrings }) => (
   <div className="min-h-screen bg-background">
     <div className="container mx-auto px-4 py-8 max-w-4xl space-y-6">
       <Button variant="ghost" size="sm" onClick={onBack}>
-        <ArrowLeft className="w-4 h-4 mr-2" /> Retour
+        <ArrowLeft className="w-4 h-4 mr-2" /> {a.back}
       </Button>
       {children}
     </div>
@@ -56,6 +58,8 @@ export default function MyAnalyses() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { language } = useLanguage();
+  const a = getAccountStrings(language);
   const [rows, setRows] = useState<UsageRow[]>([]);
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [loading, setLoading] = useState(true);
