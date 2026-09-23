@@ -5,6 +5,7 @@ import { ThemeToggle } from '@/components/settings/ThemeToggle';
 import { OfflineIndicator } from '@/components/offline/OfflineIndicator';
 import { LogOut, MessageSquareHeart, Award, Music, ShoppingBag, GraduationCap, Zap, BrainCircuit } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getAccountStrings } from '@/i18n/accountPages';
 import { useNavigate } from 'react-router-dom';
 import logoImage from '@/logo.png';
 import { formatCredits } from '@/lib/credits';
@@ -33,7 +34,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   correctionsCount, credits, isLowCredits, onFeedbackClick, onRecordingsClick, onCorrectionsClick,
   onRecitationClick, onBoutiqueClick, onIjazaClick, onSignOut, onLogoClick,
 }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const a = getAccountStrings(language);
   const navigate = useNavigate();
 
   return (
@@ -58,8 +60,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               <button
                 type="button"
                 onClick={() => navigate('/my-credits')}
-                title="Voir mes crédits et mon historique"
-                aria-label="Voir mes crédits et mon historique"
+                title={a.creditsTooltip}
+                aria-label={a.creditsTooltip}
                 className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-opacity hover:opacity-80 ${
                   credits === 0
                     ? 'bg-destructive/15 text-destructive'
@@ -75,8 +77,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             <LanguageSelector />
             <ThemeToggle />
             <Button variant="ghost" size="sm" onClick={() => navigate('/mes-analyses')} className="hidden sm:flex">
-              <span className="hidden md:inline">Mes analyses</span>
-              <span className="md:hidden">Analyses</span>
+              <span className="hidden md:inline">{a.myAnalyses}</span>
+              <span className="md:hidden">{a.myAnalysesShort}</span>
             </Button>
             <Button variant="ghost" size="sm" onClick={() => navigate('/hifz')} className="hidden sm:flex">
               <BrainCircuit className="h-4 w-4 md:mr-1" />

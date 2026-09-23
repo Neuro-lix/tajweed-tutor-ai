@@ -24,6 +24,8 @@ import { generateCorrectionsSummaryPDF } from '@/utils/pdfGenerator';
 import { downloadCorrectionsCsv } from '@/lib/correctionsCsv';
 import { buildPriorityFixes } from '@/lib/progressInsights';
 import { QIRAAT_NAMES } from '@/data/quranData';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { getAccountStrings } from '@/i18n/accountPages';
 import { DashboardSkeleton, QuranMapSkeleton } from '@/components/ui/skeleton-card';
 import type { IndexState } from '../useIndexState';
 
@@ -41,6 +43,8 @@ export const DashboardView = ({ state: s }: DashboardViewProps) => (
 const DashboardViewInner = ({ state: s }: DashboardViewProps) => {
   const [csvOpen, setCsvOpen] = useState(false);
   const [csvFilters, setCsvFilters] = useState<CsvFilters>(defaultCsvFilters);
+  const { language } = useLanguage();
+  const a = getAccountStrings(language);
 
   /** Corrections matching the current CSV filters (period, surah, severity, status). */
   const filteredCorrections = useMemo(() => {
@@ -179,13 +183,13 @@ const DashboardViewInner = ({ state: s }: DashboardViewProps) => {
             <CardContent className="py-5 space-y-3">
               <div className="flex items-center gap-2">
                 <Award className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Mes ijāzas</h3>
+                <h3 className="font-semibold">{a.ijazaTitle}</h3>
               </div>
               <p className="text-sm text-muted-foreground">
-                Enregistrez vos ijāzas, leur chaîne de transmission, et suivez votre parcours.
+                {a.ijazaCardDesc}
               </p>
               <Button variant="secondary" size="sm" className="w-full" asChild>
-                <Link to="/mes-ijazas">Ouvrir mes ijāzas</Link>
+                <Link to="/mes-ijazas">{a.ijazaCardOpen}</Link>
               </Button>
             </CardContent>
           </Card>

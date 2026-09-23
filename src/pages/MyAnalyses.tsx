@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Eye, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { getAccountStrings, fillAccountVars, type AccountStrings } from '@/i18n/accountPages';
 
 interface UsageRow {
   id: string;
@@ -31,8 +33,8 @@ interface SessionRow {
   created_at: string;
 }
 
-const fmt = (d: string) =>
-  new Date(d).toLocaleString('fr-FR', {
+const fmt = (d: string, locale: string) =>
+  new Date(d).toLocaleString(locale, {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -40,11 +42,11 @@ const fmt = (d: string) =>
     minute: '2-digit',
   });
 
-const Shell = ({ children, onBack }: { children: React.ReactNode; onBack: () => void }) => (
+const Shell = ({ children, onBack, a }: { children: React.ReactNode; onBack: () => void; a: AccountStrings }) => (
   <div className="min-h-screen bg-background">
     <div className="container mx-auto px-4 py-8 max-w-4xl space-y-6">
       <Button variant="ghost" size="sm" onClick={onBack}>
-        <ArrowLeft className="w-4 h-4 mr-2" /> Retour
+        <ArrowLeft className="w-4 h-4 mr-2" /> {a.back}
       </Button>
       {children}
     </div>
@@ -56,6 +58,8 @@ export default function MyAnalyses() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const { language } = useLanguage();
+  const a = getAccountStrings(language);
   const [rows, setRows] = useState<UsageRow[]>([]);
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,16 +95,16 @@ export default function MyAnalyses() {
 
   if (!authLoading && !user) {
     return (
-      <Shell onBack={() => navigate('/auth')}>
+      <Shell onBack={() => navigate('/auth')} a={a}>
         <Card>
           <CardHeader>
-            <CardTitle>Connexion requise</CardTitle>
+            <CardTitle>{a.analysesLoginTitle}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              Connecte-toi pour consulter l'historique de tes analyses.
+              {a.analysesLoginDesc}
             </p>
-            <Button onClick={() => navigate('/auth')}>Se connecter</Button>
+            <Button onClick={() => navigate('/auth')}>{a.analysesLoginButton}</Button>
           </CardContent>
         </Card>
       </Shell>
@@ -117,34 +121,34 @@ export default function MyAnalyses() {
       : undefined;
 
     return (
-      <Shell onBack={() => navigate('/mes-analyses')}>
+      <Shell onBack={() => navigate('/mes-analyses')} a={a}>
         <Card>
           <CardHeader>
-            <CardTitle>Détail de l'analyse</CardTitle>
+            <CardTitle>{a.analysisDetailTitle}</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <p className="text-sm text-muted-foreground animate-pulse">Chargement…</p>
+              <p className="text-sm text-muted-foreground animate-pulse">{a.loading}</p>
             ) : !row ? (
-              <p className="text-sm text-muted-foreground">Cette analyse est introuvable dans ton historique.</p>
+              <p className="text-sm text-muted-foreground">{a.analysisNotFound}</p>
             ) : (
               <dl className="text-sm space-y-2">
                 {([
-                  ['Date', fmt(row.created_at)],
-                  ['Type', row.operation],
-                  ['Moteur', row.model ?? '—'],
-                  ['Fonction', row.function_name],
-                  ['Statut', row.status === 'success' ? 'Réussie' : 'En erreur'],
-                  ['Crédits utilisés', Number(row.credits_charged).toFixed(2)],
-                  ['Jetons', String(row.total_tokens ?? 0)],
+                  [a.labelDate, fmt(row.created_at, language)],
+                  [a.labelType, row.operation],
+                  [a.labelEngine, row.model ?? '—'],
+                  [a.labelFunction, row.function_name],
+                  [a.labelStatus, row.status === 'success' ? a.statusSuccess : a.statusError],
+                  [a.labelCreditsUsed, Number(row.credits_charged).toFixed(2)],
+                  [a.labelTokens, String(row.total_tokens ?? 0)],
                   ...(near
                     ? ([
-                        ['Sourate', `${near.surah_number} — versets ${near.start_verse} à ${near.end_verse}`],
-                        ['Score', near.accuracy_score != null ? `${near.accuracy_score}/100` : '—'],
-                        ['Erreurs relevées', String(near.errors_count ?? 0)],
+                        [a.labelSurah, `${near.surah_number} — ${fillAccountVars(a.labelVerses, { from: near.start_verse, to: near.end_verse })}`],
+                        [a.labelScore, near.accuracy_score != null ? `${near.accuracy_score}/100` : '—'],
+                        [a.labelErrorsFound, String(near.errors_count ?? 0)],
                       ] as [string, string][])
                     : []),
-                  ['Identifiant', row.id],
+                  [a.labelId, row.id],
                 ] as [string, string][]).map(([k, v]) => (
                   <div key={k} className="flex justify-between gap-4 border-b border-border/50 pb-1">
                     <dt className="text-muted-foreground">{k}</dt>
@@ -163,54 +167,54 @@ export default function MyAnalyses() {
   const totalCredits = rows.reduce((s, r) => s + Number(r.credits_charged), 0);
 
   return (
-    <Shell onBack={() => navigate('/dashboard')}>
+    <Shell onBack={() => navigate('/dashboard')} a={a}>
       <div className="flex items-center justify-between gap-2">
-        <h1 className="font-serif text-2xl font-bold">Mes analyses</h1>
+        <h1 className="font-serif text-2xl font-bold">{a.myAnalyses}</h1>
         <Button size="sm" variant="outline" onClick={() => window.location.reload()}>
-          <RefreshCw className="w-4 h-4 mr-2" /> Actualiser
+          <RefreshCw className="w-4 h-4 mr-2" /> {a.refresh}
         </Button>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="text-base">
-            {rows.length} analyse(s) — {totalCredits.toFixed(2)} crédits utilisés
+            {fillAccountVars(a.analysesSummary, { count: rows.length, credits: totalCredits.toFixed(2) })}
           </CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           {loading ? (
-            <p className="text-sm text-muted-foreground animate-pulse">Chargement…</p>
+            <p className="text-sm text-muted-foreground animate-pulse">{a.loading}</p>
           ) : rows.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Aucune analyse pour le moment.</p>
+            <p className="text-sm text-muted-foreground">{a.noAnalyses}</p>
           ) : (
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-muted-foreground border-b border-border">
-                  <th className="py-2 pr-3">Date</th>
-                  <th className="py-2 pr-3">Type</th>
-                  <th className="py-2 pr-3">Statut</th>
-                  <th className="py-2 pr-3">Crédits</th>
+                  <th className="py-2 pr-3">{a.colDate}</th>
+                  <th className="py-2 pr-3">{a.colType}</th>
+                  <th className="py-2 pr-3">{a.colStatus}</th>
+                  <th className="py-2 pr-3">{a.colCredits}</th>
                   <th className="py-2"></th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.id} className="border-b border-border/50">
-                    <td className="py-2 pr-3 whitespace-nowrap">{fmt(r.created_at)}</td>
+                    <td className="py-2 pr-3 whitespace-nowrap">{fmt(r.created_at, language)}</td>
                     <td className="py-2 pr-3">
                       <span className="text-xs">{r.operation}</span>
                       {r.model && <span className="block text-[11px] text-muted-foreground">{r.model}</span>}
                     </td>
                     <td className="py-2 pr-3">
                       <Badge variant={r.status === 'success' ? 'secondary' : 'destructive'}>
-                        {r.status === 'success' ? 'Réussie' : 'Erreur'}
+                        {r.status === 'success' ? a.statusSuccess : a.statusError}
                       </Badge>
                     </td>
                     <td className="py-2 pr-3">{Number(r.credits_charged).toFixed(2)}</td>
                     <td className="py-2">
                       <Button asChild size="sm" variant="ghost" className="text-xs">
                         <Link to={`/mes-analyses/${r.id}`}>
-                          <Eye className="w-3 h-3 mr-1" /> Détails
+                          <Eye className="w-3 h-3 mr-1" /> {a.details}
                         </Link>
                       </Button>
                     </td>
