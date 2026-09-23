@@ -95,16 +95,16 @@ export default function MyAnalyses() {
 
   if (!authLoading && !user) {
     return (
-      <Shell onBack={() => navigate('/auth')}>
+      <Shell onBack={() => navigate('/auth')} a={a}>
         <Card>
           <CardHeader>
-            <CardTitle>Connexion requise</CardTitle>
+            <CardTitle>{a.analysesLoginTitle}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              Connecte-toi pour consulter l'historique de tes analyses.
+              {a.analysesLoginDesc}
             </p>
-            <Button onClick={() => navigate('/auth')}>Se connecter</Button>
+            <Button onClick={() => navigate('/auth')}>{a.analysesLoginButton}</Button>
           </CardContent>
         </Card>
       </Shell>
@@ -121,34 +121,34 @@ export default function MyAnalyses() {
       : undefined;
 
     return (
-      <Shell onBack={() => navigate('/mes-analyses')}>
+      <Shell onBack={() => navigate('/mes-analyses')} a={a}>
         <Card>
           <CardHeader>
-            <CardTitle>Détail de l'analyse</CardTitle>
+            <CardTitle>{a.analysisDetailTitle}</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <p className="text-sm text-muted-foreground animate-pulse">Chargement…</p>
+              <p className="text-sm text-muted-foreground animate-pulse">{a.loading}</p>
             ) : !row ? (
-              <p className="text-sm text-muted-foreground">Cette analyse est introuvable dans ton historique.</p>
+              <p className="text-sm text-muted-foreground">{a.analysisNotFound}</p>
             ) : (
               <dl className="text-sm space-y-2">
                 {([
-                  ['Date', fmt(row.created_at)],
-                  ['Type', row.operation],
-                  ['Moteur', row.model ?? '—'],
-                  ['Fonction', row.function_name],
-                  ['Statut', row.status === 'success' ? 'Réussie' : 'En erreur'],
-                  ['Crédits utilisés', Number(row.credits_charged).toFixed(2)],
-                  ['Jetons', String(row.total_tokens ?? 0)],
+                  [a.labelDate, fmt(row.created_at, language)],
+                  [a.labelType, row.operation],
+                  [a.labelEngine, row.model ?? '—'],
+                  [a.labelFunction, row.function_name],
+                  [a.labelStatus, row.status === 'success' ? a.statusSuccess : a.statusError],
+                  [a.labelCreditsUsed, Number(row.credits_charged).toFixed(2)],
+                  [a.labelTokens, String(row.total_tokens ?? 0)],
                   ...(near
                     ? ([
-                        ['Sourate', `${near.surah_number} — versets ${near.start_verse} à ${near.end_verse}`],
-                        ['Score', near.accuracy_score != null ? `${near.accuracy_score}/100` : '—'],
-                        ['Erreurs relevées', String(near.errors_count ?? 0)],
+                        [a.labelSurah, `${near.surah_number} — ${fillAccountVars(a.labelVerses, { from: near.start_verse, to: near.end_verse })}`],
+                        [a.labelScore, near.accuracy_score != null ? `${near.accuracy_score}/100` : '—'],
+                        [a.labelErrorsFound, String(near.errors_count ?? 0)],
                       ] as [string, string][])
                     : []),
-                  ['Identifiant', row.id],
+                  [a.labelId, row.id],
                 ] as [string, string][]).map(([k, v]) => (
                   <div key={k} className="flex justify-between gap-4 border-b border-border/50 pb-1">
                     <dt className="text-muted-foreground">{k}</dt>
