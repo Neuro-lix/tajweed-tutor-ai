@@ -1,0 +1,659 @@
+[
+  {
+    "id": "hifz-tracker",
+    "title": "Pelacak Hifz (Hafalan Al-Qur'an)",
+    "subtitle": "Metode, grid pemantauan, dan tahapan validasi",
+    "intro": "Menghafal Al-Qur'an adalah perjalanan yang membutuhkan metode, konsistensi, dan evaluasi berkala. Fiche ini memberikan kerangka praktis untuk melacak kemajuan hafalan (hifz) Anda dari hari ke hari, ayat demi ayat, hingga surah tuntas.",
+    "sections": [
+      {
+        "heading": "Prinsip dasar hifz yang efektif",
+        "body": "Hafalan yang kuat dibangun di atas pengulangan terstruktur, bukan hafalan cepat yang rapuh.",
+        "bullets": [
+          "Talaqqi: dengarkan dan tirukan dari qari atau guru sebelum menghafal sendiri",
+          "Tikrar (pengulangan): ulangi setiap ayat baru 10-20 kali sebelum lanjut",
+          "Talqin bertahap: hafalkan ayat baru, gabungkan dengan ayat sebelumnya",
+          "Jangan tambah hafalan baru sebelum yang lama benar-benar lancar",
+          "Gunakan satu mushaf yang sama agar hafalan visual (rasm) konsisten"
+        ]
+      },
+      {
+        "heading": "Tahapan validasi satu ayat",
+        "table": {
+          "headers": ["Tahap", "Deskripsi", "Kriteria lulus"],
+          "rows": [
+            ["1. Talaqqi", "Mendengar bacaan yang benar minimal 3 kali", "Bisa membedakan makhraj dan sifat huruf"],
+            ["2. Hafalan awal", "Mengulang ayat 10-20 kali tanpa melihat mushaf", "Bisa membaca 1 ayat lancar tanpa bantuan"],
+            ["3. Sambung ayat", "Menggabungkan ayat baru dengan 2-3 ayat sebelumnya", "Tidak ada jeda atau lupa sambungan"],
+            ["4. Tasmi' (setor)", "Membacakan hafalan di depan guru/pendamping", "Guru menyatakan lulus tanpa koreksi besar"],
+            ["5. Muraja'ah harian", "Mengulang hafalan baru selama 7 hari berturut-turut", "Lancar tanpa melihat mushaf sama sekali"]
+          ]
+        }
+      },
+      {
+        "heading": "Grid pemantauan mingguan",
+        "body": "Gunakan tabel ini untuk mencatat kemajuan hafalan setiap pekan.",
+        "table": {
+          "headers": ["Hari", "Surah:Ayat", "Jumlah ulangan", "Status (Baru/Muraja'ah)", "Catatan guru"],
+          "rows": [
+            ["Senin", "Al-Baqarah:1-5", "15x", "Baru", "Perbaiki makhraj huruf Qaf"],
+            ["Selasa", "Al-Baqarah:1-5", "10x", "Muraja'ah", "Lancar"],
+            ["Rabu", "Al-Baqarah:6-10", "15x", "Baru", "—"],
+            ["...", "...", "...", "...", "..."]
+          ]
+        }
+      },
+      {
+        "heading": "Target harian yang realistis",
+        "bullets": [
+          "Pemula: 1-2 ayat pendek per hari",
+          "Menengah: 3-5 ayat atau setengah halaman per hari",
+          "Lanjut: 1 halaman penuh (mushaf standar) per hari",
+          "Selalu sisakan waktu muraja'ah minimal sama dengan waktu hafalan baru",
+          "Evaluasi target setiap akhir pekan, sesuaikan bila terlalu berat"
+        ]
+      },
+      {
+        "heading": "Contoh penerapan: Surah Al-Fatihah",
+        "arabicExamples": [
+          {"ar": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ", "translit": "Bismillāhi r-raḥmāni r-raḥīm", "note": "Al-Fatihah:1 — ayat pembuka, hafalkan dengan tartil pelan"},
+          {"ar": "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ", "translit": "Al-ḥamdu lillāhi rabbi l-ʿālamīn", "note": "Al-Fatihah:2 — perhatikan mad thabi'i pada 'āmīn' setelah 'al-ʿālamīn'"}
+        ]
+      },
+      {
+        "heading": "Mengatasi lupa dan hafalan yang melemah",
+        "bullets": [
+          "Buat siklus muraja'ah: hafalan minggu ini, bulan ini, dan juz sebelumnya",
+          "Gunakan metode 'sabaq-sabqi-manzil' (baru, kemarin, lama)",
+          "Rekam suara bacaan sendiri dan bandingkan dengan qari rujukan",
+          "Jangan berkecil hati; kelupaan adalah bagian normal proses hifz"
+        ]
+      },
+      {
+        "heading": "Peran pendamping atau guru",
+        "body": "Setoran (tasmi') rutin kepada guru sangat penting untuk mendeteksi kesalahan yang tidak disadari penghafal sendiri, baik dari sisi tajwid maupun urutan ayat."
+      }
+    ],
+    "practice": {
+      "heading": "Latihan praktis",
+      "lines": [
+        "Isi grid pemantauan mingguan selama 4 pekan berturut-turut",
+        "Setorkan minimal 1 halaman hafalan setiap pekan kepada guru",
+        "Catat surah dan ayat yang paling sering lupa, lalu tambah porsi muraja'ah-nya",
+        "Evaluasi diri: baca kembali seluruh hafalan bulan ini tanpa mushaf"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI"
+  },
+  {
+    "id": "makharij",
+    "title": "Makharij al-Huruf",
+    "subtitle": "5 zona dan 17 titik keluarnya huruf hijaiyah",
+    "intro": "Makharij al-huruf adalah tempat-tempat keluarnya huruf dari alat ucap. Memahami makhraj setiap huruf adalah dasar mutlak untuk bacaan Al-Qur'an yang benar, karena kesalahan makhraj dapat mengubah makna kata.",
+    "sections": [
+      {
+        "heading": "Lima zona utama makharij",
+        "bullets": [
+          "Al-Jawf (rongga mulut dan tenggorokan): sumber huruf mad",
+          "Al-Halq (tenggorokan): terbagi 3 titik dari pangkal hingga ujung",
+          "Al-Lisan (lidah): zona terbesar, terbagi 10 titik",
+          "Asy-Syafatan (dua bibir): 2 titik",
+          "Al-Khaysyum (rongga hidung): sumber ghunnah"
+        ]
+      },
+      {
+        "heading": "Zona 1: Al-Jawf (rongga mulut)",
+        "body": "Al-Jawf menghasilkan huruf mad yang tidak memiliki titik tekan tertentu, karena udara keluar bebas melalui rongga mulut.",
+        "table": {
+          "headers": ["Huruf", "Jenis", "Contoh"],
+          "rows": [
+            ["ا (alif sukun)", "Mad", "قَالَ (qāla)"],
+            ["و (wawu sukun, didahului dhammah)", "Mad", "يَقُولُ (yaqūlu)"],
+            ["ي (ya sukun, didahului kasrah)", "Mad", "قِيلَ (qīla)"]
+          ]
+        }
+      },
+      {
+        "heading": "Zona 2: Al-Halq (tenggorokan) — 3 titik",
+        "table": {
+          "headers": ["Titik", "Lokasi", "Huruf"],
+          "rows": [
+            ["Aqshal halq (pangkal)", "Tenggorokan terdalam", "ء، ه"],
+            ["Wasathul halq (tengah)", "Pertengahan tenggorokan", "ع، ح"],
+            ["Adnal halq (ujung)", "Tenggorokan terdekat mulut", "غ، خ"]
+          ]
+        }
+      },
+      {
+        "heading": "Zona 3: Al-Lisan (lidah) — 10 titik",
+        "bullets": [
+          "Pangkal lidah bertemu langit lunak: ق",
+          "Pangkal lidah agak maju bertemu langit keras: ك",
+          "Tengah lidah bertemu langit-langit: ج، ش، ي",
+          "Tepi lidah bertemu geraham atas: ض",
+          "Tepi lidah depan bertemu gusi atas: ل",
+          "Ujung lidah bertemu gusi (agak mundur dari lam): ن",
+          "Ujung lidah bergetar bertemu gusi: ر",
+          "Ujung lidah bertemu pangkal gigi seri atas: ط، د، ت",
+          "Ujung lidah dekat gigi bertemu gusi bawah: ص، س، ز",
+          "Ujung lidah bertemu ujung gigi seri atas: ظ، ذ، ث"
+        ]
+      },
+      {
+        "heading": "Zona 4: Asy-Syafatan (dua bibir) — 2 titik",
+        "table": {
+          "headers": ["Titik", "Cara", "Huruf"],
+          "rows": [
+            ["Bibir bawah dengan ujung gigi atas", "Sentuhan ringan", "ف"],
+            ["Dua bibir bertemu", "Rapat (ب، م) atau monyong (و)", "ب، م، و"]
+          ]
+        }
+      },
+      {
+        "heading": "Zona 5: Al-Khaysyum (rongga hidung)",
+        "body": "Al-Khaysyum adalah sumber dengung (ghunnah) yang menyertai huruf nun dan mim bertasydid, serta hukum idgham bighunnah, ikhfa, dan iqlab.",
+        "arabicExamples": [
+          {"ar": "إِنَّ", "translit": "innā", "note": "Nun bertasydid — dengung 2 harakat"},
+          {"ar": "مِن بَعْدِ", "translit": "mim baʿdi", "note": "An-Nisa:? — contoh ikhfa haqiqi dengan ghunnah"}
+        ]
+      },
+      {
+        "heading": "Kesalahan umum yang perlu dihindari",
+        "bullets": [
+          "Menyamakan ض dengan ظ (padahal titik keluarnya berbeda)",
+          "Melafalkan ق terlalu ringan seperti ك",
+          "Tidak memberi getaran cukup pada ر (harus bergetar/takrir ringan)",
+          "Mengabaikan dengung pada ن dan م bertasydid"
+        ]
+      }
+    ],
+    "practice": {
+      "heading": "Latihan praktis",
+      "lines": [
+        "Ucapkan huruf ع، ح، غ، خ، ه، ء satu per satu sambil merasakan posisi tenggorokan",
+        "Bandingkan pengucapan ض dan ظ di depan cermin",
+        "Latih huruf qalqalah (ق ط ب ج د) dengan pantulan ringan",
+        "Rekam bacaan Anda dan bandingkan dengan qari rujukan untuk setiap zona"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI"
+  },
+  {
+    "id": "journal-correction",
+    "title": "Jurnal Koreksi Bacaan",
+    "subtitle": "Cara mencatat kesalahan/koreksi dan evaluasi diri",
+    "intro": "Jurnal koreksi adalah alat sederhana namun ampuh untuk melacak kesalahan bacaan Al-Qur'an secara sistematis, sehingga perbaikan dapat difokuskan pada titik lemah yang benar-benar berulang.",
+    "sections": [
+      {
+        "heading": "Mengapa mencatat kesalahan itu penting",
+        "bullets": [
+          "Kesalahan yang tidak dicatat cenderung terulang tanpa disadari",
+          "Pola kesalahan (misal selalu salah pada mad atau ghunnah) baru terlihat setelah beberapa catatan",
+          "Jurnal memberi bukti kemajuan konkret dari waktu ke waktu",
+          "Memudahkan guru memberi arahan yang lebih spesifik"
+        ]
+      },
+      {
+        "heading": "Format standar satu entri jurnal",
+        "table": {
+          "headers": ["Kolom", "Isi"],
+          "rows": [
+            ["Tanggal", "Tanggal sesi bacaan"],
+            ["Surah:Ayat", "Lokasi kesalahan, misal Al-Baqarah:255"],
+            ["Jenis kesalahan", "Makhraj, sifat huruf, mad, ghunnah, waqf, urutan ayat"],
+            ["Deskripsi kesalahan", "Contoh: 'ص dibaca seperti س'"],
+            ["Koreksi yang diberikan", "Penjelasan guru atau catatan mandiri"],
+            ["Status", "Belum diperbaiki / Dalam proses / Sudah dikuasai"]
+          ]
+        }
+      },
+      {
+        "heading": "Klasifikasi jenis kesalahan tajwid",
+        "bullets": [
+          "Kesalahan makhraj: huruf keluar dari tempat yang salah",
+          "Kesalahan sifat huruf: misal tidak melakukan qalqalah pada huruf ق ط ب ج د",
+          "Kesalahan mad: memendekkan mad wajib atau memanjangkan mad thabi'i berlebihan",
+          "Kesalahan ghunnah: dengung terlalu pendek atau terlalu panjang",
+          "Kesalahan waqf/ibtida': berhenti di tempat yang mengubah makna"
+        ]
+      },
+      {
+        "heading": "Contoh entri jurnal terisi",
+        "arabicExamples": [
+          {"ar": "مَالِكِ يَوْمِ الدِّينِ", "translit": "māliki yawmi d-dīn", "note": "Al-Fatihah:4 — kesalahan: mad thabi'i pada 'mā' dibaca terlalu pendek (1 harakat, seharusnya 2)"},
+          {"ar": "وَلَا الضَّالِّينَ", "translit": "wa la ḍ-ḍāllīn", "note": "Al-Fatihah:7 — kesalahan umum: huruf ض dilafalkan seperti د"}
+        ]
+      },
+      {
+        "heading": "Cara melakukan evaluasi diri (self-assessment)",
+        "bullets": [
+          "Rekam bacaan Anda sendiri minimal 2 kali seminggu",
+          "Dengarkan ulang sambil mengikuti mushaf, tandai setiap keraguan",
+          "Bandingkan dengan bacaan qari rujukan untuk ayat yang sama",
+          "Beri skor jujur 1-5 untuk makhraj, sifat, mad, dan waqf pada setiap sesi"
+        ]
+      },
+      {
+        "heading": "Siklus tindak lanjut kesalahan",
+        "body": "Setiap kesalahan yang dicatat harus melalui siklus: identifikasi, latihan terfokus, verifikasi ulang oleh guru, lalu ditutup sebagai 'dikuasai' hanya jika benar tiga kali berturut-turut tanpa koreksi.",
+        "table": {
+          "headers": ["Minggu", "Fokus perbaikan", "Hasil verifikasi"],
+          "rows": [
+            ["1", "Huruf ض vs د", "Masih ragu"],
+            ["2", "Huruf ض vs د", "Membaik"],
+            ["3", "Huruf ض vs د", "Dikuasai"]
+          ]
+        }
+      },
+      {
+        "heading": "Tips menjaga konsistensi jurnal",
+        "bullets": [
+          "Isi jurnal segera setelah sesi bacaan, jangan menunda",
+          "Gunakan warna atau simbol untuk menandai tingkat urgensi kesalahan",
+          "Tinjau seluruh jurnal setiap akhir bulan untuk melihat pola besar"
+        ]
+      }
+    ],
+    "practice": {
+      "heading": "Latihan praktis",
+      "lines": [
+        "Buat 5 entri jurnal dari sesi bacaan minggu ini",
+        "Kelompokkan kesalahan Anda menurut 5 kategori di atas",
+        "Pilih satu kesalahan yang paling sering muncul dan latih khusus selama 1 minggu",
+        "Minta guru memverifikasi ulang kesalahan yang sudah Anda tandai 'dalam proses'"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI"
+  },
+  {
+    "id": "planning-revision",
+    "title": "Rencana Muraja'ah Mingguan",
+    "subtitle": "Jadwal pengulangan hafalan yang terstruktur",
+    "intro": "Muraja'ah (pengulangan) adalah kunci menjaga hafalan Al-Qur'an agar tidak hilang. Tanpa jadwal yang jelas, hafalan lama mudah terlupakan saat fokus beralih ke hafalan baru. Fiche ini menyajikan sistem perencanaan mingguan yang seimbang.",
+    "sections": [
+      {
+        "heading": "Tiga kategori muraja'ah",
+        "bullets": [
+          "Muraja'ah dekat (sabqi): hafalan 1-4 minggu terakhir, diulang setiap hari",
+          "Muraja'ah menengah: hafalan 1-6 bulan terakhir, diulang 2-3 kali seminggu",
+          "Muraja'ah jauh (manzil): hafalan lama/juz penuh, diulang bergilir setiap minggu"
+        ]
+      },
+      {
+        "heading": "Contoh jadwal mingguan seimbang",
+        "table": {
+          "headers": ["Hari", "Pagi", "Sore/Malam"],
+          "rows": [
+            ["Senin", "Hafalan baru (1/2 halaman)", "Muraja'ah dekat (1 minggu terakhir)"],
+            ["Selasa", "Hafalan baru", "Muraja'ah menengah (juz sebelumnya)"],
+            ["Rabu", "Hafalan baru", "Muraja'ah dekat"],
+            ["Kamis", "Hafalan baru", "Muraja'ah jauh (manzil bergilir)"],
+            ["Jumat", "Tanpa hafalan baru — fokus muraja'ah penuh", "Tasmi' ke guru"],
+            ["Sabtu", "Hafalan baru", "Muraja'ah dekat"],
+            ["Ahad", "Evaluasi mingguan", "Istirahat/muraja'ah ringan"]
+          ]
+        }
+      },
+      {
+        "heading": "Prinsip pembagian waktu",
+        "bullets": [
+          "Alokasikan minimal 60% waktu untuk muraja'ah, 40% untuk hafalan baru",
+          "Jangan pernah menghentikan muraja'ah sepenuhnya meski target hafalan baru tinggi",
+          "Sesuaikan porsi berdasarkan jumlah total hafalan yang dimiliki (semakin banyak, semakin besar porsi muraja'ah)"
+        ]
+      },
+      {
+        "heading": "Sistem rotasi manzil (untuk penghafal juz banyak)",
+        "body": "Bagi seluruh hafalan menjadi beberapa 'manzil' (kelompok juz), lalu putar satu manzil per hari sehingga dalam seminggu seluruh hafalan lama tersentuh minimal sekali.",
+        "table": {
+          "headers": ["Hari", "Manzil"],
+          "rows": [
+            ["Senin", "Juz 1-5"],
+            ["Selasa", "Juz 6-10"],
+            ["Rabu", "Juz 11-15"],
+            ["Kamis", "Juz 16-20"],
+            ["Jumat", "Juz 21-25"],
+            ["Sabtu", "Juz 26-30"],
+            ["Ahad", "Bebas (bagian terlemah)"]
+          ]
+        }
+      },
+      {
+        "heading": "Contoh penerapan pada satu ayat",
+        "arabicExamples": [
+          {"ar": "وَاسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ", "translit": "wa staʿīnū bi ṣ-ṣabri wa ṣ-ṣalāh", "note": "Al-Baqarah:45 — jadwalkan muraja'ah ayat ini bersama konteks 2-3 ayat sekitarnya, bukan sendirian"}
+        ]
+      },
+      {
+        "heading": "Menangani hari-hari sibuk",
+        "bullets": [
+          "Jika waktu terbatas, prioritaskan muraja'ah dekat di atas hafalan baru",
+          "Gunakan waktu perjalanan atau menunggu untuk mendengarkan murattal hafalan",
+          "Lebih baik muraja'ah singkat tapi konsisten daripada sesi panjang yang jarang"
+        ]
+      },
+      {
+        "heading": "Evaluasi mingguan",
+        "body": "Setiap akhir pekan, tinjau: apakah semua kategori muraja'ah tersentuh? Ayat mana yang masih lemah? Sesuaikan rencana minggu berikutnya berdasarkan hasil evaluasi ini."
+      }
+    ],
+    "practice": {
+      "heading": "Latihan praktis",
+      "lines": [
+        "Buat jadwal mingguan Anda sendiri menggunakan tabel contoh di atas",
+        "Terapkan selama 2 minggu, catat hafalan mana yang masih lemah",
+        "Sesuaikan porsi muraja'ah dekat/menengah/jauh sesuai kebutuhan",
+        "Lakukan tasmi' mingguan kepada guru untuk memverifikasi kekuatan muraja'ah"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI"
+  },
+  {
+    "id": "tadabbur",
+    "title": "Metode Tadabbur Al-Qur'an",
+    "subtitle": "Cara menganalisis dan merenungkan satu ayat",
+    "intro": "Tadabbur adalah perenungan mendalam terhadap makna ayat Al-Qur'an, melampaui sekadar membaca atau menghafal. Fiche ini menyajikan metode langkah demi langkah untuk mentadabburi satu ayat secara terstruktur.",
+    "sections": [
+      {
+        "heading": "Mengapa tadabbur penting",
+        "bullets": [
+          "Al-Qur'an diturunkan untuk direnungkan, bukan sekadar dibaca (QS Sad:29)",
+          "Tadabbur menghubungkan bacaan dengan hati dan perilaku sehari-hari",
+          "Tanpa tadabbur, bacaan berisiko menjadi rutinitas kosong makna"
+        ]
+      },
+      {
+        "heading": "Langkah 1: Membaca dengan tartil dan hadir hati",
+        "body": "Baca ayat perlahan, ulangi 2-3 kali, rasakan setiap kata sebelum berpindah ke langkah analisis."
+      },
+      {
+        "heading": "Langkah 2: Memahami makna kata (mufradat)",
+        "bullets": [
+          "Cari arti kata-kata kunci dalam ayat menggunakan tafsir atau kamus Al-Qur'an",
+          "Perhatikan kata yang memiliki makna khusus dalam konteks Al-Qur'an (bukan makna umum bahasa Arab)",
+          "Catat akar kata (jazr) untuk memahami hubungan dengan kata lain dalam Al-Qur'an"
+        ]
+      },
+      {
+        "heading": "Langkah 3: Memahami konteks (asbabun nuzul dan siyaq)",
+        "bullets": [
+          "Pelajari sebab turunnya ayat jika ada riwayat yang shahih",
+          "Baca ayat sebelum dan sesudahnya untuk memahami alur pembicaraan (siyaq)",
+          "Rujuk minimal satu kitab tafsir muktabar (misal Ibnu Katsir, As-Sa'di)"
+        ]
+      },
+      {
+        "heading": "Langkah 4: Mengaitkan dengan diri sendiri",
+        "bullets": [
+          "Tanyakan: apa pesan ayat ini untuk kondisi hidup saya sekarang?",
+          "Identifikasi satu sifat Allah, satu perintah, atau satu pelajaran yang bisa diterapkan",
+          "Tulis refleksi singkat dalam jurnal tadabbur pribadi"
+        ]
+      },
+      {
+        "heading": "Langkah 5: Menentukan tindakan nyata",
+        "body": "Tadabbur yang sempurna berujung pada perubahan sikap atau amal, sekecil apa pun. Tuliskan satu komitmen konkret setelah merenungkan ayat."
+      },
+      {
+        "heading": "Contoh penerapan lengkap",
+        "arabicExamples": [
+          {"ar": "وَإِذَا سَأَلَكَ عِبَادِي عَنِّي فَإِنِّي قَرِيبٌ", "translit": "wa idhā saʾalaka ʿibādī ʿannī fa-innī qarīb", "note": "Al-Baqarah:186 — makna: Allah Maha Dekat dengan hamba yang berdoa; refleksi: perbanyak doa dengan yakin dijawab"}
+        ],
+        "bullets": [
+          "Mufradat: 'qarīb' = dekat, menunjukkan kedekatan tanpa perantara",
+          "Konteks: ayat ini berada di tengah pembahasan puasa Ramadan, mengajarkan doa saat ibadah",
+          "Refleksi: saya sering berdoa tergesa tanpa yakin — komitmen: berdoa dengan tenang dan yakin setiap hari"
+        ]
+      },
+      {
+        "heading": "Kesalahan umum dalam tadabbur",
+        "bullets": [
+          "Menafsirkan ayat hanya dari terjemahan tanpa merujuk tafsir",
+          "Terburu-buru berpindah ayat tanpa benar-benar merenung",
+          "Tidak menuliskan hasil renungan sehingga mudah terlupa"
+        ]
+      }
+    ],
+    "practice": {
+      "heading": "Latihan praktis",
+      "lines": [
+        "Pilih satu ayat pendek, terapkan 5 langkah di atas secara tertulis",
+        "Baca satu tafsir singkat untuk ayat yang sama, bandingkan dengan pemahaman awal Anda",
+        "Tulis satu komitmen amal nyata dari hasil tadabbur",
+        "Ulangi latihan ini setiap hari selama satu pekan dengan ayat berbeda"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI"
+  },
+  {
+    "id": "guide-waqf",
+    "title": "Panduan Tanda Waqf",
+    "subtitle": "Tanda berhenti dan aturan berhenti/lanjut dalam Al-Qur'an",
+    "intro": "Waqf (berhenti) adalah bagian penting dari tajwid yang menjaga makna ayat tetap utuh. Mushaf Al-Qur'an mencantumkan tanda-tanda waqf khusus untuk membantu pembaca mengetahui kapan boleh, dianjurkan, atau dilarang berhenti.",
+    "sections": [
+      {
+        "heading": "Jenis-jenis waqf berdasarkan hukum",
+        "table": {
+          "headers": ["Jenis", "Nama Arab", "Keterangan"],
+          "rows": [
+            ["Waqf Lazim", "الوقف اللازم", "Wajib berhenti, jika disambung mengubah makna"],
+            ["Waqf Jaiz", "الوقف الجائز", "Boleh berhenti atau lanjut, keduanya benar"],
+            ["Waqf Mamnu'", "الوقف الممنوع", "Dilarang berhenti karena dapat merusak makna"],
+            ["Waqf Muraqabah", "تعانق الوقف", "Berhenti di salah satu dari dua tempat berdekatan, tidak keduanya"]
+          ]
+        }
+      },
+      {
+        "heading": "Tanda-tanda waqf dalam mushaf",
+        "table": {
+          "headers": ["Simbol", "Nama", "Arti"],
+          "rows": [
+            ["م", "Waqf Lazim", "Harus berhenti"],
+            ["لا", "La waqfa fih / Waqf Mamnu'", "Jangan berhenti di sini"],
+            ["ج", "Waqf Ja'iz", "Boleh berhenti, boleh lanjut"],
+            ["صلى", "Al-waslu awla", "Lebih baik lanjut daripada berhenti"],
+            ["قلى", "Al-waqfu awla", "Lebih baik berhenti daripada lanjut"],
+            ["∴ ∴", "Waqf Muraqabah", "Berhenti di salah satu titik, bukan keduanya"],
+            ["ع", "Ruku'", "Akhir kelompok ayat (bukan waqf wajib)"]
+          ]
+        }
+      },
+      {
+        "heading": "Cara berhenti yang benar (kaifiyyatul waqf)",
+        "bullets": [
+          "Jika huruf akhir berharakat, ubah menjadi sukun saat berhenti",
+          "Jika kata berakhiran ta marbuthah (ة), ubah bacaannya menjadi ha sukun (ه)",
+          "Jika terdapat tanwin fathah di akhir kata, ganti dengan mad (alif) — contoh: عَلِيمًا dibaca ʿalīmā",
+          "Jangan menghentikan napas secara tiba-tiba tanpa melunakkan huruf akhir"
+        ]
+      },
+      {
+        "heading": "Cara memulai kembali (ibtida')",
+        "bullets": [
+          "Ibtida' harus dimulai dari kata yang maknanya utuh, bukan di tengah frasa yang menggantung",
+          "Jika perlu, mundur beberapa kata sebelum titik henti untuk menjaga makna",
+          "Hindari memulai dari kata sambung seperti 'wa' tanpa konteks sebelumnya jika mengubah makna"
+        ]
+      },
+      {
+        "heading": "Contoh penerapan waqf muraqabah",
+        "arabicExamples": [
+          {"ar": "لَا رَيْبَ ۛ فِيهِ ۛ هُدًى لِّلْمُتَّقِينَ", "translit": "lā rayba fīhi hudan lil-muttaqīn", "note": "Al-Baqarah:2 — waqf muraqabah: berhenti di 'rayba' ATAU di 'fīhi', bukan keduanya sekaligus"}
+        ]
+      },
+      {
+        "heading": "Contoh waqf lazim",
+        "arabicExamples": [
+          {"ar": "إِنَّمَا أَنَا نَذِيرٌ مُّبِينٌ", "translit": "innamā ana nadhīrun mubīn", "note": "Contoh posisi waqf lazim yang umum ditemukan di akhir kelompok makna sempurna"}
+        ]
+      },
+      {
+        "heading": "Kesalahan umum seputar waqf",
+        "bullets": [
+          "Berhenti di tanda 'لا' karena disangka boleh berhenti",
+          "Tidak mengubah harakat akhir kata menjadi sukun saat berhenti",
+          "Mengabaikan tanda waqf muraqabah sehingga berhenti di kedua titik"
+        ]
+      }
+    ],
+    "practice": {
+      "heading": "Latihan praktis",
+      "lines": [
+        "Baca 3 halaman mushaf sambil mengidentifikasi setiap tanda waqf yang ditemui",
+        "Latih perubahan harakat akhir menjadi sukun setiap kali berhenti",
+        "Cari 2 contoh waqf muraqabah lain di dalam Al-Qur'an dan tandai keduanya",
+        "Minta guru mengoreksi cara berhenti dan memulai (ibtida') Anda"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI"
+  },
+  {
+    "id": "objectifs-annuels",
+    "title": "Tujuan Tahunan Coraniques",
+    "subtitle": "Target tahunan dan milestone triwulan untuk perjalanan Al-Qur'an",
+    "intro": "Menetapkan tujuan tahunan yang jelas membantu menjaga motivasi dan mengukur kemajuan dalam hafalan, tajwid, dan pemahaman Al-Qur'an. Fiche ini membantu Anda merancang rencana satu tahun penuh dengan milestone triwulan.",
+    "sections": [
+      {
+        "heading": "Kategori tujuan tahunan",
+        "bullets": [
+          "Hafalan (hifz): jumlah juz atau surah baru yang ditargetkan",
+          "Tajwid: penguasaan hukum-hukum bacaan tertentu",
+          "Tadabbur: jumlah surah yang direnungkan mendalam",
+          "Muraja'ah: menjaga seluruh hafalan lama tetap kuat",
+          "Adab dan amal: menerapkan minimal satu nilai Al-Qur'an dalam keseharian"
+        ]
+      },
+      {
+        "heading": "Contoh rencana tahunan (penghafal pemula)",
+        "table": {
+          "headers": ["Triwulan", "Target Hafalan", "Target Tajwid", "Target Tadabbur"],
+          "rows": [
+            ["Q1 (bulan 1-3)", "Juz 30 (An-Naba - An-Nas)", "Makharij al-huruf dan sifat huruf", "Tadabbur 5 surah pendek"],
+            ["Q2 (bulan 4-6)", "Al-Fatihah + Al-Baqarah 1-50", "Hukum nun sukun dan tanwin", "Tadabbur Al-Fatihah mendalam"],
+            ["Q3 (bulan 7-9)", "Al-Baqarah 51-150", "Hukum mim sukun dan mad", "Tadabbur 3 ayat tentang sabar"],
+            ["Q4 (bulan 10-12)", "Al-Baqarah 151-252", "Waqf dan ibtida'", "Evaluasi tahunan dan refleksi"]
+          ]
+        }
+      },
+      {
+        "heading": "Cara menentukan target yang realistis",
+        "bullets": [
+          "Hitung mundur dari kapasitas harian: berapa ayat/halaman yang mampu dihafal per hari",
+          "Sisakan buffer minimal 20% waktu untuk hari-hari tidak produktif",
+          "Prioritaskan kualitas (tajwid benar) di atas kuantitas hafalan",
+          "Libatkan guru untuk memvalidasi target sebelum tahun dimulai"
+        ]
+      },
+      {
+        "heading": "Milestone evaluasi triwulan",
+        "table": {
+          "headers": ["Pertanyaan evaluasi", "Tindakan jika tidak tercapai"],
+          "rows": [
+            ["Apakah target hafalan tercapai?", "Kurangi target triwulan berikutnya 20%"],
+            ["Apakah muraja'ah hafalan lama masih kuat?", "Tambah porsi muraja'ah, kurangi hafalan baru sementara"],
+            ["Apakah aturan tajwid baru sudah dikuasai?", "Ulangi materi dengan guru sebelum lanjut ke hukum baru"],
+            ["Apakah ada perubahan sikap dari hasil tadabbur?", "Pilih kembali 1 nilai konkret untuk diterapkan"]
+          ]
+        }
+      },
+      {
+        "heading": "Contoh ayat motivasi untuk konsistensi",
+        "arabicExamples": [
+          {"ar": "وَالَّذِينَ جَاهَدُوا فِينَا لَنَهْدِيَنَّهُمْ سُبُلَنَا", "translit": "wa lladhīna jāhadū fīnā lanahdiyannahum subulanā", "note": "Al-Ankabut:69 — motivasi: kesungguhan usaha akan dibimbing Allah menuju jalan-Nya"}
+        ]
+      },
+      {
+        "heading": "Alat bantu pelacakan tahunan",
+        "bullets": [
+          "Gunakan kalender dinding atau aplikasi untuk menandai progres per minggu",
+          "Buat grafik sederhana jumlah halaman/juz yang telah dihafal setiap bulan",
+          "Simpan catatan tasmi' guru sebagai bukti validasi hafalan"
+        ]
+      },
+      {
+        "heading": "Refleksi akhir tahun",
+        "body": "Di akhir tahun, tinjau kembali seluruh pencapaian, syukuri progres sekecil apa pun, dan susun tujuan baru untuk tahun berikutnya berdasarkan pelajaran dari tahun ini."
+      }
+    ],
+    "practice": {
+      "heading": "Latihan praktis",
+      "lines": [
+        "Tulis 3 tujuan tahunan Anda menggunakan 5 kategori di atas",
+        "Pecah setiap tujuan menjadi 4 milestone triwulan",
+        "Jadwalkan evaluasi setiap 3 bulan dengan guru atau pendamping",
+        "Simpan rencana ini di tempat yang mudah dilihat setiap hari"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI"
+  },
+  {
+    "id": "duas-coran",
+    "title": "Doa-Doa Al-Qur'an Esensial",
+    "subtitle": "Transliterasi dan makna doa-doa pilihan dari Al-Qur'an",
+    "intro": "Al-Qur'an memuat banyak doa yang diajarkan langsung oleh Allah melalui lisan para nabi dan orang-orang saleh. Fiche ini mengumpulkan doa-doa esensial beserta transliterasi dan maknanya untuk dihafal dan diamalkan.",
+    "sections": [
+      {
+        "heading": "Mengapa berdoa dengan doa Al-Qur'an",
+        "bullets": [
+          "Doa-doa Al-Qur'an memiliki bahasa yang paling indah dan makna yang mendalam",
+          "Menggunakan doa para nabi menghubungkan kita dengan teladan mereka",
+          "Membaca sekaligus mengamalkan Al-Qur'an dalam ibadah harian"
+        ]
+      },
+      {
+        "heading": "Doa memohon kebaikan dunia dan akhirat",
+        "arabicExamples": [
+          {"ar": "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ", "translit": "rabbanā ātinā fi d-dunyā ḥasanatan wa fil-ākhirati ḥasanatan wa qinā ʿadhāba n-nār", "note": "Al-Baqarah:201 — doa paling sering dibaca, mencakup kebaikan dunia dan akhirat"}
+        ]
+      },
+      {
+        "heading": "Doa memohon ampunan dan keteguhan (doa Nabi Adam)",
+        "arabicExamples": [
+          {"ar": "رَبَّنَا ظَلَمْنَا أَنفُسَنَا وَإِن لَّمْ تَغْفِرْ لَنَا وَتَرْحَمْنَا لَنَكُونَنَّ مِنَ الْخَاسِرِينَ", "translit": "rabbanā ẓalamnā anfusanā wa in lam taghfir lanā wa tarḥamnā lanakūnanna mina l-khāsirīn", "note": "Al-A'raf:23 — doa taubat Nabi Adam AS setelah memakan buah terlarang"}
+        ]
+      },
+      {
+        "heading": "Doa Nabi Ibrahim untuk keluarga dan keturunan",
+        "arabicExamples": [
+          {"ar": "رَبِّ اجْعَلْنِي مُقِيمَ الصَّلَاةِ وَمِن ذُرِّيَّتِي رَبَّنَا وَتَقَبَّلْ دُعَاءِ", "translit": "rabbi jʿalnī muqīma ṣ-ṣalāti wa min dhurriyyatī rabbanā wa taqabbal duʿāʾ", "note": "Ibrahim:40 — doa memohon keturunan yang mendirikan shalat"}
+        ]
+      },
+      {
+        "heading": "Doa Nabi Yunus dalam kesempitan",
+        "arabicExamples": [
+          {"ar": "لَّا إِلَٰهَ إِلَّا أَنتَ سُبْحَانَكَ إِنِّي كُنتُ مِنَ الظَّالِمِينَ", "translit": "lā ilāha illā anta subḥānaka innī kuntu mina ẓ-ẓālimīn", "note": "Al-Anbiya:87 — dikenal sebagai doa Dzun Nun, dibaca saat dalam kesulitan besar"}
+        ]
+      },
+      {
+        "heading": "Doa memohon ilmu yang bermanfaat",
+        "arabicExamples": [
+          {"ar": "رَّبِّ زِدْنِي عِلْمًا", "translit": "rabbi zidnī ʿilmā", "note": "Taha:114 — doa singkat memohon penambahan ilmu, dianjurkan dibaca rutin"}
+        ]
+      },
+      {
+        "heading": "Doa memohon kelapangan dada (doa Nabi Musa)",
+        "arabicExamples": [
+          {"ar": "رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي", "translit": "rabbi shraḥ lī ṣadrī wa yassir lī amrī", "note": "Taha:25-26 — doa Nabi Musa AS sebelum menghadapi Fir'aun, memohon kemudahan dan keteguhan hati"}
+        ]
+      },
+      {
+        "heading": "Cara mengamalkan doa-doa ini",
+        "bullets": [
+          "Hafalkan satu doa per pekan beserta artinya, bukan sekadar bunyi Arabnya",
+          "Baca doa ini setelah shalat wajib atau di waktu-waktu mustajab",
+          "Pahami konteks turunnya (asbabun nuzul) agar penghayatan lebih dalam",
+          "Ajarkan doa-doa ini kepada anggota keluarga, terutama anak-anak"
+        ]
+      }
+    ],
+    "practice": {
+      "heading": "Latihan praktis",
+      "lines": [
+        "Hafalkan 3 doa dari fiche ini beserta artinya minggu ini",
+        "Baca satu doa pilihan setiap selesai shalat wajib selama 7 hari",
+        "Tulis refleksi singkat tentang konteks salah satu doa dan relevansinya dengan hidup Anda",
+        "Ajarkan satu doa kepada orang terdekat beserta maknanya"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI"
+  }
+]
