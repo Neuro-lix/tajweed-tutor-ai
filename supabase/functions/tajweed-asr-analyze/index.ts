@@ -56,6 +56,21 @@ const HF_ENDPOINT_URL = Deno.env.get("HF_ASR_ENDPOINT_URL")
   ?? `https://router.huggingface.co/hf-inference/models/${HF_MODEL}`;
 const MAX_AUDIO_BYTES = 12 * 1024 * 1024; // 12 MB
 
+// ─── Startup check: secrets requis ──────────────────────────────────────
+if (!Deno.env.get("HUGGINGFACE_API_KEY")) {
+  console.warn(
+    "[tajweed-asr-analyze] STARTUP: secret HUGGINGFACE_API_KEY absent — " +
+      "toutes les requêtes répondront 503 asr_not_configured (fallback llm_only). " +
+      "Ajoutez-le via Project Settings → Edge Functions → Secrets (voir README).",
+  );
+} else {
+  console.log(
+    `[tajweed-asr-analyze] STARTUP: HUGGINGFACE_API_KEY détectée — pipeline ASR ${
+      ASR_PIPELINE_ENABLED ? "activé" : "désactivé (ENABLE_ASR_PIPELINE=false)"
+    }, modèle ${HF_MODEL}.`,
+  );
+}
+
 type AsrWord = { word: string; start: number | null; end: number | null };
 
 /** Décodage base64 → Uint8Array, par blocs (évite les pics mémoire). */
