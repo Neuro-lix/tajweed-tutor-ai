@@ -92,7 +92,7 @@ def styles(rtl):
 BRAND = "Nassihah · TajweedTutorAI"
 
 
-def decorate(canvas, doc, title):
+def decorate(canvas, doc, title, rtl=False):
     canvas.saveState()
     w, h = A4
     canvas.setStrokeColor(GOLD)
@@ -108,8 +108,13 @@ def decorate(canvas, doc, title):
     canvas.drawString(16 * mm, 14.5 * mm, BRAND)
     canvas.drawRightString(w - 16 * mm, 14.5 * mm, str(doc.page))
     canvas.setFillColor(GREEN)
-    canvas.setFont("BodyB", 8)
-    canvas.drawCentredString(w / 2, h - 15.5 * mm, title[:70])
+    head = title[:70]
+    if rtl and HAS_AR:
+        canvas.setFont("Arabic", 9)
+        head = ar(head)
+    else:
+        canvas.setFont("BodyB", 8)
+    canvas.drawCentredString(w / 2, h - 15.5 * mm, head)
     canvas.restoreState()
 
 
@@ -122,7 +127,7 @@ def build(sheet, lang, rtl):
                           topMargin=22 * mm, bottomMargin=20 * mm, title=title, author=BRAND)
     frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id="f")
     doc.addPageTemplates([PageTemplate(id="p", frames=[frame],
-                                       onPage=lambda c, d: decorate(c, d, title))])
+                                       onPage=lambda c, d: decorate(c, d, title, rtl))])
 
     def T(x):
         return ar(x) if rtl else (mixed(x) if has_ar(x) else esc(x))
@@ -139,8 +144,13 @@ def build(sheet, lang, rtl):
         if sec.get("body"):
             flow.append(P(sec["body"], "p"))
         if sec.get("bullets"):
-            flow.append(ListFlowable([ListItem(P(b, "li"), leftIndent=8) for b in sec["bullets"]],
-                                     bulletType="bullet", start="•", leftIndent=12))
+            if rtl:
+                # En RTL, la puce doit suivre le texte à droite : pas de ListFlowable.
+                for b in sec["bullets"]:
+                    flow.append(P(f"• {b}", "li"))
+            else:
+                flow.append(ListFlowable([ListItem(P(b, "li"), leftIndent=8) for b in sec["bullets"]],
+                                         bulletType="bullet", start="•", leftIndent=12))
         tbl = sec.get("table")
         if tbl and tbl.get("headers"):
             data = [[P(str(c), "li") for c in tbl["headers"]]]
