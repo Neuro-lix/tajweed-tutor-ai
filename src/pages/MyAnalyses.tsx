@@ -167,54 +167,54 @@ export default function MyAnalyses() {
   const totalCredits = rows.reduce((s, r) => s + Number(r.credits_charged), 0);
 
   return (
-    <Shell onBack={() => navigate('/dashboard')}>
+    <Shell onBack={() => navigate('/dashboard')} a={a}>
       <div className="flex items-center justify-between gap-2">
-        <h1 className="font-serif text-2xl font-bold">Mes analyses</h1>
+        <h1 className="font-serif text-2xl font-bold">{a.myAnalyses}</h1>
         <Button size="sm" variant="outline" onClick={() => window.location.reload()}>
-          <RefreshCw className="w-4 h-4 mr-2" /> Actualiser
+          <RefreshCw className="w-4 h-4 mr-2" /> {a.refresh}
         </Button>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="text-base">
-            {rows.length} analyse(s) — {totalCredits.toFixed(2)} crédits utilisés
+            {fillAccountVars(a.analysesSummary, { count: rows.length, credits: totalCredits.toFixed(2) })}
           </CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           {loading ? (
-            <p className="text-sm text-muted-foreground animate-pulse">Chargement…</p>
+            <p className="text-sm text-muted-foreground animate-pulse">{a.loading}</p>
           ) : rows.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Aucune analyse pour le moment.</p>
+            <p className="text-sm text-muted-foreground">{a.noAnalyses}</p>
           ) : (
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-muted-foreground border-b border-border">
-                  <th className="py-2 pr-3">Date</th>
-                  <th className="py-2 pr-3">Type</th>
-                  <th className="py-2 pr-3">Statut</th>
-                  <th className="py-2 pr-3">Crédits</th>
+                  <th className="py-2 pr-3">{a.colDate}</th>
+                  <th className="py-2 pr-3">{a.colType}</th>
+                  <th className="py-2 pr-3">{a.colStatus}</th>
+                  <th className="py-2 pr-3">{a.colCredits}</th>
                   <th className="py-2"></th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => (
                   <tr key={r.id} className="border-b border-border/50">
-                    <td className="py-2 pr-3 whitespace-nowrap">{fmt(r.created_at)}</td>
+                    <td className="py-2 pr-3 whitespace-nowrap">{fmt(r.created_at, language)}</td>
                     <td className="py-2 pr-3">
                       <span className="text-xs">{r.operation}</span>
                       {r.model && <span className="block text-[11px] text-muted-foreground">{r.model}</span>}
                     </td>
                     <td className="py-2 pr-3">
                       <Badge variant={r.status === 'success' ? 'secondary' : 'destructive'}>
-                        {r.status === 'success' ? 'Réussie' : 'Erreur'}
+                        {r.status === 'success' ? a.statusSuccess : a.statusError}
                       </Badge>
                     </td>
                     <td className="py-2 pr-3">{Number(r.credits_charged).toFixed(2)}</td>
                     <td className="py-2">
                       <Button asChild size="sm" variant="ghost" className="text-xs">
                         <Link to={`/mes-analyses/${r.id}`}>
-                          <Eye className="w-3 h-3 mr-1" /> Détails
+                          <Eye className="w-3 h-3 mr-1" /> {a.details}
                         </Link>
                       </Button>
                     </td>
