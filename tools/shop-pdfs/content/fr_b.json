@@ -1,0 +1,775 @@
+[
+  {
+    "id": "livret-1-complet",
+    "title": "Mon voyage avec le Coran",
+    "subtitle": "Livret complet du débutant — Nassihah / TajweedTutorAI",
+    "intro": "Ce livret t'accompagne pas à pas dans tes premiers pas avec le Coran : apprendre les lettres, comprendre le tajwīd de base, mémoriser tes premières sourates et bâtir une pratique régulière. Suis les 8 sections dans l'ordre, à ton rythme.",
+    "sections": [
+      {
+        "heading": "1. Pourquoi apprendre le Coran",
+        "body": "Rappel de l'intention (niyya) avant de commencer tout apprentissage.",
+        "bullets": [
+          "Le Prophète ﷺ a dit : « Le meilleur d'entre vous est celui qui apprend le Coran et l'enseigne » (Bukhari)",
+          "Chaque lettre lue rapporte une bonne action, multipliée par dix (Tirmidhi)",
+          "Fixe une intention sincère (ikhlāṣ) avant chaque séance",
+          "La régularité (mudāwama) vaut mieux que la quantité"
+        ]
+      },
+      {
+        "heading": "2. L'alphabet arabe et ses sons",
+        "body": "Les 28 lettres de l'alphabet, isolées puis liées.",
+        "table": {
+          "headers": ["Lettre", "Nom", "Son approché"],
+          "rows": [
+            ["ا", "alif", "a long"],
+            ["ب", "bā'", "b"],
+            ["ت", "tā'", "t"],
+            ["ث", "thā'", "th (anglais think)"],
+            ["ع", "ʿayn", "son guttural profond"],
+            ["ق", "qāf", "k profond (uvulaire)"]
+          ]
+        },
+        "arabicExamples": [
+          {"ar": "بَ بِ بُ", "translit": "ba - bi - bu", "note": "les trois voyelles courtes (ḥarakāt) sur bā'"}
+        ]
+      },
+      {
+        "heading": "3. Les voyelles et signes de base",
+        "bullets": [
+          "Fatḥa ( َ ) = son 'a' court",
+          "Kasra ( ِ ) = son 'i' court",
+          "Ḍamma ( ُ ) = son 'u' court",
+          "Sukūn ( ْ ) = absence de voyelle, lettre arrêtée",
+          "Shadda ( ّ ) = doublement de la lettre",
+          "Tanwīn (ً ٍ ٌ) = son 'n' final ajouté"
+        ],
+        "arabicExamples": [
+          {"ar": "مَدَّ", "translit": "madda", "note": "shadda sur le dāl : doublement"},
+          {"ar": "كِتَابٌ", "translit": "kitābun", "note": "tanwīn ḍamma en fin de mot"}
+        ]
+      },
+      {
+        "heading": "4. Les prolongations (al-mudūd) de base",
+        "body": "Le mudd naturel (aṣlī) dure 2 temps (ḥarakāt).",
+        "bullets": [
+          "Alif précédé d'une fatḥa : mudd de 2 temps",
+          "Wāw sākina précédée d'une ḍamma : mudd de 2 temps",
+          "Yā' sākina précédée d'une kasra : mudd de 2 temps"
+        ],
+        "arabicExamples": [
+          {"ar": "قَالَ", "translit": "qāla", "note": "mudd sur l'alif — Al-Baqara 2:30"},
+          {"ar": "يَقُولُ", "translit": "yaqūlu", "note": "mudd sur le wāw — Al-Baqara 2:11"}
+        ]
+      },
+      {
+        "heading": "5. Les règles du nūn sākin et tanwīn",
+        "bullets": [
+          "Iẓhār (clarté) devant les 6 lettres gutturales : ء ه ع ح غ خ",
+          "Idghām (fusion) devant : ي ر م ل و ن",
+          "Iqlāb (transformation en mīm) devant : ب",
+          "Ikhfā' (dissimulation) devant les 15 lettres restantes"
+        ],
+        "arabicExamples": [
+          {"ar": "مَنْ آمَنَ", "translit": "man āmana", "note": "iẓhār — Al-Baqara 2:62"},
+          {"ar": "مِنْ رَبِّهِمْ", "translit": "mir rabbihim", "note": "idghām avec ghunna — Al-Baqara 2:5"}
+        ]
+      },
+      {
+        "heading": "6. Premières sourates à mémoriser",
+        "bullets": [
+          "Al-Fātiḥa (7 versets) — la sourate de l'ouverture, récitée dans chaque prière",
+          "An-Nās (6 versets) — protection contre les murmures",
+          "Al-Falaq (5 versets) — protection contre les maux",
+          "Al-Ikhlāṣ (4 versets) — la pureté du tawḥīd"
+        ],
+        "arabicExamples": [
+          {"ar": "قُلْ هُوَ اللَّهُ أَحَدٌ", "translit": "qul huwa Allāhu aḥad", "note": "Al-Ikhlāṣ 112:1"}
+        ]
+      },
+      {
+        "heading": "7. Méthode de mémorisation (hifz) pour débutant",
+        "bullets": [
+          "Écoute le verset 5 fois auprès d'un récitateur fiable",
+          "Répète le verset 10 fois à voix haute",
+          "Relie-le au verset précédent avant de passer au suivant",
+          "Révise chaque nouvelle page pendant 7 jours consécutifs"
+        ]
+      },
+      {
+        "heading": "8. Construire une pratique durable",
+        "bullets": [
+          "Fixe un créneau quotidien fixe (après Fajr est idéal)",
+          "Commence petit : 5 à 10 minutes par jour suffisent au début",
+          "Utilise un journal de suivi pour noter tes progrès",
+          "Cherche la compagnie d'un professeur ou d'un groupe de révision"
+        ]
+      }
+    ],
+    "practice": {
+      "heading": "Feuille de route des 30 premiers jours",
+      "lines": [
+        "Semaine 1 : alphabet et voyelles courtes",
+        "Semaine 2 : sukūn, shadda, tanwīn et mudūd naturels",
+        "Semaine 3 : mémorisation d'Al-Fātiḥa et An-Nās",
+        "Semaine 4 : mémorisation d'Al-Falaq et Al-Ikhlāṣ + révision globale"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI • Livret 1 : Mon voyage avec le Coran"
+  },
+  {
+    "id": "livret-2-complet",
+    "title": "Master Collection Tajwīd",
+    "subtitle": "Toutes les grandes règles réunies — Nassihah / TajweedTutorAI",
+    "intro": "Ce livret rassemble l'ensemble des règles majeures du tajwīd riwāya Ḥafṣ ʿan ʿĀṣim en 8 sections structurées, avec exemples coraniques précis. Il sert de référence complète pour consolider et réviser tes acquis.",
+    "sections": [
+      {
+        "heading": "1. Makhārij al-Ḥurūf — les points d'articulation",
+        "bullets": [
+          "Al-Jawf (la cavité buccale) : les lettres de prolongation ا و ي",
+          "Al-Ḥalq (la gorge) : ء ه (gorge basse), ع ح (gorge moyenne), غ خ (gorge haute)",
+          "Al-Lisān (la langue) : 10 points, dont ق, ك, ج ش ي, ل, ن, ر, ط د ت",
+          "Ash-Shafatān (les deux lèvres) : ف, ب م و",
+          "Al-Khayshūm (la cavité nasale) : source de la ghunna"
+        ]
+      },
+      {
+        "heading": "2. Ṣifāt al-Ḥurūf — les caractéristiques des lettres",
+        "bullets": [
+          "Hams (souffle) vs Jahr (voisement)",
+          "Shidda (occlusion) vs Rakhāwa (fricative) vs Tawassuṭ (intermédiaire)",
+          "Istiʿlāʾ (emphase, élévation) : les 7 lettres خ ص ض غ ط ق ظ",
+          "Istifāl (lettres non emphatiques) : toutes les autres lettres"
+        ]
+      },
+      {
+        "heading": "3. Nūn sākina et tanwīn",
+        "table": {
+          "headers": ["Règle", "Lettres concernées", "Effet"],
+          "rows": [
+            ["Iẓhār ḥalqī", "ء ه ع ح غ خ", "prononciation claire du nūn"],
+            ["Idghām", "ي ر م ل و ن", "fusion, avec ou sans ghunna"],
+            ["Iqlāb", "ب", "transformation en mīm avec ghunna"],
+            ["Ikhfā' ḥaqīqī", "15 lettres restantes", "dissimulation nasalisée"]
+          ]
+        },
+        "arabicExamples": [
+          {"ar": "مِنْ بَعْدِ", "translit": "mim baʿdi", "note": "iqlāb — Al-Baqara 2:27"}
+        ]
+      },
+      {
+        "heading": "4. Mīm sākina",
+        "bullets": [
+          "Ikhfā' shafawī devant ب : dissimulation avec ghunna",
+          "Idghām shafawī (mithlayn) devant م : fusion complète avec ghunna",
+          "Iẓhār shafawī devant les 26 autres lettres : prononciation claire"
+        ],
+        "arabicExamples": [
+          {"ar": "تَرْمِيهِم بِحِجَارَةٍ", "translit": "tarmīhim bi-ḥijāra", "note": "ikhfā' shafawī — Al-Fīl 105:4"},
+          {"ar": "لَهُم مَا", "translit": "lahum mā", "note": "idghām shafawī — Al-Baqara 2:7"}
+        ]
+      },
+      {
+        "heading": "5. Al-Mudūd — les prolongations",
+        "table": {
+          "headers": ["Type", "Durée", "Exemple"],
+          "rows": [
+            ["Mudd aṣlī (naturel)", "2 temps", "قَالَ"],
+            ["Mudd muttaṣil (obligatoire lié)", "4-5 temps", "السَّمَاءِ"],
+            ["Mudd munfaṣil (facultatif séparé)", "2, 4 ou 5 temps", "يَا أَيُّهَا"],
+            ["Mudd ʿāriḍ li-s-sukūn", "2, 4 ou 6 temps", "الرَّحِيمِ (en pause)"],
+            ["Mudd lāzim", "6 temps", "الضَّالِّينَ"]
+          ]
+        }
+      },
+      {
+        "heading": "6. Qalqala et lettres particulières",
+        "bullets": [
+          "Qutb jad : les 5 lettres de qalqala ق ط ب ج د",
+          "Qalqala sughrā (mineure) : à l'intérieur du mot",
+          "Qalqala kubrā (majeure) : en fin de mot avec arrêt",
+          "Lām de tafkhīm dans le nom d'Allah après fatḥa ou ḍamma",
+          "Rā' emphatique (mufakhkham) et fine (muraqqaq) selon la voyelle"
+        ],
+        "arabicExamples": [
+          {"ar": "قُلْ", "translit": "qul", "note": "qalqala sughrā sur le qāf — Al-Ikhlāṣ 112:1"},
+          {"ar": "أَحَدٌ", "translit": "aḥad (en pause)", "note": "qalqala kubrā sur le dāl — Al-Ikhlāṣ 112:1"}
+        ]
+      },
+      {
+        "heading": "7. Waqf et ibtidā' — arrêts et reprises",
+        "bullets": [
+          "Waqf lāzim (م) : arrêt obligatoire",
+          "Waqf jāʾiz (ج) : arrêt permis",
+          "Waqf muṭlaq (ط) : arrêt préférable",
+          "La'a yaqif (لا) : ne pas s'arrêter",
+          "Waqf murakhkhaṣ (ص) : arrêt toléré par nécessité"
+        ]
+      },
+      {
+        "heading": "8. Erreurs fréquentes à corriger",
+        "bullets": [
+          "Confondre ḍ (ض) et ẓ (ظ)",
+          "Ne pas tenir la ghunna 2 temps complets",
+          "Oublier l'emphase des lettres istiʿlāʾ",
+          "Précipiter la lecture au lieu de respecter le tartīl",
+          "Négliger le mudd lāzim (6 temps obligatoires)"
+        ]
+      }
+    ],
+    "practice": {
+      "heading": "Plan de révision transversal",
+      "lines": [
+        "Semaine 1-2 : makhārij et ṣifāt",
+        "Semaine 3-4 : nūn sākina, tanwīn et mīm sākina",
+        "Semaine 5-6 : mudūd et qalqala",
+        "Semaine 7-8 : waqf, ibtidā' et correction des erreurs fréquentes"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI • Livret 2 : Master Collection Tajwīd"
+  },
+  {
+    "id": "tajweed-idgham",
+    "title": "Idghām",
+    "subtitle": "Les 6 lettres yarmalūn — Nassihah / TajweedTutorAI",
+    "intro": "L'idghām consiste à fusionner le nūn sākin ou le tanwīn avec la lettre suivante. Cette fiche détaille les 6 lettres concernées (résumées dans le mot mnémotechnique yarmalūn : ي ر م ل و ن), leur classement avec ou sans ghunna, et les exceptions à connaître.",
+    "sections": [
+      {
+        "heading": "1. Définition de l'idghām",
+        "body": "Idghām signifie littéralement « fusion, insertion ». Le nūn sākin ou le tanwīn disparaît et se fond dans la lettre suivante, qui est prononcée avec shadda."
+      },
+      {
+        "heading": "2. Les 6 lettres yarmalūn",
+        "bullets": [
+          "ي (yā')",
+          "ر (rā')",
+          "م (mīm)",
+          "ل (lām)",
+          "و (wāw)",
+          "ن (nūn)"
+        ]
+      },
+      {
+        "heading": "3. Idghām avec ghunna (bi-ghunna)",
+        "body": "Devant les 4 lettres ي ن م و : la fusion se fait avec une nasalisation tenue 2 temps.",
+        "arabicExamples": [
+          {"ar": "مَن يَقُولُ", "translit": "may yaqūlu", "note": "idghām bi-ghunna avec yā' — Al-Baqara 2:8"},
+          {"ar": "مِن نِّعْمَةٍ", "translit": "min niʿmatin", "note": "idghām bi-ghunna avec nūn — An-Naḥl 16:53"},
+          {"ar": "مِن مَّاءٍ", "translit": "mim māʾin", "note": "idghām bi-ghunna avec mīm — Al-Anbiyā' 21:30"},
+          {"ar": "مِن وَلِيٍّ", "translit": "miw waliyyin", "note": "idghām bi-ghunna avec wāw — Al-Baqara 2:107"}
+        ]
+      },
+      {
+        "heading": "4. Idghām sans ghunna (bilā ghunna)",
+        "body": "Devant les 2 lettres ل ر : la fusion se fait directement, sans nasalisation.",
+        "arabicExamples": [
+          {"ar": "مِن لَّدُنْهُ", "translit": "mil ladunhu", "note": "idghām bilā ghunna avec lām — Al-Kahf 18:2"},
+          {"ar": "مِن رَّبِّهِمْ", "translit": "mir rabbihim", "note": "idghām bilā ghunna avec rā' — Al-Baqara 2:5"}
+        ]
+      },
+      {
+        "heading": "5. Exception : l'idghām naqiṣ (incomplet)",
+        "body": "Avec ي et و, l'idghām est dit naqiṣ : la caractéristique de ghunna reste mais la lettre n'est pas totalement doublée (pas de shadda complète)."
+      },
+      {
+        "heading": "6. Exception majeure : mot unique (kalima wāḥida)",
+        "body": "Si le nūn sākin et la lettre yarmalūn se trouvent dans un seul et même mot, l'idghām ne s'applique pas : on applique l'iẓhār muṭlaq (clarté absolue).",
+        "arabicExamples": [
+          {"ar": "الدُّنْيَا", "translit": "ad-dunyā", "note": "iẓhār muṭlaq, nūn et yā' dans le même mot"},
+          {"ar": "بُنْيَانٌ", "translit": "bunyānun", "note": "iẓhār muṭlaq, nūn et yā' dans le même mot"},
+          {"ar": "صِنْوَانٌ", "translit": "ṣinwānun", "note": "iẓhār muṭlaq, nūn et wāw dans le même mot — Ar-Raʿd 13:4"},
+          {"ar": "قِنْوَانٌ", "translit": "qinwānun", "note": "iẓhār muṭlaq — Al-Anʿām 6:99"}
+        ]
+      },
+      {
+        "heading": "7. Idghām et tanwīn",
+        "body": "La règle s'applique identiquement lorsque c'est un tanwīn (ً ٍ ٌ) qui précède la lettre yarmalūn, puisque le tanwīn se comporte comme un nūn sākin.",
+        "arabicExamples": [
+          {"ar": "هُدًى لِّلْمُتَّقِينَ", "translit": "hudal lil-muttaqīn", "note": "idghām bilā ghunna — Al-Baqara 2:2"}
+        ]
+      },
+      {
+        "heading": "8. Récapitulatif visuel",
+        "table": {
+          "headers": ["Catégorie", "Lettres", "Ghunna"],
+          "rows": [
+            ["Idghām bi-ghunna", "ي ن م و", "oui, 2 temps"],
+            ["Idghām bilā ghunna", "ل ر", "non"],
+            ["Exception (kalima wāḥida)", "ي و uniquement", "iẓhār — pas d'idghām"]
+          ]
+        }
+      }
+    ],
+    "practice": {
+      "heading": "Exercice d'application",
+      "lines": [
+        "Repère 5 cas d'idghām bi-ghunna dans la sourate Al-Baqara",
+        "Repère 5 cas d'idghām bilā ghunna dans la sourate Yā-Sīn",
+        "Mémorise les 4 mots d'exception : ad-dunyā, bunyān, ṣinwān, qinwān",
+        "Fais-toi corriger par un professeur sur la tenue de la ghunna (2 temps)"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI • Fiche Idghām"
+  },
+  {
+    "id": "tajweed-ikhfa",
+    "title": "Ikhfā'",
+    "subtitle": "Les 15 lettres de dissimulation — Nassihah / TajweedTutorAI",
+    "intro": "L'ikhfā' ḥaqīqī consiste à dissimuler partiellement le nūn sākin ou le tanwīn, entre l'iẓhār (clarté) et l'idghām (fusion), avec une nasalisation (ghunna) tenue 2 temps. Cette fiche présente les 15 lettres concernées, le mnémotechnique classique et des exemples coraniques.",
+    "sections": [
+      {
+        "heading": "1. Définition de l'ikhfā'",
+        "body": "Ikhfā' signifie « dissimulation, cacher ». Le nūn sākin ou le tanwīn est prononcé de façon atténuée, la pointe de la langue ne touchant pas le point d'articulation du nūn, avec ghunna nasale tenue 2 temps."
+      },
+      {
+        "heading": "2. Les 15 lettres de l'ikhfā'",
+        "bullets": [
+          "ص ذ ث ك ج ش ق س د ط ز ف ت ض ظ"
+        ]
+      },
+      {
+        "heading": "3. Le mnémotechnique classique",
+        "body": "Ces 15 lettres sont regroupées dans le vers mnémotechnique : « Ṣif dhā thanā kam jāda shakhṣun qad samā, duṭlub kirām, zid tuqan ẓāhir fatiq nāl »"
+      },
+      {
+        "heading": "4. Les 3 degrés d'ikhfā' selon la proximité",
+        "table": {
+          "headers": ["Degré", "Lettres", "Caractéristique"],
+          "rows": [
+            ["Ikhfā' aʿlā (le plus proche du nūn)", "ط د ت", "ikhfā' aqrab (le plus fort)"],
+            ["Ikhfā' adnā (le plus éloigné)", "ق ك", "ikhfā' abʿad, tendance à l'emphase"],
+            ["Ikhfā' awsaṭ (intermédiaire)", "les 10 lettres restantes", "ikhfā' moyen"]
+          ]
+        }
+      },
+      {
+        "heading": "5. Exemples coraniques avec nūn sākin",
+        "arabicExamples": [
+          {"ar": "مَن ذَا الَّذِي", "translit": "man dhā alladhī", "note": "ikhfā' avec dhāl — Al-Baqara 2:255"},
+          {"ar": "أَنْتُمْ", "translit": "antum", "note": "ikhfā' avec tā' — Āl ʿImrān 3:110"},
+          {"ar": "مِن قَبْلِ", "translit": "min qabli", "note": "ikhfā' avec qāf — Al-Baqara 2:4"},
+          {"ar": "مِن كُلِّ", "translit": "min kulli", "note": "ikhfā' avec kāf — Ibrāhīm 14:34"}
+        ]
+      },
+      {
+        "heading": "6. Exemples coraniques avec tanwīn",
+        "arabicExamples": [
+          {"ar": "سَمِيعًا بَصِيرًا", "translit": "samīʿam baṣīrā — attention iqlāb pas ikhfā'", "note": "à ne pas confondre : ب déclenche l'iqlāb"},
+          {"ar": "رِيحٌ صَرْصَرٌ", "translit": "rīḥun ṣarṣar", "note": "ikhfā' avec ṣād — Al-Ḥāqqa 69:6"},
+          {"ar": "قَوْمًا ضَالِّينَ", "translit": "qawman ḍāllīn", "note": "ikhfā' avec ḍād — Al-Māʾida 5:77"}
+        ]
+      },
+      {
+        "heading": "7. Comment prononcer correctement l'ikhfā'",
+        "bullets": [
+          "Position de la langue proche du nūn mais sans contact complet",
+          "Laisser passer l'air par le nez (khayshūm) pendant 2 temps",
+          "Anticiper légèrement la position de la lettre suivante",
+          "Éviter de transformer l'ikhfā' en iẓhār (trop clair) ou en idghām (fusion totale)"
+        ]
+      },
+      {
+        "heading": "8. Différencier ikhfā', iẓhār et idghām",
+        "table": {
+          "headers": ["Règle", "Lettres déclenchantes", "Ghunna"],
+          "rows": [
+            ["Iẓhār ḥalqī", "ء ه ع ح غ خ", "aucune"],
+            ["Idghām", "ي ر م ل و ن", "selon la lettre"],
+            ["Ikhfā' ḥaqīqī", "les 15 lettres restantes", "oui, 2 temps"]
+          ]
+        }
+      }
+    ],
+    "practice": {
+      "heading": "Exercice d'application",
+      "lines": [
+        "Mémorise le vers mnémotechnique des 15 lettres",
+        "Repère 3 exemples d'ikhfā' dans la sourate Al-Mulk",
+        "Enregistre-toi et vérifie la tenue de la ghunna sur 2 temps",
+        "Compare ta prononciation avec un récitateur de référence (ex. Al-Ḥuṣarī)"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI • Fiche Ikhfā'"
+  },
+  {
+    "id": "tajweed-qalqala",
+    "title": "Qalqala",
+    "subtitle": "Qutb jad — les 5 lettres à rebond — Nassihah / TajweedTutorAI",
+    "intro": "La qalqala est un rebond sonore produit sur certaines lettres sākina (sans voyelle), créant un léger écho. Cette fiche présente les 5 lettres concernées, les 3 degrés (sughrā, kubrā, akbar) et des exemples coraniques précis.",
+    "sections": [
+      {
+        "heading": "1. Définition de la qalqala",
+        "body": "Qalqala signifie « ébranlement, vibration ». Elle se produit quand une des 5 lettres qutb jad est sākina (porte un sukūn) : le point d'articulation vibre et produit un léger écho, sans ajouter de voyelle."
+      },
+      {
+        "heading": "2. Les 5 lettres qutb jad",
+        "bullets": [
+          "ق (qāf)",
+          "ط (ṭā')",
+          "ب (bā')",
+          "ج (jīm)",
+          "د (dāl)"
+        ]
+      },
+      {
+        "heading": "3. Pourquoi ces 5 lettres ?",
+        "body": "Elles partagent la caractéristique de shidda (occlusion complète du son) combinée au jahr (voisement), ce qui produit naturellement un rebond quand le son est bloqué puis relâché."
+      },
+      {
+        "heading": "4. Qalqala sughrā (mineure)",
+        "body": "La lettre qutb jad est sākina à l'intérieur du mot (sukūn originel). Le rebond est léger.",
+        "arabicExamples": [
+          {"ar": "يَجْعَلُونَ", "translit": "yajʿalūna", "note": "qalqala sughrā sur le jīm — Al-Baqara 2:19"},
+          {"ar": "أَدْرَاكَ", "translit": "adrāka", "note": "qalqala sughrā sur le dāl — Al-Qadr 97:2"}
+        ]
+      },
+      {
+        "heading": "5. Qalqala kubrā (majeure)",
+        "body": "La lettre qutb jad se trouve en fin de mot et devient sākina uniquement à cause de l'arrêt (waqf). Le rebond est plus prononcé.",
+        "arabicExamples": [
+          {"ar": "الْفَلَقْ", "translit": "al-falaq (en pause)", "note": "qalqala kubrā sur le qāf — Al-Falaq 113:1"},
+          {"ar": "أَحَدْ", "translit": "aḥad (en pause)", "note": "qalqala kubrā sur le dāl — Al-Ikhlāṣ 112:1"}
+        ]
+      },
+      {
+        "heading": "6. Qalqala akbar (la plus forte)",
+        "body": "Cas particulier : la lettre qutb jad porte une shadda et se trouve en fin de mot marqué par l'arrêt. Le rebond est alors maximal.",
+        "arabicExamples": [
+          {"ar": "تَبَّتْ يَدَا أَبِي لَهَبٍ وَتَبَّ", "translit": "wa tabb (en pause)", "note": "qalqala akbar sur le bā' doublé — Al-Masad 111:1"},
+          {"ar": "وَالْحَقِّ", "translit": "wal-ḥaqq (en pause)", "note": "qalqala akbar sur le qāf doublé — Ṣād 38:84"}
+        ]
+      },
+      {
+        "heading": "7. Erreurs fréquentes",
+        "bullets": [
+          "Ajouter une voyelle après la lettre (ex. dire 'qad-a' au lieu de 'qad')",
+          "Exagérer le rebond au point de créer un écho artificiel trop long",
+          "Oublier la qalqala kubrā en fin de verset lors de l'arrêt",
+          "Confondre qalqala et emphase (tafkhīm) — ce sont deux caractéristiques différentes"
+        ]
+      },
+      {
+        "heading": "8. Récapitulatif des degrés",
+        "table": {
+          "headers": ["Degré", "Contexte", "Intensité"],
+          "rows": [
+            ["Sughrā", "sukūn à l'intérieur du mot", "légère"],
+            ["Kubrā", "sukūn de waqf en fin de mot", "moyenne à forte"],
+            ["Akbar", "shadda + waqf en fin de mot", "maximale"]
+          ]
+        }
+      }
+    ],
+    "practice": {
+      "heading": "Exercice d'application",
+      "lines": [
+        "Récite Al-Ikhlāṣ en marquant bien la qalqala kubrā sur 'aḥad'",
+        "Repère 5 qalqala sughrā dans la sourate Al-Mulk",
+        "Trouve un exemple de qalqala akbar dans le juz' ʿAmma",
+        "Enregistre-toi pour vérifier que tu n'ajoutes pas de voyelle parasite"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI • Fiche Qalqala"
+  },
+  {
+    "id": "memorisation-al-fatiha",
+    "title": "Mémoriser Al-Fātiḥa",
+    "subtitle": "7 versets, sens et règles de tajwīd — Nassihah / TajweedTutorAI",
+    "intro": "Al-Fātiḥa (l'Ouverture) est la première sourate du Coran, composée de 7 versets, récitée dans chaque unité de prière (rakʿa). Cette fiche détaille chaque verset, son sens et les règles de tajwīd qui s'y appliquent, avec une grille de répétition.",
+    "sections": [
+      {
+        "heading": "1. Présentation générale",
+        "bullets": [
+          "Nom : Al-Fātiḥa (l'Ouverture)",
+          "Nombre de versets : 7",
+          "Lieu de révélation : La Mecque (makkiyya)",
+          "Surnommée aussi Umm al-Kitāb (la mère du Livre) et As-Sabʿ al-Mathānī (les sept versets répétés)"
+        ]
+      },
+      {
+        "heading": "2. Verset 1 — la basmala",
+        "arabicExamples": [
+          {"ar": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ", "translit": "bismi Llāhi r-raḥmāni r-raḥīm", "note": "Al-Fātiḥa 1:1 — au nom d'Allah, le Tout Miséricordieux, le Très Miséricordieux"}
+        ],
+        "bullets": [
+          "Tajwīd : lām de tafkhīm dans « Allāh » car précédé d'une kasra ici (règle générale : après fatḥa/ḍamma emphase, après kasra fin)",
+          "Mudd aṣlī sur le alif de Ar-Raḥmān"
+        ]
+      },
+      {
+        "heading": "3. Verset 2",
+        "arabicExamples": [
+          {"ar": "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ", "translit": "al-ḥamdu lillāhi rabbi l-ʿālamīn", "note": "Al-Fātiḥa 1:2 — la louange appartient à Allah, Seigneur des mondes"}
+        ],
+        "bullets": [
+          "Tajwīd : lām emphatique dans « lillāhi » (précédé de ḍamma)",
+          "Idghām shamsiyya absent ici ; attention à la liaison al-ḥamdu / lillāhi"
+        ]
+      },
+      {
+        "heading": "4. Versets 3 et 4",
+        "arabicExamples": [
+          {"ar": "الرَّحْمَٰنِ الرَّحِيمِ", "translit": "ar-raḥmāni r-raḥīm", "note": "Al-Fātiḥa 1:3 — le Tout Miséricordieux, le Très Miséricordieux"},
+          {"ar": "مَالِكِ يَوْمِ الدِّينِ", "translit": "māliki yawmi d-dīn", "note": "Al-Fātiḥa 1:4 — Maître du Jour du Jugement"}
+        ],
+        "bullets": [
+          "Idghām shamsiyya sur الدِّينِ : le lām se fond dans le dāl",
+          "Mudd ʿāriḍ li-s-sukūn possible sur 'dīn' si on marque une pause"
+        ]
+      },
+      {
+        "heading": "5. Verset 5",
+        "arabicExamples": [
+          {"ar": "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ", "translit": "iyyāka naʿbudu wa-iyyāka nastaʿīn", "note": "Al-Fātiḥa 1:5 — c'est Toi seul que nous adorons, et c'est Toi seul dont nous implorons secours"}
+        ],
+        "bullets": [
+          "Ghunna renforcée sur la shadda du yā' dans « iyyāka »",
+          "Répétition rhétorique insistant sur le tawḥīd (adoration exclusive)"
+        ]
+      },
+      {
+        "heading": "6. Verset 6",
+        "arabicExamples": [
+          {"ar": "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ", "translit": "ihdinā ṣ-ṣirāṭa l-mustaqīm", "note": "Al-Fātiḥa 1:6 — guide-nous sur le droit chemin"}
+        ],
+        "bullets": [
+          "Emphase (tafkhīm) sur le ṣād et le ṭā'",
+          "Idghām shamsiyya sur الصِّرَاطَ"
+        ]
+      },
+      {
+        "heading": "7. Verset 7",
+        "arabicExamples": [
+          {"ar": "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ", "translit": "ṣirāṭa lladhīna anʿamta ʿalayhim ghayri l-maghḍūbi ʿalayhim wa lā ḍ-ḍāllīn", "note": "Al-Fātiḥa 1:7 — le chemin de ceux que Tu as comblés de faveurs, non pas de ceux qui ont encouru Ta colère, ni des égarés"}
+        ],
+        "bullets": [
+          "Ikhfā' ḥalqī... en réalité iẓhār sur 'an-ʿamta' (ʿayn = lettre gutturale, iẓhār)",
+          "Mudd lāzim (6 temps) sur الضَّالِّينَ",
+          "Dernier verset conclu par āmīn (invocation, pas partie du verset)"
+        ]
+      },
+      {
+        "heading": "8. Grille de répétition recommandée",
+        "table": {
+          "headers": ["Jour", "Objectif"],
+          "rows": [
+            ["1-2", "écoute et répétition versets 1 à 3"],
+            ["3-4", "écoute et répétition versets 4 à 7"],
+            ["5", "récitation complète guidée"],
+            ["6-7", "récitation complète sans support, correction des erreurs"]
+          ]
+        }
+      }
+    ],
+    "practice": {
+      "heading": "Auto-évaluation",
+      "lines": [
+        "Je récite les 7 versets sans erreur de mémorisation",
+        "Je respecte le mudd lāzim sur ad-dāllīn",
+        "Je marque bien l'idghām shamsiyya (as-ṣirāṭ, ad-dīn, ad-dāllīn)",
+        "Je comprends le sens général de chaque verset"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI • Mémorisation Al-Fātiḥa"
+  },
+  {
+    "id": "memorisation-al-ikhlas",
+    "title": "Mémoriser Al-Ikhlāṣ",
+    "subtitle": "4 versets, sens et règles de tajwīd — Nassihah / TajweedTutorAI",
+    "intro": "Al-Ikhlāṣ (la pureté du monothéisme) est une courte sourate de 4 versets qui résume l'unicité absolue d'Allah. Le Prophète ﷺ a enseigné qu'elle équivaut au tiers du Coran (Bukhari). Cette fiche détaille chaque verset avec son sens et ses règles de tajwīd.",
+    "sections": [
+      {
+        "heading": "1. Présentation générale",
+        "bullets": [
+          "Nom : Al-Ikhlāṣ (la pureté / le monothéisme pur)",
+          "Nombre de versets : 4",
+          "Lieu de révélation : La Mecque (makkiyya)",
+          "Aussi appelée Sūrat at-Tawḥīd"
+        ]
+      },
+      {
+        "heading": "2. Verset 1",
+        "arabicExamples": [
+          {"ar": "قُلْ هُوَ اللَّهُ أَحَدٌ", "translit": "qul huwa Allāhu aḥad", "note": "Al-Ikhlāṣ 112:1 — dis : Il est Allah, Unique"}
+        ],
+        "bullets": [
+          "Qalqala sughrā sur le qāf de 'qul'",
+          "Lām emphatique dans 'Allāh' (précédé de ḍamma)",
+          "Qalqala kubrā sur 'aḥad' si l'on s'arrête"
+        ]
+      },
+      {
+        "heading": "3. Verset 2",
+        "arabicExamples": [
+          {"ar": "اللَّهُ الصَّمَدُ", "translit": "Allāhu ṣ-ṣamad", "note": "Al-Ikhlāṣ 112:2 — Allah, Le Seul à être imploré pour ce que nous désirons"}
+        ],
+        "bullets": [
+          "Idghām shamsiyya sur الصَّمَدُ",
+          "Emphase sur le ṣād"
+        ]
+      },
+      {
+        "heading": "4. Verset 3",
+        "arabicExamples": [
+          {"ar": "لَمْ يَلِدْ وَلَمْ يُولَدْ", "translit": "lam yalid wa lam yūlad", "note": "Al-Ikhlāṣ 112:3 — Il n'a pas engendré et n'a pas été engendré"}
+        ],
+        "bullets": [
+          "Iẓhār clair sur mīm sākina de 'lam' devant yā' et wāw (pas ikhfā' shafawī car les lettres ne sont ni bā' ni mīm)",
+          "Attention à ne pas allonger 'yalid' et 'yūlad' au-delà du naturel"
+        ]
+      },
+      {
+        "heading": "5. Verset 4",
+        "arabicExamples": [
+          {"ar": "وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ", "translit": "wa lam yakul lahu kufuwan aḥad", "note": "Al-Ikhlāṣ 112:4 — et nul n'est égal à Lui"}
+        ],
+        "bullets": [
+          "Idghām bilā ghunna : nūn sākin de 'yakun' fusionne avec le lām de 'lahu'",
+          "Qalqala kubrā finale sur 'aḥad' en pause"
+        ]
+      },
+      {
+        "heading": "6. Sens théologique global",
+        "bullets": [
+          "Affirmation de l'unicité absolue d'Allah (tawḥīd al-ulūhiyya)",
+          "Négation de toute association ou ressemblance",
+          "Négation de la filiation (ni parent ni enfant)",
+          "Négation de tout équivalent ou égal à Allah"
+        ]
+      },
+      {
+        "heading": "7. Mérite de la sourate",
+        "bullets": [
+          "Le Prophète ﷺ : « Elle équivaut au tiers du Coran » (Bukhari, Muslim)",
+          "Recommandée dans les invocations du matin et du soir (trois fois)",
+          "Récitée dans les deux rakʿa de la Sunna après le Maghrib et le Fajr"
+        ]
+      },
+      {
+        "heading": "8. Grille de répétition",
+        "table": {
+          "headers": ["Jour", "Objectif"],
+          "rows": [
+            ["1", "écoute et répétition des versets 1 et 2"],
+            ["2", "écoute et répétition des versets 3 et 4"],
+            ["3", "récitation complète guidée avec application des règles de tajwīd"],
+            ["4", "récitation complète sans support, auto-correction"]
+          ]
+        }
+      }
+    ],
+    "practice": {
+      "heading": "Auto-évaluation",
+      "lines": [
+        "Je récite les 4 versets sans erreur",
+        "Je marque la qalqala sur qul et aḥad",
+        "Je marque l'idghām bilā ghunna dans yakul-lahu",
+        "Je peux expliquer le sens du tawḥīd contenu dans cette sourate"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI • Mémorisation Al-Ikhlāṣ"
+  },
+  {
+    "id": "memorisation-al-falaq-an-nas",
+    "title": "Mémoriser Al-Falaq et An-Nās",
+    "subtitle": "Les deux sourates de protection (al-Muʿawwidhatān) — Nassihah / TajweedTutorAI",
+    "intro": "Al-Falaq et An-Nās sont les deux dernières sourates du Coran, appelées al-Muʿawwidhatān (les deux protectrices). Elles enseignent à chercher refuge auprès d'Allah contre les maux visibles et invisibles. Cette fiche détaille chaque verset, son sens et ses règles de tajwīd.",
+    "sections": [
+      {
+        "heading": "1. Présentation générale d'Al-Falaq",
+        "bullets": [
+          "Nom : Al-Falaq (l'Aube naissante)",
+          "Nombre de versets : 5",
+          "Lieu de révélation : La Mecque (makkiyya)",
+          "Fait partie des al-Muʿawwidhatān avec An-Nās"
+        ]
+      },
+      {
+        "heading": "2. Al-Falaq versets 1 à 3",
+        "arabicExamples": [
+          {"ar": "قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ", "translit": "qul aʿūdhu bi-rabbi l-falaq", "note": "Al-Falaq 113:1 — dis : je cherche refuge auprès du Seigneur de l'aube naissante"},
+          {"ar": "مِن شَرِّ مَا خَلَقَ", "translit": "min sharri mā khalaq", "note": "Al-Falaq 113:2 — contre le mal des êtres qu'Il a créés"},
+          {"ar": "وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ", "translit": "wa min sharri ghāsiqin idhā waqab", "note": "Al-Falaq 113:3 — et contre le mal de l'obscurité quand elle s'installe"}
+        ],
+        "bullets": [
+          "Ikhfā' ḥaqīqī sur 'min sharri' (nūn sākin devant shīn)",
+          "Qalqala kubrā sur 'al-falaq' en fin de verset"
+        ]
+      },
+      {
+        "heading": "3. Al-Falaq versets 4 et 5",
+        "arabicExamples": [
+          {"ar": "وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ", "translit": "wa min sharri n-naffāthāti fi l-ʿuqad", "note": "Al-Falaq 113:4 — et contre le mal de celles qui soufflent sur les nœuds"},
+          {"ar": "وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ", "translit": "wa min sharri ḥāsidin idhā ḥasad", "note": "Al-Falaq 113:5 — et contre le mal de l'envieux quand il envie"}
+        ],
+        "bullets": [
+          "Idghām shamsiyya sur النَّفَّاثَاتِ",
+          "Iẓhār ḥalqī sur 'idhā ḥasad' (nūn... en réalité pas de nūn sākin ici — attention aux ikhfā' sur 'min sharri')"
+        ]
+      },
+      {
+        "heading": "4. Présentation générale d'An-Nās",
+        "bullets": [
+          "Nom : An-Nās (les Hommes)",
+          "Nombre de versets : 6",
+          "Lieu de révélation : La Mecque (makkiyya)",
+          "Dernière sourate du muṣḥaf"
+        ]
+      },
+      {
+        "heading": "5. An-Nās versets 1 à 3",
+        "arabicExamples": [
+          {"ar": "قُلْ أَعُوذُ بِرَبِّ النَّاسِ", "translit": "qul aʿūdhu bi-rabbi n-nās", "note": "An-Nās 114:1 — dis : je cherche refuge auprès du Seigneur des hommes"},
+          {"ar": "مَلِكِ النَّاسِ", "translit": "maliki n-nās", "note": "An-Nās 114:2 — le Souverain des hommes"},
+          {"ar": "إِلَٰهِ النَّاسِ", "translit": "ilāhi n-nās", "note": "An-Nās 114:3 — le Dieu des hommes"}
+        ],
+        "bullets": [
+          "Idghām shamsiyya répété 3 fois sur النَّاسِ",
+          "Qalqala sughrā sur le qāf de 'qul'"
+        ]
+      },
+      {
+        "heading": "6. An-Nās versets 4 à 6",
+        "arabicExamples": [
+          {"ar": "مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ", "translit": "min sharri l-waswāsi l-khannās", "note": "An-Nās 114:4 — contre le mal du mauvais conseiller, furtif"},
+          {"ar": "الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ", "translit": "alladhī yuwaswisu fī ṣudūri n-nās", "note": "An-Nās 114:5 — qui souffle le mal dans les poitrines des hommes"},
+          {"ar": "مِنَ الْجِنَّةِ وَالنَّاسِ", "translit": "mina l-jinnati wa n-nās", "note": "An-Nās 114:6 — qu'il soit des djinns ou des hommes"}
+        ],
+        "bullets": [
+          "Ikhfā' ḥaqīqī sur 'min sharri' (nūn sākin devant shīn)",
+          "Emphase sur le ṣād de 'ṣudūr'"
+        ]
+      },
+      {
+        "heading": "7. Mérite et usage des deux sourates",
+        "bullets": [
+          "Récitées avec Al-Ikhlāṣ dans les invocations du matin et du soir",
+          "Le Prophète ﷺ les récitait avant de dormir en soufflant dans ses mains (Bukhari)",
+          "Protection reconnue contre le mauvais œil, la sorcellerie et les murmures sataniques"
+        ]
+      },
+      {
+        "heading": "8. Grille de répétition combinée",
+        "table": {
+          "headers": ["Jour", "Objectif"],
+          "rows": [
+            ["1", "Al-Falaq versets 1 à 3"],
+            ["2", "Al-Falaq versets 4 et 5 + révision complète"],
+            ["3", "An-Nās versets 1 à 3"],
+            ["4", "An-Nās versets 4 à 6 + révision complète"],
+            ["5", "récitation enchaînée des deux sourates sans support"]
+          ]
+        }
+      }
+    ],
+    "practice": {
+      "heading": "Auto-évaluation",
+      "lines": [
+        "Je récite Al-Falaq et An-Nās sans erreur de mémorisation",
+        "Je marque l'idghām shamsiyya sur an-nās à chaque occurrence",
+        "Je marque l'ikhfā' sur min sharri",
+        "Je connais le contexte et le mérite des al-Muʿawwidhatān"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI • Mémorisation Al-Falaq & An-Nās"
+  }
+]

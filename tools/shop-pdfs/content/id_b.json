@@ -1,0 +1,752 @@
+[
+  {
+    "id": "livret-1-complet",
+    "title": "Buku Saku 1: Perjalananku Bersama Al-Qur'an",
+    "subtitle": "Panduan lengkap pemula: tajwid dasar, adab, dan langkah pertama hafalan",
+    "intro": "Buku saku ini menemani pemula dari huruf hijaiyah hingga hafalan surah pertama. Setiap bagian disusun bertahap agar mudah diikuti tanpa guru pendamping. Sertakan waktu latihan harian singkat agar kebiasaan terbentuk.",
+    "sections": [
+      {
+        "heading": "1. Adab sebelum membaca Al-Qur'an",
+        "body": "Adab batin dan lahir menyempurnakan pahala membaca.",
+        "bullets": [
+          "Berwudu sebelum menyentuh mushaf",
+          "Duduk menghadap kiblat jika memungkinkan",
+          "Membaca taawwudz: A'udzu billahi minasy-syaithanir-rajim",
+          "Membaca basmalah di awal setiap surah kecuali At-Taubah",
+          "Membaca dengan tenang (tartil), bukan tergesa-gesa (QS Al-Muzzammil 73:4)"
+        ]
+      },
+      {
+        "heading": "2. Huruf hijaiyah dan sifatnya",
+        "body": "28 huruf hijaiyah terbagi menurut makhraj dan sifat huruf.",
+        "table": {
+          "headers": ["Kelompok", "Huruf", "Contoh sifat"],
+          "rows": [
+            ["Halqiyah (tenggorokan)", "ء ه ع ح غ خ", "Hams/jahr bervariasi"],
+            ["Lisaniyah (lidah)", "ق ك ج ش ي ض ل ن ر ط د ت ص ز س ظ ذ ث", "Qalqalah pada ق ط ب ج د"],
+            ["Syafawiyah (bibir)", "ف و ب م", "Ikhfa syafawi khusus م"]
+          ]
+        },
+        "arabicExamples": [
+          {"ar": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ", "translit": "Bismillahir-rahmanir-rahim", "note": "QS Al-Fatihah 1:1"}
+        ]
+      },
+      {
+        "heading": "3. Harakat dan tanda baca dasar",
+        "bullets": [
+          "Fathah (َ) bunyi 'a', kasrah (ِ) bunyi 'i', dammah (ُ) bunyi 'u'",
+          "Sukun (ْ) huruf mati, tasydid (ّ) huruf ganda",
+          "Tanwin (ً ٍ ٌ) bunyi 'an/in/un' di akhir kata",
+          "Mad thabi'i: alif, wau, ya sukun setelah harakat sejenis, dipanjangkan 2 harakat"
+        ],
+        "arabicExamples": [
+          {"ar": "قَالُوا", "translit": "qaalu", "note": "mad thabi'i dengan wau, QS Al-Baqarah 2:11"}
+        ]
+      },
+      {
+        "heading": "4. Nun sukun dan tanwin: empat hukum",
+        "table": {
+          "headers": ["Hukum", "Huruf", "Cara baca"],
+          "rows": [
+            ["Izhar halqi", "ء ه ع ح غ خ", "Jelas tanpa dengung"],
+            ["Idgham", "ي ر م ل و ن", "Melebur, dengan/tanpa ghunnah"],
+            ["Iqlab", "ب", "Berubah menjadi mim dengan dengung"],
+            ["Ikhfa", "15 huruf sisanya", "Samar dengan dengung"]
+          ]
+        },
+        "arabicExamples": [
+          {"ar": "مِنْ بَعْدِ", "translit": "mim ba'di", "note": "iqlab, QS Al-Baqarah 2:27"}
+        ]
+      },
+      {
+        "heading": "5. Mim sukun: tiga hukum",
+        "bullets": [
+          "Ikhfa syafawi: mim sukun bertemu ب, dengung 2 harakat",
+          "Idgham mitslain: mim sukun bertemu mim, melebur dengan dengung",
+          "Izhar syafawi: mim sukun bertemu huruf selain ب dan م, jelas"
+        ],
+        "arabicExamples": [
+          {"ar": "تَرْمِيهِم بِحِجَارَةٍ", "translit": "tarmihim bihijaratin", "note": "ikhfa syafawi, QS Al-Fil 105:4"}
+        ]
+      },
+      {
+        "heading": "6. Waqf: berhenti dan melanjutkan bacaan",
+        "table": {
+          "headers": ["Tanda", "Nama", "Arti"],
+          "rows": [
+            ["مـ", "Waqf lazim", "Wajib berhenti"],
+            ["لا", "La waqfa fih", "Dilarang berhenti"],
+            ["ج", "Waqf jaiz", "Boleh berhenti atau lanjut"],
+            ["قلى", "Al-waqf awla", "Lebih utama berhenti"]
+          ]
+        }
+      },
+      {
+        "heading": "7. Memulai hafalan pertama",
+        "bullets": [
+          "Mulai dengan Al-Fatihah, lalu An-Nas hingga Ad-Duha (juz 30 pendek)",
+          "Ulangi satu ayat 10-20 kali sebelum lanjut ayat berikutnya",
+          "Gabungkan ayat per ayat setiap akhir sesi",
+          "Perdengarkan hafalan kepada orang lain untuk koreksi (talaqqi)"
+        ]
+      },
+      {
+        "heading": "8. Grid evaluasi mingguan pemula",
+        "table": {
+          "headers": ["Hari", "Target", "Kelancaran (1-5)", "Catatan tajwid"],
+          "rows": [
+            ["Senin", "Al-Fatihah ayat 1-3", "", ""],
+            ["Rabu", "Al-Fatihah ayat 4-7", "", ""],
+            ["Jumat", "Ulangan penuh Al-Fatihah", "", ""]
+          ]
+        }
+      }
+    ],
+    "practice": {
+      "heading": "Latihan harian 10 menit",
+      "lines": [
+        "Baca ulang huruf hijaiyah dengan makhraj yang benar",
+        "Praktikkan satu hukum nun sukun/tanwin dengan 3 contoh dari mushaf",
+        "Hafalkan atau ulangi satu ayat baru",
+        "Tutup sesi dengan doa: Rabbi zidni 'ilma (QS Taha 20:114)"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI | Buku Saku 1: Perjalananku Bersama Al-Qur'an"
+  },
+  {
+    "id": "livret-2-complet",
+    "title": "Buku Saku 2: Koleksi Master Tajwid",
+    "subtitle": "Seluruh kaidah besar tajwid dalam satu referensi ringkas",
+    "intro": "Buku saku ini merangkum kaidah-kaidah utama tajwid riwayat Hafs untuk pembaca yang telah menguasai dasar. Digunakan sebagai referensi cepat saat murajaah atau talaqqi dengan guru. Setiap kaidah disertai contoh ayat konkret.",
+    "sections": [
+      {
+        "heading": "1. Makharij al-huruf: lima zona utama",
+        "table": {
+          "headers": ["Zona", "Nama Arab", "Contoh huruf"],
+          "rows": [
+            ["Rongga mulut/tenggorokan", "Al-Jawf", "Huruf mad ا و ي"],
+            ["Tenggorokan", "Al-Halq", "ء ه ع ح غ خ"],
+            ["Lidah", "Al-Lisan", "17 titik makhraj, mis. ق ك ش ج ي ل ن ر"],
+            ["Dua bibir", "Asy-Syafatan", "ف و ب م"],
+            ["Rongga hidung", "Al-Khaysyum", "Ghunnah pada semua nun/mim bertasydid"]
+          ]
+        }
+      },
+      {
+        "heading": "2. Sifat huruf berlawanan",
+        "bullets": [
+          "Hams (nafas keluar) vs Jahr (nafas tertahan)",
+          "Syiddah (tertahan penuh) vs Rakhawah (nafas mengalir) vs Tawassuth (pertengahan)",
+          "Isti'la (terangkat, tebal) vs Istifal (turun, tipis)",
+          "Ithbaq (menempel langit-langit): ص ض ط ظ"
+        ]
+      },
+      {
+        "heading": "3. Idgham lengkap: yarmaluna dan mitslain",
+        "table": {
+          "headers": ["Jenis", "Huruf/kondisi", "Contoh"],
+          "rows": [
+            ["Idgham bighunnah", "ي ن م و", "مَن يَقُولُ"],
+            ["Idgham bilaghunnah", "ل ر", "مِن رَّبِّهِمْ"],
+            ["Idgham mitslain", "huruf sama sukun-berharakat", "قَدْ دَخَلُوا"],
+            ["Idgham mutajanisain", "makhraj sama sifat beda", "قَالَت طَّائِفَةٌ"]
+          ]
+        },
+        "arabicExamples": [
+          {"ar": "مَن يَعْمَلْ", "translit": "may ya'mal", "note": "idgham bighunnah, QS Az-Zalzalah 99:7"}
+        ]
+      },
+      {
+        "heading": "4. Ikhfa haqiqi dan syafawi",
+        "bullets": [
+          "Ikhfa haqiqi: nun sukun/tanwin bertemu 15 huruf selain izhar, idgham, iqlab",
+          "Dengung ditahan 2 harakat, lidah mendekat tanpa menyentuh makhraj",
+          "Ikhfa syafawi: mim sukun bertemu ب, bibir tertutup ringan dengan dengung"
+        ],
+        "arabicExamples": [
+          {"ar": "مِن ثَمَرَةٍ", "translit": "min tsamaratin", "note": "ikhfa haqiqi, QS Al-Baqarah 2:25"}
+        ]
+      },
+      {
+        "heading": "5. Qalqalah: sughra, kubra, akbar",
+        "table": {
+          "headers": ["Jenis", "Kondisi", "Contoh"],
+          "rows": [
+            ["Sughra", "huruf qutb jad sukun di tengah kata", "يَجْعَلُونَ"],
+            ["Kubra", "huruf qutb jad sukun karena waqf", "الْفَلَقْ (waqf)"],
+            ["Akbar", "huruf bertasydid karena waqf", "الْحَقُّ (waqf)"]
+          ]
+        },
+        "arabicExamples": [
+          {"ar": "وَتَبَّ", "translit": "wa tabb", "note": "qalqalah kubra saat waqf, QS Al-Masad 111:1"}
+        ]
+      },
+      {
+        "heading": "7. Mad far'i utama",
+        "table": {
+          "headers": ["Nama", "Panjang", "Contoh"],
+          "rows": [
+            ["Mad wajib muttasil", "4-5 harakat", "جَاءَ"],
+            ["Mad jaiz munfasil", "2/4/5 harakat", "يَا أَيُّهَا"],
+            ["Mad 'aridh lissukun", "2/4/6 harakat", "الْعَالَمِينَ (waqf)"],
+            ["Mad lin", "2/4/6 harakat", "خَوْفٍ (waqf)"],
+            ["Mad lazim", "6 harakat", "الضَّالِّينَ"]
+          ]
+        }
+      },
+      {
+        "heading": "8. Tafkhim dan tarqiq huruf ra dan lam",
+        "bullets": [
+          "Ra tafkhim: berharakat fathah/dammah, atau sukun didahului fathah/dammah",
+          "Ra tarqiq: berharakat kasrah, atau sukun didahului kasrah",
+          "Lam tafkhim hanya pada lafaz Allah setelah fathah/dammah",
+          "Contoh tafkhim: QS Al-Fatihah 1:6 (اهْدِنَا الصِّرَاطَ)"
+        ]
+      }
+    ],
+    "practice": {
+      "heading": "Sesi murajaah kaidah",
+      "lines": [
+        "Pilih satu halaman mushaf, tandai semua hukum nun sukun/tanwin",
+        "Identifikasi jenis mad pada setiap kata bergaris panjang",
+        "Latih qalqalah kubra dengan mewaqafkan lima ayat berbeda",
+        "Rekam bacaan dan bandingkan dengan qari rujukan"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI | Buku Saku 2: Koleksi Master Tajwid"
+  },
+  {
+    "id": "tajweed-idgham",
+    "title": "Idgham",
+    "subtitle": "Enam huruf yarmaluna, dengan dan tanpa dengung",
+    "intro": "Idgham berarti memasukkan atau meleburkan nun sukun/tanwin ke huruf sesudahnya. Kaidah ini berlaku pada enam huruf yang terkumpul dalam kata yarmaluna. Pembagian menjadi dua jenis menentukan ada tidaknya dengung.",
+    "sections": [
+      {
+        "heading": "1. Definisi idgham",
+        "body": "Idgham secara bahasa berarti memasukkan sesuatu ke dalam sesuatu. Secara istilah, meleburkan nun sukun atau tanwin ke huruf idgham sesudahnya sehingga menjadi satu huruf bertasydid.",
+        "bullets": [
+          "Terjadi hanya antar dua kata (bukan dalam satu kata)",
+          "Enam huruf idgham terkumpul dalam kata يَرْمُلُونَ (yarmaluna): ي ر م ل و ن"
+        ]
+      },
+      {
+        "heading": "2. Idgham bighunnah (dengan dengung)",
+        "bullets": [
+          "Empat huruf: ي ن م و",
+          "Dengung ditahan sekitar 2 harakat",
+          "Berlaku antar kata; bila dalam satu kata dibaca izhar (contoh: دُنْيَا)"
+        ],
+        "table": {
+          "headers": ["Huruf", "Contoh", "Sumber"],
+          "rows": [
+            ["ي", "مَن يَقُولُ", "QS Al-Baqarah 2:8"],
+            ["ن", "مِن نِّعْمَةٍ", "QS An-Nahl 16:53"],
+            ["م", "مِن مَّاءٍ", "QS Al-Furqan 25:54"],
+            ["و", "مِن وَلِيٍّ", "QS Al-Baqarah 2:107"]
+          ]
+        }
+      },
+      {
+        "heading": "3. Idgham bilaghunnah (tanpa dengung)",
+        "bullets": [
+          "Dua huruf: ل ر",
+          "Lidah langsung melebur tanpa dengung",
+          "Sering muncul dalam kata seperti مِن رَّبِّهِمْ"
+        ],
+        "table": {
+          "headers": ["Huruf", "Contoh", "Sumber"],
+          "rows": [
+            ["ل", "هُدًى لِّلْمُتَّقِينَ", "QS Al-Baqarah 2:2"],
+            ["ر", "غَفُورٌ رَّحِيمٌ", "QS Al-Baqarah 2:173"]
+          ]
+        }
+      },
+      {
+        "heading": "4. Pengecualian: idgham kamil dan naqish",
+        "bullets": [
+          "Idgham kamil: huruf nun hilang total, sifat pun lebur (ل, ر)",
+          "Idgham naqish: huruf nun hilang tapi sifat ghunnah tetap terdengar (ي, و)",
+          "Pada huruf ن dan م, ghunnah tetap dominan karena keduanya huruf ghunnah asli"
+        ]
+      },
+      {
+        "heading": "5. Idgham mitslain, mutajanisain, mutaqaribain",
+        "table": {
+          "headers": ["Jenis", "Kondisi", "Contoh"],
+          "rows": [
+            ["Mitslain", "dua huruf sama, pertama sukun", "قَدْ دَخَلُوا (QS Al-Mujadalah 58:1)"],
+            ["Mutajanisain", "makhraj sama, sifat beda", "قَالَت طَّائِفَةٌ (QS Ali 'Imran 3:167)"],
+            ["Mutaqaribain", "makhraj berdekatan", "يَلْهَث ذَّلِكَ (QS Al-A'raf 7:176)"]
+          ]
+        }
+      },
+      {
+        "heading": "6. Latihan identifikasi huruf yarmaluna",
+        "bullets": [
+          "Hafalkan urutan huruf: ي ر م ل و ن",
+          "Latih membedakan idgham dalam satu kata vs antar kata",
+          "Perhatikan tanda tasydid kecil pada mushaf sebagai penanda idgham"
+        ]
+      },
+      {
+        "heading": "7. Kesalahan umum",
+        "bullets": [
+          "Menghilangkan dengung pada idgham bighunnah",
+          "Menambahkan dengung pada idgham bilaghunnah",
+          "Membaca idgham dalam satu kata seperti بُنْيَان padahal seharusnya izhar"
+        ]
+      }
+    ],
+    "practice": {
+      "heading": "Latihan idgham",
+      "lines": [
+        "Baca QS Al-Baqarah 2:8 dan tandai idgham bighunnah",
+        "Baca QS Al-Baqarah 2:2 dan tandai idgham bilaghunnah",
+        "Ulangi 5 kali setiap contoh sambil merasakan dengung/tanpa dengung",
+        "Minta koreksi dari pengajar untuk memastikan durasi dengung tepat"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI | Fiche Tajwid: Idgham"
+  },
+  {
+    "id": "tajweed-ikhfa",
+    "title": "Ikhfa",
+    "subtitle": "Lima belas huruf ikhfa dan cara melafalkannya dengan dengung",
+    "intro": "Ikhfa berarti menyamarkan bunyi nun sukun atau tanwin di antara izhar dan idgham, disertai dengung. Kaidah ini mencakup 15 huruf yang paling sering muncul dalam Al-Qur'an. Menguasai ikhfa sangat penting karena frekuensinya tinggi.",
+    "sections": [
+      {
+        "heading": "1. Definisi ikhfa",
+        "body": "Ikhfa secara bahasa berarti menyamarkan atau menyembunyikan. Secara istilah, melafalkan nun sukun/tanwin dengan sifat antara izhar (jelas) dan idgham (lebur), disertai dengung dan posisi lidah mendekati makhraj huruf berikutnya tanpa menyentuhnya.",
+        "bullets": [
+          "Dengung ditahan sekitar 2 harakat",
+          "Ujung lidah tidak menempel pada makhraj huruf sesudahnya"
+        ]
+      },
+      {
+        "heading": "2. Lima belas huruf ikhfa",
+        "body": "Huruf-huruf ikhfa dapat dihafal melalui bait mnemonik: 'Shif dzaa tsanaa kam jaada syakhsun qad sama, dum thayyiban zid fii tuqan dhal jaada'.",
+        "bullets": [
+          "ص ذ ث ك ج ش ق س د ط ز ف ت ض ظ"
+        ]
+      },
+      {
+        "heading": "3. Tabel huruf dan contoh",
+        "table": {
+          "headers": ["Huruf", "Contoh", "Sumber"],
+          "rows": [
+            ["ص", "مِن صِيَامٍ", "QS Al-Baqarah 2:196"],
+            ["ذ", "مَن ذَا الَّذِي", "QS Al-Baqarah 2:255"],
+            ["ث", "مِن ثَمَرَةٍ", "QS Al-Baqarah 2:25"],
+            ["ك", "يَنقَلِبُ", "QS Al-Baqarah 2:143"],
+            ["ج", "أَن جَاءَهُ", "QS 'Abasa 80:1-2"],
+            ["ش", "مَن شَاءَ", "QS 'Abasa 80:12"],
+            ["ق", "مِن قَبْلُ", "QS Al-Baqarah 2:4"],
+            ["س", "مِن سُوءٍ", "QS Al-Ma'idah 5:31"],
+            ["د", "مِن دُونِ", "QS Al-Baqarah 2:23"],
+            ["ط", "قَوْمٍ طَاغِينَ", "QS Adz-Dzariyat 51:53"],
+            ["ز", "مِن زَوَالٍ", "QS Fatir 35:41"],
+            ["ف", "مِن فَضْلِهِ", "QS An-Nisa 4:32"],
+            ["ت", "كُنتُمْ", "QS Ali 'Imran 3:110"],
+            ["ض", "مَن ضَلَّ", "QS Al-An'am 6:117"],
+            ["ظ", "أَن ظَلَمُوا", "QS An-Nahl 16:118"]
+          ]
+        }
+      },
+      {
+        "heading": "4. Ikhfa syafawi",
+        "bullets": [
+          "Mim sukun bertemu huruf ب",
+          "Bibir tertutup ringan tanpa tekanan, dengung 2 harakat",
+          "Contoh: QS Al-Fil 105:4, تَرْمِيهِم بِحِجَارَةٍ"
+        ]
+      },
+      {
+        "heading": "5. Perbedaan tingkat ikhfa (dekat, sedang, jauh)",
+        "table": {
+          "headers": ["Tingkat", "Huruf", "Keterangan"],
+          "rows": [
+            ["Aqrab (dekat)", "ط د ت", "Makhraj dekat nun, ghunnah lebih tebal"],
+            ["Ausath (sedang)", "ق ك ج ش ض ص ز ف ذ ث ظ", "Ghunnah sedang"],
+            ["Ab'ad (jauh)", "س", "Makhraj jauh, ghunnah lebih ringan"]
+          ]
+        }
+      },
+      {
+        "heading": "6. Latihan mnemonik",
+        "bullets": [
+          "Hafalkan bait: Shif dzaa tsanaa kam jaada syakhsun qad sama",
+          "Lanjutan: dum thayyiban zid fii tuqan dhal jaada",
+          "Tandai setiap huruf yang muncul dalam bait pada mushaf pribadi"
+        ]
+      },
+      {
+        "heading": "7. Kesalahan umum",
+        "bullets": [
+          "Menghilangkan dengung sehingga terdengar seperti izhar",
+          "Menyentuhkan lidah ke makhraj sehingga menjadi idgham",
+          "Memanjangkan dengung lebih dari 2 harakat"
+        ]
+      }
+    ],
+    "practice": {
+      "heading": "Latihan ikhfa",
+      "lines": [
+        "Baca QS Al-Baqarah 2:196 dan rasakan dengung pada ikhfa",
+        "Latih 5 huruf ikhfa berbeda setiap hari secara bergantian",
+        "Rekam dan bandingkan durasi dengung dengan metronom 2 ketukan",
+        "Praktikkan ikhfa syafawi pada QS Al-Fil 105:4"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI | Fiche Tajwid: Ikhfa"
+  },
+  {
+    "id": "tajweed-qalqala",
+    "title": "Qalqalah",
+    "subtitle": "Huruf qutb jad dan tiga tingkatannya: sughra, kubra, akbar",
+    "intro": "Qalqalah adalah pantulan suara yang kuat pada huruf tertentu ketika sukun. Lima huruf qalqalah terkumpul dalam kata qutb jad. Tingkat pantulan berbeda tergantung posisi huruf dalam kata dan sebab sukunnya.",
+    "sections": [
+      {
+        "heading": "1. Definisi qalqalah",
+        "body": "Qalqalah secara bahasa berarti guncangan atau getaran. Secara istilah, pantulan suara yang jelas pada huruf qalqalah saat sukun, karena huruf-huruf ini bersifat syiddah (tertahan) namun jahr (bergetar pita suara).",
+        "bullets": [
+          "Lima huruf qalqalah: ق ط ب ج د",
+          "Terangkum dalam kata mnemonik: قُطْبُ جَدٍّ (qutb jad)"
+        ]
+      },
+      {
+        "heading": "2. Qalqalah sughra (kecil)",
+        "bullets": [
+          "Huruf qalqalah sukun asli di tengah atau akhir kata, bukan karena waqf",
+          "Pantulan ringan"
+        ],
+        "arabicExamples": [
+          {"ar": "يَجْعَلُونَ", "translit": "yaj'aluna", "note": "qalqalah sughra pada ج, QS Al-Baqarah 2:19"},
+          {"ar": "أَقْرَبُ", "translit": "aqrabu", "note": "qalqalah sughra pada ق, QS Al-Baqarah 2:68"}
+        ]
+      },
+      {
+        "heading": "3. Qalqalah kubra (besar)",
+        "bullets": [
+          "Huruf qalqalah menjadi sukun karena waqf di akhir ayat/kata",
+          "Pantulan lebih kuat dan jelas dibanding sughra"
+        ],
+        "arabicExamples": [
+          {"ar": "تَبَّتْ يَدَا أَبِي لَهَبٍ وَتَبَّ", "translit": "...wa tabb (waqf)", "note": "qalqalah kubra pada ب, QS Al-Masad 111:1"},
+          {"ar": "الْفَلَقْ", "translit": "al-falaq (waqf)", "note": "qalqalah kubra pada ق, QS Al-Falaq 113:1"}
+        ]
+      },
+      {
+        "heading": "4. Qalqalah akbar (paling besar)",
+        "bullets": [
+          "Huruf qalqalah bertasydid lalu diwaqafkan",
+          "Pantulan paling kuat karena mengandung dua huruf (idgham + sukun waqf)"
+        ],
+        "arabicExamples": [
+          {"ar": "وَتَبَّ", "translit": "wa tabb", "note": "ب bertasydid diwaqafkan, QS Al-Masad 111:1"},
+          {"ar": "بِرَبِّ الْفَلَقْ", "translit": "...wal-falaq", "note": "contoh serupa pola akbar pada kata lain seperti الْحَقّ"}
+        ]
+      },
+      {
+        "heading": "5. Tabel ringkasan tiga tingkat",
+        "table": {
+          "headers": ["Tingkat", "Sebab sukun", "Kekuatan pantulan"],
+          "rows": [
+            ["Sughra", "Sukun asli di tengah kata", "Ringan"],
+            ["Kubra", "Sukun karena waqf", "Kuat"],
+            ["Akbar", "Tasydid lalu diwaqafkan", "Paling kuat"]
+          ]
+        }
+      },
+      {
+        "heading": "6. Kesalahan umum",
+        "bullets": [
+          "Melafalkan qalqalah seperti tambahan vokal 'a' atau 'e' (dikwalqalahkan berlebihan)",
+          "Mengabaikan pantulan pada qalqalah sughra",
+          "Tidak membedakan kekuatan antara sughra dan kubra"
+        ]
+      },
+      {
+        "heading": "7. Latihan identifikasi",
+        "bullets": [
+          "Cari lima kata dengan huruf ق ط ب ج د sukun di juz 30",
+          "Tandai mana yang sughra dan mana yang kubra saat waqf",
+          "Praktikkan pantulan tanpa menambahkan vokal berlebih"
+        ]
+      }
+    ],
+    "practice": {
+      "heading": "Latihan qalqalah",
+      "lines": [
+        "Baca QS Al-Masad 111:1 dengan waqaf pada 'wa tabb', rasakan qalqalah akbar",
+        "Baca QS Al-Falaq 113:1 dengan waqaf pada 'al-falaq'",
+        "Latih 5 kata qalqalah sughra dari juz 30 setiap hari",
+        "Rekam dan dengarkan ulang untuk memastikan pantulan tidak berlebihan"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI | Fiche Tajwid: Qalqalah"
+  },
+  {
+    "id": "memorisation-al-fatiha",
+    "title": "Hafalan Al-Fatihah",
+    "subtitle": "Tujuh ayat pembuka, makna, kaidah tajwid, dan grid pengulangan",
+    "intro": "Al-Fatihah adalah surah pembuka yang wajib dibaca dalam setiap rakaat salat. Tujuh ayatnya ringkas namun sarat makna tauhid, permohonan, dan petunjuk. Buku saku ini membantu menghafal dengan memahami arti dan kaidah bacaannya.",
+    "sections": [
+      {
+        "heading": "1. Keutamaan Al-Fatihah",
+        "bullets": [
+          "Disebut Umm al-Kitab (induk Al-Qur'an) dan As-Sab'ul Matsani (tujuh ayat yang diulang)",
+          "Wajib dibaca dalam setiap rakaat salat",
+          "Rasulullah bersabda tidak sah salat tanpa membaca Al-Fatihah (HR Bukhari-Muslim)"
+        ]
+      },
+      {
+        "heading": "2. Teks dan makna ayat 1-3",
+        "arabicExamples": [
+          {"ar": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ", "translit": "Bismillahir-rahmanir-rahim", "note": "QS Al-Fatihah 1:1 — Dengan nama Allah Yang Maha Pengasih, Maha Penyayang"},
+          {"ar": "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ", "translit": "Alhamdu lillahi rabbil-'alamin", "note": "QS Al-Fatihah 1:2 — Segala puji bagi Allah, Tuhan semesta alam"},
+          {"ar": "الرَّحْمَٰنِ الرَّحِيمِ", "translit": "Ar-rahmanir-rahim", "note": "QS Al-Fatihah 1:3 — Yang Maha Pengasih, Maha Penyayang"}
+        ]
+      },
+      {
+        "heading": "3. Teks dan makna ayat 4-7",
+        "arabicExamples": [
+          {"ar": "مَالِكِ يَوْمِ الدِّينِ", "translit": "Maliki yawmid-din", "note": "QS Al-Fatihah 1:4 — Penguasa hari pembalasan"},
+          {"ar": "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ", "translit": "Iyyaka na'budu wa iyyaka nasta'in", "note": "QS Al-Fatihah 1:5 — Hanya kepada-Mu kami menyembah dan memohon pertolongan"},
+          {"ar": "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ", "translit": "Ihdinash-shiratal-mustaqim", "note": "QS Al-Fatihah 1:6 — Tunjukilah kami jalan yang lurus"},
+          {"ar": "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ", "translit": "Shiratal-ladzina an'amta 'alaihim ghairil-maghdhubi 'alaihim wa ladh-dhallin", "note": "QS Al-Fatihah 1:7 — Jalan orang yang diberi nikmat, bukan yang dimurkai dan bukan yang sesat"}
+        ]
+      },
+      {
+        "heading": "4. Kaidah tajwid penting dalam Al-Fatihah",
+        "bullets": [
+          "Mad thabi'i pada 'al-'aalamiin', 'ar-rahiim' dipanjangkan 2 harakat",
+          "Ghunnah pada tasydid nun dan mim: 'ar-rahmaanir-rahiim'",
+          "Tafkhim pada huruf ر dalam 'ash-shiraath' dan lam jalalah 'Allah' setelah fathah",
+          "Mad 'aridh lissukun saat waqaf di akhir ayat 'al-'alamin', 'ad-din'",
+          "Idgham bighunnah tidak ada di surah ini, tapi perhatikan qalqalah tidak muncul juga (perlu ketelitian huruf)"
+        ]
+      },
+      {
+        "heading": "5. Kata-kata kunci dan artinya",
+        "table": {
+          "headers": ["Kata", "Arti"],
+          "rows": [
+            ["Rabb", "Tuhan, pemelihara, pengatur"],
+            ["Ad-din", "Hari pembalasan/agama"],
+            ["Na'budu", "Kami menyembah"],
+            ["Ash-shirat al-mustaqim", "Jalan yang lurus"],
+            ["Al-maghdhub 'alaihim", "Mereka yang dimurkai"],
+            ["Adh-dhallin", "Mereka yang sesat"]
+          ]
+        }
+      },
+      {
+        "heading": "6. Metode hafalan ayat demi ayat",
+        "bullets": [
+          "Dengarkan ayat dari qari, ulangi 10 kali per ayat",
+          "Sambungkan ayat 1-2, lalu 1-3, dan seterusnya (metode sambung)",
+          "Ulangi hafalan penuh 3 kali di akhir sesi",
+          "Perdengarkan ke pendamping untuk koreksi tajwid"
+        ]
+      },
+      {
+        "heading": "7. Grid pengulangan mingguan",
+        "table": {
+          "headers": ["Hari", "Ayat", "Jumlah ulangan", "Catatan"],
+          "rows": [
+            ["Hari 1", "Ayat 1-2", "20x", ""],
+            ["Hari 2", "Ayat 3-4", "20x", ""],
+            ["Hari 3", "Ayat 5-6", "20x", ""],
+            ["Hari 4", "Ayat 7", "20x", ""],
+            ["Hari 5-7", "Ulangan penuh 1-7", "5x/hari", ""]
+          ]
+        }
+      }
+    ],
+    "practice": {
+      "heading": "Latihan hafalan Al-Fatihah",
+      "lines": [
+        "Baca Al-Fatihah dalam salat dengan penuh kesadaran makna",
+        "Uji hafalan tanpa melihat mushaf setiap malam",
+        "Perhatikan mad 'aridh lissukun saat berhenti di akhir setiap ayat",
+        "Evaluasi mingguan bersama pendamping atau guru"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI | Hafalan: Al-Fatihah"
+  },
+  {
+    "id": "memorisation-al-ikhlas",
+    "title": "Hafalan Al-Ikhlas",
+    "subtitle": "Empat ayat tauhid murni, makna, dan kaidah bacaan",
+    "intro": "Al-Ikhlas adalah surah pendek yang setara sepertiga Al-Qur'an dalam pahala karena memurnikan akidah tauhid. Empat ayatnya mudah dihafal namun mengandung makna mendalam tentang keesaan Allah. Cocok untuk pemula sebagai hafalan awal setelah Al-Fatihah.",
+    "sections": [
+      {
+        "heading": "1. Keutamaan Al-Ikhlas",
+        "bullets": [
+          "Rasulullah bersabda surah ini setara sepertiga Al-Qur'an (HR Bukhari)",
+          "Sering dibaca bersama Al-Falaq dan An-Nas (al-mu'awwidzat) sebagai ruqyah",
+          "Dianjurkan dibaca dalam witir dan sunnah fajar"
+        ]
+      },
+      {
+        "heading": "2. Teks lengkap dan makna",
+        "arabicExamples": [
+          {"ar": "قُلْ هُوَ اللَّهُ أَحَدٌ", "translit": "Qul huwallahu ahad", "note": "QS Al-Ikhlas 112:1 — Katakanlah: Dialah Allah, Yang Maha Esa"},
+          {"ar": "اللَّهُ الصَّمَدُ", "translit": "Allahush-shamad", "note": "QS Al-Ikhlas 112:2 — Allah tempat bergantung segala sesuatu"},
+          {"ar": "لَمْ يَلِدْ وَلَمْ يُولَدْ", "translit": "Lam yalid wa lam yulad", "note": "QS Al-Ikhlas 112:3 — Dia tiada beranak dan tidak pula diperanakkan"},
+          {"ar": "وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ", "translit": "Wa lam yakul-lahu kufuwan ahad", "note": "QS Al-Ikhlas 112:4 — Dan tidak ada sesuatu pun yang setara dengan-Nya"}
+        ]
+      },
+      {
+        "heading": "3. Kaidah tajwid penting",
+        "bullets": [
+          "Qalqalah sughra pada 'ahad' bila washal, kubra bila waqaf di ayat 1 dan 4",
+          "Idgham bilaghunnah pada 'lam yakul-lahu' (nun sukun bertemu ل)",
+          "Mad 'aridh lissukun saat waqaf pada 'ahad' dan 'shamad'",
+          "Tafkhim pada lam jalalah 'Allahush-shamad' karena didahului dammah"
+        ]
+      },
+      {
+        "heading": "4. Kata kunci dan makna",
+        "table": {
+          "headers": ["Kata", "Arti"],
+          "rows": [
+            ["Ahad", "Yang Maha Esa, tunggal mutlak"],
+            ["Ash-Shamad", "Tempat bergantung, tidak butuh apa pun"],
+            ["Lam yalid", "Tidak beranak"],
+            ["Lam yulad", "Tidak diperanakkan"],
+            ["Kufuwan", "Setara, sebanding"]
+          ]
+        }
+      },
+      {
+        "heading": "5. Metode hafalan cepat",
+        "bullets": [
+          "Surah pendek, cukup 15 kali ulangan per ayat untuk pemula",
+          "Gabungkan makna dengan bacaan agar lebih membekas",
+          "Latih dalam salat sunnah untuk memperkuat hafalan"
+        ]
+      },
+      {
+        "heading": "6. Perbandingan idgham dan qalqalah dalam surah",
+        "bullets": [
+          "Idgham bilaghunnah hanya muncul sekali pada ayat 4",
+          "Qalqalah muncul pada huruf د di 'ahad' setiap kali diwaqafkan",
+          "Latih perbedaan qalqalah sughra (di tengah bacaan washal) dan kubra (waqaf)"
+        ]
+      },
+      {
+        "heading": "7. Grid pengulangan",
+        "table": {
+          "headers": ["Sesi", "Ayat", "Ulangan"],
+          "rows": [
+            ["1", "Ayat 1", "15x"],
+            ["2", "Ayat 2", "15x"],
+            ["3", "Ayat 3-4", "15x"],
+            ["4", "Ulangan penuh", "10x"]
+          ]
+        }
+      }
+    ],
+    "practice": {
+      "heading": "Latihan hafalan Al-Ikhlas",
+      "lines": [
+        "Hafalkan sambil merenungkan makna tauhid pada setiap ayat",
+        "Praktikkan qalqalah kubra saat mewaqafkan 'ahad' di akhir ayat 1 dan 4",
+        "Baca dalam salat witir tiga malam berturut-turut",
+        "Uji hafalan tanpa mushaf di depan pendamping"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI | Hafalan: Al-Ikhlas"
+  },
+  {
+    "id": "memorisation-al-falaq-an-nas",
+    "title": "Hafalan Al-Falaq & An-Nas",
+    "subtitle": "Dua surah perlindungan (al-mu'awwidzatain)",
+    "intro": "Al-Falaq dan An-Nas dikenal sebagai al-mu'awwidzatain, dua surah perlindungan dari kejahatan yang tampak dan tersembunyi. Keduanya sering dibaca bersama Al-Ikhlas setiap pagi dan petang sebagai bentuk perlindungan diri. Buku saku ini menyajikan teks, makna, dan kaidah bacaannya.",
+    "sections": [
+      {
+        "heading": "1. Keutamaan al-mu'awwidzatain",
+        "bullets": [
+          "Rasulullah membaca keduanya sebelum tidur sambil meniup ke telapak tangan (HR Bukhari)",
+          "Dianjurkan dibaca 3 kali pagi dan petang sebagai perlindungan",
+          "Merupakan dua surah terakhir dalam mushaf Al-Qur'an"
+        ]
+      },
+      {
+        "heading": "2. Teks dan makna Al-Falaq",
+        "arabicExamples": [
+          {"ar": "قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ", "translit": "Qul a'udzu bi rabbil-falaq", "note": "QS Al-Falaq 113:1 — Katakanlah: aku berlindung kepada Tuhan yang menguasai subuh"},
+          {"ar": "مِن شَرِّ مَا خَلَقَ", "translit": "Min syarri ma khalaq", "note": "QS Al-Falaq 113:2 — Dari kejahatan makhluk yang Dia ciptakan"},
+          {"ar": "وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ", "translit": "Wa min syarri ghasiqin idza waqab", "note": "QS Al-Falaq 113:3 — Dari kejahatan malam apabila telah gelap gulita"},
+          {"ar": "وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ", "translit": "Wa min syarrin-naffatsati fil-'uqad", "note": "QS Al-Falaq 113:4 — Dari kejahatan tukang sihir yang meniup pada buhul"},
+          {"ar": "وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ", "translit": "Wa min syarri hasidin idza hasad", "note": "QS Al-Falaq 113:5 — Dari kejahatan orang yang dengki apabila ia dengki"}
+        ]
+      },
+      {
+        "heading": "3. Teks dan makna An-Nas",
+        "arabicExamples": [
+          {"ar": "قُلْ أَعُوذُ بِرَبِّ النَّاسِ", "translit": "Qul a'udzu bi rabbin-nas", "note": "QS An-Nas 114:1 — Katakanlah: aku berlindung kepada Tuhan manusia"},
+          {"ar": "مَلِكِ النَّاسِ", "translit": "Malikin-nas", "note": "QS An-Nas 114:2 — Raja manusia"},
+          {"ar": "إِلَٰهِ النَّاسِ", "translit": "Ilahin-nas", "note": "QS An-Nas 114:3 — Sesembahan manusia"},
+          {"ar": "مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ", "translit": "Min syarril-waswasil-khannas", "note": "QS An-Nas 114:4 — Dari kejahatan bisikan setan yang bersembunyi"},
+          {"ar": "الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ", "translit": "Alladzi yuwaswisu fi shudurin-nas", "note": "QS An-Nas 114:5 — Yang membisikkan ke dalam dada manusia"},
+          {"ar": "مِنَ الْجِنَّةِ وَالنَّاسِ", "translit": "Minal-jinnati wan-nas", "note": "QS An-Nas 114:6 — Dari golongan jin dan manusia"}
+        ]
+      },
+      {
+        "heading": "4. Kaidah tajwid penting",
+        "bullets": [
+          "Ikhfa haqiqi pada 'min syarri' di kedua surah (nun sukun bertemu ش)",
+          "Qalqalah sughra pada 'khalaq' dan kubra bila diwaqafkan",
+          "Idgham bilaghunnah pada 'min rabbin-nas' bila disambung dengan kata lain",
+          "Mad 'aridh lissukun saat waqaf pada 'al-falaq', 'an-nas', 'hasad'",
+          "Tafkhim pada lam jalalah tidak ada karena tidak ada lafaz Allah eksplisit dalam kedua surah ini"
+        ]
+      },
+      {
+        "heading": "5. Kata kunci dan makna",
+        "table": {
+          "headers": ["Kata", "Arti"],
+          "rows": [
+            ["Al-Falaq", "Waktu subuh, celah cahaya"],
+            ["Ghasiq", "Malam gelap"],
+            ["An-Naffatsat", "Peniup sihir (tukang sihir)"],
+            ["Al-Waswas al-Khannas", "Bisikan setan yang bersembunyi saat disebut nama Allah"],
+            ["Al-Jinnah wan-nas", "Golongan jin dan manusia"]
+          ]
+        }
+      },
+      {
+        "heading": "6. Metode hafalan berpasangan",
+        "bullets": [
+          "Hafalkan Al-Falaq lebih dulu (5 ayat), lalu An-Nas (6 ayat)",
+          "Bandingkan struktur mirip: 'Qul a'udzu bi rabbi...' pada awal keduanya",
+          "Latih perlindungan makna sambil menghafal agar lebih membekas"
+        ]
+      },
+      {
+        "heading": "7. Grid pengulangan mingguan",
+        "table": {
+          "headers": ["Hari", "Target", "Ulangan"],
+          "rows": [
+            ["Hari 1-2", "Al-Falaq ayat 1-5", "15x/ayat"],
+            ["Hari 3-4", "An-Nas ayat 1-3", "15x/ayat"],
+            ["Hari 5", "An-Nas ayat 4-6", "15x/ayat"],
+            ["Hari 6-7", "Ulangan penuh kedua surah + Al-Ikhlas", "5x/hari"]
+          ]
+        }
+      }
+    ],
+    "practice": {
+      "heading": "Latihan hafalan al-mu'awwidzatain",
+      "lines": [
+        "Baca ketiga surah (Al-Ikhlas, Al-Falaq, An-Nas) tiga kali setiap pagi dan petang",
+        "Praktikkan ikhfa haqiqi pada semua kemunculan 'min syarri'",
+        "Uji hafalan tanpa mushaf sebelum tidur",
+        "Renungkan makna perlindungan saat membaca untuk memperkuat ingatan"
+      ]
+    },
+    "footer": "Nassihah — TajweedTutorAI | Hafalan: Al-Falaq & An-Nas"
+  }
+]
