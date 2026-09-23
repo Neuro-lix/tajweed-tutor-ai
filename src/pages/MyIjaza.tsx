@@ -16,6 +16,8 @@ import { PageSeo } from '@/components/seo/PageSeo';
 import { QIRAAT_NAMES } from '@/data/quranData';
 import { useMyIjaza, type IjazaCertificateInput } from '@/hooks/useMyIjaza';
 import { generateIjazaPDF } from '@/utils/ijazaPdf';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { getAccountStrings } from '@/i18n/accountPages';
 
 const emptyForm: IjazaCertificateInput = {
   studentName: '',
@@ -30,6 +32,8 @@ const emptyForm: IjazaCertificateInput = {
 
 const MyIjaza = () => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const a = getAccountStrings(language);
   const { certificates, loading, addCertificate, deleteCertificate, getAttachmentUrl } = useMyIjaza();
   const [form, setForm] = useState<IjazaCertificateInput>(emptyForm);
   const [file, setFile] = useState<File | null>(null);
@@ -41,7 +45,7 @@ const MyIjaza = () => {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.studentName.trim() || !form.sheikhName.trim()) {
-      toast.error('Nom de l\'étudiant et nom du cheikh sont requis.');
+      toast.error(a.ijazaRequired);
       return;
     }
     setSaving(true);
@@ -51,10 +55,10 @@ const MyIjaza = () => {
     );
     setSaving(false);
     if (error) {
-      toast.error("Enregistrement impossible pour le moment.");
+      toast.error(a.ijazaSaveError);
       return;
     }
-    toast.success('Ijāza enregistrée.');
+    toast.success(a.ijazaSaved);
     setForm(emptyForm);
     setFile(null);
     setOpen(false);
@@ -63,7 +67,7 @@ const MyIjaza = () => {
   const openAttachment = async (path: string) => {
     const url = await getAttachmentUrl(path);
     if (url) window.open(url, '_blank', 'noopener');
-    else toast.error('Document indisponible.');
+    else toast.error(a.ijazaDocUnavailable);
   };
 
   const riwayat = Object.entries(QIRAAT_NAMES);
@@ -71,40 +75,40 @@ const MyIjaza = () => {
   return (
     <div className="min-h-screen bg-background">
       <PageSeo
-        title="Mes ijāzas — parcours et certificats"
-        description="Enregistrez vos ijāzas obtenues auprès de vos cheikhs, leur chaîne de transmission et suivez votre parcours."
+        title={a.ijazaTitle}
+        description={a.ijazaCardDesc}
         path="/mes-ijazas"
       />
       <main className="container mx-auto px-4 py-8 max-w-4xl space-y-6">
         <Button variant="ghost" onClick={() => navigate(-1)} className="gap-2">
-          <ArrowLeft className="h-4 w-4" /> Retour
+          <ArrowLeft className="h-4 w-4" /> {a.back}
         </Button>
 
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold flex items-center gap-2">
-              <Award className="h-7 w-7 text-primary" /> Mes ijāzas
+              <Award className="h-7 w-7 text-primary" /> {a.ijazaTitle}
             </h1>
             <p className="text-muted-foreground mt-1">
-              Vos certificats obtenus auprès de vos cheikhs, avec leur chaîne de transmission.
+              {a.ijazaDesc}
             </p>
           </div>
           <Button onClick={() => setOpen((o) => !o)} className="gap-2">
-            <Plus className="h-4 w-4" /> Ajouter une ijāza
+            <Plus className="h-4 w-4" /> {a.addIjaza}
           </Button>
         </div>
 
         <div className="grid sm:grid-cols-3 gap-4">
           <Card><CardContent className="py-5">
-            <p className="text-sm text-muted-foreground">Ijāzas enregistrées</p>
+            <p className="text-sm text-muted-foreground">{a.statCertificates}</p>
             <p className="text-3xl font-semibold">{certificates.length}</p>
           </CardContent></Card>
           <Card><CardContent className="py-5">
-            <p className="text-sm text-muted-foreground">Riwāyāt couvertes</p>
+            <p className="text-sm text-muted-foreground">{a.statRiwayat}</p>
             <p className="text-3xl font-semibold">{new Set(certificates.map((c) => c.riwaya)).size}</p>
           </CardContent></Card>
           <Card><CardContent className="py-5">
-            <p className="text-sm text-muted-foreground">Cheikhs</p>
+            <p className="text-sm text-muted-foreground">{a.statSheikhs}</p>
             <p className="text-3xl font-semibold">{new Set(certificates.map((c) => c.sheikhName)).size}</p>
           </CardContent></Card>
         </div>
