@@ -40,7 +40,7 @@ const ShopSuccess: React.FC = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { credits, refetch } = useCredits();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [downloading, setDownloading] = useState<string | null>(null);
   const [creditsAdded, setCreditsAdded] = useState(false);
   const [addingCredits, setAddingCredits] = useState(false);
