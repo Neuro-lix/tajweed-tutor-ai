@@ -2,6 +2,17 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { CREDIT_COSTS } from "../_shared/credit-costs.ts";
 
+// ─── Startup check: secrets requis ──────────────────────────────────────
+if (!Deno.env.get("HUGGINGFACE_API_KEY")) {
+  console.warn(
+    "[analyze-recitation] STARTUP: secret HUGGINGFACE_API_KEY absent — " +
+      "la transcription spécialisée Coran est désactivée (repli LLM seul). " +
+      "Ajoutez-le via Project Settings → Edge Functions → Secrets (voir README).",
+  );
+} else {
+  console.log("[analyze-recitation] STARTUP: HUGGINGFACE_API_KEY détectée.");
+}
+
 type RateLimitResult = { allowed: boolean; count: number; limit: number; reset_at: string };
 
 // ─── CORS: env-driven allowlist (no wildcard) ───────────────────────────
