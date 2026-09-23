@@ -142,15 +142,30 @@ const ShopSuccess: React.FC = () => {
   const handleDownload = async (fileName: string) => {
     setDownloading(fileName);
     try {
-      const { data, error } = await supabase.storage
-        .from('pdfs')
-        .createSignedUrl(fileName, 3600);
+      // Les PDF sont publiés par langue (fr/, en/, ar/, id/, ms/) ; on retombe sur le
+      // français puis sur la racine historique si la langue n'est pas encore disponible.
+      const candidates = Array.from(
+        new Set([`${language}/${fileName}`, `fr/${fileName}`, fileName]),
+      );
 
-      if (error || !data?.signedUrl) {
-        throw new Error(error?.message || t.shopSuccessDownloadError);
+      let signedUrl: string | null = null;
+      let lastError = '';
+      for (const path of candidates) {
+        const { data, error } = await supabase.storage
+          .from('pdfs')
+          .createSignedUrl(path, 3600);
+        if (data?.signedUrl) {
+          signedUrl = data.signedUrl;
+          break;
+        }
+        lastError = error?.message ?? '';
       }
 
-      window.open(data.signedUrl, '_blank');
+      if (!signedUrl) {
+        throw new Error(lastError || t.shopSuccessDownloadError);
+      }
+
+      window.open(signedUrl, '_blank');
     } catch (err) {
       toast({
         title: t.shopSuccessDownloadError,
