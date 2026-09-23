@@ -147,7 +147,7 @@ def build(sheet, lang, rtl):
             if rtl:
                 # En RTL, la puce doit suivre le texte à droite : pas de ListFlowable.
                 for b in sec["bullets"]:
-                    flow.append(P(f"{b} •", "li"))
+                    flow.append(P(f"• {b}", "li"))
             else:
                 flow.append(ListFlowable([ListItem(P(b, "li"), leftIndent=8) for b in sec["bullets"]],
                                          bulletType="bullet", start="•", leftIndent=12))
