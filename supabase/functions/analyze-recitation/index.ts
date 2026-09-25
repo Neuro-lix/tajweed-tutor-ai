@@ -47,6 +47,7 @@ function buildCors(req: Request): Record<string, string> {
 const stripDiacritics = (s: string): string =>
   (s || "")
     .normalize("NFKC")
+    .replace(/\u0670/g, "ا") // alif khanjariyya = long ā
     .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, "") // harakat + tatweel
     .replace(/[ﺁﺂﺄﺆﺈﺊﺌﺎ]/g, "ا")
     .replace(/[إأآاٱ]/g, "ا")
