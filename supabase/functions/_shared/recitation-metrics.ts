@@ -5,7 +5,7 @@ export const stripDiacritics = (s: string): string =>
     .normalize("NFKC")
     .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, "")
     .replace(/[ﺁﺂﺄﺆﺈﺊﺌﺎ]/g, "ا")
-    .replace(/[إأآا]/g, "ا")
+    .replace(/[إأآاٱ]/g, "ا")
     .replace(/[ىي]/g, "ي")
     .replace(/ة/g, "ه")
     .replace(/\s+/g, " ")
