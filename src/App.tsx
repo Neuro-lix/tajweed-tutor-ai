@@ -20,6 +20,7 @@ const Auth = lazy(() => import("./pages/Auth"));
 const Ijaza = lazy(() => import("./pages/IjazaWrapper"));
 const VerifyCertificate = lazy(() => import("./pages/VerifyCertificate"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const AsrStatus = lazy(() => import("./pages/AsrStatus"));
 const Shop = lazy(() => import("./pages/Shop"));
 const ShopSuccess = lazy(() => import("./pages/ShopSuccess"));
 const CryptoCheckout = lazy(() => import("./pages/CryptoCheckout"));
@@ -100,6 +101,7 @@ const App = () => (
                     <Route path="/verify/:id" element={<VerifyCertificate />} />
                     <Route path="/diagnostics" element={<Diagnostics />} />
                     <Route path="/health" element={<Health />} />
+                    <Route path="/moteur-asr" element={<AsrStatus />} />
                     <Route path="/noorani-qaida" element={<NooraniQaida />} />
                     <Route path="/tajwid" element={<TajwidHub />} />
                     <Route path="/tajwid/faq" element={<TajwidFaq />} />
