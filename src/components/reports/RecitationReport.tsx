@@ -26,6 +26,7 @@ interface RecitationError {
   ruleDescription: string;
   severity: 'minor' | 'major' | 'critical';
   correction?: string;
+  confidence?: 'measured' | 'inferred';
 }
 
 interface RecitationReportProps {
@@ -257,9 +258,20 @@ export const RecitationReport: React.FC<RecitationReportProps> = ({
                       {getSeverityBadge(error.severity)}
                     </div>
                     <div>
-                      <Badge variant="outline" className="text-xs mb-1">
-                        {error.ruleType}
-                      </Badge>
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <Badge variant="outline" className="text-xs">
+                          {error.ruleType}
+                        </Badge>
+                        {error.confidence === 'measured' ? (
+                          <Badge className="text-xs bg-primary/15 text-primary border-primary/30" title="Mesuré dans l'audio (durée, pause)">
+                            Mesuré
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs" title="Déduit par l'IA à partir du texte — non mesuré dans l'audio">
+                            Déduit
+                          </Badge>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground">{error.ruleDescription}</p>
                     </div>
                     {error.correction && (
