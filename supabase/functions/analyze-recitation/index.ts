@@ -164,6 +164,7 @@ serve(async (req) => {
     let whisperError: string | null = null;
     let transcriptionEngine:
       | "quran-whisper"
+      | "hf-whisper-large-v3-turbo"
       | "gpt-4o-mini-transcribe"
       | "whisper-1"
       | "whisper-large-v3" = "gpt-4o-mini-transcribe";
@@ -191,57 +192,51 @@ serve(async (req) => {
       // on tajwīd-relevant phonetics. Falls through to the generic cascade on any failure.
       // ⚠️ MANUAL SETUP: add the `HUGGINGFACE_API_KEY` secret to enable this path.
       const HUGGINGFACE_API_KEY = Deno.env.get("HUGGINGFACE_API_KEY");
-      // Opt-in switch: the Quran-specialised model runs on a paid HuggingFace
-      // account, so it stays OFF until `ENABLE_QURAN_WHISPER` is set to "true".
-      const quranWhisperEnabled =
-        (Deno.env.get("ENABLE_QURAN_WHISPER") ?? "true").toLowerCase() !== "false";
-      if (!quranWhisperEnabled) {
-        console.log(
-          "[analyze-recitation] Quran-specialised model disabled (ENABLE_QURAN_WHISPER != true) — " +
-          "using the Whisper cascade with word-level confidence.",
-        );
+      // tarteel-ai n'est PAS servi en serverless HF ("Model not supported by provider").
+      // → si un Inference Endpoint dédié est configuré (HF_ASR_ENDPOINT_URL), on l'utilise ;
+      //   sinon whisper-large-v3-turbo (serverless) avec horodatage mot par mot.
+      const hfDedicated = Deno.env.get("HF_ASR_ENDPOINT_URL");
+      const hfUrl = hfDedicated ?? "https://router.huggingface.co/hf-inference/models/openai/whisper-large-v3-turbo";
+      const hfEnabled = (Deno.env.get("ENABLE_ASR_PIPELINE") ?? "false").toLowerCase() === "true";
+      if (!hfEnabled) {
+        console.log("[analyze-recitation] ENABLE_ASR_PIPELINE != true — generic cascade.");
       } else if (!HUGGINGFACE_API_KEY) {
-        console.warn(
-          "[analyze-recitation] HUGGINGFACE_API_KEY not configured — skipping the Quran-specialised " +
-          "model (tarteel-ai/whisper-base-ar-quran) and falling back to the generic Whisper cascade.",
-        );
+        console.warn("[analyze-recitation] HUGGINGFACE_API_KEY not configured — generic cascade.");
       } else {
-        console.log("[analyze-recitation] Trying HuggingFace tarteel-ai/whisper-base-ar-quran...");
+        console.log("[analyze-recitation] Trying HuggingFace", hfUrl);
         try {
-          const hfResp = await fetch(
-            Deno.env.get("HF_ASR_ENDPOINT_URL") ?? "https://router.huggingface.co/hf-inference/models/tarteel-ai/whisper-base-ar-quran",
-            {
-              method: "POST",
-              headers: {
-                "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
-                "Content-Type": rawMimeType,
-                "x-wait-for-model": "true",
-              },
-              body: decodeAudioBytes(),
+          const hfResp = await fetch(hfUrl, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
+              "Content-Type": "application/json",
+              "x-wait-for-model": "true",
             },
-          );
+            body: JSON.stringify({
+              inputs: base64Payload,
+              parameters: { return_timestamps: "word", generate_kwargs: { language: "arabic", task: "transcribe" } },
+            }),
+          });
           if (!hfResp.ok) {
             const errTxt = await hfResp.text();
-            console.error("[analyze-recitation] HuggingFace error:", hfResp.status, errTxt);
+            console.error("[analyze-recitation] HuggingFace error:", hfResp.status, errTxt.slice(0, 300));
             whisperError = `HuggingFace ${hfResp.status}, fallback moteur générique`;
           } else {
             const hfJson = await hfResp.json();
             const hfText = (typeof hfJson === "string" ? hfJson : (hfJson.text ?? "")).trim();
             if (Array.isArray(hfJson?.chunks)) {
-              whisperWords = hfJson.chunks.map((c: { text?: string; timestamp?: [number, number] }) => ({
+              whisperWords = hfJson.chunks.map((c: { text?: string; timestamp?: [number, number | null] }) => ({
                 word: String(c.text ?? "").trim(), start: c.timestamp?.[0] ?? null, end: c.timestamp?.[1] ?? null,
               })).filter((w: WhisperWord) => w.word);
             }
             if (hfText.length >= 3) {
               transcribedText = hfText;
               transcriptionOk = true;
-              transcriptionEngine = "quran-whisper";
+              transcriptionEngine = hfDedicated ? "quran-whisper" : "hf-whisper-large-v3-turbo";
               whisperError = null;
-              // NOTE: the HF inference API for this model returns plain text only —
-              // no per-word probabilities, so confidence falls back to text similarity.
-              console.log("[analyze-recitation] Quran-Whisper result:", hfText.substring(0, 100));
+              console.log("[analyze-recitation] HF result:", hfText.substring(0, 100));
             } else {
-              whisperError = "Quran-Whisper vide, fallback moteur générique";
+              whisperError = "HuggingFace vide, fallback moteur générique";
             }
           }
         } catch (e) {
