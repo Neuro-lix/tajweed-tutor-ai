@@ -51,7 +51,7 @@ const json = (body: unknown, status: number, cors: Record<string, string>) =>
 const ASR_PIPELINE_ENABLED =
   (Deno.env.get("ENABLE_ASR_PIPELINE") ?? "false").toLowerCase() === "true";
 /** Modèle par défaut, surchargeable (Inference Endpoint dédié en Phase 4). */
-const HF_MODEL = Deno.env.get("HF_ASR_MODEL") ?? "tarteel-ai/whisper-base-ar-quran";
+const HF_MODEL = Deno.env.get("HF_ASR_MODEL") ?? "openai/whisper-large-v3-turbo";
 const HF_ENDPOINT_URL = Deno.env.get("HF_ASR_ENDPOINT_URL")
   ?? `https://router.huggingface.co/hf-inference/models/${HF_MODEL}`;
 const MAX_AUDIO_BYTES = 12 * 1024 * 1024; // 12 MB
@@ -208,10 +208,10 @@ serve(async (req) => {
         method: "POST",
         headers: {
           Authorization: `Bearer ${HUGGINGFACE_API_KEY}`,
-          "Content-Type": mimeType,
+          "Content-Type": "application/json",
           "x-wait-for-model": "true",
         },
-        body: bytes,
+        body: JSON.stringify({ inputs: body.audio.includes(",") ? body.audio.slice(body.audio.indexOf(",") + 1) : body.audio, parameters: { return_timestamps: "word" }, mimeType }),
       });
       if (!resp.ok) {
         const detail = (await resp.text()).slice(0, 300);
