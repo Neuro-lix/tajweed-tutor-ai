@@ -622,9 +622,9 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
       .filter((e) => !measured.some((m) => m.word === e.word && m.ruleType === e.ruleType))
       .map((e) => ({ ...e, confidence: "inferred" }));
     analysis.errors = [...measured, ...inferred];
-    const degraded = transcriptionEngine !== "quran-whisper";
+    const degraded = transcriptionEngine !== "quran-whisper" && transcriptionEngine !== "hf-whisper-large-v3-turbo";
     analysis.engineStatus = {
-      mode: degraded ? "degraded" : "quran",
+      mode: transcriptionEngine === "quran-whisper" ? "quran" : degraded ? "degraded" : "timestamps",
       engine: transcriptionEngine,
       reason: degraded ? (whisperError ?? "quran_engine_unavailable") : null,
       hasWordTimestamps: wordConfidence.some((w) => w.start !== null),
