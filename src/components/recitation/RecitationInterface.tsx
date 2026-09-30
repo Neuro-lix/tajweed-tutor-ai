@@ -11,6 +11,8 @@ import { AudioWaveform } from './AudioWaveform';
 import { AudioDebugPanel, type AudioDebugStats } from './AudioDebugPanel';
 import { MicQualityIndicator } from './MicQualityIndicator';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useLiveRecitation } from '@/hooks/useLiveRecitation';
+import { LiveVerseTracker } from './LiveVerseTracker';
 
 const CUMULATIVE_VERSES = [
   0, 7, 293, 493, 669, 789, 954, 1160, 1235, 1364, 1473, 1596, 1707, 1750, 1802,
@@ -78,6 +80,9 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
   const { level, peak, waveform } = useAudioWaveform(isRecording ? (mediaStream ?? null) : null, {
     fftSize: 1024,
   });
+
+  const live = useLiveRecitation(mediaStream ?? null, isRecording, verseText, surahNumber, currentVerse);
+  const liveStarted = live.states.some((s) => s !== 'pending');
 
   return (
     <div className="space-y-6">
@@ -163,6 +168,11 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
               <span className="text-sm text-destructive">{t.recordingInProgress}</span>
             </div>
             <MicQualityIndicator level={level} peak={peak} isRecording={isRecording} />
+          </div>
+        )}
+        {(isRecording || (liveStarted && !isAnalyzing && !feedback)) && (
+          <div className="w-full">
+            <LiveVerseTracker words={live.words} states={live.states} unavailable={live.unavailable} />
           </div>
         )}
       </div>

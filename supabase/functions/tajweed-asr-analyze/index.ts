@@ -152,7 +152,7 @@ serve(async (req) => {
     const { data: rl } = await supabase.rpc("check_and_increment_rate_limit", {
       p_user_id: userId,
       p_action: "tajweed-asr-analyze",
-      p_max: 30,
+      p_max: 150, // suivi en direct : ~1 appel / 4 s pendant la récitation
       p_window_seconds: 600,
     });
     const limit = rl as { allowed?: boolean } | null;
