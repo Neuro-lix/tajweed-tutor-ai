@@ -108,7 +108,8 @@ export type MeasuredError = {
 
 const MADD_LAZIM = /[اوي]ّ|آ|ٓ/; // shadda after long vowel or maddah sign
 const LONG_VOWEL = /(َا|ُو|ِي|ٰ|ٓ)/;
-const QALQALA_FINAL = /[قطبجد][ْ]?[\u064B-\u065F]*$/;
+// Qalqala uniquement si la lettre porte un sukūn (ْ ou ۡ uthmani), jamais si elle est vocalisée.
+const QALQALA_FINAL = /[قطبجد][\u0652\u06E1]$/;
 
 /** Letters (no diacritics) per word — basis for per-harf timing. */
 const letterCount = (w: string) => stripDiacritics(w).replace(/\s/g, "").length || 1;
