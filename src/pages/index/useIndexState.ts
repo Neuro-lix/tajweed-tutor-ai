@@ -418,6 +418,10 @@ export function useIndexState() {
       const isCorrect = !transcriptionImpossible && data?.isCorrect === true;
 
       setAnalysisResult(data);
+      try {
+        const es = (data as { engineStatus?: unknown })?.engineStatus;
+        if (es) localStorage.setItem('asr_engine_status', JSON.stringify({ ...(es as object), at: Date.now() }));
+      } catch { /* ignore */ }
 
       setAiFeedback({
         status: isCorrect ? 'correct' : 'review',

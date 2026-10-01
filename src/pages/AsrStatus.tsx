@@ -2,49 +2,50 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/contexts/LanguageContext';
 
-const AsrStatus = () => (
-  <main className="container max-w-3xl py-10 space-y-6">
-    <h1 className="text-3xl font-semibold text-foreground">Moteur de reconnaissance : mode dégradé</h1>
-    <p className="text-muted-foreground">
-      Cette page explique quel moteur écoute ta récitation et ce que cela change pour la fiabilité des corrections.
-    </p>
+type EngineStatus = { mode?: 'quran' | 'timestamps' | 'degraded'; engine?: string; reason?: string; measuredCount?: number; at?: number };
 
-    <Card>
-      <CardHeader><CardTitle className="flex items-center gap-2">État actuel <Badge variant="secondary">Mode dégradé</Badge></CardTitle></CardHeader>
-      <CardContent className="space-y-3 text-sm text-foreground">
-        <p><strong>Moteur par défaut prévu :</strong> modèle spécialisé Coran (tarteel-ai/whisper-base-ar-quran), entraîné sur des récitations.</p>
-        <p><strong>Moteur utilisé en ce moment :</strong> reconnaissance vocale générique, tant que le moteur Coran n'est pas joignable.</p>
-        <p><strong>Pourquoi :</strong> la clé Hugging Face enregistrée n'a pas l'autorisation « Make calls to Inference Providers », ou n'a pas de crédit d'inférence.</p>
-      </CardContent>
-    </Card>
+const STR = {
+  fr: { title: 'Moteur de reconnaissance', intro: 'Quel moteur a écouté ta dernière récitation, et ce que cela change.', current: 'Dernière analyse', none: 'Aucune analyse encore. Récite un verset pour voir le moteur utilisé.', engine: 'Moteur', measured: 'Erreurs mesurées', modes: { quran: 'Moteur Coran', timestamps: 'Minutage mot par mot', degraded: 'Mode dégradé' }, desc: { quran: 'Modèle spécialisé Coran actif.', timestamps: "Moteur généraliste avec minutage de chaque mot : madd et qalqala peuvent être mesurés dans le son.", degraded: 'Moteur générique sans minutage : toutes les erreurs sont déduites par l’IA.' }, legend: 'Comprendre les étiquettes', m: 'Calculé dans le son (durée des madd, pause après qalqala).', i: "Proposé par l'IA à partir du texte entendu.", warn: 'Aucune correction automatique ne remplace un professeur ou un cheikh.', back: 'Retour' },
+  en: { title: 'Recognition engine', intro: 'Which engine listened to your last recitation, and what it means.', current: 'Last analysis', none: 'No analysis yet. Recite a verse to see the engine used.', engine: 'Engine', measured: 'Measured errors', modes: { quran: 'Quran engine', timestamps: 'Word timing', degraded: 'Degraded mode' }, desc: { quran: 'Specialised Quran model active.', timestamps: 'General engine with per-word timing: madd and qalqala can be measured in the audio.', degraded: 'Generic engine without timing: all errors are inferred by AI.' }, legend: 'Understanding the labels', m: 'Computed from the audio (madd length, pause after qalqala).', i: 'Suggested by AI from the heard text.', warn: 'No automatic correction replaces a teacher or sheikh.', back: 'Back' },
+};
 
-    <Card>
-      <CardHeader><CardTitle>Ce que ça change</CardTitle></CardHeader>
-      <CardContent className="space-y-2 text-sm text-foreground">
-        <p><Badge className="bg-primary/15 text-primary border-primary/30 mr-2">Mesuré</Badge>Erreurs calculées dans le son (durée des madd, pause après qalqala). Elles n'apparaissent qu'avec le moteur Coran, qui donne le minutage de chaque mot.</p>
-        <p><Badge variant="secondary" className="mr-2">Déduit</Badge>Erreurs proposées par l'IA à partir du texte entendu. En mode dégradé, toutes les erreurs sont de ce type.</p>
-        <p className="text-muted-foreground">Aucune correction automatique ne remplace un professeur ou un cheikh.</p>
-      </CardContent>
-    </Card>
+const AsrStatus = () => {
+  const { language } = useLanguage() as unknown as { language: string };
+  const s = language === 'fr' ? STR.fr : STR.en;
+  let st: EngineStatus | null = null;
+  try { st = JSON.parse(localStorage.getItem('asr_engine_status') || 'null'); } catch { st = null; }
+  const mode = st?.mode ?? null;
 
-    <Card>
-      <CardHeader><CardTitle>Activer le moteur Coran</CardTitle></CardHeader>
-      <CardContent className="space-y-3 text-sm text-foreground">
-        <ol className="list-decimal pl-5 space-y-1">
-          <li>Sur Hugging Face : Settings → Access Tokens → Create new token (type « Fine-grained »).</li>
-          <li>Coche « Make calls to Inference Providers ».</li>
-          <li>Ajoute un peu de crédit d'inférence sur ton compte Hugging Face.</li>
-          <li>Donne ce jeton à l'assistant : il remplace la clé HUGGINGFACE_API_KEY.</li>
-        </ol>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild><a href="https://huggingface.co/docs/inference-providers/index" target="_blank" rel="noreferrer">Guide Hugging Face</a></Button>
-          <Button asChild variant="outline"><a href="https://huggingface.co/settings/tokens" target="_blank" rel="noreferrer">Créer un jeton</a></Button>
-          <Button asChild variant="ghost"><Link to="/">Retour</Link></Button>
-        </div>
-      </CardContent>
-    </Card>
-  </main>
-);
+  return (
+    <main className="container max-w-3xl py-10 space-y-6">
+      <h1 className="text-3xl font-semibold text-foreground">{s.title}</h1>
+      <p className="text-muted-foreground">{s.intro}</p>
+      <Card>
+        <CardHeader><CardTitle className="flex items-center gap-2">{s.current} {mode && <Badge variant={mode === 'degraded' ? 'secondary' : 'default'}>{s.modes[mode]}</Badge>}</CardTitle></CardHeader>
+        <CardContent className="space-y-2 text-sm text-foreground">
+          {!mode ? <p>{s.none}</p> : (
+            <>
+              <p>{s.desc[mode]}</p>
+              {st?.engine && <p><strong>{s.engine} :</strong> {st.engine}</p>}
+              {typeof st?.measuredCount === 'number' && <p><strong>{s.measured} :</strong> {st.measuredCount}</p>}
+              {st?.at && <p className="text-muted-foreground">{new Date(st.at).toLocaleString(language)}</p>}
+            </>
+          )}
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader><CardTitle>{s.legend}</CardTitle></CardHeader>
+        <CardContent className="space-y-2 text-sm text-foreground">
+          <p><Badge className="mr-2">✓</Badge>{s.m}</p>
+          <p><Badge variant="secondary" className="mr-2">~</Badge>{s.i}</p>
+          <p className="text-muted-foreground">{s.warn}</p>
+          <Button asChild variant="ghost"><Link to="/">{s.back}</Link></Button>
+        </CardContent>
+      </Card>
+    </main>
+  );
+};
 
 export default AsrStatus;
