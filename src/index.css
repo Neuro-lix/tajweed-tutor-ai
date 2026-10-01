@@ -205,25 +205,35 @@
   display: none !important;
 }
 
-/* Mode impression : n'imprimer que la zone marquée .print-area */
+/* Mode impression : n'imprimer que la zone marquée .print-area.
+   On retire du flux (display:none) tout ce qui ne la contient pas : plus de pages blanches. */
 @media print {
-  body * {
-    visibility: hidden;
+  html, body { background: #fff !important; height: auto !important; overflow: visible !important; }
+  body:has(.print-area) *:not(:has(.print-area)):not(.print-area):not(.print-area *) {
+    display: none !important;
   }
-  .print-area,
-  .print-area * {
-    visibility: visible;
+  /* Ancêtres (dialogue, zone défilante) : on enlève hauteur max, position fixe, transform. */
+  body:has(.print-area) *:has(.print-area) {
+    position: static !important;
+    transform: none !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    width: auto !important;
+    max-width: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #fff !important;
+    padding: 0 !important;
   }
   .print-area {
-    position: absolute;
-    inset: 0 auto auto 0;
     width: 100%;
-    border: none !important;
-    box-shadow: none !important;
     background: #fff !important;
     color: #000 !important;
   }
-  .print-area .text-muted-foreground {
-    color: #444 !important;
-  }
+  .print-area * { color: #000 !important; box-shadow: none !important; }
+  .print-area .text-muted-foreground { color: #444 !important; }
+  .print-area .text-destructive { color: #b00020 !important; }
+  .print-area .card, .print-area [class*="rounded"] { break-inside: avoid; }
+  .no-print { display: none !important; }
 }

@@ -19,6 +19,7 @@ import { generateReportPDF } from '@/utils/pdfGenerator';
 import { PronunciationCoach } from '@/components/coach/PronunciationCoach';
 import { HighlightedVerse } from '@/components/coach/HighlightedVerse';
 import { ConfidenceVerse, type WordConfidence } from '@/components/coach/ConfidenceVerse';
+import { SelfListenPanel } from './SelfListenPanel';
 
 interface RecitationError {
   word: string;
@@ -43,6 +44,7 @@ interface RecitationReportProps {
   date?: Date;
   userName?: string;
   wordConfidence?: WordConfidence[];
+  userAudioBlob?: Blob | null;
   onClose?: () => void;
 }
 
@@ -60,6 +62,7 @@ export const RecitationReport: React.FC<RecitationReportProps> = ({
   date = new Date(),
   userName,
   wordConfidence,
+  userAudioBlob,
   onClose,
 }) => {
   const { t } = useLanguage();
@@ -133,7 +136,11 @@ export const RecitationReport: React.FC<RecitationReportProps> = ({
         </div>
       </div>
 
-      <div ref={reportRef} className="space-y-4">
+      {userAudioBlob && (
+        <SelfListenPanel audioBlob={userAudioBlob} wordConfidence={wordConfidence} errorWords={errors.map((e) => e.word)} />
+      )}
+
+      <div ref={reportRef} className="space-y-4 print-area">
         {/* Header */}
         <Card>
           <CardContent className="py-6">
