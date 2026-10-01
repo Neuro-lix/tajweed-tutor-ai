@@ -29,7 +29,7 @@ export const CorrectionReport: React.FC<CorrectionReportProps> = ({ corrections,
   }, {} as Record<string, Correction[]>);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 print-area">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

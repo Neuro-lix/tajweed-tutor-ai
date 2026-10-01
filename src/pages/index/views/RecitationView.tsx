@@ -188,6 +188,7 @@ export const RecitationView = ({ state: s }: RecitationViewProps) => {
                     expectedText={s.analysisResult.expectedText || s.currentVerseText || `Sourate ${s.currentSurah}, verset ${s.currentVerse}`}
                     textComparison={s.analysisResult.textComparison}
                     wordConfidence={s.analysisResult.wordConfidence}
+                    userAudioBlob={s.userAudioBlob}
                   />
                 </Suspense>
               )}
