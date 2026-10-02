@@ -203,45 +203,36 @@ serve(async (req) => {
       } else if (!HUGGINGFACE_API_KEY) {
         console.warn("[analyze-recitation] HUGGINGFACE_API_KEY not configured — generic cascade.");
       } else {
-        console.log("[analyze-recitation] Trying HuggingFace", hfUrl);
-        try {
-          const hfResp = await fetch(hfUrl, {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`,
-              "Content-Type": "application/json",
-              "x-wait-for-model": "true",
-            },
-            body: JSON.stringify({
-              inputs: base64Payload,
-              parameters: { return_timestamps: "word", generate_kwargs: { language: "arabic", task: "transcribe" } },
-            }),
-          });
-          if (!hfResp.ok) {
-            const errTxt = await hfResp.text();
-            console.error("[analyze-recitation] HuggingFace error:", hfResp.status, errTxt.slice(0, 300));
-            whisperError = `HuggingFace ${hfResp.status}, fallback moteur générique`;
-          } else {
-            const hfJson = await hfResp.json();
-            const hfText = (typeof hfJson === "string" ? hfJson : (hfJson.text ?? "")).trim();
-            if (Array.isArray(hfJson?.chunks)) {
-              whisperWords = hfJson.chunks.map((c: { text?: string; timestamp?: [number, number | null] }) => ({
-                word: String(c.text ?? "").trim(), start: c.timestamp?.[0] ?? null, end: c.timestamp?.[1] ?? null,
-              })).filter((w: WhisperWord) => w.word);
-            }
-            if (hfText.length >= 3) {
-              transcribedText = hfText;
-              transcriptionOk = true;
-              transcriptionEngine = hfDedicated ? "quran-whisper" : "hf-whisper-large-v3-turbo";
-              whisperError = null;
-              console.log("[analyze-recitation] HF result:", hfText.substring(0, 100));
-            } else {
-              whisperError = "HuggingFace vide, fallback moteur générique";
-            }
-          }
-        } catch (e) {
-          console.error("[analyze-recitation] HuggingFace exception:", e);
-          whisperError = "HuggingFace exception, fallback moteur générique";
+        // Moteur Coran (tarteel, texte vocalisé) + moteur généraliste (minutage mot par mot) en parallèle.
+        // tarteel ne sait pas renvoyer de minutage : on combine les deux.
+        const turboUrl = "https://router.huggingface.co/hf-inference/models/openai/whisper-large-v3-turbo";
+        console.log("[analyze-recitation] Trying HuggingFace", hfDedicated ? "quran endpoint + turbo" : hfUrl);
+        const hfHeaders = { "Authorization": `Bearer ${HUGGINGFACE_API_KEY}`, "Content-Type": "application/json", "x-wait-for-model": "true" };
+        const quranCall = hfDedicated
+          ? fetch(hfDedicated, { method: "POST", headers: hfHeaders, body: JSON.stringify({ inputs: base64Payload }) })
+              .then(async (r) => r.ok ? String((await r.json())?.text ?? "").trim() : (console.error("[analyze-recitation] Quran endpoint", r.status, (await r.text()).slice(0, 200)), ""))
+              .catch((e) => { console.error("[analyze-recitation] Quran endpoint exception", e); return ""; })
+          : Promise.resolve("");
+        const turboCall = fetch(turboUrl, {
+          method: "POST", headers: hfHeaders,
+          body: JSON.stringify({ inputs: base64Payload, parameters: { return_timestamps: "word", generate_kwargs: { language: "arabic", task: "transcribe" } } }),
+        }).then(async (r) => r.ok ? await r.json() : (console.error("[analyze-recitation] HF turbo", r.status, (await r.text()).slice(0, 200)), null))
+          .catch((e) => { console.error("[analyze-recitation] HF turbo exception", e); return null; });
+        const [quranText, turboJson] = await Promise.all([quranCall, turboCall]);
+        const turboText = turboJson ? String(typeof turboJson === "string" ? turboJson : (turboJson.text ?? "")).trim() : "";
+        if (Array.isArray(turboJson?.chunks)) {
+          whisperWords = turboJson.chunks.map((c: { text?: string; timestamp?: [number, number | null] }) => ({
+            word: String(c.text ?? "").trim(), start: c.timestamp?.[0] ?? null, end: c.timestamp?.[1] ?? null,
+          })).filter((w: WhisperWord) => w.word);
+        }
+        if (quranText.length >= 3) {
+          transcribedText = quranText; transcriptionOk = true; transcriptionEngine = "quran-whisper"; whisperError = null;
+          console.log("[analyze-recitation] Quran result:", quranText.substring(0, 100));
+        } else if (turboText.length >= 3) {
+          transcribedText = turboText; transcriptionOk = true; transcriptionEngine = "hf-whisper-large-v3-turbo"; whisperError = null;
+          console.log("[analyze-recitation] HF turbo result:", turboText.substring(0, 100));
+        } else {
+          whisperError = "HuggingFace indisponible, fallback moteur générique";
         }
       }
 

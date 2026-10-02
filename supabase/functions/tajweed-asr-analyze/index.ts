@@ -211,7 +211,10 @@ serve(async (req) => {
           "Content-Type": "application/json",
           "x-wait-for-model": "true",
         },
-        body: JSON.stringify({ inputs: body.audio.includes(",") ? body.audio.slice(body.audio.indexOf(",") + 1) : body.audio, parameters: { return_timestamps: "word" }, mimeType }),
+        // Le modèle Coran (endpoint dédié) ne sait pas renvoyer de minutage : texte seul.
+        body: JSON.stringify(Deno.env.get("HF_ASR_ENDPOINT_URL")
+          ? { inputs: body.audio.includes(",") ? body.audio.slice(body.audio.indexOf(",") + 1) : body.audio }
+          : { inputs: body.audio.includes(",") ? body.audio.slice(body.audio.indexOf(",") + 1) : body.audio, parameters: { return_timestamps: "word" }, mimeType }),
       });
       if (!resp.ok) {
         const detail = (await resp.text()).slice(0, 300);
