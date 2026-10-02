@@ -278,6 +278,7 @@ export const RecitationReport: React.FC<RecitationReportProps> = ({
                             Déduit
                           </Badge>
                         )}
+                        <a href="#/moteur-asr" className="text-xs text-muted-foreground underline no-print">?</a>
                       </div>
                       <p className="text-sm text-muted-foreground">{error.ruleDescription}</p>
                     </div>
