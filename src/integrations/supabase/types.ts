@@ -434,6 +434,72 @@ export type Database = {
         }
         Relationships: []
       }
+      recitation_samples: {
+        Row: {
+          acoustic_measures: Json
+          annotation_status: string
+          audio_path: string | null
+          contributor_hash: string
+          created_at: string
+          detected_errors: Json
+          duration_sec: number | null
+          engine: string | null
+          expected_text: string
+          id: string
+          latency_ms: number | null
+          qiraat: string | null
+          score: number | null
+          session_type: string | null
+          surah_number: number
+          transcription: string | null
+          ui_language: string | null
+          verse_number: number
+          word_timestamps: Json
+        }
+        Insert: {
+          acoustic_measures?: Json
+          annotation_status?: string
+          audio_path?: string | null
+          contributor_hash: string
+          created_at?: string
+          detected_errors?: Json
+          duration_sec?: number | null
+          engine?: string | null
+          expected_text: string
+          id?: string
+          latency_ms?: number | null
+          qiraat?: string | null
+          score?: number | null
+          session_type?: string | null
+          surah_number: number
+          transcription?: string | null
+          ui_language?: string | null
+          verse_number: number
+          word_timestamps?: Json
+        }
+        Update: {
+          acoustic_measures?: Json
+          annotation_status?: string
+          audio_path?: string | null
+          contributor_hash?: string
+          created_at?: string
+          detected_errors?: Json
+          duration_sec?: number | null
+          engine?: string | null
+          expected_text?: string
+          id?: string
+          latency_ms?: number | null
+          qiraat?: string | null
+          score?: number | null
+          session_type?: string | null
+          surah_number?: number
+          transcription?: string | null
+          ui_language?: string | null
+          verse_number?: number
+          word_timestamps?: Json
+        }
+        Relationships: []
+      }
       recitation_sessions: {
         Row: {
           accuracy_score: number | null
@@ -508,6 +574,59 @@ export type Database = {
           verse_number?: number
         }
         Relationships: []
+      }
+      sample_annotations: {
+        Row: {
+          annotator_id: string
+          created_at: string
+          id: string
+          makhraj: string | null
+          note: string | null
+          rule_type: string
+          sample_id: string
+          severity: string | null
+          sifa: string | null
+          verdict: string
+          word: string | null
+          word_index: number | null
+        }
+        Insert: {
+          annotator_id: string
+          created_at?: string
+          id?: string
+          makhraj?: string | null
+          note?: string | null
+          rule_type: string
+          sample_id: string
+          severity?: string | null
+          sifa?: string | null
+          verdict: string
+          word?: string | null
+          word_index?: number | null
+        }
+        Update: {
+          annotator_id?: string
+          created_at?: string
+          id?: string
+          makhraj?: string | null
+          note?: string | null
+          rule_type?: string
+          sample_id?: string
+          severity?: string | null
+          sifa?: string | null
+          verdict?: string
+          word?: string | null
+          word_index?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sample_annotations_sample_id_fkey"
+            columns: ["sample_id"]
+            isOneToOne: false
+            referencedRelation: "recitation_samples"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sheikh_availability: {
         Row: {
