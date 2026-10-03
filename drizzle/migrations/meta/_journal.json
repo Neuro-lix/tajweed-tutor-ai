@@ -36,6 +36,13 @@
       "when": 1790091897690,
       "tag": "0004_ijaza_docs_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791018681508,
+      "tag": "0005_add_expert_role",
+      "breakpoints": true
     }
   ]
 }
