@@ -15,6 +15,7 @@ import { PaymentsTab } from "@/components/admin/PaymentsTab";
 import { EmailsTab } from "@/components/admin/EmailsTab";
 import { AnalysesTab } from "@/components/admin/AnalysesTab";
 import { UsersTab } from "@/components/admin/UsersTab";
+import { DatasetTab } from "@/components/admin/DatasetTab";
 
 interface TajweedErrorBucket {
   category: string;
@@ -101,7 +102,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
   const { isAdmin, loading: roleLoading } = useIsAdmin();
   const [stats, setStats] = useState<DashStats | null>(null);
   const [loading, setLoading] = useState(true);
-  type AdminTab = "overview" | "users" | "accounts" | "tajweed" | "business" | "boutique" | "payments" | "emails" | "analyses" | "credits";
+  type AdminTab = "overview" | "users" | "accounts" | "tajweed" | "business" | "boutique" | "payments" | "emails" | "analyses" | "dataset" | "credits";
   const [tab, setTab] = useState<AdminTab>("overview");
   const [refreshing, setRefreshing] = useState(false);
 
@@ -385,6 +386,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
             { key: "payments", label: "Suivi des paiements", icon: CreditCard },
             { key: "emails", label: "Suivi des e-mails", icon: Mail },
             { key: "analyses", label: "Suivi des analyses", icon: Target },
+            { key: "dataset", label: "Dataset & annotation", icon: Target },
             { key: "credits", label: "💳 Crédits LLM", icon: CreditCard },
           ].map(t => (
             <button
@@ -771,6 +773,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack }) => {
           <UsersTab />
         ) : tab === "analyses" ? (
           <AnalysesTab />
+        ) : tab === "dataset" ? (
+          <DatasetTab />
         ) : (
           <LlmCreditsTab />
         )}
