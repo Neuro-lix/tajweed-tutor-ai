@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { CREDIT_COSTS } from "../_shared/credit-costs.ts";
+import { decodeWavPcm16, measureAcoustics, base64ToBytes } from "../_shared/acoustics.ts";
 import { stripDiacritics, computeSimilarity, buildWordConfidence, measureTajweed, type AsrWord } from "../_shared/recitation-metrics.ts";
 type WhisperWord = AsrWord;
 
@@ -115,7 +116,8 @@ serve(async (req) => {
       });
     }
 
-    const { audioBase64, audioMimeType, surahNumber, verseNumber, expectedText, qiraat } = await req.json();
+    const t0 = Date.now();
+    const { audioBase64, audioMimeType, surahNumber, verseNumber, expectedText, qiraat, contributeToDataset, uiLanguage } = await req.json();
 
     // ── Solde de crédits requis AVANT toute transcription / appel LLM ──
     const { data: creditRow } = await sbAdmin
@@ -612,15 +614,27 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
     const inferred = (analysis.errors as Record<string, unknown>[])
       .filter((e) => !measured.some((m) => m.word === e.word && m.ruleType === e.ruleType))
       .map((e) => ({ ...e, confidence: "inferred" }));
-    analysis.errors = [...measured, ...inferred];
+    // Signal-level measurements (ghunna nasal energy, qalqala burst) on WAV audio.
+    let acoustic: ReturnType<typeof measureAcoustics> = [];
+    try {
+      if (hasAudio && audioBase64 && String(audioMimeType ?? "").includes("wav")) {
+        const pcm = decodeWavPcm16(base64ToBytes(audioBase64));
+        if (pcm) acoustic = measureAcoustics(pcm, wordConfidence.map((w) => ({ word: w.word, start: w.start ?? null, end: w.end ?? null })));
+      }
+    } catch (e) { console.warn("[analyze-recitation] acoustics failed:", e); }
+    const acousticErrors = acoustic.filter((a) => !a.ok && !measured.some((m) => m.word === a.word && m.ruleType === a.ruleType));
+    const inferredFinal = inferred.filter((e) => !acoustic.some((a) => a.word === e.word && a.ruleType === e.ruleType));
+    analysis.acousticMeasures = acoustic;
+    analysis.errors = [...measured, ...acousticErrors, ...inferredFinal];
     const degraded = transcriptionEngine !== "quran-whisper" && transcriptionEngine !== "hf-whisper-large-v3-turbo";
     analysis.engineStatus = {
       mode: transcriptionEngine === "quran-whisper" ? "quran" : degraded ? "degraded" : "timestamps",
       engine: transcriptionEngine,
       reason: degraded ? (whisperError ?? "quran_engine_unavailable") : null,
       hasWordTimestamps: wordConfidence.some((w) => w.start !== null),
-      measuredCount: measured.length,
-      inferredCount: inferred.length,
+      measuredCount: measured.length + acousticErrors.length,
+      measuredChecks: acoustic.length,
+      inferredCount: inferredFinal.length,
     };
     if (degraded) console.warn("[analyze-recitation] DEGRADED MODE — generic engine used:", transcriptionEngine, whisperError);
 
@@ -638,6 +652,35 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
       console.error("[analyze-recitation] credit deduction failed:", creditErr);
     }
     analysis.remainingCredits = remainingCredits;
+
+    // ── Dataset contribution (opt-in, anonymised) ──
+    if (contributeToDataset === true) {
+      try {
+        const hashBuf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`nassihah:${userId}`));
+        const contributor = Array.from(new Uint8Array(hashBuf)).map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 24);
+        const { data: prof } = await sbAdmin.from("profiles").select("session_type").eq("user_id", userId).maybeSingle();
+        let audioPath: string | null = null;
+        if (hasAudio && audioBase64) {
+          const ext = String(audioMimeType ?? "").includes("wav") ? "wav" : "webm";
+          audioPath = `${surahNumber}/${verseNumber}/${crypto.randomUUID()}.${ext}`;
+          const { error: upErr } = await sbAdmin.storage.from("recitation-dataset")
+            .upload(audioPath, base64ToBytes(audioBase64), { contentType: audioMimeType ?? "audio/wav" });
+          if (upErr) { console.warn("[dataset] upload failed", upErr); audioPath = null; }
+        }
+        const last = wordConfidence.filter((w) => w.end != null).pop();
+        await sbAdmin.from("recitation_samples").insert({
+          contributor_hash: contributor,
+          surah_number: surahNumber, verse_number: verseNumber,
+          qiraat: qiraat ?? null, session_type: prof?.session_type ?? null,
+          ui_language: typeof uiLanguage === "string" ? uiLanguage.slice(0, 8) : null,
+          expected_text: expectedText ?? "", transcription: analysis.transcribedText,
+          engine: transcriptionEngine, word_timestamps: wordConfidence,
+          acoustic_measures: acoustic, detected_errors: analysis.errors,
+          score: analysis.overallScore, audio_path: audioPath,
+          duration_sec: last?.end ?? null, latency_ms: Date.now() - t0,
+        });
+      } catch (e) { console.warn("[dataset] insert failed", e); }
+    }
 
     return new Response(JSON.stringify(analysis), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

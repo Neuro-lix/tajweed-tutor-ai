@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { stripDiacritics, charSimilarity } from '../../supabase/functions/_shared/recitation-metrics';
 
-export type LiveWordState = 'pending' | 'correct' | 'doubt' | 'wrong';
+export type LiveWordState = 'pending' | 'active' | 'correct' | 'doubt' | 'wrong';
 
-const SEGMENT_MS = 4000;
+const SEGMENT_MS = 1200; // envoi serveur ~toutes les 1,2 s
+const VOICED_SEC_PER_LETTER = 0.11; // tempo moyen pour le curseur local
 
 const blobToBase64 = (b: Blob) =>
   new Promise<string>((resolve, reject) => {
@@ -49,10 +50,47 @@ export const useLiveRecitation = (
   const [unavailable, setUnavailable] = useState(false);
   const chunks = useRef<Blob[]>([]);
   const busy = useRef(false);
+  const confirmed = useRef(0); // nb de mots confirmés par le serveur
+  const [cursor, setCursor] = useState(-1);
+  const [latencyMs, setLatencyMs] = useState<number | null>(null);
 
   useEffect(() => {
     setStates(verseText.split(/\s+/).filter(Boolean).map(() => 'pending'));
+    confirmed.current = 0; setCursor(-1);
   }, [verseText, active]);
+
+  // Réveille le moteur spécialisé dès le début (évite le démarrage à froid).
+  useEffect(() => {
+    if (!active) return;
+    supabase.functions.invoke('tajweed-asr-analyze', { body: { warmup: true } }).catch(() => {});
+  }, [active]);
+
+  // Curseur local instantané : temps de voix détecté → position estimée dans le verset.
+  useEffect(() => {
+    if (!active || !stream) return;
+    const ws = verseText.split(/\s+/).filter(Boolean);
+    const lens = ws.map((w) => stripDiacritics(w).length || 1);
+    let ctx: AudioContext;
+    try { ctx = new AudioContext(); } catch { return; }
+    const an = ctx.createAnalyser(); an.fftSize = 512;
+    ctx.createMediaStreamSource(stream).connect(an);
+    const buf = new Float32Array(an.fftSize);
+    let voiced = 0, last = performance.now(), noise = 0.01, raf = 0;
+    const tick = () => {
+      const now = performance.now(); const dt = (now - last) / 1000; last = now;
+      an.getFloatTimeDomainData(buf);
+      let e = 0; for (const v of buf) e += v * v; e = Math.sqrt(e / buf.length);
+      noise = Math.min(noise * 0.995 + e * 0.005, 0.05);
+      if (e > noise * 3 && e > 0.01) voiced += dt;
+      let acc = 0, idx = -1;
+      for (let i = 0; i < lens.length; i++) { acc += lens[i] * VOICED_SEC_PER_LETTER; if (voiced < acc) { idx = i; break; } }
+      if (idx < 0) idx = lens.length - 1;
+      setCursor((c) => (idx !== c ? Math.max(idx, confirmed.current) : c));
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => { cancelAnimationFrame(raf); ctx.close().catch(() => {}); };
+  }, [active, stream, verseText]);
 
   useEffect(() => {
     if (!active || !stream || typeof MediaRecorder === 'undefined') return;
@@ -64,14 +102,18 @@ export const useLiveRecitation = (
       if (e.data.size) chunks.current.push(e.data);
       if (busy.current || rec.state !== 'recording') return;
       busy.current = true;
+      const t0 = performance.now();
       try {
         const audio = await blobToBase64(new Blob(chunks.current, { type: mime }));
         const { data, error } = await supabase.functions.invoke('tajweed-asr-analyze', {
-          body: { audio, mimeType: mime.split(';')[0], surahNumber, verseNumber },
+          body: { audio, mimeType: mime.split(';')[0], surahNumber, verseNumber, live: true },
         });
+        setLatencyMs(Math.round(performance.now() - t0));
         if (error || !data?.transcription) { if (error) setUnavailable(true); return; }
         const heard = String(data.transcription).split(/\s+/).filter(Boolean);
-        setStates(alignLive(verseText.split(/\s+/).filter(Boolean), heard));
+        const next = alignLive(verseText.split(/\s+/).filter(Boolean), heard);
+        confirmed.current = next.reduce((n, st, i) => (st !== 'pending' ? i + 1 : n), 0);
+        setStates(next);
       } catch { setUnavailable(true); }
       finally { busy.current = false; }
     };
@@ -79,5 +121,8 @@ export const useLiveRecitation = (
     return () => { try { rec.stop(); } catch { /* ignore */ } };
   }, [active, stream, verseText, surahNumber, verseNumber]);
 
-  return { words, states, unavailable };
+  const display: LiveWordState[] = states.map((st, i) =>
+    st === 'pending' && active && i === cursor ? 'active' : st);
+
+  return { words, states: display, unavailable, latencyMs };
 };

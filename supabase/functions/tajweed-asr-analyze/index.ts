@@ -152,7 +152,7 @@ serve(async (req) => {
     const { data: rl } = await supabase.rpc("check_and_increment_rate_limit", {
       p_user_id: userId,
       p_action: "tajweed-asr-analyze",
-      p_max: 150, // suivi en direct : ~1 appel / 4 s pendant la récitation
+      p_max: 600, // suivi en direct : ~1 appel / 1,2 s pendant la récitation
       p_window_seconds: 600,
     });
     const limit = rl as { allowed?: boolean } | null;
@@ -179,8 +179,13 @@ serve(async (req) => {
 
     // ─── Entrée ───────────────────────────────────────────────────────
     const body = await req.json().catch(() => null) as
-      | { audio?: string; mimeType?: string; surahNumber?: number; verseNumber?: number }
+      | { audio?: string; mimeType?: string; surahNumber?: number; verseNumber?: number; warmup?: boolean }
       | null;
+    if (body?.warmup) {
+      // Réveille l'endpoint (scale-to-zero) sans attendre la réponse.
+      fetch(HF_ENDPOINT_URL, { method: "POST", headers: { Authorization: `Bearer ${HUGGINGFACE_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ inputs: "" }) }).catch(() => {});
+      return json({ ok: true, warmed: true }, 200, corsHeaders);
+    }
     if (!body?.audio || typeof body.audio !== "string") {
       return json({ error: "missing_audio" }, 400, corsHeaders);
     }
