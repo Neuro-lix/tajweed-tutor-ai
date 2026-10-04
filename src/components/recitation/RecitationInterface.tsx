@@ -1,3 +1,4 @@
+import { DatasetConsent } from './DatasetConsent';
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -172,10 +173,12 @@ export const RecitationInterface: React.FC<RecitationInterfaceProps> = ({
         )}
         {(isRecording || (liveStarted && !isAnalyzing && !feedback)) && (
           <div className="w-full">
-            <LiveVerseTracker words={live.words} states={live.states} unavailable={live.unavailable} />
+            <LiveVerseTracker words={live.words} states={live.states} unavailable={live.unavailable} latencyMs={live.latencyMs} />
           </div>
         )}
       </div>
+
+      <DatasetConsent />
 
       {isAnalyzing && <AnalysisProgress currentStep={analysisStep} transcriptionFailed={transcriptionFailed} />}
 
