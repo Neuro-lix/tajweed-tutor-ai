@@ -343,6 +343,8 @@ export function useIndexState() {
           verseNumber: currentVerse,
           expectedText,
           qiraat: selectedQiraat || 'hafs_asim',
+          contributeToDataset: localStorage.getItem('nassihah.contributeDataset') === '1',
+          uiLanguage: localStorage.getItem('i18nextLng') || document.documentElement.lang || null,
         },
       });
 
