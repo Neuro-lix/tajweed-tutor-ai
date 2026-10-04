@@ -56,7 +56,7 @@ export const DatasetTab: React.FC = () => {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return;
     const { error } = await supabase.from('sample_annotations').insert({
-      sample_id: current.id, annotator_id: u.user.id, word: w ?? word || null,
+      sample_id: current.id, annotator_id: u.user.id, word: (w ?? word) || null,
       rule_type: r ?? rule, verdict, note: note || null,
     });
     if (error) toast.error(error.message); else toast.success('Annotation enregistrée');
