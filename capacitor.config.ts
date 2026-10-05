@@ -42,9 +42,11 @@ import type { CapacitorConfig } from '@capacitor/cli';
  * `localStorage` / `sessionStorage` usage is fine as-is.
  */
 const config: CapacitorConfig = {
-  appId: 'app.lovable.dd06a15664f5407dbf7994ef3c169108',
-  appName: 'recite-perfectly-bot',
+  // Identifiant définitif sur Google Play : ne plus jamais le changer après la 1re publication.
+  appId: 'com.tajweedtutorai.app',
+  appName: 'Tajweed Tutor AI',
   webDir: 'dist',
+  android: { allowMixedContent: false },
 };
 
 export default config;
