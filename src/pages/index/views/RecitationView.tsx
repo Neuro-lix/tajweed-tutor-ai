@@ -1,3 +1,4 @@
+import { isAndroidApp } from '@/lib/platform';
 import { lazy, Suspense } from 'react';
 import { FileText, Zap } from 'lucide-react';
 import { toast } from 'sonner';
@@ -212,12 +213,12 @@ export const RecitationView = ({ state: s }: RecitationViewProps) => {
                 <Zap className="h-8 w-8 text-destructive" />
               </div>
               <h3 className="text-lg font-semibold text-foreground">{t.noMoreCredits}</h3>
-              <p className="text-muted-foreground text-sm">
+              {!isAndroidApp() && (<p className="text-muted-foreground text-sm">
                 {t.noCreditsDesc}
-              </p>
-              <Button variant="default" onClick={() => { s.setShowNoCredits(false); s.navigate('/shop'); }}>
+              </p>)}
+              {!isAndroidApp() && <Button variant="default" onClick={() => { s.setShowNoCredits(false); s.navigate('/shop'); }}>
                 {t.rechargeCredits}
-              </Button>
+              </Button>}
             </div>
           </DialogContent>
         </Dialog>

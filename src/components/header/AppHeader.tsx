@@ -1,3 +1,4 @@
+import { isAndroidApp } from '@/lib/platform';
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { LanguageSelector } from '@/components/settings/LanguageSelector';
@@ -91,10 +92,12 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               <GraduationCap className="h-4 w-4 md:mr-1" />
               <span className="hidden md:inline">{t.ijaza}</span>
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/shop')} className="hidden sm:flex">
-              <ShoppingBag className="h-4 w-4 md:mr-1" />
-              <span className="hidden md:inline">{t.boutiqueLabel}</span>
-            </Button>
+            {!isAndroidApp() && (
+              <Button variant="ghost" size="sm" onClick={() => navigate('/shop')} className="hidden sm:flex">
+                <ShoppingBag className="h-4 w-4 md:mr-1" />
+                <span className="hidden md:inline">{t.boutiqueLabel}</span>
+              </Button>
+            )}
             <Button variant="ghost" size="sm" onClick={onRecordingsClick} className="hidden sm:flex">
               <Music className="h-4 w-4 md:mr-1" />
               <span className="hidden md:inline">{t.myRecitations}</span>

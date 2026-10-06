@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { isAndroidApp } from "@/lib/platform";
 
 const LINKS = [
   { to: "/contact", label: "Contact" },
@@ -13,7 +14,7 @@ export const SiteFooter = () => (
   <footer className="border-t border-border bg-card/40 mt-16">
     <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col gap-4 items-center text-center">
       <nav aria-label="Liens de bas de page" className="flex flex-wrap justify-center gap-x-6 gap-y-2">
-        {LINKS.map((l) => (
+        {LINKS.filter((l) => !(isAndroidApp() && (l.to === "/shop" || l.to === "/remboursement"))).map((l) => (
           <Link
             key={l.to}
             to={l.to}

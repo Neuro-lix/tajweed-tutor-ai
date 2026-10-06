@@ -1,3 +1,4 @@
+import { isNativeApp } from '@/lib/platform';
 import { useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 
@@ -6,7 +7,7 @@ export function SwUpdateBanner() {
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
 
   useEffect(() => {
-    if (!('serviceWorker' in navigator)) return;
+    if (!('serviceWorker' in navigator) || isNativeApp()) return;
 
     const handleWaiting = (sw: ServiceWorker) => {
       setWaitingWorker(sw);

@@ -1,3 +1,4 @@
+import { isAndroidApp } from '@/lib/platform';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -366,12 +367,12 @@ export function useIndexState() {
             description:
               `Il te faut au moins ${CREDIT_COSTS.analyzeRecitation} crédit pour lancer une analyse. Solde actuel : ${formatCredits(serverBalance ?? 0)}.`,
             duration: 8000,
-            action: { label: 'Recharger', onClick: () => navigate('/shop') },
+            ...(isAndroidApp() ? {} : { action: { label: 'Recharger', onClick: () => navigate('/shop') } }),
           });
           setAiFeedback({
             status: 'review',
             message: 'Crédits insuffisants',
-            details: 'Recharge ton solde depuis la boutique pour relancer une analyse de ta récitation.',
+            details: isAndroidApp() ? 'Aucun crédit disponible.' : 'Recharge ton solde depuis la boutique pour relancer une analyse de ta récitation.',
           });
           return;
         }
@@ -390,12 +391,12 @@ export function useIndexState() {
             description:
               `Il te faut au moins ${CREDIT_COSTS.analyzeRecitation} crédit pour lancer une analyse. Solde actuel : ${formatCredits(Number(data.balance ?? 0))}.`,
             duration: 8000,
-            action: { label: 'Recharger', onClick: () => navigate('/shop') },
+            ...(isAndroidApp() ? {} : { action: { label: 'Recharger', onClick: () => navigate('/shop') } }),
           });
           setAiFeedback({
             status: 'review',
             message: 'Crédits insuffisants',
-            details: 'Recharge ton solde depuis la boutique pour relancer une analyse de ta récitation.',
+            details: isAndroidApp() ? 'Aucun crédit disponible.' : 'Recharge ton solde depuis la boutique pour relancer une analyse de ta récitation.',
           });
           return;
         }
