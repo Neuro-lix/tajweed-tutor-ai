@@ -533,6 +533,74 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
+        import { handlePreflight, isOriginAllowed } from "../_shared/cors.ts";
+import { adminClient, requireUser } from "../_shared/auth.ts";
+import { enforceRateLimit } from "../_shared/rateLimit.ts";
+import { consumeCredits, refundCredits } from "../_shared/credits.ts";
+import { HttpError, json, errorResponse } from "../_shared/http.ts";
+import { parseLlmJson } from "../_shared/llmJson.ts";
+import { pseudonymize } from "../_shared/hash.ts";
+
+const ANALYSIS_COST = 1;
+
+// ⬇️ Collez ici votre logique actuelle (appel ASR, prompt LLM, etc.)
+// Remplacez votre JSON.parse(...) du LLM par parseLlmJson(content).
+async function runAnalysis(
+  body: Record<string, unknown>,
+  userId: string,
+  admin: ReturnType<typeof adminClient>,
+): Promise<unknown> {
+  // ... votre pipeline existant ...
+
+  // Contribution dataset : uniquement si consentement explicite
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("dataset_consent")
+    .eq("id", userId)
+    .single();
+
+  if (profile?.dataset_consent === true) {
+    const contributorHash = await pseudonymize(userId);
+    // ... insert dans votre table dataset avec contributorHash ...
+  }
+
+  return {}; // ← retournez votre résultat actuel
+}
+
+Deno.serve(async (req) => {
+  const preflight = handlePreflight(req);
+  if (preflight) return preflight;
+
+  if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
+  if (!isOriginAllowed(req)) return json(req, { error: "Origin not allowed" }, 403);
+
+  const admin = adminClient();
+  let charged = false;
+  let userId = "";
+
+  try {
+    const user = await requireUser(req, admin);
+    userId = user.id;
+
+    await enforceRateLimit(admin, `analyze-recitation:${userId}`);
+
+    const body = await req.json().catch(() => {
+      throw new HttpError(400, "Invalid JSON body", "BAD_BODY");
+    });
+    // ... gardez ici votre validation d'entrée existante (taille audio, sourate, verset…) ...
+
+    // Débit AVANT l'analyse, en une seule requête SQL atomique
+    const remaining = await consumeCredits(admin, userId, ANALYSIS_COST);
+    charged = true;
+
+    const result = await runAnalysis(body, userId, admin);
+    return json(req, { ...(result as object), credits_remaining: remaining });
+  } catch (err) {
+    if (charged) await refundCredits(admin, userId, ANALYSIS_COST);
+    return errorResponse(req, err);
+  }
+});
+
       }),
     });
 
