@@ -1,3 +1,4 @@
+import { isNativeApp } from "./lib/platform";
 import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -48,7 +49,7 @@ createRoot(document.getElementById("root")!).render(
 }
 
 // Register Service Worker for PWA
-if ("serviceWorker" in navigator && import.meta.env.PROD) {
+if ("serviceWorker" in navigator && import.meta.env.PROD && !isNativeApp()) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
       .register("/sw.js")

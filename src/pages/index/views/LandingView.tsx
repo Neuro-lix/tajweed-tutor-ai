@@ -1,3 +1,4 @@
+import { isAndroidApp } from '@/lib/platform';
 import { Link } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -190,9 +191,11 @@ export const LandingView = ({ state: s }: LandingViewProps) => {
           <Link to="/ijaza" className="text-muted-foreground hover:text-primary underline-offset-4 hover:underline">
             Ijāza
           </Link>
-          <Link to="/shop" className="text-muted-foreground hover:text-primary underline-offset-4 hover:underline">
-            Boutique
-          </Link>
+          {!isAndroidApp() && (
+            <Link to="/shop" className="text-muted-foreground hover:text-primary underline-offset-4 hover:underline">
+              Boutique
+            </Link>
+          )}
         </nav>
 
         <TajwidLinks locale="fr" className="mt-12 max-w-3xl mx-auto" />

@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { resolveRedirect } from "@/lib/redirects";
 
+import { isAndroidApp } from "@/lib/platform";
 const SUGGESTIONS = [
   { to: "/", label: "Accueil" },
   { to: "/tajwid", label: "Règles du tajwīd" },
@@ -40,7 +41,7 @@ const NotFound = () => {
           Le lien est peut-être obsolète ou mal écrit. Voici les pages les plus utiles :
         </p>
         <div className="flex flex-wrap justify-center gap-2">
-          {SUGGESTIONS.map((s) => (
+          {SUGGESTIONS.filter((s) => !(isAndroidApp() && s.to === "/shop")).map((s) => (
             <Button key={s.to} asChild variant="outline" size="sm">
               <Link to={s.to}>{s.label}</Link>
             </Button>

@@ -13,6 +13,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { PwaInstallDialog } from "@/components/pwa/PwaInstallDialog";
 import { SwUpdateBanner } from "@/components/pwa/SwUpdateBanner";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { NativeShell, WebOnly } from "@/components/native/NativeShell";
 
 // Lazy-load all routes for code-splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -81,6 +82,7 @@ const App = () => (
                 <Sonner />
                 <PwaInstallDialog />
                 <SwUpdateBanner />
+                <NativeShell />
                 <Suspense fallback={<RouteFallback />}>
                   <Routes>
                     <Route path="/" element={<Index />} />
@@ -92,12 +94,12 @@ const App = () => (
                     <Route path="/mes-analyses" element={<ProtectedRoute><MyAnalyses /></ProtectedRoute>} />
                     <Route path="/mes-analyses/:id" element={<ProtectedRoute><MyAnalyses /></ProtectedRoute>} />
                     <Route path="/mes-ijazas" element={<ProtectedRoute><MyIjaza /></ProtectedRoute>} />
-                    <Route path="/payments" element={<ProtectedRoute><PaymentHistory /></ProtectedRoute>} />
+                    <Route path="/payments" element={<WebOnly><ProtectedRoute><PaymentHistory /></ProtectedRoute></WebOnly>} />
                     <Route path="/hifz" element={<ProtectedRoute><HifzPlan /></ProtectedRoute>} />
                     <Route path="/ijaza" element={<Ijaza />} />
-                    <Route path="/shop" element={<Shop />} />
-                    <Route path="/shop/crypto" element={<CryptoCheckout />} />
-                    <Route path="/shop/success" element={<ProtectedRoute><ShopSuccess /></ProtectedRoute>} />
+                    <Route path="/shop" element={<WebOnly><Shop /></WebOnly>} />
+                    <Route path="/shop/crypto" element={<WebOnly><CryptoCheckout /></WebOnly>} />
+                    <Route path="/shop/success" element={<WebOnly><ProtectedRoute><ShopSuccess /></ProtectedRoute></WebOnly>} />
                     <Route path="/verify/:id" element={<VerifyCertificate />} />
                     <Route path="/diagnostics" element={<Diagnostics />} />
                     <Route path="/health" element={<Health />} />

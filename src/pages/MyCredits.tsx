@@ -1,3 +1,5 @@
+import { isAndroidApp } from '@/lib/platform';
+import { DeleteAccountCard } from '@/components/account/DeleteAccountCard';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Loader2, Zap, TrendingDown, TrendingUp, Gift } from 'lucide-react';
@@ -129,12 +131,16 @@ const MyCredits = () => {
         <Card>
           <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
             <CardTitle className="text-lg">Historique des mouvements</CardTitle>
-            <Button asChild variant="outline" size="sm">
-              <Link to="/shop">Recharger</Link>
-            </Button>
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/payments">Paiements</Link>
-            </Button>
+            {!isAndroidApp() && (
+              <>
+                <Button asChild variant="outline" size="sm">
+                  <Link to="/shop">Recharger</Link>
+                </Button>
+                <Button asChild variant="ghost" size="sm">
+                  <Link to="/payments">Paiements</Link>
+                </Button>
+              </>
+            )}
           </CardHeader>
           <CardContent>
             {loading ? (

@@ -1,3 +1,4 @@
+import { isAndroidApp } from '@/lib/platform';
 import React, { lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -213,7 +214,7 @@ const Index = () => {
   }
 
   // Pricing
-  if (s.currentView === 'pricing') {
+  if (s.currentView === 'pricing' && !isAndroidApp()) {
     return (
       <Suspense fallback={<PageSkeleton label="Chargement des offres" />}>
         <PricingSection onBack={() => s.setCurrentView('dashboard')} />
@@ -221,7 +222,7 @@ const Index = () => {
     );
   }
 
-  if (s.currentView === 'boutique') {
+  if (s.currentView === 'boutique' && !isAndroidApp()) {
     return (
       <Suspense fallback={<PageSkeleton label="Chargement de la boutique" />}>
         <Boutique onBack={() => s.setCurrentView('dashboard')} />

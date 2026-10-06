@@ -1,3 +1,4 @@
+import { isAndroidApp } from '@/lib/platform';
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -87,7 +88,7 @@ export const usePaddleCheckout = () => {
   }, [user]);
 
   useEffect(() => {
-    if (!clientToken) return;
+    if (!clientToken || isAndroidApp()) return;
     const init = () => {
       if (!window.Paddle) return;
       window.Paddle.Initialize({

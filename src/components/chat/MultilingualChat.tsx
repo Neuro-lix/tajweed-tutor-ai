@@ -1,3 +1,4 @@
+import { isAndroidApp } from '@/lib/platform';
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -218,9 +219,11 @@ export const MultilingualChat: React.FC = () => {
             <p className="text-muted-foreground">
               Crédits insuffisants pour utiliser le chat ({formatCredits(credits)} restant).
             </p>
-            <Button asChild size="sm" className="w-full">
-              <Link to="/shop">Acheter des crédits</Link>
-            </Button>
+            {!isAndroidApp() && (
+              <Button asChild size="sm" className="w-full">
+                <Link to="/shop">Acheter des crédits</Link>
+              </Button>
+            )}
           </div>
         ) : (
         <div className="flex gap-2">
