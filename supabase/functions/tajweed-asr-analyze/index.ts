@@ -273,3 +273,35 @@ serve(async (req) => {
     return json({ error: "internal_error", fallback: "llm_only" }, 500, corsHeaders);
   }
 });
+import { handlePreflight, isOriginAllowed } from "../_shared/cors.ts";
+import { adminClient, requireUser } from "../_shared/auth.ts";
+import { enforceRateLimit } from "../_shared/rateLimit.ts";
+import { HttpError, json, errorResponse } from "../_shared/http.ts";
+
+// ⬇️ Collez ici votre logique ASR actuelle
+async function runAsr(body: Record<string, unknown>): Promise<unknown> {
+  // ... votre code existant ...
+  return {};
+}
+
+Deno.serve(async (req) => {
+  const preflight = handlePreflight(req);
+  if (preflight) return preflight;
+
+  if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
+  if (!isOriginAllowed(req)) return json(req, { error: "Origin not allowed" }, 403);
+
+  const admin = adminClient();
+  try {
+    const user = await requireUser(req, admin);
+    await enforceRateLimit(admin, `tajweed-asr:${user.id}`);
+
+    const body = await req.json().catch(() => {
+      throw new HttpError(400, "Invalid JSON body", "BAD_BODY");
+    });
+
+    return json(req, await runAsr(body));
+  } catch (err) {
+    return errorResponse(req, err);
+  }
+});
