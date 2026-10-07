@@ -1,5 +1,10 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { handleOptions } from "../_shared/cors.ts";
+import { HttpError, json, errorResponse, readJson } from "../_shared/http.ts";
+import { requireUser, supabaseAdmin } from "../_shared/auth.ts";
+import { enforceRateLimit } from "../_shared/rateLimit.ts";
+import { consumeCredits, refundCredits } from "../_shared/credits.ts";
+import { parseLlmJson } from "../_shared/llmJson.ts";
+import { pseudonymize } from "../_shared/hash.ts";
 import { CREDIT_COSTS } from "../_shared/credit-costs.ts";
 import { decodeWavPcm16, measureAcoustics, base64ToBytes } from "../_shared/acoustics.ts";
 import { stripDiacritics, computeSimilarity, buildWordConfidence, measureTajweed, type AsrWord } from "../_shared/recitation-metrics.ts";
@@ -16,67 +21,23 @@ if (!Deno.env.get("HUGGINGFACE_API_KEY")) {
   console.log("[analyze-recitation] STARTUP: HUGGINGFACE_API_KEY détectée.");
 }
 
-type RateLimitResult = { allowed: boolean; count: number; limit: number; reset_at: string };
+const COST = CREDIT_COSTS.analyzeRecitation;
+const MAX_AUDIO_BYTES = 15 * 1024 * 1024;
 
-// ─── CORS: env-driven allowlist (no wildcard) ───────────────────────────
-const DEFAULT_ALLOWED_ORIGINS = [
-  "https://recite-perfectly-bot.lovable.app",
-  "https://id-preview--dd06a156-64f5-407d-bf79-94ef3c169108.lovable.app",
-  "https://tajweedtutorai.com",
-  "https://www.tajweedtutorai.com",
-  "http://localhost:8080",
-  "http://localhost:5173",
-];
-const ENV_ALLOWED = (Deno.env.get("ALLOWED_ORIGINS") ?? "")
-  .split(",").map((s) => s.trim()).filter(Boolean);
-const ALLOWLIST = ENV_ALLOWED.length ? ENV_ALLOWED : DEFAULT_ALLOWED_ORIGINS;
-const ALLOW_HEADERS = "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version";
+Deno.serve(async (req) => {
+  const pre = handleOptions(req); if (pre) return pre;
 
-function buildCors(req: Request): Record<string, string> {
-  const origin = req.headers.get("Origin") ?? "";
-  const ok = ALLOWLIST.includes(origin)
-    || /^https:\/\/[a-z0-9-]+\.lovable\.app$/i.test(origin)
-    || /^https:\/\/[a-z0-9-]+\.lovableproject\.com$/i.test(origin);
-  return {
-    "Access-Control-Allow-Origin": ok ? origin : ALLOWLIST[0],
-    "Access-Control-Allow-Headers": ALLOW_HEADERS,
-    "Vary": "Origin",
+  let charged = false;
+  let chargedUser: string | null = null;
+  const refund = async () => {
+    if (charged && chargedUser) { charged = false; await refundCredits(chargedUser, COST); }
   };
-}
-
-serve(async (req) => {
-  const corsHeaders = buildCors(req);
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
 
   try {
-    // ── AuthN: require valid Supabase JWT to prevent abuse of expensive AI ops
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const sb = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-    );
-    const { data: { user }, error: authErr } = await sb.auth.getUser(
-      authHeader.replace("Bearer ", "")
-    );
-    if (authErr || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const user = await requireUser(req);
     const userId = user.id;
-
-    // ── Per-user rate limit (20 analyses / hour)
-    const sbAdmin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    await enforceRateLimit(userId, "analyze-recitation", 10, 60);
+    const sbAdmin = supabaseAdmin;
 
     // ── Best-effort LLM usage logger (never blocks or throws) ──
     const logUsage = async (entry: {
@@ -104,54 +65,48 @@ serve(async (req) => {
       }
     };
 
-    const { data: rl } = await sbAdmin.rpc("check_and_increment_rate_limit", {
-      p_user_id: userId, p_action: "analyze-recitation", p_max: 20, p_window_seconds: 3600,
-    });
-    if (rl && (rl as RateLimitResult).allowed === false) {
-      const resetAt = (rl as RateLimitResult).reset_at;
-      const retryAfter = Math.max(1, Math.ceil((new Date(resetAt).getTime() - Date.now()) / 1000));
-      return new Response(JSON.stringify({ error: "Rate limit exceeded", retry_after: retryAfter }), {
-        status: 429,
-        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": String(retryAfter) },
-      });
-    }
-
     const t0 = Date.now();
-    const { audioBase64, audioMimeType, surahNumber, verseNumber, expectedText, qiraat, contributeToDataset, uiLanguage } = await req.json();
+    const body = await readJson<Record<string, unknown>>(req, 22_000_000);
+    const audioBase64 = body.audioBase64 as string | undefined;
+    const audioMimeType = body.audioMimeType as string | undefined;
+    const surahNumber = body.surahNumber as number;
+    const verseNumber = body.verseNumber as number;
+    const expectedText = body.expectedText as string;
+    const qiraat = body.qiraat as string | undefined;
+    const uiLanguage = body.uiLanguage as string | undefined;
+    if (audioBase64 !== undefined && audioBase64 !== null && typeof audioBase64 !== "string") throw new HttpError(400, "Audio invalide.");
+    if (typeof audioBase64 === "string" && audioBase64.length * 0.75 > MAX_AUDIO_BYTES) throw new HttpError(413, "Fichier audio trop volumineux (max 15 Mo).");
+    if (audioMimeType != null && (typeof audioMimeType !== "string" || audioMimeType.length > 100)) throw new HttpError(400, "Type audio invalide.");
+    if (!Number.isInteger(surahNumber) || surahNumber < 1 || surahNumber > 114) throw new HttpError(400, "Sourate invalide.");
+    if (!Number.isInteger(verseNumber) || verseNumber < 1 || verseNumber > 286) throw new HttpError(400, "Verset invalide.");
+    if (typeof expectedText !== "string" || expectedText.length === 0 || expectedText.length > 5000) throw new HttpError(400, "Texte attendu invalide.");
+    if (qiraat != null && (typeof qiraat !== "string" || qiraat.length > 40)) throw new HttpError(400, "Qirāʾa invalide.");
+    if (uiLanguage != null && (typeof uiLanguage !== "string" || uiLanguage.length > 16)) throw new HttpError(400, "Langue invalide.");
 
-    // ── Solde de crédits requis AVANT toute transcription / appel LLM ──
-    const { data: creditRow } = await sbAdmin
-      .from("user_credits")
-      .select("credits")
-      .eq("user_id", userId)
-      .maybeSingle();
-    const balance = Number(creditRow?.credits ?? 0);
-    if (!creditRow || balance < CREDIT_COSTS.analyzeRecitation) {
-      return new Response(JSON.stringify({
-        error: "insufficient_credits",
-        required: CREDIT_COSTS.analyzeRecitation,
-        balance,
-        message: "Crédits insuffisants pour analyser une récitation, achetez un pack de crédits.",
-      }), {
-        status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // ── Payload size guard (~5 MB base64 ≈ 3.75 MB binary)
-    if (typeof audioBase64 === "string" && audioBase64.length > 5_000_000) {
-      return new Response(JSON.stringify({
-        error: "audio_too_large",
-        message: "Fichier audio trop volumineux (max ~3.75 MB).",
-      }), { status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    // ── Décompte atomique AVANT tout appel IA ──
+    let remainingCredits: number | null = null;
+    try {
+      remainingCredits = Number(await consumeCredits(userId, COST));
+      charged = true; chargedUser = userId;
+    } catch (e) {
+      if (e instanceof HttpError && e.status === 402) {
+        const { data: creditRow } = await sbAdmin.from("user_credits").select("credits").eq("user_id", userId).maybeSingle();
+        return json(req, {
+          error: "insufficient_credits",
+          required: COST,
+          balance: Number(creditRow?.credits ?? 0),
+          message: "Crédits insuffisants pour analyser une récitation.",
+        }, 402);
+      }
+      throw e;
     }
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       console.error("[analyze-recitation] Missing LOVABLE_API_KEY");
-      return new Response(JSON.stringify({ error: "Service temporarily unavailable" }), {
-        status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      await refund();
+      return json(req, { error: "Service temporarily unavailable" }, 503);
     }
 
     // Optional: Whisper-large-v3 via Replicate for better Arabic accuracy + diacritics
@@ -385,7 +340,8 @@ serve(async (req) => {
 
     // 2) Early return if transcription failed (status 422 so the client can branch)
     if (hasAudio && !transcriptionOk) {
-      return new Response(JSON.stringify({
+      await refund();
+      return json(req, {
         error: "transcription_empty",
         message: "La récitation n'a pas été capturée. Vérifiez votre microphone.",
         isCorrect: false, overallScore: 0,
@@ -396,7 +352,7 @@ serve(async (req) => {
         audioAnalyzed: true, audioMimeType: audioMimeType ?? null,
         transcribedText: null, expectedText,
         transcriptionImpossible: true, whisperError,
-      }), { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }, 422);
     }
 
     // Pre-compute textual similarity (helps Gemini calibrate scoring)
@@ -542,16 +498,14 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
       const errorText = await response.text();
       console.error("[analyze-recitation] Lovable AI error:", response.status, errorText);
       await logUsage({ model: "google/gemini-2.5-flash", operation: "analysis", status: `error_${response.status}` });
+      await refund();
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Limite de requêtes atteinte. Réessayez dans un instant." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return json(req, { error: "Limite de requêtes atteinte. Réessayez dans un instant." }, 429);
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Crédits IA épuisés. Veuillez recharger pour continuer." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        return json(req, { error: "Crédits IA épuisés. Veuillez recharger pour continuer." }, 402);
       }
-      return new Response(JSON.stringify({ error: "Analysis service error. Please try again." }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return json(req, { error: "Analysis service error. Please try again." }, 502);
     }
 
     const aiResponse = await response.json();
@@ -568,29 +522,16 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
 
     let analysis: Record<string, unknown>;
     try {
-      analysis = JSON.parse(content);
-    } catch {
-      analysis = {
-        isCorrect: false, overallScore: 0,
-        feedback: "Erreur d'analyse. Veuillez réessayer.",
-        encouragement: "Ne vous découragez pas, réessayez!",
-        priorityFixes: [], errors: [], textComparison: "",
-      };
-    }
-
-    // Validate the structure — if the model returned a malformed object, fall
-    // back to a safe shape so the client never crashes on missing fields.
-    const required = ["isCorrect", "overallScore", "feedback", "encouragement", "priorityFixes", "errors"];
-    const missing = required.filter((k) => !(k in (analysis ?? {})));
-    if (!analysis || typeof analysis !== "object" || missing.length > 0) {
-      console.error("[analyze-recitation] Malformed AI response, missing:", missing);
-      analysis = {
-        isCorrect: false, overallScore: 0,
-        feedback: "Erreur d'analyse. Veuillez réessayer.",
-        encouragement: "Ne vous découragez pas, réessayez!",
-        priorityFixes: ["Réenregistrez votre récitation", "Vérifiez le microphone", "Réessayez"],
-        errors: [], textComparison: "",
-      };
+      analysis = parseLlmJson<Record<string, unknown>>(String(content ?? ""));
+      const required = ["isCorrect", "overallScore", "feedback", "encouragement", "priorityFixes", "errors"];
+      const missing = required.filter((k) => !(k in (analysis ?? {})));
+      if (!analysis || typeof analysis !== "object" || missing.length > 0) {
+        console.error("[analyze-recitation] Malformed AI response, missing:", missing);
+        throw new HttpError(502, "Réponse de l'IA illisible.");
+      }
+    } catch (e) {
+      await refund();
+      throw e;
     }
 
     // Safety: clamp score, coerce types, and fix isCorrect coherence
@@ -638,27 +579,13 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
     };
     if (degraded) console.warn("[analyze-recitation] DEGRADED MODE — generic engine used:", transcriptionEngine, whisperError);
 
-    // ── Déduction du crédit côté serveur (service_role uniquement).
-    // Le client n'a plus le droit d'appeler deduct_credit directement.
-    let remainingCredits: number | null = null;
-    try {
-      const { data: balance } = await sbAdmin.rpc("deduct_credit", {
-        p_user_id: userId,
-        p_amount: CREDIT_COSTS.analyzeRecitation,
-      });
-      const num = Number(balance);
-      remainingCredits = Number.isFinite(num) && num >= 0 ? num : null;
-    } catch (creditErr) {
-      console.error("[analyze-recitation] credit deduction failed:", creditErr);
-    }
     analysis.remainingCredits = remainingCredits;
 
     // ── Dataset contribution (opt-in, anonymised) ──
-    if (contributeToDataset === true) {
+    const { data: prof } = await sbAdmin.from("profiles").select("session_type, dataset_consent").eq("user_id", userId).maybeSingle();
+    if (prof?.dataset_consent === true) {
       try {
-        const hashBuf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`nassihah:${userId}`));
-        const contributor = Array.from(new Uint8Array(hashBuf)).map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 24);
-        const { data: prof } = await sbAdmin.from("profiles").select("session_type").eq("user_id", userId).maybeSingle();
+        const contributor = await pseudonymize(userId);
         let audioPath: string | null = null;
         if (hasAudio && audioBase64) {
           const ext = String(audioMimeType ?? "").includes("wav") ? "wav" : "webm";
@@ -682,17 +609,9 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
       } catch (e) { console.warn("[dataset] insert failed", e); }
     }
 
-    return new Response(JSON.stringify(analysis), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json(req, analysis);
   } catch (error) {
-    console.error("[analyze-recitation] Fatal error:", error);
-    return new Response(JSON.stringify({
-      error: "An unexpected error occurred",
-      isCorrect: false, overallScore: 0,
-      feedback: "Une erreur s'est produite lors de l'analyse.",
-      encouragement: "Veuillez réessayer.",
-      priorityFixes: [], errors: [],
-    }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    await refund();
+    return errorResponse(req, error);
   }
 });
