@@ -520,9 +520,10 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans \`\`\`json.`;
       usage: (aiResponse?.usage ?? {}) as Record<string, number>,
     });
 
-    let analysis: Record<string, unknown>;
+    // deno-lint-ignore no-explicit-any
+    let analysis: Record<string, any>;
     try {
-      analysis = parseLlmJson<Record<string, unknown>>(String(content ?? ""));
+      analysis = parseLlmJson<Record<string, any>>(String(content ?? ""));
       const required = ["isCorrect", "overallScore", "feedback", "encouragement", "priorityFixes", "errors"];
       const missing = required.filter((k) => !(k in (analysis ?? {})));
       if (!analysis || typeof analysis !== "object" || missing.length > 0) {
