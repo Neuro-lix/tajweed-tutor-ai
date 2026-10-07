@@ -7,12 +7,40 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Build
 node_modules
 dist
 dist-ssr
 *.local
+.vercel
+.netlify
 
-# Editor directories and files
+# Secrets — ne JAMAIS publier
+.env
+.env.*
+!.env.example
+supabase/.env
+supabase/functions/.env
+*.pem
+*.key
+*.keystore
+*.jks
+google-services.json
+service-account*.json
+
+# Capacitor / Android
+android/app/build
+android/.gradle
+android/local.properties
+android/app/release
+ios/App/Pods
+ios/App/build
+
+# Supabase local
+supabase/.branches
+supabase/.temp
+
+# Éditeurs
 .vscode/*
 !.vscode/extensions.json
 .idea
