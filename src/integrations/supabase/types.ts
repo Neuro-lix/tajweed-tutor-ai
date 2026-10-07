@@ -380,6 +380,8 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          dataset_consent: boolean
+          dataset_consent_at: string | null
           full_name: string | null
           id: string
           paddle_customer_id: string | null
@@ -390,6 +392,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          dataset_consent?: boolean
+          dataset_consent_at?: string | null
           full_name?: string | null
           id?: string
           paddle_customer_id?: string | null
@@ -400,6 +404,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          dataset_consent?: boolean
+          dataset_consent_at?: string | null
           full_name?: string | null
           id?: string
           paddle_customer_id?: string | null
@@ -1101,9 +1107,22 @@ export type Database = {
         }
         Returns: Json
       }
+      check_rate_limit: {
+        Args: {
+          p_key: string
+          p_max: number
+          p_user_id: string
+          p_window_seconds: number
+        }
+        Returns: boolean
+      }
       claim_admin_access: {
         Args: { _password: string; _user_id: string }
         Returns: boolean
+      }
+      consume_credits: {
+        Args: { p_amount: number; p_user_id: string }
+        Returns: number
       }
       deduct_credit: {
         Args: { p_amount?: number; p_user_id: string }
@@ -1115,6 +1134,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      refund_credits: {
+        Args: { p_amount: number; p_user_id: string }
+        Returns: undefined
       }
       verify_certificate: {
         Args: { p_id: string }
