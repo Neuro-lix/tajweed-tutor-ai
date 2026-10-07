@@ -10,41 +10,10 @@
 // Confidentialité : l'audio est décodé en mémoire, envoyé au moteur ASR puis
 // libéré. Il n'est jamais écrit en base ni dans le stockage.
 // ─────────────────────────────────────────────────────────────────────────────
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
-// ─── CORS: env-driven allowlist (no wildcard) ───────────────────────────
-const DEFAULT_ALLOWED_ORIGINS = [
-  "https://recite-perfectly-bot.lovable.app",
-  "https://id-preview--dd06a156-64f5-407d-bf79-94ef3c169108.lovable.app",
-  "https://tajweedtutorai.com",
-  "https://www.tajweedtutorai.com",
-  "http://localhost:8080",
-  "http://localhost:5173",
-];
-const ENV_ALLOWED = (Deno.env.get("ALLOWED_ORIGINS") ?? "")
-  .split(",").map((s) => s.trim()).filter(Boolean);
-const ALLOWLIST = ENV_ALLOWED.length ? ENV_ALLOWED : DEFAULT_ALLOWED_ORIGINS;
-const ALLOW_HEADERS =
-  "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version";
-
-function buildCors(req: Request): Record<string, string> {
-  const origin = req.headers.get("Origin") ?? "";
-  const ok = ALLOWLIST.includes(origin)
-    || /^https:\/\/[a-z0-9-]+\.lovable\.app$/i.test(origin)
-    || /^https:\/\/[a-z0-9-]+\.lovableproject\.com$/i.test(origin);
-  return {
-    "Access-Control-Allow-Origin": ok ? origin : ALLOWLIST[0],
-    "Access-Control-Allow-Headers": ALLOW_HEADERS,
-    "Vary": "Origin",
-  };
-}
-
-const json = (body: unknown, status: number, cors: Record<string, string>) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...cors, "Content-Type": "application/json" },
-  });
+import { handleOptions } from "../_shared/cors.ts";
+import { HttpError, json, errorResponse, readJson } from "../_shared/http.ts";
+import { requireUser } from "../_shared/auth.ts";
+import { enforceRateLimit } from "../_shared/rateLimit.ts";
 
 // ─── Config ─────────────────────────────────────────────────────────────
 /** Bascule ancien pipeline (LLM only) ↔ nouveau pipeline (ASR + LLM). */
@@ -54,7 +23,7 @@ const ASR_PIPELINE_ENABLED =
 const HF_MODEL = Deno.env.get("HF_ASR_MODEL") ?? "openai/whisper-large-v3-turbo";
 const HF_ENDPOINT_URL = Deno.env.get("HF_ASR_ENDPOINT_URL")
   ?? `https://router.huggingface.co/hf-inference/models/${HF_MODEL}`;
-const MAX_AUDIO_BYTES = 12 * 1024 * 1024; // 12 MB
+const MAX_AUDIO_BYTES = 15 * 1024 * 1024; // 15 Mo
 
 // ─── Startup check: secrets requis ──────────────────────────────────────
 if (!Deno.env.get("HUGGINGFACE_API_KEY")) {
@@ -128,82 +97,49 @@ function estimateConfidence(text: string, words: AsrWord[], audioBytes: number):
   return { score, level, reason };
 }
 
-serve(async (req) => {
-  const corsHeaders = buildCors(req);
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405, corsHeaders);
+Deno.serve(async (req) => {
+  const pre = handleOptions(req); if (pre) return pre;
 
   try {
-    // ─── Auth ─────────────────────────────────────────────────────────
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return json({ error: "unauthorized" }, 401, corsHeaders);
-    }
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } },
-    );
-    const { data: userData, error: userErr } = await supabase.auth.getUser();
-    if (userErr || !userData?.user) return json({ error: "unauthorized" }, 401, corsHeaders);
-    const userId = userData.user.id;
+    if (req.method !== "POST") throw new HttpError(405, "Méthode non autorisée.");
+    const user = await requireUser(req);
+    // Live tracking sends ~1 segment / 1.2 s, so this function allows 60 calls per minute.
+    await enforceRateLimit(user.id, "tajweed-asr-analyze", 60, 60);
 
-    // ─── Rate limit (réutilise la RPC existante) ──────────────────────
-    const { data: rl } = await supabase.rpc("check_and_increment_rate_limit", {
-      p_user_id: userId,
-      p_action: "tajweed-asr-analyze",
-      p_max: 600, // suivi en direct : ~1 appel / 1,2 s pendant la récitation
-      p_window_seconds: 600,
-    });
-    const limit = rl as { allowed?: boolean } | null;
-    if (limit && limit.allowed === false) {
-      return json({ error: "rate_limited" }, 429, corsHeaders);
-    }
+    const body = await readJson<{ audio?: unknown; mimeType?: unknown; surahNumber?: unknown; verseNumber?: unknown; warmup?: unknown }>(req, 22_000_000);
+    if (body.surahNumber != null && (!Number.isInteger(body.surahNumber) || (body.surahNumber as number) < 1 || (body.surahNumber as number) > 114)) throw new HttpError(400, "Sourate invalide.");
+    if (body.verseNumber != null && (!Number.isInteger(body.verseNumber) || (body.verseNumber as number) < 1 || (body.verseNumber as number) > 286)) throw new HttpError(400, "Verset invalide.");
+    if (body.mimeType != null && (typeof body.mimeType !== "string" || body.mimeType.length > 100)) throw new HttpError(400, "Type audio invalide.");
 
-    // ─── Flag de bascule ──────────────────────────────────────────────
     if (!ASR_PIPELINE_ENABLED) {
-      return json(
-        { error: "asr_pipeline_disabled", fallback: "llm_only" },
-        503,
-        corsHeaders,
-      );
+      return json(req, { error: "asr_pipeline_disabled", fallback: "llm_only" }, 503);
     }
     const HUGGINGFACE_API_KEY = Deno.env.get("HUGGINGFACE_API_KEY");
     if (!HUGGINGFACE_API_KEY) {
-      return json(
-        { error: "asr_not_configured", fallback: "llm_only" },
-        503,
-        corsHeaders,
-      );
+      return json(req, { error: "asr_not_configured", fallback: "llm_only" }, 503);
     }
 
-    // ─── Entrée ───────────────────────────────────────────────────────
-    const body = await req.json().catch(() => null) as
-      | { audio?: string; mimeType?: string; surahNumber?: number; verseNumber?: number; warmup?: boolean }
-      | null;
-    if (body?.warmup) {
+    if (body.warmup === true) {
       // Réveille l'endpoint (scale-to-zero) sans attendre la réponse.
       fetch(HF_ENDPOINT_URL, { method: "POST", headers: { Authorization: `Bearer ${HUGGINGFACE_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ inputs: "" }) }).catch(() => {});
-      return json({ ok: true, warmed: true }, 200, corsHeaders);
+      return json(req, { ok: true, warmed: true });
     }
-    if (!body?.audio || typeof body.audio !== "string") {
-      return json({ error: "missing_audio" }, 400, corsHeaders);
-    }
+    if (typeof body.audio !== "string" || body.audio.length === 0) throw new HttpError(400, "Audio manquant.");
+    const audio = body.audio;
+    const surahNumber = (body.surahNumber as number | undefined) ?? null;
+    const verseNumber = (body.verseNumber as number | undefined) ?? null;
 
     let bytes: Uint8Array;
     try {
-      bytes = base64ToBytes(body.audio);
+      bytes = base64ToBytes(audio);
     } catch {
-      return json({ error: "invalid_audio_encoding" }, 400, corsHeaders);
+      throw new HttpError(400, "Encodage audio invalide.");
     }
-    if (bytes.byteLength === 0) return json({ error: "empty_audio" }, 400, corsHeaders);
-    if (bytes.byteLength > MAX_AUDIO_BYTES) {
-      return json({ error: "audio_too_large" }, 413, corsHeaders);
-    }
+    if (bytes.byteLength === 0) throw new HttpError(400, "Audio vide.");
+    if (bytes.byteLength > MAX_AUDIO_BYTES) throw new HttpError(413, "Fichier audio trop volumineux (max 15 Mo).");
     const audioBytes = bytes.byteLength;
-    const mimeType = body.mimeType && /^audio\//.test(body.mimeType)
-      ? body.mimeType
-      : "audio/wav";
+    const mimeType = typeof body.mimeType === "string" && /^audio\//.test(body.mimeType) ? body.mimeType : "audio/wav";
+    const payload = audio.includes(",") ? audio.slice(audio.indexOf(",") + 1) : audio;
 
     // ─── Appel ASR (audio en mémoire uniquement) ──────────────────────
     const startedAt = Date.now();
@@ -218,22 +154,17 @@ serve(async (req) => {
         },
         // Le modèle Coran (endpoint dédié) ne sait pas renvoyer de minutage : texte seul.
         body: JSON.stringify(Deno.env.get("HF_ASR_ENDPOINT_URL")
-          ? { inputs: body.audio.includes(",") ? body.audio.slice(body.audio.indexOf(",") + 1) : body.audio }
-          : { inputs: body.audio.includes(",") ? body.audio.slice(body.audio.indexOf(",") + 1) : body.audio, parameters: { return_timestamps: "word" }, mimeType }),
+          ? { inputs: payload }
+          : { inputs: payload, parameters: { return_timestamps: "word" }, mimeType }),
       });
       if (!resp.ok) {
-        const detail = (await resp.text()).slice(0, 300);
-        console.error("[tajweed-asr-analyze] HF error", resp.status, detail);
-        return json(
-          { error: "asr_unavailable", status: resp.status, fallback: "llm_only" },
-          502,
-          corsHeaders,
-        );
+        console.error("[tajweed-asr-analyze] HF error", resp.status, (await resp.text()).slice(0, 300));
+        return json(req, { error: "asr_unavailable", status: resp.status, fallback: "llm_only" }, 502);
       }
       hfRaw = await resp.json();
     } catch (e) {
       console.error("[tajweed-asr-analyze] HF exception", e);
-      return json({ error: "asr_unavailable", fallback: "llm_only" }, 502, corsHeaders);
+      return json(req, { error: "asr_unavailable", fallback: "llm_only" }, 502);
     } finally {
       // Libération explicite de l'audio : rien n'est persisté.
       bytes = new Uint8Array(0);
@@ -241,35 +172,26 @@ serve(async (req) => {
 
     const { text, words } = parseHfResponse(hfRaw);
     if (!text) {
-      return json(
-        {
-          error: "empty_transcription",
-          confidence: { score: 0, level: "low", reason: "audio_unintelligible" },
-        },
-        422,
-        corsHeaders,
-      );
+      return json(req, {
+        error: "empty_transcription",
+        confidence: { score: 0, level: "low", reason: "audio_unintelligible" },
+      }, 422);
     }
 
     const confidence = estimateConfidence(text, words, audioBytes);
 
-    return json(
-      {
-        pipeline: "asr",
-        engine: { provider: "huggingface", model: HF_MODEL },
-        transcription: text,
-        words,
-        confidence,
-        durationMs: Date.now() - startedAt,
-        surahNumber: body.surahNumber ?? null,
-        verseNumber: body.verseNumber ?? null,
-        audioPersisted: false,
-      },
-      200,
-      corsHeaders,
-    );
-  } catch (e) {
-    console.error("[tajweed-asr-analyze] unexpected", e);
-    return json({ error: "internal_error", fallback: "llm_only" }, 500, corsHeaders);
+    return json(req, {
+      pipeline: "asr",
+      engine: { provider: "huggingface", model: HF_MODEL },
+      transcription: text,
+      words,
+      confidence,
+      durationMs: Date.now() - startedAt,
+      surahNumber,
+      verseNumber,
+      audioPersisted: false,
+    });
+  } catch (err) {
+    return errorResponse(req, err);
   }
 });
