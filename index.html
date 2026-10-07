@@ -1,101 +1,115 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" dir="ltr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-
     <title>Tajweed Tutor AI — Coach IA de récitation du Coran</title>
-    <meta name="description" content="Coach IA de tajwīd : analyse ta récitation du Coran verset par verset, compare-la aux grands récitateurs et progresse dans les 10 Qirā’āt.">
-    <meta name="author" content="Quran Tajwid Coach" />
+    <meta name="description" content="Coach IA de tajwīd : analyse ta récitation du Coran verset par verset, compare-la aux grands récitateurs et progresse dans les 10 Qirā’āt." />
+    <meta name="author" content="Tajweed Tutor AI" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://tajweedtutorai.com/" />
 
-    <!-- PWA -->
+    <!-- Performance : connexions anticipées -->
+    <link rel="preconnect" href="https://storage.googleapis.com" crossorigin />
+    <link rel="dns-prefetch" href="https://storage.googleapis.com" />
+    <link rel="preload" as="image" href="/img/logo-192.webp" type="image/webp" fetchpriority="high" />
+
+    <!-- Icônes (locales = plus rapides que Google Storage) -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-icon-192.png" />
+    <link rel="apple-touch-icon" href="/pwa-icon-192.png" />
+
+    <!-- PWA / Play Store -->
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="theme-color" content="#16a34a" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Tajweed Tutor" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="apple-touch-icon" href="/pwa-icon-192.png" />
-    <link rel="preload" as="image" href="/img/logo-192.webp" type="image/webp" fetchpriority="high" />
+    <meta name="application-name" content="Tajweed Tutor AI" />
 
     <!-- Open Graph -->
-    
-    
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fr_FR" />
     <meta property="og:url" content="https://tajweedtutorai.com/" />
     <meta property="og:site_name" content="Tajweed Tutor AI" />
-    <meta property="og:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/K5B9XopSinZ3V0htRmjQEElgq9F2/social-images/social-1770296635561-Tajweed_tutor_ai.png">
+    <meta property="og:title" content="Tajweed Tutor AI — Coach IA de récitation du Coran" />
+    <meta property="og:description" content="Coach IA de tajwīd : analyse ta récitation du Coran verset par verset, compare-la aux grands récitateurs et progresse dans les 10 Qirā’āt." />
+    <meta property="og:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/K5B9XopSinZ3V0htRmjQEElgq9F2/social-images/social-1770296635561-Tajweed_tutor_ai.png" />
+    <meta property="og:image:alt" content="Tajweed Tutor AI — coach de récitation du Coran" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    
-    <meta name="twitter:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/K5B9XopSinZ3V0htRmjQEElgq9F2/social-images/social-1770296635561-Tajweed_tutor_ai.png">
-    <meta property="og:title" content="Tajweed Tutor AI — Coach IA de récitation du Coran">
-    <meta name="twitter:title" content="Tajweed Tutor AI — Coach IA de récitation du Coran">
-    <meta property="og:description" content="Coach IA de tajwīd : analyse ta récitation du Coran verset par verset, compare-la aux grands récitateurs et progresse dans les 10 Qirā’āt.">
-    <meta name="twitter:description" content="Coach IA de tajwīd : analyse ta récitation du Coran verset par verset, compare-la aux grands récitateurs et progresse dans les 10 Qirā’āt.">
-  <link rel="icon" type="image/png" href="https://storage.googleapis.com/gpt-engineer-file-uploads/K5B9XopSinZ3V0htRmjQEElgq9F2/uploads/1770296608850-Tajweed_tutor_ai.png">
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "Tajweed Tutor AI",
-        "url": "https://tajweedtutorai.com/",
-        "logo": "https://storage.googleapis.com/gpt-engineer-file-uploads/K5B9XopSinZ3V0htRmjQEElgq9F2/uploads/1770296608850-Tajweed_tutor_ai.png",
-        "description": "Coach IA de tajwīd pour la récitation du Coran, avec analyse, comparaison audio et suivi de progression."
-      }
-    </script>
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "Tajweed Tutor AI",
-        "url": "https://tajweedtutorai.com/",
-        "applicationCategory": "EducationalApplication",
-        "operatingSystem": "Web",
-        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
-      }
-    </script>
-</head>
+    <meta name="twitter:title" content="Tajweed Tutor AI — Coach IA de récitation du Coran" />
+    <meta name="twitter:description" content="Coach IA de tajwīd : analyse ta récitation du Coran verset par verset, compare-la aux grands récitateurs et progresse dans les 10 Qirā’āt." />
+    <meta name="twitter:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/K5B9XopSinZ3V0htRmjQEElgq9F2/social-images/social-1770296635561-Tajweed_tutor_ai.png" />
 
+    <!-- Évite le flash blanc avant le chargement de React -->
+    <style>
+      html, body { margin: 0; background: #ffffff; }
+      @media (prefers-color-scheme: dark) { html, body { background: #0b0f0d; } }
+      #root { min-height: 100vh; min-height: 100dvh; }
+    </style>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "name": "Tajweed Tutor AI",
+          "url": "https://tajweedtutorai.com/",
+          "logo": "https://tajweedtutorai.com/pwa-icon-192.png",
+          "description": "Coach IA de tajwīd pour la récitation du Coran, avec analyse, comparaison audio et suivi de progression."
+        },
+        {
+          "@type": "WebApplication",
+          "name": "Tajweed Tutor AI",
+          "url": "https://tajweedtutorai.com/",
+          "inLanguage": ["fr", "ar", "en"],
+          "applicationCategory": "EducationalApplication",
+          "operatingSystem": "Web, Android",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+        }
+      ]
+    }
+    </script>
+  </head>
   <body>
+    <noscript>Tajweed Tutor AI nécessite JavaScript pour analyser ta récitation. Active-le dans ton navigateur.</noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      // Force-clean stale Service Workers + caches on each new deploy.
-      // Fixes blank-screen caused by old SW intercepting requests with a broken bundle.
+      // Nettoie les anciens Service Workers après un déploiement,
+      // SANS recharger la page lors de la première visite (bug corrigé).
       (function () {
         try {
-          // Bump SW_VERSION on every deploy that needs to invalidate stale caches.
-          var SW_VERSION = '2026-05-12-a';
-          var BUILD_KEY = 'app_build_marker';
+          var SW_VERSION = '2026-10-07-a';
           var VERSION_KEY = 'app_sw_version';
-          var marker = (document.querySelector('script[type=module][src*="/assets/"]') || {}).src || '';
-          var prev = localStorage.getItem(BUILD_KEY);
           var prevVersion = localStorage.getItem(VERSION_KEY);
-          var changed = (marker && marker !== prev) || prevVersion !== SW_VERSION;
-          if (marker) localStorage.setItem(BUILD_KEY, marker);
           localStorage.setItem(VERSION_KEY, SW_VERSION);
 
-          if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(function (regs) {
-              if (!regs.length && !changed) return;
-              // If multiple SWs, or build/version changed -> nuke everything and reload once.
-              var shouldClean = regs.length > 1 || changed;
-              if (!shouldClean) return;
-              Promise.all(regs.map(function (r) { return r.unregister(); }))
-                .then(function () {
-                  if (window.caches && caches.keys) {
-                    return caches.keys().then(function (names) {
-                      return Promise.all(names.map(function (n) { return caches.delete(n); }));
-                    });
-                  }
-                })
-                .then(function () {
-                  if (changed) window.location.reload();
-                })
-                .catch(function () {});
-            }).catch(function () {});
-          }
+          // Première visite : rien à nettoyer
+          if (prevVersion === null || prevVersion === SW_VERSION) return;
+          if (!('serviceWorker' in navigator)) return;
+
+          navigator.serviceWorker.getRegistrations().then(function (regs) {
+            if (!regs.length) return; // aucun ancien SW → pas de rechargement
+            Promise.all(regs.map(function (r) { return r.unregister(); }))
+              .then(function () {
+                if (window.caches && caches.keys) {
+                  return caches.keys().then(function (names) {
+                    return Promise.all(names.map(function (n) { return caches.delete(n); }));
+                  });
+                }
+              })
+              .then(function () {
+                if (!sessionStorage.getItem('sw_reloaded')) {
+                  sessionStorage.setItem('sw_reloaded', '1');
+                  window.location.reload();
+                }
+              })
+              .catch(function () {});
+          }).catch(function () {});
         } catch (e) { /* ignore */ }
       })();
     </script>
