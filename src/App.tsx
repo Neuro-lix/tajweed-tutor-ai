@@ -42,6 +42,7 @@ const Contact = lazy(() => import("./pages/Contact"));
 const Terms = lazy(() => import("./pages/legal/Terms"));
 const Privacy = lazy(() => import("./pages/legal/Privacy"));
 const Refund = lazy(() => import("./pages/legal/Refund"));
+const AccountDeletion = lazy(() => import("./pages/AccountDeletion"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -115,6 +116,7 @@ const App = () => (
                     <Route path="/conditions-generales" element={<Terms />} />
                     <Route path="/confidentialite" element={<Privacy />} />
                     <Route path="/remboursement" element={<Refund />} />
+                    <Route path="/suppression-compte" element={<AccountDeletion />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>

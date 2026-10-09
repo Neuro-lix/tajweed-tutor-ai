@@ -237,3 +237,11 @@
   .print-area .card, .print-area [class*="rounded"] { break-inside: avoid; }
   .no-print { display: none !important; }
 }
+
+/* Native app: keep content clear of the status bar and navigation bar (no effect in browsers where insets are 0). */
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}

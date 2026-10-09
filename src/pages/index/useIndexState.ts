@@ -1,3 +1,4 @@
+import { parseAnalysisResult } from '@/lib/analysisSchema';
 import { isAndroidApp } from '@/lib/platform';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -336,7 +337,8 @@ export function useIndexState() {
 
     try {
       setAnalysisStep('analyzing');
-      const { data, error } = await supabase.functions.invoke('analyze-recitation', {
+      // eslint-disable-next-line prefer-const
+      let { data, error } = await supabase.functions.invoke('analyze-recitation', {
         body: {
           audioBase64: recordedAudioBase64,
           audioMimeType: recordedAudioMimeType,
@@ -344,7 +346,6 @@ export function useIndexState() {
           verseNumber: currentVerse,
           expectedText,
           qiraat: selectedQiraat || 'hafs_asim',
-          contributeToDataset: localStorage.getItem('nassihah.contributeDataset') === '1',
           uiLanguage: localStorage.getItem('i18nextLng') || document.documentElement.lang || null,
         },
       });
@@ -408,6 +409,14 @@ export function useIndexState() {
         throw new Error(String(data.error));
       }
 
+      const parsed = parseAnalysisResult(data);
+      if (!parsed.ok) {
+        console.warn('[analysis] invalid result', parsed.error);
+        setAnalysisStep('error');
+        toast.error('Analyse invalide, réessaie');
+        return;
+      }
+      data = parsed.data;
       setAnalysisStep('done');
 
       // Le crédit est déduit côté serveur par l'edge function ; on synchronise
