@@ -1,3 +1,4 @@
+import { parseAsrResult } from '@/lib/analysisSchema';
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { stripDiacritics, charSimilarity } from '../../supabase/functions/_shared/recitation-metrics';
@@ -109,8 +110,10 @@ export const useLiveRecitation = (
           body: { audio, mimeType: mime.split(';')[0], surahNumber, verseNumber, live: true },
         });
         setLatencyMs(Math.round(performance.now() - t0));
-        if (error || !data?.transcription) { if (error) setUnavailable(true); return; }
-        const heard = String(data.transcription).split(/\s+/).filter(Boolean);
+        if (error) { setUnavailable(true); return; }
+        const parsed = parseAsrResult(data);
+        if (!parsed.ok) return;
+        const heard = parsed.data.transcription.split(/\s+/).filter(Boolean);
         const next = alignLive(verseText.split(/\s+/).filter(Boolean), heard);
         confirmed.current = next.reduce((n, st, i) => (st !== 'pending' ? i + 1 : n), 0);
         setStates(next);
