@@ -102,3 +102,20 @@ Secrets optionnels liés : `ENABLE_ASR_PIPELINE` (`true`/`false`),
 
 > ⚠️ La précision automatique ne remplace pas un professeur ou un cheikh
 > habilité : elle assiste la révision, elle ne délivre pas d'ijāza.
+
+## Android App Links (`public/.well-known/assetlinks.json`)
+
+Le fichier est vide (`[]`) pour l'instant. Après la première build signée, remplace-le par :
+
+```json
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.tajweedtutorai.app",
+    "sha256_cert_fingerprints": ["AA:BB:...:FF"]
+  }
+}]
+```
+
+L'empreinte SHA-256 se trouve dans Google Play Console → Intégrité de l'application → Certificat de la clé de signature.

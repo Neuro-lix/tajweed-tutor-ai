@@ -46,7 +46,7 @@ const Privacy = () => (
     <Section heading="6. Vos droits">
       <p>
         Vous disposez d'un droit d'accès, de rectification, d'effacement, de portabilité et
-        d'opposition. Exercez-les via la page Contact ; une réponse vous sera apportée sous 30 jours.
+        d'opposition. Exercez-les via la page Contact ; une réponse vous sera apportée sous 30 jours. Vous pouvez supprimer votre compte et vos données directement dans l'application (Mes crédits → « Supprimer mon compte ») ; la démarche complète est décrite sur la page /suppression-compte.
       </p>
     </Section>
     <Section heading="7. Cookies">
