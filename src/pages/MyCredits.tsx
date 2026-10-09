@@ -1,3 +1,4 @@
+import { DatasetConsent } from '@/components/recitation/DatasetConsent';
 import { isAndroidApp } from '@/lib/platform';
 import { DeleteAccountCard } from '@/components/account/DeleteAccountCard';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -180,6 +181,10 @@ const MyCredits = () => {
             )}
           </CardContent>
         </Card>
+        <div className="mt-8 space-y-4">
+          <DatasetConsent />
+          <DeleteAccountCard />
+        </div>
       </div>
     </div>
   );

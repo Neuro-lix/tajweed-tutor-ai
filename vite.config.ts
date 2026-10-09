@@ -125,6 +125,7 @@ export default defineConfig(({ mode, command }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  esbuild: mode === "production" ? { drop: ["debugger"], pure: ["console.log", "console.debug", "console.info"] } : undefined,
   build: {
     // Limite d'avertissement resserrée : chaque chunk doit rester léger
     chunkSizeWarningLimit: 500,
