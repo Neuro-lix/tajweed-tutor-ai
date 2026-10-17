@@ -411,12 +411,12 @@ export function useIndexState() {
 
       const parsed = parseAnalysisResult(data);
       if (!parsed.ok) {
-        console.warn('[analysis] invalid result', parsed.error);
+        console.warn('[analysis] invalid result', 'error' in parsed ? parsed.error : '');
         setAnalysisStep('error');
         toast.error('Analyse invalide, réessaie');
         return;
       }
-      data = parsed.data;
+      data = (parsed as { data: typeof data }).data;
       setAnalysisStep('done');
 
       // Le crédit est déduit côté serveur par l'edge function ; on synchronise
